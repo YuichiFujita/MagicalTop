@@ -135,9 +135,6 @@ void CMultiModel::Draw(void)
 		// テクスチャの設定
 		pDevice->SetTexture(0, pTexture->GetTexture(m_modelData.pTextureID[nCntMat]));
 
-		// モデルの描画
-		m_modelData.pMesh->DrawSubset(nCntMat);
-
 		if (m_scale != VEC3_ONE)
 		{ // 拡大率が変更されている場合
 

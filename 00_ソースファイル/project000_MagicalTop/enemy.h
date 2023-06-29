@@ -21,7 +21,6 @@
 //	前方宣言
 //************************************************************
 class CMultiModel;	// マルチモデルクラス
-class CObjectModel;	// オブジェクトモデルクラス
 
 //************************************************************
 //	クラス定義
@@ -164,8 +163,8 @@ private:
 	static const char *mc_apModelFile[];	// モデル定数
 
 	// メンバ変数
-	CObjectModel *m_apModel[MODEL_MAX];		// モデルの情報
-	D3DXVECTOR3 m_rotCannon;	// キャノン向き
+	CMultiModel	*m_apMultiModel[MAX_PARTS];	// モデルの情報
+	int m_nNumModel;	// パーツの総数
 };
 
 #endif	// _ENEMY_H_
