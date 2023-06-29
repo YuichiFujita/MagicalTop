@@ -129,9 +129,6 @@ void CObjectModel::Draw(void)
 		// テクスチャの設定
 		pDevice->SetTexture(0, pTexture->GetTexture(m_modelData.pTextureID[nCntMat]));
 
-		// モデルの描画
-		m_modelData.pMesh->DrawSubset(nCntMat);
-
 		if (m_scale != VEC3_ONE)
 		{ // 拡大率が変更されている場合
 
@@ -225,6 +222,15 @@ void CObjectModel::BindModel(CModel::Model *pModel)
 }
 
 //============================================================
+//	マトリックスの設定処理
+//============================================================
+void CObjectModel::SetMtxWorld(const D3DXMATRIX& rMtxWorld)
+{
+	// 引数のマトリックスを設定
+	m_mtxWorld = rMtxWorld;
+}
+
+//============================================================
 //	位置の設定処理
 //============================================================
 void CObjectModel::SetPosition(const D3DXVECTOR3& rPos)
@@ -258,6 +264,15 @@ void CObjectModel::SetModelData(const CModel::Model& rModel)
 {
 	// 引数のモデル情報を代入
 	m_modelData = rModel;
+}
+
+//============================================================
+//	マトリックス取得処理
+//============================================================
+D3DXMATRIX CObjectModel::GetMtxWorld(void) const
+{
+	// ワールドマトリックスを返す
+	return m_mtxWorld;
 }
 
 //============================================================

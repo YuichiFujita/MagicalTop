@@ -33,8 +33,8 @@
 #define CLASS_NAME	"WindowClass"	// ウインドウクラスの名前
 #define WINDOW_NAME	"MagicalTop"	// ウインドウの名前 (キャプションに表示)
 
-#define FPS	(60)	// ウインドウのFPS
-#define WINDOW_FPS	(1000 / FPS)	// 経過時間の判定用
+#define FPS		(60)			// アプリケーションのFPS値
+#define APP_FPS	(1000 / FPS)	// アプリケーションの経過時間の判定用
 
 //************************************************************
 //	プロトタイプ宣言
@@ -154,7 +154,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 
 #endif	// _DEBUG
 
-			if ((dwCurrentTime - dwExecLastTime) >= WINDOW_FPS)
+			if ((dwCurrentTime - dwExecLastTime) >= APP_FPS)
 			{ // 60分の1秒経過
 
 				if (USED(pManager))

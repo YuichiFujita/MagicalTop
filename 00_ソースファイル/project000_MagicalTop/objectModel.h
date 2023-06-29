@@ -47,10 +47,12 @@ public:
 
 	// メンバ関数
 	void BindModel(CModel::Model *pModel);			// モデル割当
+	void SetMtxWorld(const D3DXMATRIX& rMtxWorld);	// マトリックス設定
 	void SetPosition(const D3DXVECTOR3& rPos);		// 位置設定
 	void SetRotation(const D3DXVECTOR3& rRot);		// 向き設定
 	void SetScaling(const D3DXVECTOR3& rScale);		// 大きさ設定
 	void SetModelData(const CModel::Model& rModel);	// モデル情報設定
+	D3DXMATRIX GetMtxWorld(void) const;				// マトリックス取得
 	D3DXVECTOR3 GetPosition(void) const;			// 位置取得
 	D3DXVECTOR3 GetRotation(void) const;			// 向き取得
 	D3DXVECTOR3 GetScaling(void) const;				// 大きさ取得

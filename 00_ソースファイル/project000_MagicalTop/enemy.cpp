@@ -491,8 +491,8 @@ void CEnemy::CollisionEnemy(D3DXVECTOR3& rPos, D3DXVECTOR3& rOldPos)
 CEnemyCar::CEnemyCar(const TYPE type) : CEnemy(type)
 {
 	// メンバ変数をクリア
-	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
-	m_nNumModel = 0;	// パーツの総数
+	memset(&m_apModel[0], 0, sizeof(m_apModel));	// モデルの情報
+	m_rotCannon = VEC3_ZERO;	// キャノン向き
 }
 
 //============================================================
@@ -524,35 +524,18 @@ HRESULT CEnemyCar::Init(void)
 	}
 
 	// メンバ変数を初期化
-	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
-	m_nNumModel = 0;	// パーツの総数
+	memset(&m_apModel[0], 0, sizeof(m_apModel));	// モデルの情報
+	m_rotCannon = VEC3_ZERO;	// キャノン向き
 
-	// パーツ数を代入
-	m_nNumModel = parts.nNumParts;
-
-	for (int nCntEnemy = 0; nCntEnemy < m_nNumModel; nCntEnemy++)
+	for (int nCntEnemy = 0; nCntEnemy < MODEL_MAX; nCntEnemy++)
 	{ // パーツ数分繰り返す
 
 		// モデルの生成
-		m_apMultiModel[nCntEnemy] = CMultiModel::Create(parts.aInfo[nCntEnemy].pos, parts.aInfo[nCntEnemy].rot);
+		m_apModel[nCntEnemy] = CObjectModel::Create(parts.aInfo[nCntEnemy].pos, parts.aInfo[nCntEnemy].rot);
 
 		// モデルの登録・割当
 		nModelID = pModel->Regist(mc_apModelFile[(MODEL)nCntEnemy]);
-		m_apMultiModel[nCntEnemy]->BindModel(pModel->GetModel(nModelID));
-
-		// 親モデルの設定
-		if (parts.aInfo[nCntEnemy].nParentID == NONE_IDX)
-		{ // 親がない場合
-
-			// NULLを設定
-			m_apMultiModel[nCntEnemy]->SetParent(NULL);
-		}
-		else
-		{ // 親がいる場合
-
-			// 親のアドレスを設定
-			m_apMultiModel[nCntEnemy]->SetParent(m_apMultiModel[parts.aInfo[nCntEnemy].nParentID]);
-		}
+		m_apModel[nCntEnemy]->BindModel(pModel->GetModel(nModelID));
 	}
 
 	// 成功を返す
@@ -564,21 +547,17 @@ HRESULT CEnemyCar::Init(void)
 //============================================================
 void CEnemyCar::Uninit(void)
 {
-	// マルチモデルを破棄
-	for (int nCntEnemy = 0; nCntEnemy < MAX_PARTS; nCntEnemy++)
+	// モデルの破棄
+	for (int nCntEnemy = 0; nCntEnemy < MODEL_MAX; nCntEnemy++)
 	{ // パーツの最大数分繰り返す
 
-		if (USED(m_apMultiModel[nCntEnemy]))
+		if (USED(m_apModel[nCntEnemy]))
 		{ // パーツが使用中の場合
 
-			// 破棄処理
-			if (FAILED(m_apMultiModel[nCntEnemy]->Release(m_apMultiModel[nCntEnemy])))
-			{ // 破棄に失敗した場合
-
-				// 例外処理
-				assert(false);
-			}
+			// オブジェクトモデルの終了
+			m_apModel[nCntEnemy]->Uninit();
 		}
+		else { assert(false); }	// 非使用中
 	}
 
 	// 敵の終了
@@ -605,11 +584,39 @@ void CEnemyCar::Draw(void)
 	// 敵の描画
 	CEnemy::Draw();
 
-	for (int nCntEnemy = 0; nCntEnemy < m_nNumModel; nCntEnemy++)
-	{ // パーツの総数分繰り返す
+	for (int nCntEnemy = 0; nCntEnemy < MODEL_MAX; nCntEnemy++)
+	{ // パーツの最大数分繰り返す
 
-		// パーツの描画
-		m_apMultiModel[nCntEnemy]->Draw();
+		// 変数を宣言
+		D3DXVECTOR3 rot;	// モデルごとの向き
+
+		switch (nCntEnemy)
+		{ // カウンターごとの処理
+		case MODEL_CATERPILLAR:	// キャタピラ
+
+			// 本体の向きを設定
+			rot = GetRotation();
+
+			break;
+
+		case MODEL_CANNON:		// キャノン
+
+			// キャノンの向きを設定
+			rot = m_rotCannon;
+
+			break;
+
+		default:	// 例外処理
+			assert(false);
+			break;
+		}
+
+		// モデルの位置・向きを設定
+		m_apModel[nCntEnemy]->SetPosition(GetPosition());
+		m_apModel[nCntEnemy]->SetRotation(rot);
+
+		// モデルを描画
+		m_apModel[nCntEnemy]->Draw();
 	}
 }
 
@@ -623,7 +630,6 @@ void CEnemyCar::CollisionFind(void)
 	D3DXVECTOR3 posEnemy	= GetPosition();	// 敵位置
 	D3DXVECTOR3 rotEnemy	= GetRotation();	// 敵向き
 	D3DXVECTOR3 posLook		= VEC3_ZERO;		// 視認対象位置
-	D3DXVECTOR3 rotCannon	= VEC3_ZERO;		// 敵キャノン向き
 
 	float fPlayerRadius = CManager::GetPlayer()->GetRadius();	// プレイヤー半径
 	float fDestRot = 0.0f;	// 目標向き
@@ -649,6 +655,9 @@ void CEnemyCar::CollisionFind(void)
 
 		if (collision::Circle(posLook, posEnemy, fPlayerRadius, status.fAttackRadius) == false)
 		{ // 敵の攻撃範囲外の場合
+
+			// 向きを取得
+			D3DXVECTOR3 oldrotEnemy = GetRotation();
 
 			// 対象の方向を向かせる
 			Look(posLook);
@@ -682,61 +691,6 @@ void CEnemyCar::CollisionFind(void)
 				posEnemy.x += sinf(rotEnemy.y) * status.fBackwardMove;
 				posEnemy.z += cosf(rotEnemy.y) * status.fBackwardMove;
 			}
-			else
-			{ // 後退状態ではない場合
-
-#if 0
-				// 向きを取得
-				D3DXVECTOR3 rot = m_apMultiModel[1]->GetRotation() + GetRotation();
-
-				// 変数を宣言
-				float fDestRot = 0.0f;	// 目標向き
-				float fDiffRot = 0.0f;	// 向き
-
-				// プレイヤーの向きを代入
-				fDestRot = atan2f(posEnemy.x - posLook.x, posEnemy.z - posLook.z);	// 目標向き
-
-				// 目標向きまでの差分を計算
-				fDiffRot = fDestRot - rot.y;
-
-				// 差分向きの正規化
-				useful::NormalizeRot(fDiffRot);
-
-				// 向きの更新
-				rot.y += fDiffRot * 0.03f;
-				rot.y -= GetRotation().y;
-
-				// 向きの正規化
-				useful::NormalizeRot(rot.y);
-
-				// 向きを設定
-				m_apMultiModel[1]->SetRotation(rot);
-
-				// 攻撃
-				Attack(posEnemy, D3DXVECTOR3(50.0f, 50.0f, 0.0f), D3DXVECTOR3(rot.x + (-D3DX_PI * 0.5f), rot.y + GetRotation().y, 0.0f));
-#endif
-				// キャノンの向きを取得
-				rotCannon = m_apMultiModel[MODEL_CANNON]->GetRotation() + GetRotation();	// 本体の向きを加算
-
-				// プレイヤーの向きを代入
-				fDestRot = atan2f(posEnemy.x - posLook.x, posEnemy.z - posLook.z);	// 目標向き
-
-				// 目標向きまでの差分を計算
-				fDiffRot = fDestRot - rotCannon.y;
-
-				// 差分向きの正規化
-				useful::NormalizeRot(fDiffRot);
-
-				// 向きの更新
-				rotCannon.y += fDiffRot * 0.03f;	// TODO：cannonの向き補正値作る
-				rotCannon.y -= GetRotation().y;		// パーツの向きから本体の向きを減算
-
-				// 向きの正規化
-				useful::NormalizeRot(rotCannon.y);
-
-				// 向きを設定
-				m_apMultiModel[MODEL_CANNON]->SetRotation(rotCannon);
-			}
 
 			// 位置補正
 			Limit(posEnemy);
@@ -744,19 +698,36 @@ void CEnemyCar::CollisionFind(void)
 			// 敵との当たり判定
 			CollisionEnemy(posEnemy, GetOldPosition());
 
-			// 攻撃
-			Attack
-			( // 引数
-				posEnemy,						// 弾の発射位置
-				VEC3_ALL(status.fBullRadius),	// 弾の大きさ
-				D3DXVECTOR3						// 弾の発射向き
-				( // 引数
-					rotCannon.x + (-D3DX_PI * 0.5f),	// x
-					rotCannon.y + GetRotation().y,		// y
-					0.0f								// z
-				)
-			);
+
+
+			// プレイヤーの向きを代入
+			fDestRot = atan2f(posEnemy.x - posLook.x, posEnemy.z - posLook.z);	// 目標向き
+
+			// 目標向きまでの差分を計算
+			fDiffRot = fDestRot - m_rotCannon.y;
+
+			// 差分向きの正規化
+			useful::NormalizeRot(fDiffRot);
+
+			// 向きの更新
+			m_rotCannon.y += fDiffRot * 0.03f;	// TODO：cannonの向き補正値作る
+
+			// 向きの正規化
+			useful::NormalizeRot(m_rotCannon.y);
 		}
+
+		// 攻撃
+		Attack
+		( // 引数
+			posEnemy,						// 弾の発射位置
+			VEC3_ALL(status.fBullRadius),	// 弾の大きさ
+			D3DXVECTOR3						// 弾の発射向き
+			( // 引数
+				m_rotCannon.x + (-D3DX_PI * 0.5f),	// x
+				m_rotCannon.y,						// y
+				0.0f								// z
+			)
+		);
 	}
 
 	// 位置を反映
