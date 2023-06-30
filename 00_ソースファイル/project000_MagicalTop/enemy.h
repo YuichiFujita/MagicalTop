@@ -96,11 +96,16 @@ public:
 	);
 
 	// メンバ関数
-	void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
-	void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
+	void SetPosition(const D3DXVECTOR3& rPos);		// 位置設定
+	void SetMovePosition(const D3DXVECTOR3& rMove);	// 位置移動量設定
+	void SetRotation(const D3DXVECTOR3& rRot);		// 向き設定
+	void SetMoveRotation(const D3DXVECTOR3& rMove);	// 向き変更量設定
+
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	D3DXVECTOR3 GetOldPosition(void) const;		// 過去位置取得
+	D3DXVECTOR3 GetMovePosition(void) const;	// 位置移動量取得
 	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
+	D3DXVECTOR3 GetMoveRotation(void) const;	// 向き変更量取得
 	float GetRadius(void) const;				// 半径取得
 	StatusInfo GetStatusInfo(void) const;		// ステータス情報取得
 	PartsInfo GetPartsInfo(void) const;			// パーツ情報取得
@@ -111,7 +116,7 @@ protected:
 	void Look(const D3DXVECTOR3& rPos);	// 対象視認
 	void Limit(D3DXVECTOR3& rPos);		// 位置制限
 	void CollisionEnemy(D3DXVECTOR3& rPos, D3DXVECTOR3& rOldPos);	// 敵との当たり判定
-	void Attack(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, const D3DXVECTOR3& rRot);	// 攻撃
+	void Attack(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot);	// 攻撃
 
 private:
 	// 静的メンバ変数
@@ -158,6 +163,7 @@ public:
 private:
 	// オーバーライド関数
 	void CollisionFind(void);	// 検知範囲の当たり判定
+	void SetRotationCannon(const D3DXVECTOR3& rLookPos, D3DXVECTOR3& rRotCannon);	// キャノン向き設定
 
 	// 静的メンバ変数
 	static const char *mc_apModelFile[];	// モデル定数

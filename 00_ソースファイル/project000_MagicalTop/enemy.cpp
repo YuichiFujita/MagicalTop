@@ -235,6 +235,15 @@ void CEnemy::SetPosition(const D3DXVECTOR3& rPos)
 }
 
 //============================================================
+//	ˆÊ’uˆÚ“®—Ê‚ÌÝ’èˆ—
+//============================================================
+void CEnemy::SetMovePosition(const D3DXVECTOR3& rMove)
+{
+	// ˆø”‚ÌˆÊ’uˆÚ“®—Ê‚ðÝ’è
+	m_movePos = rMove;
+}
+
+//============================================================
 //	Œü‚«‚ÌÝ’èˆ—
 //============================================================
 void CEnemy::SetRotation(const D3DXVECTOR3& rRot)
@@ -246,6 +255,20 @@ void CEnemy::SetRotation(const D3DXVECTOR3& rRot)
 	useful::NormalizeRot(m_rot.x);
 	useful::NormalizeRot(m_rot.y);
 	useful::NormalizeRot(m_rot.z);
+}
+
+//============================================================
+//	Œü‚«•ÏX—Ê‚ÌÝ’èˆ—
+//============================================================
+void CEnemy::SetMoveRotation(const D3DXVECTOR3& rMove)
+{
+	// ˆø”‚ÌŒü‚«‚ðÝ’è
+	m_moveRot = rMove;
+
+	// Œü‚«‚Ì³‹K‰»
+	useful::NormalizeRot(m_moveRot.x);
+	useful::NormalizeRot(m_moveRot.y);
+	useful::NormalizeRot(m_moveRot.z);
 }
 
 //============================================================
@@ -267,12 +290,30 @@ D3DXVECTOR3 CEnemy::GetOldPosition(void) const
 }
 
 //============================================================
+//	ˆÊ’uˆÚ“®—ÊŽæ“¾ˆ—
+//============================================================
+D3DXVECTOR3 CEnemy::GetMovePosition(void) const
+{
+	// ˆÊ’uˆÚ“®—Ê‚ð•Ô‚·
+	return m_movePos;
+}
+
+//============================================================
 //	Œü‚«Žæ“¾ˆ—
 //============================================================
 D3DXVECTOR3 CEnemy::GetRotation(void) const
 {
 	// Œü‚«‚ð•Ô‚·
 	return m_rot;
+}
+
+//============================================================
+//	Œü‚«•ÏX—ÊŽæ“¾ˆ—
+//============================================================
+D3DXVECTOR3 CEnemy::GetMoveRotation(void) const
+{
+	// Œü‚«•ÏX—Ê‚ð•Ô‚·
+	return m_moveRot;
 }
 
 //============================================================
@@ -357,7 +398,7 @@ void CEnemy::CollisionFind(void)
 			}
 
 			// UŒ‚
-			Attack(m_pos, D3DXVECTOR3(80.0f, 80.0f, 0.0f), D3DXVECTOR3(m_rot.x + (-D3DX_PI * 0.5f), m_rot.y, 0.0f));
+			Attack(m_pos, D3DXVECTOR3(m_rot.x + (-D3DX_PI * 0.5f), m_rot.y, 0.0f));
 		}
 	}
 }
@@ -401,7 +442,7 @@ void CEnemy::Limit(D3DXVECTOR3& rPos)
 //============================================================
 //	UŒ‚ˆ—
 //============================================================
-void CEnemy::Attack(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, const D3DXVECTOR3& rRot)
+void CEnemy::Attack(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 {
 	// ƒJƒEƒ“ƒ^[‚ð‰ÁŽZ
 	m_nCounterAtk++;
@@ -415,13 +456,13 @@ void CEnemy::Attack(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, const D3D
 		// ’eƒIƒuƒWƒFƒNƒg‚Ì¶¬
 		CBullet::Create
 		( // ˆø”
-			CBullet::TYPE_ENEMY,	// Ží—Þ
-			rPos,					// ˆÊ’u
-			rSize,					// ‘å‚«‚³
-			XCOL_WHITE,				// F
-			rRot,					// ŽËŒ‚Œü‚«
-			m_status.fBullMove,		// ˆÚ“®‘¬“x
-			m_status.nBullLife		// Žõ–½
+			CBullet::TYPE_ENEMY,			// Ží—Þ
+			rPos,							// ˆÊ’u
+			VEC3_ALL(m_status.fBullRadius),	// ‘å‚«‚³
+			XCOL_WHITE,						// F
+			rRot,							// ŽËŒ‚Œü‚«
+			m_status.fBullMove,				// ˆÚ“®‘¬“x
+			m_status.nBullLife				// Žõ–½
 		);
 	}
 }
@@ -657,9 +698,18 @@ void CEnemyCar::CollisionFind(void)
 			// ‘ÎÛ‚Ì•ûŒü‚ÉˆÚ“® (‘Oi)
 			posEnemy.x -= sinf(rotEnemy.y) * status.fForwardMove;
 			posEnemy.z -= cosf(rotEnemy.y) * status.fForwardMove;
+
+			// ˆÊ’u•â³
+			Limit(posEnemy);
+
+			// “G‚Æ‚Ì“–‚½‚è”»’è
+			CollisionEnemy(posEnemy, GetOldPosition());
 		}
 		else
 		{ // “G‚ÌUŒ‚”ÍˆÍ“à‚Ìê‡
+
+			// ƒLƒƒƒmƒ“Œü‚«‚ÌÝ’è
+			SetRotationCannon(posLook, rotCannon);
 
 			if (collision::Circle(posLook, posEnemy, fPlayerRadius, status.fBackwardRadius) == true && status.bBackward == true)
 			{ // “G‚ÌŒã‘Þ”ÍˆÍ“àŠŽ‚ÂAŒã‘Þ‚ªON‚Ìê‡
@@ -674,52 +724,25 @@ void CEnemyCar::CollisionFind(void)
 				posEnemy.x += sinf(rotEnemy.y) * status.fBackwardMove;
 				posEnemy.z += cosf(rotEnemy.y) * status.fBackwardMove;
 			}
-			else
-			{ // Œã‘Þó‘Ô‚Å‚Í‚È‚¢ê‡
 
-				// •Ï”‚ðéŒ¾
-				float fDestRot = 0.0f;	// –Ú•WŒü‚«
-				float fDiffRot = 0.0f;	// Œü‚«
+			// ˆÊ’u•â³
+			Limit(posEnemy);
 
-				// ƒLƒƒƒmƒ“‚ÌŒü‚«‚ðŽæ“¾
-				rotCannon = m_apMultiModel[MODEL_CANNON]->GetRotation() + GetRotation();	// –{‘Ì‚ÌŒü‚«‚ð‰ÁŽZ
-				useful::NormalizeRot(rotCannon.y);	// ƒLƒƒƒmƒ“Œü‚«‚Ì³‹K‰»
+			// “G‚Æ‚Ì“–‚½‚è”»’è
+			CollisionEnemy(posEnemy, GetOldPosition());
 
-				// –Ú•WŒü‚«‚ÌŒvŽZ
-				fDestRot = atan2f(posEnemy.x - posLook.x, posEnemy.z - posLook.z);
-				useful::NormalizeRot(fDestRot);		// –Ú•WŒü‚«‚Ì³‹K‰»
-
-				// ·•ªŒü‚«‚ÌŒvŽZ
-				fDiffRot = fDestRot - rotCannon.y;
-				useful::NormalizeRot(fDiffRot);		// ·•ªŒü‚«‚Ì³‹K‰»
-
-				// Œü‚«‚ÌXV
-				rotCannon.y += fDiffRot * 0.03f;	// TODOFcannon‚ÌŒü‚«•â³’lì‚é
-				useful::NormalizeRot(rotCannon.y);	// ƒLƒƒƒmƒ“Œü‚«‚Ì³‹K‰»
-
-				// Œü‚«‚ðÝ’è
-				m_apMultiModel[MODEL_CANNON]->SetRotation(rotCannon - GetRotation());		// –{‘Ì‚ÌŒü‚«‚ðŒ¸ŽZ
-			}
-		}
-
-		// ˆÊ’u•â³
-		Limit(posEnemy);
-
-		// “G‚Æ‚Ì“–‚½‚è”»’è
-		CollisionEnemy(posEnemy, GetOldPosition());
-
-		// UŒ‚
-		Attack
-		( // ˆø”
-			posEnemy,						// ’e‚Ì”­ŽËˆÊ’u
-			VEC3_ALL(status.fBullRadius),	// ’e‚Ì‘å‚«‚³
-			D3DXVECTOR3						// ’e‚Ì”­ŽËŒü‚«
+			// UŒ‚
+			Attack
 			( // ˆø”
-				rotCannon.x + (-D3DX_PI * 0.5f),	// x
-				rotCannon.y,						// y
-				0.0f								// z
-			)
-		);
+				posEnemy,	// ’e‚Ì”­ŽËˆÊ’u
+				D3DXVECTOR3	// ’e‚Ì”­ŽËŒü‚«
+				( // ˆø”
+					rotCannon.x + (-D3DX_PI * 0.5f),	// x
+					rotCannon.y,						// y
+					0.0f								// z
+				)
+			);
+		}
 	}
 
 	// ˆÊ’u‚ð”½‰f
@@ -727,6 +750,36 @@ void CEnemyCar::CollisionFind(void)
 
 	// Œü‚«‚ð”½‰f
 	SetRotation(rotEnemy);
+}
+
+//============================================================
+//	ƒLƒƒƒmƒ“Œü‚«‚ÌÝ’èˆ—
+//============================================================
+void CEnemyCar::SetRotationCannon(const D3DXVECTOR3& rLookPos, D3DXVECTOR3& rRotCannon)
+{
+	// •Ï”‚ðéŒ¾
+	D3DXVECTOR3 posEnemy = GetPosition();	// “GˆÊ’u
+	float fDestRot = 0.0f;	// –Ú•WŒü‚«
+	float fDiffRot = 0.0f;	// Œü‚«
+
+	// ƒLƒƒƒmƒ“‚ÌŒü‚«‚ðŽæ“¾
+	rRotCannon = m_apMultiModel[MODEL_CANNON]->GetRotation() + GetRotation();	// –{‘Ì‚ÌŒü‚«‚ð‰ÁŽZ
+	useful::NormalizeRot(rRotCannon.y);	// ƒLƒƒƒmƒ“Œü‚«‚Ì³‹K‰»
+
+	// –Ú•WŒü‚«‚ÌŒvŽZ
+	fDestRot = atan2f(posEnemy.x - rLookPos.x, posEnemy.z - rLookPos.z);
+	useful::NormalizeRot(fDestRot);		// –Ú•WŒü‚«‚Ì³‹K‰»
+
+	// ·•ªŒü‚«‚ÌŒvŽZ
+	fDiffRot = fDestRot - rRotCannon.y;
+	useful::NormalizeRot(fDiffRot);		// ·•ªŒü‚«‚Ì³‹K‰»
+
+	// Œü‚«‚ÌXV
+	rRotCannon.y += fDiffRot * 0.03f;	// TODOFcannon‚ÌŒü‚«•â³’lì‚é
+	useful::NormalizeRot(rRotCannon.y);	// ƒLƒƒƒmƒ“Œü‚«‚Ì³‹K‰»
+
+	// Œü‚«‚ðÝ’è
+	m_apMultiModel[MODEL_CANNON]->SetRotation(rRotCannon - GetRotation());		// –{‘Ì‚ÌŒü‚«‚ðŒ¸ŽZ
 }
 
 //************************************************************

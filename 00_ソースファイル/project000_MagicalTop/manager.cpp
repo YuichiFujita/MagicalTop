@@ -259,10 +259,10 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 
 	// TODO
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(200.0f, 400.0f, 0.0f), VEC3_ZERO);
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3( 2000.0f, 400.0f,     0.0f), VEC3_ZERO);
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f,     0.0f), VEC3_ZERO);
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(    0.0f, 400.0f, -2000.0f), VEC3_ZERO);
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(    0.0f, 400.0f,  2000.0f), VEC3_ZERO);
+	//CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3( 2000.0f, 400.0f,     0.0f), VEC3_ZERO);
+	//CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f,     0.0f), VEC3_ZERO);
+	//CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(    0.0f, 400.0f, -2000.0f), VEC3_ZERO);
+	//CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(    0.0f, 400.0f,  2000.0f), VEC3_ZERO);
 
 	// ƒJƒƒ‰‚Ì‰ŠúˆÊ’u‚ðÝ’è
 	m_pCamera->SetDestCamera();
