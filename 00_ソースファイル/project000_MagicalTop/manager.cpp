@@ -34,6 +34,7 @@
 
 #include "enemy.h"
 #include "magic.h"
+#include "lockCursor.h"	// TODO
 
 #ifdef _DEBUG	// デバッグ処理
 
@@ -451,12 +452,18 @@ void CManager::Update(void)
 
 #endif	// _DEBUG
 
-	if (m_pKeyboard->GetTrigger(DIK_0))
+	if (m_pKeyboard->GetTrigger(DIK_1))
 	{
 		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, -2000.0f), VEC3_ZERO);
 		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, 2000.0f), VEC3_ZERO);
+	}
+
+	// TODO
+	if (m_pKeyboard->GetTrigger(DIK_0))
+	{
+		CLockCursor::Create(m_pTarget->GetPosition());
 	}
 
 	if (USED(m_pPad))

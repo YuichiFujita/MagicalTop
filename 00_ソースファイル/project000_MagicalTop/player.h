@@ -114,7 +114,11 @@ private:
 	D3DXVECTOR3	m_move;		// 移動量
 	D3DXVECTOR3	m_rot;		// 現在向き
 	D3DXVECTOR3 m_destRot;	// 目標向き
+
 	CMagic::TYPE m_magic;	// 魔法
+	// TODO：魔法Managerを作成し、そこで魔法・ロックオンの管理をする
+	// TODO：ロックオンの表示位置は敵の高さ/2の位置
+
 	int m_nNumModel;		// パーツの総数
 	bool m_bJump;			// ジャンプ状況
 };

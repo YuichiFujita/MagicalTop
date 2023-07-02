@@ -50,11 +50,21 @@ public:
 	void Draw(void);	// 描画
 
 	// 静的メンバ関数
-	static CLockCursor *Create(void);	// 生成
+	static CLockCursor *Create		// 生成
+	( // 引数
+		const D3DXVECTOR3& rPos,	// 位置
+		const bool bDraw = true		// 描画状況
+	);
+
+	// メンバ関数
+	void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
+	void SetEnableDraw(const bool bDraw);		// 描画状況設定
+	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
+	bool IsDraw(void);							// 描画状況取得
 
 private:
 	// メンバ変数
-	bool bDraw;	// 描画状況
+	bool m_bDraw;	// 描画状況
 
 	// 静的メンバ変数
 	CObjectBillboard *m_apBilboard[TEXTURE_MAX];	// ビルボードの情報
