@@ -189,6 +189,10 @@ void CPlayer::Update(void)
 	m_move.x += (0.0f - m_move.x) * PLAY_REV;
 	m_move.z += (0.0f - m_move.z) * PLAY_REV;
 
+	// 当たり判定
+	CollisionTarget();	// ターゲット
+	CollisionEnemy();	// 敵
+
 	// 範囲外補正
 	// TODO：範囲外補正消す
 	useful::LimitNum(m_pos.x, -2000.0f, 2000.0f);
@@ -208,9 +212,6 @@ void CPlayer::Update(void)
 
 	// 射撃操作
 	currentMotion = Magic(currentMotion);
-
-	// 当たり判定
-	Collision();
 
 	// カメラ操作
 	Camera();
@@ -699,37 +700,6 @@ void CPlayer::Motion(MOTION motion)
 }
 
 //============================================================
-//	当たり判定処理
-//============================================================
-void CPlayer::Collision(void)
-{
-	// ポインタを宣言
-	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
-
-	// TODO：判定確認
-	if (USED(pTarget))
-	{ // ターゲットが使用されている場合
-
-		// 変数を宣言
-		D3DXVECTOR3 posTarget  = pTarget->GetPosition();
-		D3DXVECTOR3 sizeTarget = VEC3_ALL(pTarget->GetRadius());
-		D3DXVECTOR3 sizePlayer = VEC3_ALL(PLAY_RADIUS);
-
-		// ターゲットとの衝突判定
-		collision::Pillar
-		( // 引数
-			m_pos,		// 判定位置
-			m_oldPos,	// 判定過去位置
-			posTarget,	// 判定目標位置
-			sizePlayer,	// 判定サイズ(右・上・後)
-			sizePlayer,	// 判定サイズ(左・下・前)
-			sizeTarget,	// 判定目標サイズ(右・上・後)
-			sizeTarget	// 判定目標サイズ(左・下・前)
-		);
-	}
-}
-
-//============================================================
 //	向き処理
 //============================================================
 void CPlayer::Rot(void)
@@ -781,6 +751,70 @@ void CPlayer::Camera(void)
 
 	// カメラの向きを設定
 	CManager::GetCamera()->SetDestRotation(rot);
+}
+
+//============================================================
+//	ターゲットとの当たり判定
+//============================================================
+void CPlayer::CollisionTarget(void)
+{
+	// ポインタを宣言
+	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
+
+	if (USED(pTarget))
+	{ // ターゲットが使用されている場合
+
+		// 変数を宣言
+		D3DXVECTOR3 posTarget  = pTarget->GetPosition();
+		D3DXVECTOR3 sizeTarget = VEC3_ALL(pTarget->GetRadius());
+		D3DXVECTOR3 sizePlayer = VEC3_ALL(PLAY_RADIUS);
+
+		// ターゲットとの衝突判定
+		collision::BoxPillar
+		( // 引数
+			m_pos,		// 判定位置
+			m_oldPos,	// 判定過去位置
+			posTarget,	// 判定目標位置
+			sizePlayer,	// 判定サイズ(右・上・後)
+			sizePlayer,	// 判定サイズ(左・下・前)
+			sizeTarget,	// 判定目標サイズ(右・上・後)
+			sizeTarget	// 判定目標サイズ(左・下・前)
+		);
+	}
+}
+
+//============================================================
+//	敵との当たり判定
+//============================================================
+void CPlayer::CollisionEnemy(void)
+{
+	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
+	{ // 優先順位の総数分繰り返す
+
+		for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
+		{ // オブジェクトの総数分繰り返す
+
+			// ポインタを宣言
+			CObject *pObject = CObject::GetObject(nCntPri, nCntObject);	// オブジェクト
+
+			if (UNUSED(pObject)
+			||  pObject->GetLabel() != CObject::LABEL_ENEMY)
+			{ // オブジェクトが非使用中・ラベルが敵ではない場合
+
+				// 次の繰り返しに移行
+				continue;
+			}
+
+			// ターゲットとの衝突判定
+			collision::CirclePillar
+			( // 引数
+				m_pos,					// 判定位置
+				pObject->GetPosition(),	// 判定目標位置
+				PLAY_RADIUS,			// 判定半径
+				pObject->GetRadius()	// 判定目標半径
+			);
+		}
+	}
 }
 
 //============================================================

@@ -294,21 +294,15 @@ CMagic::StatusInfo CMagic::GetStatusInfo(void) const
 bool CMagic::Collision(CObject *pObject)
 {
 	// 変数を宣言
-	D3DXVECTOR3 posEnemy  = pObject->GetPosition();			// 敵位置
-	D3DXVECTOR3 sizeEnemy = VEC3_ALL(pObject->GetRadius());	// 敵大きさ
-	D3DXVECTOR3 sizeMagic = VEC3_ALL(m_status.fRadius);		// 魔法大きさ
 	bool bHit = false;	// 当たったかの判定
 
-	// TODO：円の判定にしたい
 	// 敵との当たり判定
-	bHit = collision::Box3D
+	bHit = collision::Circle3D
 	( // 引数
-		m_pos,		// 判定位置
-		posEnemy,	// 判定目標位置
-		sizeMagic,	// 判定サイズ(右・上・後)
-		sizeMagic,	// 判定サイズ(左・下・前)
-		sizeEnemy,	// 判定目標サイズ(右・上・後)
-		sizeEnemy	// 判定目標サイズ(左・下・前)
+		m_pos,					// 判定位置
+		pObject->GetPosition(),	// 判定目標位置
+		m_status.fRadius,		// 判定半径
+		pObject->GetRadius()	// 判定目標半径
 	);
 
 	// 当たったかの判定を返す

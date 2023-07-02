@@ -115,8 +115,9 @@ protected:
 	virtual void CollisionFind(void);	// 検知範囲の当たり判定
 	void Look(const D3DXVECTOR3& rPos);	// 対象視認
 	void Limit(D3DXVECTOR3& rPos);		// 位置制限
-	void CollisionEnemy(D3DXVECTOR3& rPos, D3DXVECTOR3& rOldPos);	// 敵との当たり判定
 	void Attack(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot);	// 攻撃
+	void CollisionTarget(D3DXVECTOR3& rPos, D3DXVECTOR3& rPosOld);	// ターゲットとの当たり判定
+	void CollisionEnemy(D3DXVECTOR3& rPos);							// 敵との当たり判定
 
 private:
 	// 静的メンバ変数

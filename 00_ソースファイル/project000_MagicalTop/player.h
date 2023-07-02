@@ -96,9 +96,10 @@ private:
 	MOTION Magic(MOTION motion);	// 魔法
 	MOTION Land(MOTION motion);		// 着地
 	void Motion(MOTION motion);		// モーション
-	void Collision(void);			// 当たり判定
 	void Rot(void);					// 向き
 	void Camera(void);				// カメラ
+	void CollisionTarget(void);		// ターゲットとの当たり判定
+	void CollisionEnemy(void);		// 敵との当たり判定
 	void LoadSetup(void);			// セットアップ
 
 	// 静的メンバ変数

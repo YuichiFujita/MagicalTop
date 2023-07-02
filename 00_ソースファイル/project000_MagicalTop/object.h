@@ -56,6 +56,7 @@ public:
 		LABEL_ENEMY,		// 敵
 		LABEL_TARGET,		// ターゲット
 		LABEL_MAGIC,		// 魔法
+		LABEL_LOCK,			// ロックオン
 		LABEL_BULLET,		// 弾
 		LABEL_SHADOW,		// 影
 		LABEL_FIELD,		// 地面

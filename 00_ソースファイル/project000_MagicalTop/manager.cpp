@@ -257,21 +257,17 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// 魔法セットアップの読み込み
 	CMagic::LoadSetup();
 
-	// TODO
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(200.0f, 400.0f, 0.0f), VEC3_ZERO);
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3( 2000.0f, 400.0f,     0.0f), VEC3_ZERO);
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f,     0.0f), VEC3_ZERO);
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(    0.0f, 400.0f, -2000.0f), VEC3_ZERO);
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(    0.0f, 400.0f,  2000.0f), VEC3_ZERO);
-
+	// TODO：初期設定
+#if 0
 	// カメラの初期位置を設定
-	//m_pCamera->SetDestCamera();
+	m_pCamera->SetDestCamera();
 
 	// タイムを計測開始
-	//m_pTimer->Start();
+	m_pTimer->Start();
 
 	// BGMの再生
-	//m_pSound->Play(CSound::LABEL_BGM_000);
+	m_pSound->Play(CSound::LABEL_BGM_000);
+#endif
 
 	//--------------------------------------------------------
 	//	デバッグ用
@@ -455,13 +451,12 @@ void CManager::Update(void)
 
 #endif	// _DEBUG
 
-	if (m_pKeyboard->GetPress(DIK_0))
+	if (m_pKeyboard->GetTrigger(DIK_0))
 	{
-		CParticle2D::Create(CParticle2D::TYPE_DAMAGE, D3DXVECTOR3(640.0f, 360.0f, 0.0f), XCOL_WHITE);
-	}
-	if (m_pKeyboard->GetPress(DIK_9))
-	{
-		CEffect2D::Create(CEffect2D::TYPE_NORMAL, D3DXVECTOR3(640.0f, 360.0f, 0.0f), VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, 1, 20.0f, 0.0f, 0.0f);
+		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);
+		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f, 0.0f), VEC3_ZERO);
+		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, -2000.0f), VEC3_ZERO);
+		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, 2000.0f), VEC3_ZERO);
 	}
 
 	if (USED(m_pPad))

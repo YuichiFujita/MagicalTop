@@ -357,7 +357,7 @@ void CEnemy::CollisionFind(void)
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 視認対象の設定
-		if (collision::Circle(CManager::GetPlayer()->GetPosition(), m_pos, fPlayerRadius, m_status.fFindRadius) == false)
+		if (collision::Circle2D(CManager::GetPlayer()->GetPosition(), m_pos, fPlayerRadius, m_status.fFindRadius) == false)
 		{ // 敵の検知範囲外の場合
 
 			// 視認対象位置を設定
@@ -373,7 +373,7 @@ void CEnemy::CollisionFind(void)
 		// 対象の方向を向かせる
 		Look(posLook);
 
-		if (collision::Circle(posLook, m_pos, fPlayerRadius, m_status.fAttackRadius) == false)
+		if (collision::Circle2D(posLook, m_pos, fPlayerRadius, m_status.fAttackRadius) == false)
 		{ // 敵の攻撃範囲外の場合
 
 			// 対象の方向に移動 (前進)
@@ -386,7 +386,7 @@ void CEnemy::CollisionFind(void)
 		else
 		{ // 敵の攻撃範囲内の場合
 
-			if (collision::Circle(posLook, m_pos, fPlayerRadius, m_status.fBackwardRadius) == true && m_status.bBackward == true)
+			if (collision::Circle2D(posLook, m_pos, fPlayerRadius, m_status.fBackwardRadius) == true && m_status.bBackward == true)
 			{ // 敵の後退範囲内且つ、後退がONの場合
 
 				// 対象の逆方向に移動 (後退)
@@ -468,21 +468,45 @@ void CEnemy::Attack(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 }
 
 //============================================================
+//	ターゲットとの当たり判定
+//============================================================
+void CEnemy::CollisionTarget(D3DXVECTOR3& rPos, D3DXVECTOR3& rPosOld)
+{
+	// ポインタを宣言
+	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
+
+	if (USED(pTarget))
+	{ // ターゲットが使用されている場合
+
+		// 変数を宣言
+		D3DXVECTOR3 posTarget = pTarget->GetPosition();
+		D3DXVECTOR3 sizeTarget = VEC3_ALL(pTarget->GetRadius());
+		D3DXVECTOR3 sizeEnemy = VEC3_ALL(m_status.fRadius);
+
+		// ターゲットとの衝突判定
+		collision::BoxPillar
+		( // 引数
+			rPos,		// 判定位置
+			rPosOld,	// 判定過去位置
+			posTarget,	// 判定目標位置
+			sizeEnemy,	// 判定サイズ(右・上・後)
+			sizeEnemy,	// 判定サイズ(左・下・前)
+			sizeTarget,	// 判定目標サイズ(右・上・後)
+			sizeTarget	// 判定目標サイズ(左・下・前)
+		);
+	}
+}
+
+//============================================================
 //	敵との当たり判定
 //============================================================
-void CEnemy::CollisionEnemy(D3DXVECTOR3& rPos, D3DXVECTOR3& rOldPos)
+void CEnemy::CollisionEnemy(D3DXVECTOR3& rPos)
 {
-	// TODO：処理の確認
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
 
 		for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
 		{ // オブジェクトの総数分繰り返す
-
-			// 変数を宣言
-			D3DXVECTOR3 posEnemy;	// 敵の位置
-			D3DXVECTOR3 sizeEnemy;	// 敵の大きさ
-			D3DXVECTOR3 sizeSelf;	// 自身の大きさ
 
 			// ポインタを宣言
 			CObject *pObject = CObject::GetObject(nCntPri, nCntObject);	// オブジェクト
@@ -503,21 +527,13 @@ void CEnemy::CollisionEnemy(D3DXVECTOR3& rPos, D3DXVECTOR3& rOldPos)
 				continue;
 			}
 
-			// 敵の情報を取得
-			posEnemy  = pObject->GetPosition();			// 敵の位置
-			sizeEnemy = VEC3_ALL(pObject->GetRadius());	// 敵の大きさ
-			sizeSelf  = VEC3_ALL(m_status.fRadius);		// 自身の大きさ
-
-			// 衝突判定
-			collision::Pillar
+			// ターゲットとの衝突判定
+			collision::CirclePillar
 			( // 引数
-				rPos,		// 判定位置
-				rOldPos,	// 判定過去位置
-				posEnemy,	// 判定目標位置
-				sizeSelf,	// 判定サイズ(右・上・後)
-				sizeSelf,	// 判定サイズ(左・下・前)
-				sizeEnemy,	// 判定目標サイズ(右・上・後)
-				sizeEnemy	// 判定目標サイズ(左・下・前)
+				rPos,					// 判定位置
+				pObject->GetPosition(),	// 判定目標位置
+				m_status.fRadius,		// 判定半径
+				pObject->GetRadius()	// 判定目標半径
 			);
 		}
 	}
@@ -672,7 +688,7 @@ void CEnemyCar::CollisionFind(void)
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 視認対象の検知判定
-		if (collision::Circle(CManager::GetPlayer()->GetPosition(), posEnemy, fPlayerRadius, status.fFindRadius) == false)
+		if (collision::Circle2D(CManager::GetPlayer()->GetPosition(), posEnemy, fPlayerRadius, status.fFindRadius) == false)
 		{ // 敵の検知範囲外の場合
 
 			// 視認対象位置を設定
@@ -686,7 +702,7 @@ void CEnemyCar::CollisionFind(void)
 		}
 
 		// 視認対象の攻撃判定
-		if (collision::Circle(posLook, posEnemy, fPlayerRadius, status.fAttackRadius) == false)
+		if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, status.fAttackRadius) == false)
 		{ // 敵の攻撃範囲外の場合
 
 			// 対象の方向を向かせる
@@ -699,11 +715,14 @@ void CEnemyCar::CollisionFind(void)
 			posEnemy.x -= sinf(rotEnemy.y) * status.fForwardMove;
 			posEnemy.z -= cosf(rotEnemy.y) * status.fForwardMove;
 
-			// 位置補正
-			Limit(posEnemy);
+			// ターゲットとの当たり判定
+			CollisionTarget(posEnemy, GetOldPosition());
 
 			// 敵との当たり判定
-			CollisionEnemy(posEnemy, GetOldPosition());
+			CollisionEnemy(posEnemy);
+
+			// 位置補正
+			Limit(posEnemy);
 		}
 		else
 		{ // 敵の攻撃範囲内の場合
@@ -711,7 +730,7 @@ void CEnemyCar::CollisionFind(void)
 			// キャノン向きの設定
 			SetRotationCannon(posLook, rotCannon);
 
-			if (collision::Circle(posLook, posEnemy, fPlayerRadius, status.fBackwardRadius) == true && status.bBackward == true)
+			if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, status.fBackwardRadius) == true && status.bBackward == true)
 			{ // 敵の後退範囲内且つ、後退がONの場合
 
 				// 対象の方向を向かせる
@@ -725,11 +744,14 @@ void CEnemyCar::CollisionFind(void)
 				posEnemy.z += cosf(rotEnemy.y) * status.fBackwardMove;
 			}
 
-			// 位置補正
-			Limit(posEnemy);
+			// ターゲットとの当たり判定
+			CollisionTarget(posEnemy, GetOldPosition());
 
 			// 敵との当たり判定
-			CollisionEnemy(posEnemy, GetOldPosition());
+			CollisionEnemy(posEnemy);
+
+			// 位置補正
+			Limit(posEnemy);
 
 			// 攻撃
 			Attack

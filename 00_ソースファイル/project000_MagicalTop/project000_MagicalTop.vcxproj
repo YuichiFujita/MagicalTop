@@ -166,6 +166,7 @@
     <ClCompile Include="field.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="light.cpp" />
+    <ClCompile Include="lockCursor.cpp" />
     <ClCompile Include="magic.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="manager.cpp" />
@@ -217,6 +218,7 @@
     <ClInclude Include="field.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="light.h" />
+    <ClInclude Include="lockCursor.h" />
     <ClInclude Include="magic.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="manager.h" />
