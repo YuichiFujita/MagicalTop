@@ -259,16 +259,16 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 
 	// TODO
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(200.0f, 400.0f, 0.0f), VEC3_ZERO);
-	//CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3( 2000.0f, 400.0f,     0.0f), VEC3_ZERO);
-	//CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f,     0.0f), VEC3_ZERO);
-	//CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(    0.0f, 400.0f, -2000.0f), VEC3_ZERO);
-	//CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(    0.0f, 400.0f,  2000.0f), VEC3_ZERO);
+	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3( 2000.0f, 400.0f,     0.0f), VEC3_ZERO);
+	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f,     0.0f), VEC3_ZERO);
+	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(    0.0f, 400.0f, -2000.0f), VEC3_ZERO);
+	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(    0.0f, 400.0f,  2000.0f), VEC3_ZERO);
 
 	// カメラの初期位置を設定
-	m_pCamera->SetDestCamera();
+	//m_pCamera->SetDestCamera();
 
 	// タイムを計測開始
-	m_pTimer->Start();
+	//m_pTimer->Start();
 
 	// BGMの再生
 	//m_pSound->Play(CSound::LABEL_BGM_000);

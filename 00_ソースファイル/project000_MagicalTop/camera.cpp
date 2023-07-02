@@ -65,6 +65,7 @@ CCamera::~CCamera()
 HRESULT CCamera::Init(void)
 {
 	// カメラ情報を初期化
+#if 0
 	m_camera.posV		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 現在の視点
 	m_camera.posR		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 現在の注視点
 	m_camera.destPosV	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 目標の視点
@@ -73,6 +74,16 @@ HRESULT CCamera::Init(void)
 	m_camera.rot		= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 現在の向き
 	m_camera.destRot	= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 目標の向き
 	m_camera.fDis		= -800.0f;							// 視点と注視点の距離
+#else
+	m_camera.posV		= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 現在の視点
+	m_camera.posR		= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 現在の注視点
+	m_camera.destPosV	= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 目標の視点
+	m_camera.destPosR	= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 目標の注視点
+	m_camera.vecU		= D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// 上方向ベクトル
+	m_camera.rot		= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 現在の向き
+	m_camera.destRot	= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 目標の向き
+	m_camera.fDis		= -800.0f;							// 視点と注視点の距離
+#endif
 
 	// ビューポート情報を初期化
 	m_camera.viewport.X			= 0;				// 左上隅のピクセル座標 (x)
@@ -99,7 +110,7 @@ void CCamera::Uninit(void)
 //============================================================
 void CCamera::Update(void)
 {
-#if 0
+#if 1
 	// カメラの位置の更新 (追従)
 	MoveFollowCamera();
 #else
@@ -173,14 +184,14 @@ void CCamera::SetDestCamera(void)
 	D3DXVECTOR3 rot = CManager::GetPlayer()->GetRotation();		// プレイヤー向き
 
 	// 目標の注視点の位置を更新
-	m_camera.posR.x = pos.x + sinf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
-	m_camera.posR.y = pos.y;										// プレイヤーの位置と同じ
-	m_camera.posR.z = pos.z + cosf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
+	m_camera.destPosR.x = m_camera.posR.x = pos.x + sinf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
+	m_camera.destPosR.y = m_camera.posR.y = pos.y;										// プレイヤーの位置と同じ
+	m_camera.destPosR.z = m_camera.posR.z = pos.z + cosf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
 
 	// 目標の視点の位置を更新
-	m_camera.posV.x = m_camera.posR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));	// 目標注視点から距離分離れた位置
-	m_camera.posV.y = POS_V_Y;																				// 固定の高さ
-	m_camera.posV.z = m_camera.posR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// 目標注視点から距離分離れた位置
+	m_camera.destPosV.x = m_camera.posV.x = m_camera.posR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));	// 目標注視点から距離分離れた位置
+	m_camera.destPosV.y = m_camera.posV.y = POS_V_Y;																			// 固定の高さ
+	m_camera.destPosV.z = m_camera.posV.z = m_camera.posR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// 目標注視点から距離分離れた位置
 
 	// TODO：最初にカメラ動かないように直す
 }

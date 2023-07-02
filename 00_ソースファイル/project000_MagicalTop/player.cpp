@@ -18,6 +18,9 @@
 #include "collision.h"
 #include "target.h"
 
+// TODO：いらんインクルード
+#include "effect3D.h"
+
 //************************************************************
 //	マクロ定義
 //************************************************************
@@ -521,25 +524,86 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion)
 	CInputKeyboard	*pKeyboard = CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad = CManager::GetPad();				// パッド
 
-	// 魔法操作
-	if (pKeyboard->GetTrigger(DIK_RETURN))
-	{ // 魔法の操作が行われた場合
+	// TODO：ロックオン判定もう少しきれいに
+	// ロックオン判定
+	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
+	{ // 優先順位の総数分繰り返す
 
-		// 変数を宣言
-		D3DXVECTOR3 magicPos = D3DXVECTOR3(m_pos.x, m_pos.y + 40.0f, m_pos.z);			// 発射位置
-		D3DXVECTOR3 magicRot = D3DXVECTOR3(m_rot.x + (-D3DX_PI * 0.5f), m_rot.y, 0.0f);	// 発射向き
+		for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
+		{ // オブジェクトの総数分繰り返す
 
-		// アクションモーションを設定
-		currentMotion = MOTION_ACTION;
+			// 変数を宣言
+			bool bHit = false;
 
-		// 魔法オブジェクトの生成
-		CMagic::Create
-		( // 引数
-			m_magic,	// 種類
-			magicPos,	// 発射位置
-			magicRot	// 発射向き
-		);
+			// ポインタを宣言
+			CObject *pObject = CObject::GetObject(nCntPri, nCntObject);	// オブジェクト
+
+			if (UNUSED(pObject)
+			||  pObject->GetLabel() != CObject::LABEL_ENEMY)
+			{ // オブジェクトが非使用中・ラベルが敵ではない場合
+
+				// 次の繰り返しに移行
+				continue;
+			}
+
+			// 視界内判定
+			bHit = collision::Sector
+			( // 引数
+				m_pos,
+				pObject->GetPosition(),
+				m_rot.y + D3DX_PI,
+				800.0f,
+				90.0f
+			);
+
+			if (bHit)
+			{ // 視界内の場合
+			
+				CEffect3D::Create(CEffect3D::TYPE_NORMAL, pObject->GetPosition(), VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, 1, 50.0f, 0.0f, 0.0f);
+
+				// 魔法操作
+				if (pKeyboard->GetTrigger(DIK_RETURN))
+				{ // 魔法の操作が行われた場合
+			
+					// 変数を宣言
+					float fMoveRot = atan2f(m_pos.x - pObject->GetPosition().x, m_pos.z - pObject->GetPosition().z);	// 敵方向
+					D3DXVECTOR3 magicPos = D3DXVECTOR3(m_pos.x, m_pos.y + 40.0f, m_pos.z);				// 発射位置
+					D3DXVECTOR3 magicRot = D3DXVECTOR3(m_rot.x + (-D3DX_PI * 0.5f), fMoveRot, 0.0f);	// 発射向き
+			
+					// アクションモーションを設定
+					currentMotion = MOTION_ACTION;
+			
+					// 魔法オブジェクトの生成
+					CMagic::Create
+					( // 引数
+						m_magic,	// 種類
+						magicPos,	// 発射位置
+						magicRot	// 発射向き
+					);
+				}
+			}
+		}
 	}
+
+	//// 魔法操作
+	//if (pKeyboard->GetTrigger(DIK_RETURN))
+	//{ // 魔法の操作が行われた場合
+
+	//	// 変数を宣言
+	//	D3DXVECTOR3 magicPos = D3DXVECTOR3(m_pos.x, m_pos.y + 40.0f, m_pos.z);			// 発射位置
+	//	D3DXVECTOR3 magicRot = D3DXVECTOR3(m_rot.x + (-D3DX_PI * 0.5f), m_rot.y, 0.0f);	// 発射向き
+
+	//	// アクションモーションを設定
+	//	currentMotion = MOTION_ACTION;
+
+	//	// 魔法オブジェクトの生成
+	//	CMagic::Create
+	//	( // 引数
+	//		m_magic,	// 種類
+	//		magicPos,	// 発射位置
+	//		magicRot	// 発射向き
+	//	);
+	//}
 
 	// 現在のモーションを返す
 	return currentMotion;
