@@ -18,6 +18,7 @@
 #include "collision.h"
 #include "target.h"
 #include "magicManager.h"
+#include "stage.h"
 
 //************************************************************
 //	マクロ定義
@@ -206,10 +207,8 @@ void CPlayer::Update(void)
 	CollisionTarget();	// ターゲット
 	CollisionEnemy();	// 敵
 
-	// 範囲外補正
-	// TODO：範囲外補正消す
-	useful::LimitNum(m_pos.x, -2000.0f, 2000.0f);
-	useful::LimitNum(m_pos.z, -2000.0f, 2000.0f);
+	// ステージ範囲外の補正
+	CManager::GetStage()->LimitPosition(m_pos, PLAY_RADIUS);
 
 	// 着地判定
 	if (Land(currentMotion) == MOTION_LANDING)
@@ -563,20 +562,12 @@ CPlayer::MOTION CPlayer::Land(MOTION motion)
 	// 変数を宣言
 	MOTION currentMotion = motion;	// 現在のモーション
 
-	// TODO：固定値やめる
-
 	// 着地判定
-	if (m_pos.y < 400.0f)
-	{ // プレイヤーの位置が下画面外の場合
+	if (CManager::GetStage()->LandPosition(m_pos, m_move, 0.0f) == true)
+	{ // プレイヤーの位置がステージ範囲外の場合
 
 		// 着地モーションを設定
 		currentMotion = MOTION_LANDING;
-
-		// 位置を補正
-		m_pos.y = 400.0f;
-
-		// 移動量を初期化
-		m_move.y = 0.0f;
 
 		// ジャンプしていない状態にする
 		m_bJump = false;

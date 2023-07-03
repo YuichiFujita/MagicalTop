@@ -18,6 +18,7 @@
 #include "value.h"
 #include "debugproc.h"
 
+#include "stage.h"
 #include "player.h"
 #include "score.h"
 #include "timer.h"
@@ -50,6 +51,7 @@ CCamera			*CManager::m_pCamera	= NULL;		// カメラオブジェクト
 CLight			*CManager::m_pLight		= NULL;		// ライトオブジェクト
 CTexture		*CManager::m_pTexture	= NULL;		// テクスチャオブジェクト
 CModel			*CManager::m_pModel		= NULL;		// モデルオブジェクト
+CStage			*CManager::m_pStage		= NULL;		// ステージオブジェクト
 CPlayer			*CManager::m_pPlayer	= NULL;		// プレイヤーオブジェクト
 CTarget			*CManager::m_pTarget	= NULL;		// ターゲットオブジェクト
 CScore			*CManager::m_pScore		= NULL;		// スコアオブジェクト
@@ -87,7 +89,7 @@ CManager::~CManager()
 HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 {
 	//--------------------------------------------------------
-	//	システムオブジェクトの生成
+	//	システムの生成
 	//--------------------------------------------------------
 	// レンダラーの生成
 	m_pRenderer = CRenderer::Create(hWnd);
@@ -185,6 +187,16 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	//--------------------------------------------------------
 	//	ゲームオブジェクトの生成
 	//--------------------------------------------------------
+	// ステージの生成
+	m_pStage = CStage::Create();
+	if (UNUSED(m_pStage))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// 海オブジェクトの生成
 	CSea::Create();
 
@@ -254,8 +266,15 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// 魔法セットアップの読み込み
 	CMagic::LoadSetup();
 
+#if 1
+	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);
+	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f, 0.0f), VEC3_ZERO);
+	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, -2000.0f), VEC3_ZERO);
+	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, 2000.0f), VEC3_ZERO);
+#endif
+
 	// TODO：初期設定
-#if 0
+#if 1
 	// カメラの初期位置を設定
 	m_pCamera->SetDestCamera();
 
@@ -334,10 +353,25 @@ HRESULT CManager::Uninit(void)
 	m_pSound->Stop();
 
 	//--------------------------------------------------------
-	//	オブジェクトの全破棄
+	//	ゲームオブジェクトの破棄
 	//--------------------------------------------------------
 	// オブジェクトの全破棄
 	CObject::ReleaseAll();
+
+	// ステージの破棄
+	if (FAILED(CStage::Release(m_pStage)))
+	{ // 破棄に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 終了済みのオブジェクトポインタをNULLにする
+	m_pPlayer = NULL;		// プレイヤーオブジェクト
+	m_pTarget = NULL;		// ターゲットオブジェクト
+	m_pScore = NULL;		// スコアオブジェクト
+	m_pTimer = NULL;		// タイマーオブジェクト
 
 	//--------------------------------------------------------
 	//	情報の破棄
@@ -361,7 +395,7 @@ HRESULT CManager::Uninit(void)
 	}
 
 	//--------------------------------------------------------
-	//	オブジェクトの破棄
+	//	システムの破棄
 	//--------------------------------------------------------
 	// ライトの破棄
 	if (FAILED(CLight::Release(m_pLight)))
@@ -425,12 +459,6 @@ HRESULT CManager::Uninit(void)
 		assert(false);
 		return E_FAIL;
 	}
-
-	// 終了済みのオブジェクトポインタをNULLにする
-	m_pPlayer	= NULL;		// プレイヤーオブジェクト
-	m_pTarget	= NULL;		// ターゲットオブジェクト
-	m_pScore	= NULL;		// スコアオブジェクト
-	m_pTimer	= NULL;		// タイマーオブジェクト
 
 	// 成功を返す
 	return S_OK;
@@ -676,6 +704,15 @@ CModel *CManager::GetModel(void)
 {
 	// モデルのポインタを返す
 	return m_pModel;
+}
+
+//============================================================
+//	ステージ取得処理
+//============================================================
+CStage *CManager::GetStage(void)
+{
+	// ステージのポインタを返す
+	return m_pStage;
 }
 
 //============================================================

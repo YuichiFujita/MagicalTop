@@ -199,6 +199,7 @@
     <ClCompile Include="sea.cpp" />
     <ClCompile Include="sky.cpp" />
     <ClCompile Include="sound.cpp" />
+    <ClCompile Include="stage.cpp" />
     <ClCompile Include="target.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="timer.cpp" />
@@ -250,6 +251,7 @@
     <ClInclude Include="sea.h" />
     <ClInclude Include="sky.h" />
     <ClInclude Include="sound.h" />
+    <ClInclude Include="stage.h" />
     <ClInclude Include="target.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="timer.h" />

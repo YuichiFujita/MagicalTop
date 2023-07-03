@@ -27,6 +27,7 @@ class CCamera;			// カメラクラス
 class CLight;			// ライトクラス
 class CTexture;			// テクスチャクラス
 class CModel;			// モデルクラス
+class CStage;			// ステージクラス
 class CPlayer;			// プレイヤークラス
 class CTarget;			// ターゲットクラス
 class CScore;			// スコアクラス
@@ -71,6 +72,7 @@ public:
 	static CLight			*GetLight(void);		// ライト取得
 	static CTexture			*GetTexture(void);		// テクスチャ取得
 	static CModel			*GetModel(void);		// モデル取得
+	static CStage			*GetStage(void);		// ステージ取得
 	static CPlayer			*GetPlayer(void);		// プレイヤー取得
 	static CTarget			*GetTarget(void);		// ターゲット取得
 	static CScore			*GetScore(void);		// スコア取得
@@ -95,6 +97,7 @@ private:
 	static CLight			*m_pLight;		// ライトオブジェクト
 	static CTexture			*m_pTexture;	// テクスチャオブジェクト
 	static CModel			*m_pModel;		// モデルオブジェクト
+	static CStage			*m_pStage;		// ステージオブジェクト
 	static CPlayer			*m_pPlayer;		// プレイヤーオブジェクト
 	static CTarget			*m_pTarget;		// ターゲットオブジェクト
 	static CScore			*m_pScore;		// スコアオブジェクト

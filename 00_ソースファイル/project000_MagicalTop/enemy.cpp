@@ -17,6 +17,7 @@
 #include "player.h"
 #include "target.h"
 #include "bullet.h"
+#include "stage.h"
 #include "score.h"
 #include "particle3D.h"
 
@@ -403,8 +404,8 @@ void CEnemy::CollisionFind(void)
 			m_pos.x -= sinf(m_rot.y) * m_status.fForwardMove;
 			m_pos.z -= cosf(m_rot.y) * m_status.fForwardMove;
 
-			// 位置補正
-			Limit(m_pos);
+			// ステージ範囲外の補正
+			CManager::GetStage()->LimitPosition(m_pos, m_status.fRadius);
 		}
 		else
 		{ // 敵の攻撃範囲内の場合
@@ -416,8 +417,8 @@ void CEnemy::CollisionFind(void)
 				m_pos.x += sinf(m_rot.y) * m_status.fBackwardMove;
 				m_pos.z += cosf(m_rot.y) * m_status.fBackwardMove;
 
-				// 位置補正
-				Limit(m_pos);
+				// ステージ範囲外の補正
+				CManager::GetStage()->LimitPosition(m_pos, m_status.fRadius);
 			}
 
 			// 攻撃
@@ -449,17 +450,6 @@ void CEnemy::Look(const D3DXVECTOR3& rPos)
 
 	// 向きの正規化
 	useful::NormalizeRot(m_rot.y);
-}
-
-//============================================================
-//	位置制限処理
-//============================================================
-void CEnemy::Limit(D3DXVECTOR3& rPos)
-{
-	// 範囲外補正
-	// TODO：範囲外補正消す
-	useful::LimitNum(rPos.x, -2000.0f, 2000.0f);
-	useful::LimitNum(rPos.z, -2000.0f, 2000.0f);
 }
 
 //============================================================
@@ -744,8 +734,8 @@ void CEnemyCar::CollisionFind(void)
 			// 敵との当たり判定
 			CollisionEnemy(posEnemy);
 
-			// 位置補正
-			Limit(posEnemy);
+			// ステージ範囲外の補正
+			CManager::GetStage()->LimitPosition(posEnemy, status.fRadius);
 		}
 		else
 		{ // 敵の攻撃範囲内の場合
@@ -773,8 +763,8 @@ void CEnemyCar::CollisionFind(void)
 			// 敵との当たり判定
 			CollisionEnemy(posEnemy);
 
-			// 位置補正
-			Limit(posEnemy);
+			// ステージ範囲外の補正
+			CManager::GetStage()->LimitPosition(posEnemy, status.fRadius);
 
 			// 攻撃
 			Attack
