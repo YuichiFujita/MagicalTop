@@ -257,6 +257,9 @@
     <ClInclude Include="value.h" />
     <ClInclude Include="wall.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="project000_MagicalTop.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
