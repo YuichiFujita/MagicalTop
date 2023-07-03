@@ -89,6 +89,7 @@ public:
 	virtual void Hit(const int nDmg);	// ヒット
 	virtual void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
 	virtual void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
+	virtual D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
 	virtual D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	virtual D3DXVECTOR3 GetRotation(void) const;		// 向き取得
 	virtual D3DXVECTOR3 GetScaling(void) const;			// 大きさ取得

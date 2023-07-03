@@ -58,16 +58,19 @@ public:
 
 	// メンバ関数
 	void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
+	void SetLockObject(CObject *pObject);		// ロックオン設定
 	void SetEnableDraw(const bool bDraw);		// 描画状況設定
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
+	const CObject *GetLockObject(void);			// ロックオン取得
 	bool IsDraw(void);							// 描画状況取得
 
 private:
 	// メンバ変数
-	bool m_bDraw;	// 描画状況
+	CObjectBillboard *m_apBilboard[TEXTURE_MAX];	// ビルボードの情報
+	CObject *m_pLock;	// ロックオンオブジェクトの情報
+	bool m_bDraw;		// 描画状況
 
 	// 静的メンバ変数
-	CObjectBillboard *m_apBilboard[TEXTURE_MAX];	// ビルボードの情報
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 };
 

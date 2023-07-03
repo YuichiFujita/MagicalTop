@@ -106,23 +106,31 @@ bool collision::Sector
 	D3DXVECTOR3 targetPos,	// 判定目標位置
 	float fCenterRot,		// 判定向き
 	float fRadius,			// 視界範囲
-	float fAngle			// 視野角
+	float fAngle,			// 視野角
+	float *pLength			// 判定目標との距離
 )
 {
 	// 変数を宣言
-	float       fLength;		// 中心位置と目標位置の距離
-	float       fHalfAngle;		// 引数の角度の半分の値の代入用
-	bool        bHit = false;	// 当たり判定の結果
-	D3DXVECTOR3 vecToPos;		// 左端と位置のベクトル
+	bool  bHit = false;		// 当たり判定の結果
+	float fLength;			// 中心位置と目標位置の距離
+	float fHalfAngle;		// 引数の角度の半分の値の代入用
+	D3DXVECTOR3 vecToPos;	// 左端と位置のベクトル
 
 	// 変数配列を宣言
-	float       fRotEdge[2];	// 扇形の縁の角度     [※] 0：左 1：右
-	D3DXVECTOR3 posEdge[2];		// 扇形の縁の先端位置 [※] 0：左 1：右
-	D3DXVECTOR3 vecEdge[2];		// 扇形の縁ベクトル   [※] 0：左 1：右
+	float fRotEdge[2];		// 扇形の縁の角度     [※] 0：左 1：右
+	D3DXVECTOR3 posEdge[2];	// 扇形の縁の先端位置 [※] 0：左 1：右
+	D3DXVECTOR3 vecEdge[2];	// 扇形の縁ベクトル   [※] 0：左 1：右
 
 	// 中心位置と目標位置の距離求める
 	fLength = (centerPos.x - targetPos.x) * (centerPos.x - targetPos.x)
 			+ (centerPos.z - targetPos.z) * (centerPos.z - targetPos.z);
+
+	if (USED(pLength))
+	{ // ポインタが使用されている場合
+
+		// 判定目標との距離を代入
+		*pLength = fLength;
+	}
 
 	if (fLength < fRadius * fRadius)
 	{ // 円の範囲内の場合

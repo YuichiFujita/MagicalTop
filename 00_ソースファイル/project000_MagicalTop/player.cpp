@@ -17,9 +17,7 @@
 #include "motion.h"
 #include "collision.h"
 #include "target.h"
-
-// TODO：いらんインクルード
-#include "effect3D.h"
+#include "magicManager.h"
 
 //************************************************************
 //	マクロ定義
@@ -67,15 +65,14 @@ CPlayer::CPlayer() : CObject(CObject::LABEL_PLAYER)
 	// メンバ変数をクリア
 	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
 	m_pMotion	= NULL;			// モーションの情報
+	m_pMagic	= NULL;			// 魔法マネージャーの情報
 	m_pos		= VEC3_ZERO;	// 現在位置
 	m_oldPos	= VEC3_ZERO;	// 過去位置
 	m_move		= VEC3_ZERO;	// 移動量
 	m_rot		= VEC3_ZERO;	// 現在向き
 	m_destRot	= VEC3_ZERO;	// 目標向き
-
-	m_magic		= CMagic::TYPE_LV0_NORMAL;	// 魔法
-	m_nNumModel	= 0;		// パーツの総数
-	m_bJump		= false;	// ジャンプ状況
+	m_nNumModel	= 0;			// パーツの総数
+	m_bJump		= false;		// ジャンプ状況
 }
 
 //============================================================
@@ -97,10 +94,18 @@ HRESULT CPlayer::Init(void)
 	m_move		= VEC3_ZERO;	// 移動量
 	m_rot		= VEC3_ZERO;	// 現在向き
 	m_destRot	= VEC3_ZERO;	// 目標向き
+	m_nNumModel	= 0;			// パーツの総数
+	m_bJump		= true;			// ジャンプ状況
 
-	m_magic		= CMagic::TYPE_LV0_NORMAL;	// 魔法
-	m_nNumModel	= 0;	// パーツの総数
-	m_bJump		= true;	// ジャンプ状況
+	// 魔法マネージャーの生成
+	m_pMagic = CMagicManager::Create();
+	if (UNUSED(m_pMagic))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// モーションオブジェクトの生成
 	m_pMotion = CMotion::Create();
@@ -149,6 +154,14 @@ void CPlayer::Uninit(void)
 
 	// モーションを破棄
 	if (FAILED(m_pMotion->Release(m_pMotion)))
+	{ // 破棄に失敗した場合
+
+		// 例外処理
+		assert(false);
+	}
+
+	// 魔法マネージャーを破棄
+	if (FAILED(m_pMagic->Release(m_pMagic)))
 	{ // 破棄に失敗した場合
 
 		// 例外処理
@@ -525,86 +538,18 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion)
 	CInputKeyboard	*pKeyboard = CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad = CManager::GetPad();				// パッド
 
-	// TODO：ロックオン判定もう少しきれいに
-	// ロックオン判定
-	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
-	{ // 優先順位の総数分繰り返す
+	// 魔法のロックオン
+	m_pMagic->LockOnMagic(m_pos, D3DXVECTOR3(m_rot.x, m_rot.y + D3DX_PI, m_rot.z));
 
-		for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-		{ // オブジェクトの総数分繰り返す
+	if (pKeyboard->GetTrigger(DIK_RETURN))
+	{ // 魔法の操作が行われた場合
 
-			// 変数を宣言
-			bool bHit = false;
+		// アクションモーションを設定
+		currentMotion = MOTION_ACTION;
 
-			// ポインタを宣言
-			CObject *pObject = CObject::GetObject(nCntPri, nCntObject);	// オブジェクト
-
-			if (UNUSED(pObject)
-			||  pObject->GetLabel() != CObject::LABEL_ENEMY)
-			{ // オブジェクトが非使用中・ラベルが敵ではない場合
-
-				// 次の繰り返しに移行
-				continue;
-			}
-
-			// 視界内判定
-			bHit = collision::Sector
-			( // 引数
-				m_pos,
-				pObject->GetPosition(),
-				m_rot.y + D3DX_PI,
-				800.0f,
-				90.0f
-			);
-
-			if (bHit)
-			{ // 視界内の場合
-			
-				CEffect3D::Create(CEffect3D::TYPE_NORMAL, pObject->GetPosition(), VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, 1, 50.0f, 0.0f, 0.0f);
-
-				// 魔法操作
-				if (pKeyboard->GetTrigger(DIK_RETURN))
-				{ // 魔法の操作が行われた場合
-			
-					// 変数を宣言
-					float fMoveRot = atan2f(m_pos.x - pObject->GetPosition().x, m_pos.z - pObject->GetPosition().z);	// 敵方向
-					D3DXVECTOR3 magicPos = D3DXVECTOR3(m_pos.x, m_pos.y + 40.0f, m_pos.z);				// 発射位置
-					D3DXVECTOR3 magicRot = D3DXVECTOR3(m_rot.x + (-D3DX_PI * 0.5f), fMoveRot, 0.0f);	// 発射向き
-			
-					// アクションモーションを設定
-					currentMotion = MOTION_ACTION;
-			
-					// 魔法オブジェクトの生成
-					CMagic::Create
-					( // 引数
-						m_magic,	// 種類
-						magicPos,	// 発射位置
-						magicRot	// 発射向き
-					);
-				}
-			}
-		}
+		// 魔法の発射
+		m_pMagic->ShotMagic();
 	}
-
-	//// 魔法操作
-	//if (pKeyboard->GetTrigger(DIK_RETURN))
-	//{ // 魔法の操作が行われた場合
-
-	//	// 変数を宣言
-	//	D3DXVECTOR3 magicPos = D3DXVECTOR3(m_pos.x, m_pos.y + 40.0f, m_pos.z);			// 発射位置
-	//	D3DXVECTOR3 magicRot = D3DXVECTOR3(m_rot.x + (-D3DX_PI * 0.5f), m_rot.y, 0.0f);	// 発射向き
-
-	//	// アクションモーションを設定
-	//	currentMotion = MOTION_ACTION;
-
-	//	// 魔法オブジェクトの生成
-	//	CMagic::Create
-	//	( // 引数
-	//		m_magic,	// 種類
-	//		magicPos,	// 発射位置
-	//		magicRot	// 発射向き
-	//	);
-	//}
 
 	// 現在のモーションを返す
 	return currentMotion;
@@ -617,6 +562,8 @@ CPlayer::MOTION CPlayer::Land(MOTION motion)
 {
 	// 変数を宣言
 	MOTION currentMotion = motion;	// 現在のモーション
+
+	// TODO：固定値やめる
 
 	// 着地判定
 	if (m_pos.y < 400.0f)

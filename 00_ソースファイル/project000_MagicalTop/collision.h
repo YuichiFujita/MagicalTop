@@ -50,7 +50,8 @@ namespace collision
 		D3DXVECTOR3 targetPos,	// ”»’è–Ú•WˆÊ’u
 		float fCenterRot,		// ”»’èŒü‚«
 		float fRadius,			// ‹ŠE”ÍˆÍ
-		float fAngle			// ‹–ìŠp
+		float fAngle,			// ‹–ìŠp
+		float *pLength = NULL	// ”»’è–Ú•W‚Æ‚Ì‹——£
 	);
 
 	bool BoxPillar	// Šp’Œ‚ÌÕ“Ë”»’è

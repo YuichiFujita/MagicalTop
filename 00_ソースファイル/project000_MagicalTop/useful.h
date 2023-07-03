@@ -98,7 +98,6 @@ namespace useful
 		const int nNum,		// 分解する数値
 		const int nMaxDigit	// 分解する数字の桁数
 	);
-
 	void NormalizeNormal	// 法線の正規化
 	( // 引数
 		const D3DXVECTOR3& rPosLeft,	// 左位置
@@ -106,7 +105,6 @@ namespace useful
 		const D3DXVECTOR3& rPosRight,	// 右位置
 		D3DXVECTOR3& rNor				// 法線
 	);
-
 	void NormalizeRot(float& rRot);	// 向きの正規化
 
 	// テンプレート関数
@@ -115,6 +113,11 @@ namespace useful
 		T& rNum,		// 制限数値
 		const T min,	// 最小範囲
 		const T max		// 最大範囲
+	);
+	template<class T> void useful::SortNum	// 値のソート
+	( // 引数
+		T *pSortNum,		// ソート配列
+		const int nMaxKeep	// 配列サイズ
 	);
 }
 
@@ -125,7 +128,7 @@ namespace useful
 //	値の範囲内制限
 //============================================================
 template<class T> bool useful::LimitNum
-( // 引数
+(
 	T& rNum,		// 制限数値
 	const T min,	// 最小範囲
 	const T max		// 最大範囲
@@ -152,6 +155,47 @@ template<class T> bool useful::LimitNum
 
 	// 偽を返す
 	return false;
+}
+
+//============================================================
+//	値のソート
+//============================================================
+template<class T> void useful::SortNum
+(
+	T *pSortNum,		// ソート配列
+	const int nMaxKeep	// 配列サイズ
+)
+{
+	// 変数を宣言
+	T	keepNum;		// ソート用
+	int	nCurrentMaxID;	// 最大値のインデックス
+
+	for (int nCntKeep = 0; nCntKeep < (nMaxKeep - 1); nCntKeep++)
+	{ // 入れ替える値の総数 -1回分繰り返す
+
+		// 現在の繰り返し数を代入 (要素1とする)
+		nCurrentMaxID = nCntKeep;
+
+		for (int nCntSort = nCntKeep + 1; nCntSort < nMaxKeep; nCntSort++)
+		{ // 入れ替える値の総数 -nCntKeep分繰り返す
+
+			if (pSortNum[nCurrentMaxID] < pSortNum[nCntSort])
+			{ // 最大値に設定されている値より、現在の値のほうが大きい場合
+
+				// 現在の要素番号を最大値に設定
+				nCurrentMaxID = nCntSort;
+			}
+		}
+
+		if (nCntKeep != nCurrentMaxID)
+		{ // 最大値の要素番号に変動があった場合
+
+			// 要素の入れ替え
+			keepNum					= pSortNum[nCntKeep];
+			pSortNum[nCntKeep]		= pSortNum[nCurrentMaxID];
+			pSortNum[nCurrentMaxID]	= keepNum;
+		}
+	}
 }
 
 #endif	// _USEFUL_H_

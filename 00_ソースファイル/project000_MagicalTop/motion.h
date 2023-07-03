@@ -86,7 +86,7 @@ public:
 
 	// Ã“Iƒƒ“ƒoŠÖ”
 	static CMotion *Create(void);				// ¶¬
-	static HRESULT Release(CMotion *&pMotion);	// ”jŠü
+	static HRESULT Release(CMotion *&prMotion);	// ”jŠü
 
 private:
 	// ƒƒ“ƒo•Ï”

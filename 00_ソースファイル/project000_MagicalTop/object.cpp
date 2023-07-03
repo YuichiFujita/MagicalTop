@@ -126,6 +126,24 @@ void CObject::SetRotation(const D3DXVECTOR3& rRot)
 }
 
 //============================================================
+//	マトリックス取得処理
+//============================================================
+D3DXMATRIX CObject::GetMtxWorld(void) const
+{
+	// 変数を宣言
+	D3DXMATRIX mtxNone;	// 返り値用
+
+	// マトリックスの初期化
+	D3DXMatrixIdentity(&mtxNone);
+
+	// 例外処理
+	assert(false);
+
+	// 単位マトリックスを返す
+	return mtxNone;
+}
+
+//============================================================
 //	位置取得処理
 //============================================================
 D3DXVECTOR3 CObject::GetPosition(void) const

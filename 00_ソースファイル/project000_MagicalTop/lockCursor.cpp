@@ -42,6 +42,7 @@ CLockCursor::CLockCursor() : CObject(CObject::LABEL_LOCK, LOCKCURSOR_PRIO)
 {
 	// メンバ変数をクリア
 	memset(&m_apBilboard[0], 0, sizeof(m_apBilboard));	// ビルボードの情報
+	m_pLock = NULL;		// ロックオンオブジェクトの情報
 	m_bDraw = false;	// 描画状況
 }
 
@@ -66,6 +67,7 @@ HRESULT CLockCursor::Init(void)
 
 	// メンバ変数を初期化
 	memset(&m_apBilboard[0], 0, sizeof(m_apBilboard));	// ビルボードの情報
+	m_pLock = NULL;		// ロックオンオブジェクトの情報
 	m_bDraw = false;	// 描画状況
 
 	for (int nCntLock = 0; nCntLock < TEXTURE_MAX; nCntLock++)
@@ -119,7 +121,8 @@ void CLockCursor::Uninit(void)
 void CLockCursor::Update(void)
 {
 	// 変数を宣言
-	D3DXVECTOR3 rot;	// 向き
+	D3DXVECTOR3 rot;		// 向き
+	D3DXMATRIX  mtxLock;	// ロックオンオブジェクトのマトリックス
 
 	// 変数配列を宣言
 	const float fAddRot[] =	// 向き加算量
@@ -143,6 +146,16 @@ void CLockCursor::Update(void)
 
 		// ビルボードの更新
 		m_apBilboard[nCntLock]->Update();
+
+		if (USED(m_pLock))
+		{ // ロックオン対象がある場合
+
+			// ワールドマトリックスを取得
+			mtxLock = m_pLock->GetMtxWorld();
+
+			// 位置を設定
+			m_apBilboard[nCntLock]->SetPosition(D3DXVECTOR3(mtxLock._41, mtxLock._42, mtxLock._43));
+		}
 	}
 }
 
@@ -230,6 +243,15 @@ void CLockCursor::SetPosition(const D3DXVECTOR3& rPos)
 }
 
 //============================================================
+//	ロックオンの設定処理
+//============================================================
+void CLockCursor::SetLockObject(CObject *pObject)
+{
+	// 引数のオブジェクトを設定
+	m_pLock = pObject;
+}
+
+//============================================================
 //	描画状況の設定処理
 //============================================================
 void CLockCursor::SetEnableDraw(const bool bDraw)
@@ -237,11 +259,18 @@ void CLockCursor::SetEnableDraw(const bool bDraw)
 	// 引数の描画状況を設定
 	m_bDraw = bDraw;
 
-	for (int nCntLock = 0; nCntLock < TEXTURE_MAX; nCntLock++)
-	{ // テクスチャの最大数分繰り返す
+	if (bDraw == false)
+	{ // 描画しない設定だった場合
 
-		// 向きを初期化
-		m_apBilboard[nCntLock]->SetRotation(VEC3_ZERO);
+		// ロックオンしているオブジェクトの情報を初期化
+		m_pLock = NULL;
+
+		for (int nCntLock = 0; nCntLock < TEXTURE_MAX; nCntLock++)
+		{ // テクスチャの最大数分繰り返す
+
+			// 向きを初期化
+			m_apBilboard[nCntLock]->SetRotation(VEC3_ZERO);
+		}
 	}
 }
 
@@ -252,6 +281,15 @@ D3DXVECTOR3 CLockCursor::GetPosition(void) const
 {
 	// 先頭アドレスの位置を返す
 	return m_apBilboard[0]->GetPosition();
+}
+
+//============================================================
+//	ロックオン取得処理
+//============================================================
+const CObject *CLockCursor::GetLockObject(void)
+{
+	// ロックオン中のオブジェクトを返す
+	return m_pLock;
 }
 
 //============================================================

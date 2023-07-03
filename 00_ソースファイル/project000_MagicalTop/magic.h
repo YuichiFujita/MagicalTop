@@ -43,12 +43,15 @@ public:
 	// ステータス構造体
 	typedef struct
 	{
-		int		nLife;		// 寿命
-		int		nDamage;	// 攻撃力
-		float	fRadius;	// 半径
-		float	fHeight;	// 縦幅
-		float	fMove;		// 移動量
-		bool	bHoming;	// ホーミングの ON/OFF
+		int		nLock;			// ロックオン数
+		int		nLife;			// 寿命
+		int		nDamage;		// 攻撃力
+		float	fRadius;		// 半径
+		float	fHeight;		// 縦幅
+		float	fMove;			// 移動量
+		float	fViewRadius;	// 視界範囲
+		float	fViewAngle;		// 視野角
+		bool	bHoming;		// ホーミングの ON/OFF
 	}StatusInfo;
 
 	// オーバーライド関数
@@ -65,15 +68,16 @@ public:
 		const D3DXVECTOR3& rPos,	// 位置
 		const D3DXVECTOR3& rRot		// 向き
 	);
+	static StatusInfo GetStatusInfo(const TYPE type);	// ステータス情報取得
 
 	// メンバ関数
 	void SetMove(D3DXVECTOR3 rot, const float fMove);	// 移動量設定
-	void SetLife(const int nLife);				// 寿命設定
-	void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
-	void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
-	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
-	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
-	StatusInfo GetStatusInfo(void) const;		// ステータス情報取得
+	void SetLife(const int nLife);						// 寿命設定
+	void SetPosition(const D3DXVECTOR3& rPos);			// 位置設定
+	void SetRotation(const D3DXVECTOR3& rRot);			// 向き設定
+	D3DXVECTOR3 GetPosition(void) const;				// 位置取得
+	D3DXVECTOR3 GetRotation(void) const;				// 向き取得
+	StatusInfo GetStatusInfo(void) const;				// ステータス情報取得
 
 	// 仮想関数
 	virtual bool Collision(CObject *pObject);	// 魔法判定

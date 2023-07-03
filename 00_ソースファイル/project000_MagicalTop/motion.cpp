@@ -8,8 +8,6 @@
 //	インクルードファイル
 //************************************************************
 #include "motion.h"
-#include "manager.h"
-#include "renderer.h"
 #include "multiModel.h"
 
 #include "debugproc.h"
@@ -268,7 +266,7 @@ HRESULT CMotion::Release(CMotion *&prMotion)
 	if (USED(prMotion))
 	{ // 使用中の場合
 
-		// デバッグの終了
+		// モーションの終了
 		prMotion->Uninit();
 
 		// メモリ開放

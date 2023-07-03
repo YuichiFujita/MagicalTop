@@ -21,8 +21,9 @@
 //************************************************************
 //	前方宣言
 //************************************************************
-class CMultiModel;	// マルチモデルクラス
-class CMotion;		// モーションクラス
+class CMultiModel;		// マルチモデルクラス
+class CMotion;			// モーションクラス
+class CMagicManager;	// 魔法マネージャークラス
 
 //************************************************************
 //	クラス定義
@@ -106,20 +107,17 @@ private:
 	static const char *mc_apModelFile[];	// モデル定数
 
 	// メンバ変数
-	CMultiModel	*m_apMultiModel[MAX_PARTS];	// モデルの情報
-	CMotion		*m_pMotion;	// モーションの情報
+	CMultiModel		*m_apMultiModel[MAX_PARTS];	// モデルの情報
+	CMotion			*m_pMotion;	// モーションの情報
+	CMagicManager	*m_pMagic;	// 魔法マネージャーの情報
+
 	D3DXMATRIX	m_mtxWorld;	// ワールドマトリックス
 	D3DXVECTOR3	m_pos;		// 現在位置
 	D3DXVECTOR3	m_oldPos;	// 過去位置
 	D3DXVECTOR3	m_move;		// 移動量
 	D3DXVECTOR3	m_rot;		// 現在向き
-	D3DXVECTOR3 m_destRot;	// 目標向き
-
-	CMagic::TYPE m_magic;	// 魔法
-	// TODO：魔法Managerを作成し、そこで魔法・ロックオンの管理をする
-	// TODO：ロックオンの表示位置は敵の高さ/2の位置
-
-	int m_nNumModel;		// パーツの総数
+	D3DXVECTOR3	m_destRot;	// 目標向き
+	int  m_nNumModel;		// パーツの総数
 	bool m_bJump;			// ジャンプ状況
 };
 

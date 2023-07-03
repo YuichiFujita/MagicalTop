@@ -101,6 +101,7 @@ public:
 	void SetRotation(const D3DXVECTOR3& rRot);		// 向き設定
 	void SetMoveRotation(const D3DXVECTOR3& rMove);	// 向き変更量設定
 
+	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	D3DXVECTOR3 GetOldPosition(void) const;		// 過去位置取得
 	D3DXVECTOR3 GetMovePosition(void) const;	// 位置移動量取得

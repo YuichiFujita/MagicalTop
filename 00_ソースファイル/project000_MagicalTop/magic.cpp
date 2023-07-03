@@ -216,6 +216,20 @@ CMagic *CMagic::Create
 }
 
 //============================================================
+//	ステータス情報取得処理
+//============================================================
+CMagic::StatusInfo CMagic::GetStatusInfo(const TYPE type)
+{
+	if (type < TYPE_MAX)
+	{ // 引数のインデックスが使用可能な場合
+
+		// 引数のステータス情報を返す
+		return m_aStatusInfo[type];
+	}
+	else { assert(false); return m_aStatusInfo[0]; }	// 使用不可
+}
+
+//============================================================
 //	移動量の設定処理
 //============================================================
 void CMagic::SetMove(D3DXVECTOR3 rot, const float fMove)
@@ -477,6 +491,12 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
 								fscanf(pFile, "%d", &nType);		// 種類を読み込む
 							}
+							else if (strcmp(&aString[0], "LOCK") == 0)
+							{ // 読み込んだ文字列が LOCK の場合
+
+								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nType].nLock);	// ロックオン数を読み込む
+							}
 							else if (strcmp(&aString[0], "LIFE") == 0)
 							{ // 読み込んだ文字列が LIFE の場合
 
@@ -506,6 +526,18 @@ void CMagic::LoadSetup(void)
 
 								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].fMove);	// 移動量を読み込む
+							}
+							else if (strcmp(&aString[0], "VIEW_RADIUS") == 0)
+							{ // 読み込んだ文字列が VIEW_RADIUS の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fViewRadius);	// 視界範囲を読み込む
+							}
+							else if (strcmp(&aString[0], "VIEW_ANGLE") == 0)
+							{ // 読み込んだ文字列が VIEW_ANGLE の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fViewAngle);	// 視野角を読み込む
 							}
 							else if (strcmp(&aString[0], "HOMING_ENABLE") == 0)
 							{ // 読み込んだ文字列が HOMING_ENABLE の場合

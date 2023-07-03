@@ -460,12 +460,6 @@ void CManager::Update(void)
 		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, 2000.0f), VEC3_ZERO);
 	}
 
-	// TODO
-	if (m_pKeyboard->GetTrigger(DIK_0))
-	{
-		CLockCursor::Create(m_pTarget->GetPosition());
-	}
-
 	if (USED(m_pPad))
 	{ // g—p’†‚Ìê‡
 
