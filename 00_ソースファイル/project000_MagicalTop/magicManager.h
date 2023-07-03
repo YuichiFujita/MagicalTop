@@ -39,6 +39,13 @@ public:
 	// デストラクタ
 	~CMagicManager();
 
+	// ロックオン情報構造体
+	typedef struct
+	{
+		CObject *pObject;	// ロックオンしたオブジェクト
+		float fLength;		// ロックオンオブジェクトとの距離
+	}LockInfo;
+
 	// メンバ関数
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
@@ -53,7 +60,7 @@ public:
 
 private:
 	// メンバ関数
-	void SortLockOnMagic(void);	// ロックオンソート
+	void SortLockOnMagic(LockInfo *pLock, const int nNumLock, CObject *pObject, const float fLength);	// ロックオンソート
 
 	// メンバ変数
 	CLockCursor *m_apLockCursor[MAX_LOCK];	// ロックオン表示情報

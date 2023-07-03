@@ -14,6 +14,8 @@
 #include "player.h"
 #include "collision.h"
 
+#include "debugproc.h"
+
 //************************************************************
 //	親クラス [CMagicManager] のメンバ関数
 //************************************************************
@@ -75,18 +77,12 @@ void CMagicManager::Uninit(void)
 //============================================================
 void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 {
-	// TODO：見直す
-
 	// 変数を宣言
 	CMagic::StatusInfo status = CMagic::GetStatusInfo(m_magic);	// 魔法ステータス
 	int nCurrentLock = 0;	// 現在のロックオン数
-	float fLength = 0.0f;	// 敵との距離
 
 	// 変数配列を宣言
-	float aLockLength[MAX_LOCK] = {};	// ロックオンした敵との距離
-
-	// ポインタを宣言
-	CObject *apObject[MAX_LOCK] = {};	// ロックオンしたオブジェクト
+	LockInfo aLockData[MAX_LOCK] = {};	// ロックオン情報
 
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
@@ -95,7 +91,8 @@ void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot
 		{ // オブジェクトの総数分繰り返す
 
 			// 変数を宣言
-			bool bHit = false;	// 判定結果
+			bool bHit = false;		// 判定結果
+			float fLength = 0.0f;	// 敵との距離
 
 			// ポインタを宣言
 			CObject *pObject = CObject::GetObject(nCntPri, nCntObject);	// オブジェクト
@@ -123,111 +120,74 @@ void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot
 			{ // 視界内の場合
 
 				if (nCurrentLock < status.nLock)
-				{ // ロックオン数が最大ロックオン数より小さい場合
+				{ // 現在の魔法の最大ロックオン数より少ない場合
 
 					// 現在のロックオン数を加算
 					nCurrentLock++;
-				}
-
-				if (aLockLength[nCurrentLock - 1] < fLength)
-				{ // 最遠のロックオンよりも距離が近い場合
-
-					// 変数を宣言
-					CObject *pKeepObject;	// 位置ソート用
-					float fKeepLength;		// 距離ソート用
-					int   nCurrentMaxID;	// 最大値のインデックス
 
 					// 情報を設定
-					aLockLength[nCurrentLock - 1]	= fLength;
-					apObject[nCurrentLock - 1]		= pObject;
+					aLockData[nCurrentLock - 1].pObject = pObject;	// ロックオンしたオブジェクト
+					aLockData[nCurrentLock - 1].fLength = fLength;	// ロックオンオブジェクトとの距離
 
-					// TODO：ソート見直し
-#if 0
-					for (int nCntKeep = 0; nCntKeep < (nCurrentLock - 1); nCntKeep++)
-					{ // 入れ替える値の総数 -1回分繰り返す
+					if (nCurrentLock >= status.nLock)
+					{ // ロックオンの最大数に到達した場合
 
-						// 現在の繰り返し数を代入 (要素1とする)
-						nCurrentMaxID = nCntKeep;
-
-						for (int nCntSort = nCntKeep + 1; nCntSort < nCurrentLock; nCntSort++)
-						{ // 入れ替える値の総数 -nCntKeep分繰り返す
-
-							if (aLockLength[nCurrentMaxID] < aLockLength[nCntSort])
-							{ // 最大値に設定されている値より、現在の値のほうが大きい場合
-
-								// 現在の要素番号を最大値に設定
-								nCurrentMaxID = nCntSort;
-							}
-						}
-
-						if (nCntKeep != nCurrentMaxID)
-						{ // 最大値の要素番号に変動があった場合
-
-							// 要素(値)の入れ替え
-							fKeepLength					= aLockLength[nCntKeep];
-							aLockLength[nCntKeep]		= aLockLength[nCurrentMaxID];
-							aLockLength[nCurrentMaxID]	= fKeepLength;
-
-							// 要素(位置)の入れ替え
-							pKeepObject				= apObject[nCntKeep];
-							apObject[nCntKeep]		= apObject[nCurrentMaxID];
-							apObject[nCurrentMaxID]	= pKeepObject;
-						}
+						// ロックオンのソート
+						SortLockOnMagic(&aLockData[0], nCurrentLock, pObject, fLength);
 					}
-#else
+				}
+				else
+				{ // ロックオン数が最大の場合
+
 					// ロックオンのソート
-					SortLockOnMagic();
-#endif
+					SortLockOnMagic(&aLockData[0], nCurrentLock, pObject, fLength);
 				}
 			}
 		}
 	}
 
-	// ロックオンの設定
-	if (nCurrentLock < status.nLock)
-	{ // ロックオン数が最大数じゃない場合
+	// 前回のロックオンの削除
+	for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)
+	{ // ロックオンの最大数分繰り返す
 
-		for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)
-		{ // ロックオンの最大数分繰り返す
+		// 変数を宣言
+		bool bSame = false;	// 同一判定
 
-			// 変数を宣言
-			bool bSame = false;	// 同一判定
+		if (USED(m_apLockCursor[nCntLock]->GetLockObject()))
+		{ // オブジェクトをロックオンしていた場合
 
-			if (USED(m_apLockCursor[nCntLock]->GetLockObject()))
-			{ // オブジェクトをロックオンしていた場合
+			for (int nCntCheck = 0; nCntCheck < MAX_LOCK; nCntCheck++)
+			{ // ロックオンの最大数分繰り返す
 
-				for (int nCnt = 0; nCnt < MAX_LOCK; nCnt++)
-				{ // ロックオンの最大数分繰り返す
+				if (m_apLockCursor[nCntLock]->GetLockObject() == aLockData[nCntCheck].pObject)
+				{ // ロック中のオブジェクトが今回のロックオブジェクト同じ場合
 
-					if (m_apLockCursor[nCntLock]->GetLockObject() == apObject[nCnt])
-					{ // ロック中のオブジェクトが今回のロックオブジェクト同じ場合
+					// 同一オブジェクトが存在した状態にする
+					bSame = true;
 
-						// 同一オブジェクトが存在した状態にする
-						bSame = true;
-
-						// 処理を抜ける
-						break;
-					}
+					// 処理を抜ける
+					break;
 				}
 			}
+		}
 
-			if (bSame == false)
-			{ // 同一オブジェクトが存在しなかった場合
+		if (bSame == false)
+		{ // 同一オブジェクトが存在しなかった場合
 
-				// 描画しない設定にする
-				m_apLockCursor[nCntLock]->SetEnableDraw(false);
-			}
+			// 描画しない設定にする
+			m_apLockCursor[nCntLock]->SetEnableDraw(false);
 		}
 	}
 
+	// 今回のロックオンの設定
 	for (int nCntLock = 0; nCntLock < nCurrentLock; nCntLock++)
 	{ // 今回のロックオン数分繰り返す
 
 		// 描画する設定にする
 		m_apLockCursor[nCntLock]->SetEnableDraw(true);
 
-		// ロックオンを設定
-		m_apLockCursor[nCntLock]->SetLockObject(apObject[nCntLock]);
+		// ロックするオブジェクトを設定
+		m_apLockCursor[nCntLock]->SetLockObject(aLockData[nCntLock].pObject);
 	}
 }
 
@@ -365,7 +325,47 @@ HRESULT CMagicManager::Release(CMagicManager *&prMagicManager)
 //============================================================
 //	ロックオンのソート処理
 //============================================================
-void CMagicManager::SortLockOnMagic(void)
+void CMagicManager::SortLockOnMagic(LockInfo *pLock, const int nNumLock, CObject *pObject, const float fLength)
 {
-	// TODO：作る
+	// 変数を宣言
+	LockInfo keepLock;	// ソート用
+	int nCurrentMaxID;	// 最大値のインデックス
+
+	// 例外処理
+	assert(nNumLock > 0);	// ロックオン数が最小値以下
+
+	if (fLength <= pLock[nNumLock - 1].fLength)
+	{ // 最遠のロックオンよりも近いロックオンの場合
+
+		// 情報を設定
+		pLock[nNumLock - 1].pObject = pObject;	// ロックオンしたオブジェクト
+		pLock[nNumLock - 1].fLength = fLength;	// ロックオンオブジェクトとの距離
+
+		for (int nCntKeep = 0; nCntKeep < (nNumLock - 1); nCntKeep++)
+		{ // 入れ替える値の総数 -1回分繰り返す
+
+			// 現在の繰り返し数を代入
+			nCurrentMaxID = nCntKeep;
+
+			for (int nCntSort = nCntKeep + 1; nCntSort < nNumLock; nCntSort++)
+			{ // 入れ替える値の総数 - ソート回数分繰り返す
+
+				if (pLock[nCurrentMaxID].fLength > pLock[nCntSort].fLength)
+				{ // 最大値に設定されている距離より、現在の距離のほうが遠い場合
+
+					// 現在のインデックスを最大値に設定
+					nCurrentMaxID = nCntSort;
+				}
+			}
+
+			if (nCntKeep != nCurrentMaxID)
+			{ // 最大値のインデックスに変動があった場合
+
+				// 要素の入れ替え
+				keepLock             = pLock[nCntKeep];
+				pLock[nCntKeep]      = pLock[nCurrentMaxID];
+				pLock[nCurrentMaxID] = keepLock;
+			}
+		}
+	}
 }

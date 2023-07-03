@@ -276,8 +276,22 @@ void CEnemy::SetMoveRotation(const D3DXVECTOR3& rMove)
 //============================================================
 D3DXMATRIX CEnemy::GetMtxWorld(void) const
 {
+	// 変数を宣言
+	D3DXMATRIX mtxRot, mtxTrans, mtxWorld;	// 計算用マトリックス
+
+	// ワールドマトリックスの初期化
+	D3DXMatrixIdentity(&mtxWorld);
+
+	// 向きを反映
+	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
+	D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
+
+	// 位置を反映
+	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
+	D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+
 	// ワールドマトリックスを返す
-	return m_mtxWorld;
+	return mtxWorld;
 }
 
 //============================================================
