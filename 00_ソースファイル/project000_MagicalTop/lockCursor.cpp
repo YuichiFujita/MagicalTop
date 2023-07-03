@@ -147,14 +147,21 @@ void CLockCursor::Update(void)
 		// ビルボードの更新
 		m_apBilboard[nCntLock]->Update();
 
-		if (USED(m_pLock))
-		{ // ロックオン対象がある場合
+		// TODO：ポインタの確認もっときれいに
+		if (CObject::CheckUse(m_pLock))
+		{ // ロックオン対象が使用されていた場合
 
 			// ワールドマトリックスを取得
 			mtxLock = m_pLock->GetMtxWorld();
 
 			// 位置を設定
 			m_apBilboard[nCntLock]->SetPosition(D3DXVECTOR3(mtxLock._41, mtxLock._42, mtxLock._43));
+		}
+		else
+		{ // ロックオン対象が使用されていなかった場合
+
+			// ロックオンしているオブジェクトの情報を初期化
+			m_pLock = NULL;
 		}
 	}
 }

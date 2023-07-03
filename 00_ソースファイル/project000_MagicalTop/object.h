@@ -99,12 +99,13 @@ public:
 	static void ReleaseAll(void);	// 全破棄
 	static void UpdateAll(void);	// 全更新
 	static void DrawAll(void);		// 全描画
-
 	static CObject *GetObject	// オブジェクト取得
 	( // 引数
 		const int nPriority,	// 優先順位
 		const int nID			// インデックス
 	);
+
+	static bool CheckUse(const CObject *pObject);	// 使用確認
 
 	// メンバ関数
 	HRESULT GetResult(void) const;			// 失敗判定取得

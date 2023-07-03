@@ -287,6 +287,40 @@ CObject *CObject::GetObject(const int nPriority, const int nID)
 }
 
 //============================================================
+//	使用確認処理
+//============================================================
+bool CObject::CheckUse(const CObject *pObject)
+{
+	if (USED(pObject))
+	{ // ポインタが使用中の場合
+
+		for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
+		{ // 優先順位の総数分繰り返す
+
+			for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
+			{ // オブジェクトの総数分繰り返す
+
+				if (CObject::GetObject(nCntPri, nCntObject) == pObject)
+				{ // 同アドレスの場合
+
+					// 真を返す
+					return true;	// TODO：同じアドレスが確保されているだけの可能性がある
+				}
+			}
+		}
+
+		// 偽を返す
+		return false;
+	}
+	else
+	{ // ポインタが非使用中の場合
+
+		// 偽を返す
+		return false;
+	}
+}
+
+//============================================================
 //	失敗判定の取得処理
 //============================================================
 HRESULT CObject::GetResult(void) const

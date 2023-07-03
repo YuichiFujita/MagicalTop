@@ -278,5 +278,3 @@ HRESULT CMotion::Release(CMotion *&prMotion)
 	}
 	else { assert(false); return E_FAIL; }	// 非使用中
 }
-
-// TODO：プレイヤーのパーツ配列動的確保化

@@ -239,7 +239,7 @@ void CMagicManager::ShotMagic(void)
 	// 変数を宣言
 	D3DXVECTOR3 posPlayer = CManager::GetPlayer()->GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 rotPlayer = CManager::GetPlayer()->GetRotation();	// プレイヤー向き
-	bool bLock = false;	// ロックオン状態
+	bool bLock = false;	// ロックオン状況
 
 	for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)
 	{ // ロックオンの最大数分繰り返す
@@ -253,7 +253,7 @@ void CMagicManager::ShotMagic(void)
 				posPlayer.x - m_apLockCursor[nCntLock]->GetLockObject()->GetPosition().x,
 				posPlayer.z - m_apLockCursor[nCntLock]->GetLockObject()->GetPosition().z
 			);
-			D3DXVECTOR3 magicPos = D3DXVECTOR3(posPlayer.x, posPlayer.y + 40.0f, posPlayer.z);		// 発射位置
+			D3DXVECTOR3 magicPos = D3DXVECTOR3(posPlayer.x, posPlayer.y + PLAY_MAGIC_POS_PLUS_Y, posPlayer.z);	// 発射位置
 			D3DXVECTOR3 magicRot = D3DXVECTOR3(rotPlayer.x + (-D3DX_PI * 0.5f), fMoveRot, 0.0f);	// 発射向き
 
 			// 魔法オブジェクトの生成
@@ -273,7 +273,7 @@ void CMagicManager::ShotMagic(void)
 	{ // ロックオンされていなかった場合
 
 		// 変数を宣言
-		D3DXVECTOR3 magicPos = D3DXVECTOR3(posPlayer.x, posPlayer.y + 40.0f, posPlayer.z);		// 発射位置
+		D3DXVECTOR3 magicPos = D3DXVECTOR3(posPlayer.x, posPlayer.y + PLAY_MAGIC_POS_PLUS_Y, posPlayer.z);	// 発射位置
 		D3DXVECTOR3 magicRot = D3DXVECTOR3(rotPlayer.x + (-D3DX_PI * 0.5f), rotPlayer.y, 0.0f);	// 発射向き
 
 		// 魔法オブジェクトの生成

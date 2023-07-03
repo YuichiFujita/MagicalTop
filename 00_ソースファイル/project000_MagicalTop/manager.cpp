@@ -16,25 +16,21 @@
 #include "texture.h"
 #include "model.h"
 #include "value.h"
-
-#include "sea.h"
-#include "player.h"
-#include "bullet.h"
-#include "score.h"
-#include "timer.h"
-#include "effect2D.h"
-#include "particle2D.h"
 #include "debugproc.h"
 
+#include "player.h"
+#include "score.h"
+#include "timer.h"
+
+#include "sea.h"
 #include "field.h"
 #include "wall.h"
 #include "scenery.h"
 #include "sky.h"
-#include "target.h"
 
+#include "target.h"
 #include "enemy.h"
 #include "magic.h"
-#include "lockCursor.h"	// TODO
 
 #ifdef _DEBUG	// デバッグ処理
 
