@@ -266,7 +266,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// 魔法セットアップの読み込み
 	CMagic::LoadSetup();
 
-#if 1
+#if 0
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, -2000.0f), VEC3_ZERO);
@@ -274,7 +274,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 #endif
 
 	// TODO：初期設定
-#if 1
+#if 0
 	// カメラの初期位置を設定
 	m_pCamera->SetDestCamera();
 
