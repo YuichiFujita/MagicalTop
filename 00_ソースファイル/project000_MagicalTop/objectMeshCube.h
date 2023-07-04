@@ -46,21 +46,59 @@ public:
 		TEXSTATE_MAX,		// この列挙型の総数
 	}TEXSTATE;
 
+	// キューブ色列挙
+	typedef enum
+	{
+		CUBECOL_CUBE = 0,	// キューブ色
+		CUBECOL_BORDER,		// 縁取り色
+		CUBECOL_MAX			// この列挙型の総数
+	}CUBECOL;
+
+	// キューブ分割数列挙
+	typedef enum
+	{
+		CUBEPART_X = 0,	// テクスチャ分割数 x
+		CUBEPART_Y,		// テクスチャ分割数 y
+		CUBEPART_Z,		// テクスチャ分割数 z
+		CUBEPART_MAX	// この列挙型の総数
+	}CUBEPART;
+
 	// テクスチャ構造体
 	struct FACETEX
 	{
 	public:
 		// コンストラクタ
 		FACETEX() {}
-
 		FACETEX(const int nAll)
-		{ All = nAll; Left = 0; Right = 0; Bottom = 0; Top = 0; Near = 0; Far = 0; }
-
+		{
+			All		= nAll;
+			Left	= NONE_IDX;
+			Right	= NONE_IDX;
+			Bottom	= NONE_IDX;
+			Top		= NONE_IDX;
+			Near	= NONE_IDX;
+			Far		= NONE_IDX;
+		}
 		FACETEX(const int nLeft, const int nRight, const int nBottom, const int nTop, const int nNear, const int nFar)
-		{ All = 0; Left = nLeft; Right = nRight; Bottom = nBottom; Top = nTop; Near = nNear; Far = nFar; }
-
+		{
+			All		= NONE_IDX;
+			Left	= nLeft;
+			Right	= nRight;
+			Bottom	= nBottom;
+			Top		= nTop;
+			Near	= nNear;
+			Far		= nFar;
+		}
 		FACETEX(const int nAll, const int nLeft, const int nRight, const int nBottom, const int nTop, const int nNear, const int nFar)
-		{ All = nAll; Left = nLeft; Right = nRight; Bottom = nBottom; Top = nTop; Near = nNear; Far = nFar; }
+		{
+			All		= nAll;
+			Left	= nLeft;
+			Right	= nRight;
+			Bottom	= nBottom;
+			Top		= nTop;
+			Near	= nNear;
+			Far		= nFar;
+		}
 
 		// デストラクタ
 		~FACETEX() {}

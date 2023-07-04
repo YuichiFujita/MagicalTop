@@ -59,6 +59,7 @@ public:
 		LABEL_LOCK,			// ロックオン
 		LABEL_BULLET,		// 弾
 		LABEL_SHADOW,		// 影
+		LABEL_BLOCK,		// ブロック
 		LABEL_FIELD,		// 地面
 		LABEL_WALL,			// 壁
 		LABEL_SCENERY,		// 景色

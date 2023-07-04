@@ -155,6 +155,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="anim2D.cpp" />
+    <ClCompile Include="block.cpp" />
     <ClCompile Include="bullet.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="collision.cpp" />
@@ -209,6 +210,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="anim2D.h" />
+    <ClInclude Include="block.h" />
     <ClInclude Include="bullet.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="collision.h" />

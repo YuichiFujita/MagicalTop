@@ -20,6 +20,7 @@
 
 #include "stage.h"
 #include "player.h"
+#include "target.h"
 #include "score.h"
 #include "timer.h"
 
@@ -29,7 +30,7 @@
 #include "scenery.h"
 #include "sky.h"
 
-#include "target.h"
+#include "block.h"
 #include "enemy.h"
 #include "magic.h"
 
@@ -184,6 +185,15 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		return E_FAIL;
 	}
 
+	// ブロックセットアップの読込
+	CBlock::LoadSetup();
+
+	// 敵セットアップの読込
+	CEnemy::LoadSetup();
+
+	// 魔法セットアップの読込
+	CMagic::LoadSetup();
+
 	//--------------------------------------------------------
 	//	ゲームオブジェクトの生成
 	//--------------------------------------------------------
@@ -260,11 +270,13 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	//--------------------------------------------------------
 	//	初期設定
 	//--------------------------------------------------------
-	// 敵セットアップの読み込み
-	CEnemy::LoadSetup();
-
-	// 魔法セットアップの読み込み
-	CMagic::LoadSetup();
+	// TODO
+	CBlock *p = CBlock::Create(CBlock::TYPE_STONE, D3DXVECTOR3(200.0f, 500.0f, 0.0f));
+	p->SetTextureState(CBlock::TEXSTATE_ONE);
+	CBlock *pp = CBlock::Create(CBlock::TYPE_GRASS, D3DXVECTOR3(260.0f, 500.0f, 0.0f));
+	pp->SetTextureState(CBlock::TEXSTATE_SELECT);
+	CBlock *ppp = CBlock::Create(CBlock::TYPE_SOIL, D3DXVECTOR3(320.0f, 500.0f, 0.0f));
+	ppp->SetTextureState(CBlock::TEXSTATE_ONE);
 
 #if 0
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);
