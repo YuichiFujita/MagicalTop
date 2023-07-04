@@ -20,8 +20,8 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
-CObjectMeshCube::MeshCube CBlock::m_blockInfo = {};					// ブロックステータス情報
-CObjectMeshCube::FACETEX CBlock::m_aTexInfo[CBlock::TYPE_MAX] = {};	// テクスチャ種類情報
+CObjectMeshCube::MeshCube CBlock::m_blockInfo = {};			// ブロックステータス情報
+CBlock::Type CBlock::m_aTypeInfo[CBlock::TYPE_MAX] = {};	// テクスチャ種類情報
 
 //************************************************************
 //	子クラス [CBlock] のメンバ関数
@@ -127,7 +127,7 @@ CBlock *CBlock::Create
 			}
 
 			// テクスチャを割当
-			pBlock->BindTexture(m_aTexInfo[type]);
+			pBlock->BindTexture(m_aTypeInfo[type].texture);
 
 			// 位置を設定
 			pBlock->SetPosition(rPos);
@@ -160,7 +160,7 @@ CBlock *CBlock::Create
 			pBlock->SetBorderThick(m_blockInfo.fBordThick);
 
 			// テクスチャの状態を設定
-			pBlock->SetTextureState(m_blockInfo.texState);
+			pBlock->SetTextureState(m_aTypeInfo[type].state);
 
 			// テクスチャの分割数Xを設定
 			pBlock->SetTexturePatternX(m_blockInfo.aTexPart[CUBEPART_X]);
@@ -428,7 +428,10 @@ void CBlock::LoadSetup(void)
 								assert(nCurrentType < TYPE_MAX);	// テクスチャ種類オーバー
 
 								// テクスチャを登録
-								m_aTexInfo[nCurrentType] = FACETEX(pTextureID[texType.All]);
+								m_aTypeInfo[nCurrentType].texture = FACETEX(pTextureID[texType.All]);
+
+								// テクスチャ状態を設定
+								m_aTypeInfo[nCurrentType].state = TEXSTATE_ONE;	// 同一のテクスチャを使用
 
 								// 種類読み込み数を加算
 								nCurrentType++;
@@ -484,7 +487,7 @@ void CBlock::LoadSetup(void)
 								assert(nCurrentType < TYPE_MAX);	// テクスチャ種類オーバー
 
 								// テクスチャを登録
-								m_aTexInfo[nCurrentType] = FACETEX
+								m_aTypeInfo[nCurrentType].texture = FACETEX
 								( // 引数
 									pTextureID[texType.Left],	// 左
 									pTextureID[texType.Right],	// 右
@@ -493,6 +496,9 @@ void CBlock::LoadSetup(void)
 									pTextureID[texType.Near],	// 前
 									pTextureID[texType.Far]		// 後
 								);
+
+								// テクスチャ状態を設定
+								m_aTypeInfo[nCurrentType].state = TEXSTATE_SELECT;	// それぞれのテクスチャを使用
 
 								// 種類読み込み数を加算
 								nCurrentType++;

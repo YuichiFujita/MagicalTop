@@ -270,14 +270,6 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	//--------------------------------------------------------
 	//	‰ŠúÝ’è
 	//--------------------------------------------------------
-	// TODO
-	CBlock *p = CBlock::Create(CBlock::TYPE_STONE, D3DXVECTOR3(200.0f, 500.0f, 0.0f));
-	p->SetTextureState(CBlock::TEXSTATE_ONE);
-	CBlock *pp = CBlock::Create(CBlock::TYPE_GRASS, D3DXVECTOR3(260.0f, 500.0f, 0.0f));
-	pp->SetTextureState(CBlock::TEXSTATE_SELECT);
-	CBlock *ppp = CBlock::Create(CBlock::TYPE_SOIL, D3DXVECTOR3(320.0f, 500.0f, 0.0f));
-	ppp->SetTextureState(CBlock::TEXSTATE_ONE);
-
 #if 0
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f, 0.0f), VEC3_ZERO);

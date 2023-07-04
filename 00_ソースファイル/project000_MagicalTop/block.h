@@ -38,6 +38,13 @@ public:
 	// デストラクタ
 	~CBlock();
 
+	// 種類構造体
+	typedef struct
+	{
+		FACETEX  texture;	// テクスチャ
+		TEXSTATE state;		// テクスチャ使用状況
+	}Type;
+
 	// オーバーライド関数
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
@@ -54,8 +61,8 @@ public:
 
 private:
 	// 静的メンバ変数
-	static MeshCube m_blockInfo;			// ブロックステータス情報
-	static FACETEX m_aTexInfo[TYPE_MAX];	// テクスチャ種類情報
+	static MeshCube m_blockInfo;		// ブロックステータス情報
+	static Type m_aTypeInfo[TYPE_MAX];	// テクスチャ種類情報
 };
 
 #endif	// _BLOCK_H_
