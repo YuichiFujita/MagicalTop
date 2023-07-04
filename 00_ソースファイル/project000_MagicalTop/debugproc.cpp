@@ -202,7 +202,7 @@ void CDebugProc::Print(const char *fmt, ...)
 //==========================================================
 //	生成処理
 //==========================================================
-CDebugProc *CDebugProc::Create(HWND hWnd)
+CDebugProc *CDebugProc::Create(void)
 {
 	// ポインタを宣言
 	CDebugProc *pDebugProc = NULL;		// デバッグ表示生成用

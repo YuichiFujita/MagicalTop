@@ -36,8 +36,8 @@ public:
 	LPDIRECT3DDEVICE9 GetDevice(void) const;	// デバイス取得
 
 	// 静的メンバ関数
-	static CRenderer *Create(HWND hWnd);			// 生成
-	static HRESULT Release(CRenderer *&pRenderer);	// 破棄
+	static CRenderer *Create(HWND hWnd, BOOL bWindow);	// 生成
+	static HRESULT Release(CRenderer *&pRenderer);		// 破棄
 
 private:
 	// メンバ関数

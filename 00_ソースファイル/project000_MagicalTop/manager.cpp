@@ -93,7 +93,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	//	システムの生成
 	//--------------------------------------------------------
 	// レンダラーの生成
-	m_pRenderer = CRenderer::Create(hWnd);
+	m_pRenderer = CRenderer::Create(hWnd, bWindow);
 	if (UNUSED(m_pRenderer))
 	{ // 非使用中の場合
 
@@ -293,7 +293,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	//	デバッグ用
 	//--------------------------------------------------------
 	// デバッグ表示の生成
-	m_pDebugProc = CDebugProc::Create(hWnd);
+	m_pDebugProc = CDebugProc::Create();
 	if (UNUSED(m_pDebugProc))
 	{ // 非使用中の場合
 

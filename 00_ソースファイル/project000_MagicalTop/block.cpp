@@ -88,6 +88,15 @@ void CBlock::Draw(void)
 }
 
 //============================================================
+//	ブロックのステータス取得処理
+//============================================================
+CBlock::MeshCube CBlock::GetBlockInfo(void)
+{
+	// ブロックのステータス情報を返す
+	return m_blockInfo;
+}
+
+//============================================================
 //	生成処理
 //============================================================
 CBlock *CBlock::Create
@@ -97,7 +106,6 @@ CBlock *CBlock::Create
 )
 {
 	// ポインタを宣言
-	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 	CBlock *pBlock = NULL;	// ブロック生成用
 
 	if (UNUSED(pBlock))

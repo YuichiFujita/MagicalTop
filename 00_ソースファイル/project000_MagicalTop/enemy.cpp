@@ -483,7 +483,7 @@ void CEnemy::Attack(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 //============================================================
 //	ターゲットとの当たり判定
 //============================================================
-void CEnemy::CollisionTarget(D3DXVECTOR3& rPos, D3DXVECTOR3& rPosOld)
+void CEnemy::CollisionTarget(D3DXVECTOR3& rPos, D3DXVECTOR3 posOld)
 {
 	// ポインタを宣言
 	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
@@ -500,7 +500,7 @@ void CEnemy::CollisionTarget(D3DXVECTOR3& rPos, D3DXVECTOR3& rPosOld)
 		collision::BoxPillar
 		( // 引数
 			rPos,		// 判定位置
-			rPosOld,	// 判定過去位置
+			posOld,		// 判定過去位置
 			posTarget,	// 判定目標位置
 			sizeEnemy,	// 判定サイズ(右・上・後)
 			sizeEnemy,	// 判定サイズ(左・下・前)

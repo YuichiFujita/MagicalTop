@@ -38,7 +38,7 @@ public:
 	virtual ~CInput();
 
 	// ‰¼‘zŠÖ”
-	virtual HRESULT Init(HINSTANCE hInstance, HWND hWnd);	// ‰Šú‰»
+	virtual HRESULT Init(HINSTANCE hInstance);	// ‰Šú‰»
 	virtual void Uninit(void);		// I—¹
 
 	// ƒˆ‰¼‘zŠÖ”

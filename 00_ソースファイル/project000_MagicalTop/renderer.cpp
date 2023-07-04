@@ -199,7 +199,7 @@ LPDIRECT3DDEVICE9 CRenderer::GetDevice(void) const
 //============================================================
 //	生成処理
 //============================================================
-CRenderer *CRenderer::Create(HWND hWnd)
+CRenderer *CRenderer::Create(HWND hWnd, BOOL bWindow)
 {
 	// ポインタを宣言
 	CRenderer *pRenderer = NULL;	// レンダラー生成用
@@ -216,7 +216,7 @@ CRenderer *CRenderer::Create(HWND hWnd)
 	{ // 確保に成功している場合
 
 		// レンダラーの初期化
-		if (FAILED(pRenderer->Init(hWnd, TRUE)))
+		if (FAILED(pRenderer->Init(hWnd, bWindow)))
 		{ // 初期化に失敗した場合
 
 			// メモリ開放

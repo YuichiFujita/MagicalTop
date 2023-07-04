@@ -57,7 +57,7 @@ CInput::~CInput()
 //============================================================
 //	初期化処理
 //============================================================
-HRESULT CInput::Init(HINSTANCE hInstance, HWND hWnd)
+HRESULT CInput::Init(HINSTANCE hInstance)
 {
 	// メンバ変数を初期化
 	m_pDevice = NULL;	// DirectInputデバイス
@@ -143,7 +143,7 @@ HRESULT CInputKeyboard::Init(HINSTANCE hInstance, HWND hWnd)
 	memset(&m_aKeyStateRelease[0], 0, sizeof(m_aKeyStateRelease));	// マウスのリリース情報
 
 	// 入力の初期化
-	if (FAILED(CInput::Init(hInstance, hWnd)))
+	if (FAILED(CInput::Init(hInstance)))
 	{ // 初期化に失敗した場合
 
 		// 失敗を返す
@@ -348,7 +348,7 @@ HRESULT CInputMouse::Init(HINSTANCE hInstance, HWND hWnd)
 	DIPROPDWORD diprop;	// デバイスの設定用
 
 	// 入力の初期化
-	if (FAILED(CInput::Init(hInstance, hWnd)))
+	if (FAILED(CInput::Init(hInstance)))
 	{ // 初期化に失敗した場合
 
 		// 失敗を返す

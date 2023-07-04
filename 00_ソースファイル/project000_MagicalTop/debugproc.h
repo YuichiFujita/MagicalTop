@@ -34,7 +34,7 @@ public:
 	void Print(const char *fmt, ...);
 
 	// Ã“Iƒƒ“ƒoŠÖ”
-	static CDebugProc *Create(HWND hWnd);				// ¶¬
+	static CDebugProc *Create(void);					// ¶¬
 	static HRESULT Release(CDebugProc *&pDebugProc);	// ”jŠü
 
 private:

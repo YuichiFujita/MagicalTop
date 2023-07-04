@@ -52,7 +52,8 @@ public:
 	void Draw(void);	// 描画
 
 	// 静的メンバ関数
-	static void LoadSetup(void);	// セットアップ
+	static void LoadSetup(void);		// セットアップ
+	static MeshCube GetBlockInfo(void);	// ブロックステータス取得
 	static CBlock *Create	// 生成
 	( // 引数
 		const TYPE type,		// 種類

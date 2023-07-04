@@ -32,8 +32,18 @@ int CModel::m_nNumAll = 0;	// モデルの総数
 CModel::CModel()
 {
 	// メンバ変数をクリア
-	memset(&m_aModel[0], 0, sizeof(m_aModel));			// モデルへのポインタ
-	memset(&m_pFileName[0][0], 0, sizeof(m_pFileName));	// 読み込んだモデルファイル名
+	memset(&m_aModel[0], 0, sizeof(m_aModel));	// モデルへのポインタ
+
+	for (int nCntModel = 0; nCntModel < MAX_MODEL; nCntModel++)
+	{ // モデルの最大数分繰り返す
+
+		for (int nCntFile = 0; nCntFile < MAX_FILENAME; nCntFile++)
+		{ // ファイル名の最大数分繰り返す
+
+			// 読み込んだテクスチャファイル名を初期化
+			m_pFileName[nCntModel][nCntFile] = '\0';	// NULL文字を代入
+		}
+	}
 }
 
 //============================================================
@@ -49,12 +59,19 @@ CModel::~CModel()
 //============================================================
 HRESULT CModel::Load(void)
 {
-	// ポインタを宣言
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
-
 	// メンバ変数を初期化
-	memset(&m_aModel[0], 0, sizeof(m_aModel));			// モデルへのポインタ
-	memset(&m_pFileName[0][0], 0, sizeof(m_pFileName));	// 読み込んだモデルファイル名
+	memset(&m_aModel[0], 0, sizeof(m_aModel));	// モデルへのポインタ
+
+	for (int nCntModel = 0; nCntModel < MAX_MODEL; nCntModel++)
+	{ // モデルの最大数分繰り返す
+
+		for (int nCntFile = 0; nCntFile < MAX_FILENAME; nCntFile++)
+		{ // ファイル名の最大数分繰り返す
+
+			// 読み込んだテクスチャファイル名を初期化
+			m_pFileName[nCntModel][nCntFile] = '\0';	// NULL文字を代入
+		}
+	}
 
 	// 成功を返す
 	return S_OK;
@@ -105,9 +122,6 @@ int CModel::Regist(const char *pFileName)
 {
 	// 変数を宣言
 	int nID = m_nNumAll;	// モデル読込番号
-
-	// ポインタを宣言
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
 	for (int nCntModel = 0; nCntModel < m_nNumAll; nCntModel++)
 	{ // モデルの総数分繰り返す
@@ -284,7 +298,6 @@ HRESULT CModel::LoadXFileModel(const int nID, const char *pFileName)
 HRESULT CModel::LoadTextureModel(const int nID)
 {
 	// ポインタを宣言
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 	D3DXMATERIAL *pMat;		// マテリアルへのポインタ
 
