@@ -193,19 +193,17 @@ void CStage::SetStageGridMax(const POSGRID3& rGrid)
 //============================================================
 void CStage::SetInGrid(const POSGRID3& rGrid, CBlock *pBlock)
 {
-	// 変数を宣言
-	GridZ inGrid;	// 方眼座標内の情報
-
 	if (rGrid.x < MAX_GRIDX
 	&&  rGrid.y < MAX_GRIDY
 	&&  rGrid.z < MAX_GRIDZ)
 	{ // グリッドが範囲内の場合
 
-		// 方眼に入れる情報を設定
-		inGrid.pBlock = pBlock;	// ブロックのポインタ
+		if (UNUSED(m_stageGrid.Out(rGrid).pBlock))
+		{ // グリッド内にブロックがない場合
 
-		// 引数の方眼座標にオブジェクトの情報を設定
-		m_stageGrid.In(rGrid, inGrid);
+			// 引数の方眼座標にオブジェクトの情報を設定
+			m_stageGrid.In(rGrid, pBlock);
+		}
 	}
 	else { assert(false); }	// 範囲外
 }

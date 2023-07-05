@@ -20,7 +20,7 @@
 //************************************************************
 #define FVF_VERTEX_3D	(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1)	// 頂点フォーマット [3D]
 
-#define MAX_OBJECT		(1024)	// オブジェクトの最大数
+#define MAX_OBJECT		(2048)	// オブジェクトの最大数
 #define MAX_PRIO		(8)		// 優先順位の総数
 #define DEFAULT_PRIO	(3)		// デフォルトの優先順位
 

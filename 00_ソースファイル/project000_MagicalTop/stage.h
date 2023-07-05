@@ -62,9 +62,9 @@ public:
 	typedef struct
 	{
 		// ÉÅÉìÉoä÷êî
-		void In(const POSGRID3& rGrid, const GridZ inGrid)
+		void In(const POSGRID3& rGrid, CBlock *pBlock)
 		{
-			aX[rGrid.x].aY[rGrid.y].aZ[rGrid.z] = inGrid;
+			aX[rGrid.x].aY[rGrid.y].aZ[rGrid.z].pBlock = pBlock;
 		}
 		GridZ Out(const POSGRID3& rGrid)
 		{

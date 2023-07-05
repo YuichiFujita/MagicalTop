@@ -16,6 +16,7 @@
 //	マクロ定義
 //************************************************************
 #define BLOCK_SETUP_TXT	"data\\TXT\\block.txt"	// セットアップテキスト相対パス
+#define BLOCK_PRIO	(1)	// ブロックの優先順位
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -29,7 +30,7 @@ CBlock::Type CBlock::m_aTypeInfo[CBlock::TYPE_MAX] = {};	// テクスチャ種類情報
 //============================================================
 //	コンストラクタ
 //============================================================
-CBlock::CBlock() : CObjectMeshCube(CObject::LABEL_BLOCK)
+CBlock::CBlock() : CObjectMeshCube(CObject::LABEL_BLOCK, BLOCK_PRIO)
 {
 
 }
