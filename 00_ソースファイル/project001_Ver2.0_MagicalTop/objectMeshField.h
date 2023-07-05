@@ -79,6 +79,8 @@ public:
 	bool GetLighting(void) const;				// ライティング取得
 	POSGRID2 GetPattern(void) const;			// 分割数取得
 	D3DXVECTOR3 GetMeshVertexPosition(const int nID);	// メッシュの頂点位置取得
+	float GetPositionHeight(const D3DXVECTOR3&rPos);	// メッシュの着地位置取得
+	bool LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove, const float fHeight);	// メッシュ着地
 
 protected:
 	// メンバ関数

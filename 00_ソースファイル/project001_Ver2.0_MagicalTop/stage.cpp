@@ -69,11 +69,11 @@ void CStage::LimitPosition(D3DXVECTOR3& rPos, const float fRadius)
 //============================================================
 bool CStage::LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove, const float fHeight)
 {
-	if (rPos.y < m_stageLimit.fField)
+	if (rPos.y - fHeight < m_stageLimit.fField)
 	{ // ˆÊ’u‚ª’n–Ê‚æ‚è‰º‚Ìê‡
 
 		// ˆÊ’u‚ð•â³
-		rPos.y = m_stageLimit.fField;
+		rPos.y = m_stageLimit.fField + fHeight;
 
 		// ˆÚ“®—Ê‚ð‰Šú‰»
 		rMove.y = 0.0f;

@@ -30,6 +30,7 @@ class CModel;			// モデルクラス
 class CStage;			// ステージクラス
 class CPlayer;			// プレイヤークラス
 class CTarget;			// ターゲットクラス
+class CField;			// 地面クラス
 class CScore;			// スコアクラス
 class CTimer;			// タイマークラス
 class CDebugProc;		// デバッグ表示クラス
@@ -75,6 +76,7 @@ public:
 	static CStage			*GetStage(void);		// ステージ取得
 	static CPlayer			*GetPlayer(void);		// プレイヤー取得
 	static CTarget			*GetTarget(void);		// ターゲット取得
+	static CField			*GetField(void);		// 地面取得
 	static CScore			*GetScore(void);		// スコア取得
 	static CTimer			*GetTimer(void);		// タイマー取得
 	static CDebugProc		*GetDebugProc(void);	// デバッグ表示取得
@@ -100,6 +102,7 @@ private:
 	static CStage			*m_pStage;		// ステージオブジェクト
 	static CPlayer			*m_pPlayer;		// プレイヤーオブジェクト
 	static CTarget			*m_pTarget;		// ターゲットオブジェクト
+	static CField			*m_pField;		// 地面オブジェクト
 	static CScore			*m_pScore;		// スコアオブジェクト
 	static CTimer			*m_pTimer;		// タイマーオブジェクト
 	static CDebugProc		*m_pDebugProc;	// デバッグ表示オブジェクト

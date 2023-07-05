@@ -53,6 +53,7 @@ CTexture		*CManager::m_pTexture	= NULL;		// テクスチャオブジェクト
 CModel			*CManager::m_pModel		= NULL;		// モデルオブジェクト
 CStage			*CManager::m_pStage		= NULL;		// ステージオブジェクト
 CPlayer			*CManager::m_pPlayer	= NULL;		// プレイヤーオブジェクト
+CField			*CManager::m_pField		= NULL;		// 地面オブジェクト
 CTarget			*CManager::m_pTarget	= NULL;		// ターゲットオブジェクト
 CScore			*CManager::m_pScore		= NULL;		// スコアオブジェクト
 CTimer			*CManager::m_pTimer		= NULL;		// タイマーオブジェクト
@@ -201,7 +202,14 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	CSea::Create();
 
 	// 地面オブジェクトの生成
-	CField::Create(CField::TEXTURE_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(4000.0f, 4000.0f), XCOL_WHITE, POSGRID2(12, 12));
+	m_pField = CField::Create(CField::TEXTURE_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(4000.0f, 4000.0f), XCOL_WHITE, POSGRID2(12, 12));
+	if (UNUSED(m_pField))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// 壁オブジェクトの生成
 	CWall::Create(CWall::TEXTURE_NORMAL, D3DXVECTOR3( 0.0f,    0.0f, -2000.0f), D3DXToRadian(D3DXVECTOR3(0.0f, 0.0f, 0.0f)),   D3DXVECTOR2(4000.0f, 400.0f), XCOL_WHITE, POSGRID2(12, 1));
@@ -370,6 +378,7 @@ HRESULT CManager::Uninit(void)
 	// 終了済みのオブジェクトポインタをNULLにする
 	m_pPlayer = NULL;		// プレイヤーオブジェクト
 	m_pTarget = NULL;		// ターゲットオブジェクト
+	m_pField = NULL;		// 地面オブジェクト
 	m_pScore = NULL;		// スコアオブジェクト
 	m_pTimer = NULL;		// タイマーオブジェクト
 
@@ -731,6 +740,15 @@ CTarget *CManager::GetTarget(void)
 {
 	// ターゲットのポインタを返す
 	return m_pTarget;
+}
+
+//============================================================
+//	地面取得処理
+//============================================================
+CField *CManager::GetField(void)
+{
+	// 地面のポインタを返す
+	return m_pField;
 }
 
 //============================================================

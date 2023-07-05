@@ -435,9 +435,7 @@ float CObject3D::GetPositionHeight(const D3DXVECTOR3&rPos)
 		aVtxPos[nCnt] = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
 	}
 
-	if (collision::LineOuterProduct(aVtxPos[0], aVtxPos[1], rPos) > 0
-	&&  collision::LineOuterProduct(aVtxPos[1], aVtxPos[2], rPos) > 0
-	&&  collision::LineOuterProduct(aVtxPos[2], aVtxPos[0], rPos) > 0)
+	if (collision::TrianglePillar(aVtxPos[0], aVtxPos[1], aVtxPos[2], rPos))
 	{ // ポリゴンの範囲内にいる場合
 
 		// 法線を求める
@@ -451,9 +449,7 @@ float CObject3D::GetPositionHeight(const D3DXVECTOR3&rPos)
 		}
 	}
 
-	if (collision::LineOuterProduct(aVtxPos[3], aVtxPos[1], rPos) < 0
-	&&  collision::LineOuterProduct(aVtxPos[1], aVtxPos[2], rPos) < 0
-	&&  collision::LineOuterProduct(aVtxPos[2], aVtxPos[3], rPos) < 0)
+	if (collision::TrianglePillar(aVtxPos[3], aVtxPos[1], aVtxPos[2], rPos))
 	{ // ポリゴンの範囲内にいる場合
 
 		// 法線を求める

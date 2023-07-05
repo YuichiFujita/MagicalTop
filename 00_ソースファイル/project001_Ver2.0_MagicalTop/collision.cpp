@@ -316,3 +316,29 @@ float collision::LineOuterProduct
 	// 外積の計算結果を返す
 	return (vecLine.z * vecToPos.x) - (vecLine.x * vecToPos.z);
 }
+
+//============================================================
+//	三角柱の当たり判定
+//============================================================
+//	境界線から見て左右どちらにいるかの判定に使用
+//============================================================
+bool collision::TrianglePillar
+(
+	D3DXVECTOR3 pos0,	// 三角の各頂点
+	D3DXVECTOR3 pos1,	// 三角の各頂点
+	D3DXVECTOR3 pos2,	// 三角の各頂点
+	D3DXVECTOR3 pos		// 判定位置
+)
+{
+	if (collision::LineOuterProduct(pos0, pos1, pos) <= 0.0f
+	&&  collision::LineOuterProduct(pos1, pos2, pos) <= 0.0f
+	&&  collision::LineOuterProduct(pos2, pos0, pos) <= 0.0f)
+	{ // 判定内の場合
+
+		// 真を返す
+		return true;
+	}
+
+	// 偽を返す
+	return false;
+}

@@ -11,6 +11,7 @@
 #include "manager.h"
 #include "renderer.h"
 #include "texture.h"
+#include "collision.h"
 
 //************************************************************
 //	子クラス [CObjectMeshField] のメンバ関数
@@ -120,8 +121,7 @@ void CObjectMeshField::Uninit(void)
 //============================================================
 void CObjectMeshField::Update(void)
 {
-	// 頂点情報の設定
-	SetVtx();
+
 }
 
 //============================================================
@@ -560,6 +560,111 @@ D3DXVECTOR3 CObjectMeshField::GetMeshVertexPosition(const int nID)
 
 	// 引数のインデックスの頂点座標を返す
 	return pos;
+}
+
+//============================================================
+//	メッシュの着地位置の取得処理
+//============================================================
+float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3&rPos)
+{
+	// 変数を宣言
+	int nNumCul;		// 法線ベクトル用の頂点計算用
+	int nNumVtx;		// 法線を求める頂点番号
+	D3DXVECTOR3 nor;	// 法線ベクトル
+
+	// 変数配列を宣言
+	D3DXVECTOR3 aVtxPos[3];		// ポリゴンの頂点座標
+	D3DXVECTOR3 aVtxMtxPos[3];	// ポリゴンの位置・向き反映を行った頂点座標
+
+	for (int nCntVtx = 0; nCntVtx < 2; nCntVtx++)
+	{ // 
+
+		// 法線ベクトル用の頂点計算用の値を設定
+		nNumCul = (nCntVtx == 0) ? 1: -1;
+
+		for (int nCntHeight = 0; nCntHeight < m_part.y; nCntHeight++)
+		{ // 縦の分割数分繰り返す
+
+			for (int nCntWidth = 0; nCntWidth < m_part.x; nCntWidth++)
+			{ // 横の分割数分繰り返す
+
+				// 法線を求める頂点番号を設定
+				nNumVtx = ((nCntWidth + 1) + (nCntHeight * (m_part.x + 1))) + (nCntVtx * m_part.x);
+
+				// ポリゴンの頂点位置を取得
+				aVtxPos[0] = GetMeshVertexPosition(nNumVtx);
+				aVtxPos[1] = GetMeshVertexPosition(nNumVtx - (1 * nNumCul));
+				aVtxPos[2] = GetMeshVertexPosition(nNumVtx + ((m_part.x + 1) * nNumCul));
+
+				for (int nCnt = 0; nCnt < 3; nCnt++)
+				{ // 頂点数分繰り返す
+
+					// 変数を宣言
+					D3DXMATRIX mtxWorld, mtxRot, mtxTrans;	// 計算用マトリックス
+
+					// ワールドマトリックスの初期化
+					D3DXMatrixIdentity(&mtxWorld);
+
+					// 頂点位置を反映
+					D3DXMatrixTranslation(&mtxTrans, aVtxPos[nCnt].x, aVtxPos[nCnt].y, aVtxPos[nCnt].z);
+					D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+
+					// ポリゴン向きを反映
+					D3DXMatrixRotationYawPitchRoll(&mtxRot, m_meshField.rot.y, m_meshField.rot.x, m_meshField.rot.z);
+					D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
+
+					// ポリゴン位置を反映
+					D3DXMatrixTranslation(&mtxTrans, m_meshField.pos.x, m_meshField.pos.y, m_meshField.pos.z);
+					D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+
+					// 計算したマトリックスから座標を設定
+					aVtxMtxPos[nCnt] = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
+				}
+
+				if (collision::TrianglePillar(aVtxMtxPos[0], aVtxMtxPos[1], aVtxMtxPos[2], rPos))
+				{ // ポリゴンの範囲内にいる場合
+
+					// 法線を求める
+					useful::NormalizeNormal(aVtxMtxPos[1], aVtxMtxPos[0], aVtxMtxPos[2], nor);
+
+					if (nor.y != 0.0f)
+					{ // 法線が設定されている場合
+
+						// プレイヤーの着地点を返す
+						return (((rPos.x - aVtxMtxPos[0].x) * nor.x + (-aVtxMtxPos[0].y) * nor.y + (rPos.z - aVtxMtxPos[0].z) * nor.z) * -1.0f) / nor.y;
+					}
+				}
+			}
+		}
+	}
+
+	// 着地範囲外の場合現在のy座標を返す
+	return rPos.y;
+}
+
+//============================================================
+//	範囲外の着地処理
+//============================================================
+bool CObjectMeshField::LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove, const float fHeight)
+{
+	// 変数を宣言
+	float fLandHeight = GetPositionHeight(rPos);	// 着地位置
+
+	if (rPos.y - fHeight < fLandHeight)
+	{ // 位置が地面より下の場合
+
+		// 位置を補正
+		rPos.y = fLandHeight + fHeight;
+
+		// 移動量を初期化
+		rMove.y = 0.0f;
+
+		// 着地している状況を返す
+		return true;
+	}
+
+	// 着地していない状況を返す
+	return false;
 }
 
 //============================================================

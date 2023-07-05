@@ -13,12 +13,15 @@
 #include "input.h"
 #include "sound.h"
 #include "camera.h"
+#include "collision.h"
+#include "debugproc.h"
+
 #include "multiModel.h"
 #include "motion.h"
-#include "collision.h"
-#include "target.h"
 #include "magicManager.h"
+#include "target.h"
 #include "stage.h"
+#include "field.h"
 
 //************************************************************
 //	マクロ定義
@@ -563,8 +566,9 @@ CPlayer::MOTION CPlayer::Land(MOTION motion)
 	MOTION currentMotion = motion;	// 現在のモーション
 
 	// 着地判定
-	if (CManager::GetStage()->LandPosition(m_pos, m_move, 0.0f) == true)
-	{ // プレイヤーの位置がステージ範囲外の場合
+	if (CManager::GetField()->LandPosition(m_pos, m_move, 0.0f)
+	||  CManager::GetStage()->LandPosition(m_pos, m_move, 0.0f))
+	{ // プレイヤーが着地していた場合
 
 		// 着地モーションを設定
 		currentMotion = MOTION_LANDING;
