@@ -14,6 +14,11 @@
 #include "collision.h"
 
 //************************************************************
+//	マクロ定義
+//************************************************************
+#define NUM_VTX_TRIANGLE	(3)	// 三角形ポリゴンの頂点数
+
+//************************************************************
 //	子クラス [CObjectMeshField] のメンバ関数
 //************************************************************
 //============================================================
@@ -573,11 +578,11 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3&rPos)
 	D3DXVECTOR3 nor;	// 法線ベクトル
 
 	// 変数配列を宣言
-	D3DXVECTOR3 aVtxPos[3];		// ポリゴンの頂点座標
-	D3DXVECTOR3 aVtxMtxPos[3];	// ポリゴンの位置・向き反映を行った頂点座標
+	D3DXVECTOR3 aVtxPos[NUM_VTX_TRIANGLE];		// ポリゴンの頂点座標
+	D3DXVECTOR3 aVtxMtxPos[NUM_VTX_TRIANGLE];	// ポリゴンの位置・向き反映を行った頂点座標
 
 	for (int nCntVtx = 0; nCntVtx < 2; nCntVtx++)
-	{ // 
+	{ // 四角ポリゴンに使用する三角の数分繰り返す
 
 		// 法線ベクトル用の頂点計算用の値を設定
 		nNumCul = (nCntVtx == 0) ? 1: -1;
@@ -596,8 +601,8 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3&rPos)
 				aVtxPos[1] = GetMeshVertexPosition(nNumVtx - (1 * nNumCul));
 				aVtxPos[2] = GetMeshVertexPosition(nNumVtx + ((m_part.x + 1) * nNumCul));
 
-				for (int nCnt = 0; nCnt < 3; nCnt++)
-				{ // 頂点数分繰り返す
+				for (int nCnt = 0; nCnt < NUM_VTX_TRIANGLE; nCnt++)
+				{ // 三角形ポリゴンの頂点数分繰り返す
 
 					// 変数を宣言
 					D3DXMATRIX mtxWorld, mtxRot, mtxTrans;	// 計算用マトリックス
