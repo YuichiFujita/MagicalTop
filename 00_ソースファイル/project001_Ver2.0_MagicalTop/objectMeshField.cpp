@@ -650,16 +650,16 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3&rPos)
 //============================================================
 //	範囲外の着地処理
 //============================================================
-bool CObjectMeshField::LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove, const float fHeight)
+bool CObjectMeshField::LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove)
 {
 	// 変数を宣言
 	float fLandHeight = GetPositionHeight(rPos);	// 着地位置
 
-	if (rPos.y - fHeight < fLandHeight)
+	if (rPos.y < fLandHeight)
 	{ // 位置が地面より下の場合
 
 		// 位置を補正
-		rPos.y = fLandHeight + fHeight;
+		rPos.y = fLandHeight;
 
 		// 移動量を初期化
 		rMove.y = 0.0f;

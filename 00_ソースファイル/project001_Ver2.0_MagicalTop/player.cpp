@@ -566,7 +566,7 @@ CPlayer::MOTION CPlayer::Land(MOTION motion)
 	MOTION currentMotion = motion;	// 現在のモーション
 
 	// 着地判定
-	if (CManager::GetField()->LandPosition(m_pos, m_move, 0.0f)
+	if (CManager::GetField()->LandPosition(m_pos, m_move)
 	||  CManager::GetStage()->LandPosition(m_pos, m_move, 0.0f))
 	{ // プレイヤーが着地していた場合
 
