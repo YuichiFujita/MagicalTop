@@ -29,6 +29,7 @@ class CTexture;			// テクスチャクラス
 class CModel;			// モデルクラス
 class CPlayer;			// プレイヤークラス
 class CField;			// 地面クラス
+class CEdit;			// エディットクラス
 class CDebugProc;		// デバッグ表示クラス
 
 #ifdef _DEBUG	// デバッグ処理
@@ -71,6 +72,7 @@ public:
 	static CModel			*GetModel(void);		// モデル取得
 	static CPlayer			*GetPlayer(void);		// プレイヤー取得
 	static CField			*GetField(void);		// 地面取得
+	static CEdit			*GetEdit(void);			// エディット取得
 	static CDebugProc		*GetDebugProc(void);	// デバッグ表示取得
 
 #ifdef _DEBUG	// デバッグ処理
@@ -93,6 +95,7 @@ private:
 	static CModel			*m_pModel;		// モデルオブジェクト
 	static CPlayer			*m_pPlayer;		// プレイヤーオブジェクト
 	static CField			*m_pField;		// 地面オブジェクト
+	static CEdit			*m_pEdit;		// エディットオブジェクト
 	static CDebugProc		*m_pDebugProc;	// デバッグ表示オブジェクト
 
 #ifdef _DEBUG	// デバッグ処理

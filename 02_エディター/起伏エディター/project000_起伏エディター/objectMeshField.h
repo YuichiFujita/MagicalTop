@@ -78,6 +78,7 @@ public:
 	D3DCULL GetCulling(void) const;				// カリング取得
 	bool GetLighting(void) const;				// ライティング取得
 	POSGRID2 GetPattern(void) const;			// 分割数取得
+	int GetNumVertex(void) const;				// 頂点数取得
 	D3DXVECTOR3 GetMeshVertexPosition(const int nID);			// メッシュの頂点位置取得
 	float GetPositionHeight(const D3DXVECTOR3&rPos);			// メッシュの着地位置取得
 	bool LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove);	// メッシュ着地
@@ -94,6 +95,9 @@ protected:
 	);
 
 private:
+	// メンバ関数
+	void NormalizeNormal(void);	// 法線の正規化
+
 	// メンバ変数
 	LPDIRECT3DVERTEXBUFFER9 m_pVtxBuff;	// 頂点バッファへのポインタ
 	LPDIRECT3DINDEXBUFFER9  m_pIdxBuff;	// インデックスバッファへのポインタ

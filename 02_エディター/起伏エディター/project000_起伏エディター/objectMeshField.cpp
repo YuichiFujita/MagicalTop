@@ -533,6 +533,15 @@ POSGRID2 CObjectMeshField::GetPattern(void) const
 }
 
 //============================================================
+//	頂点数取得処理
+//============================================================
+int CObjectMeshField::GetNumVertex(void) const
+{
+	// 頂点数を返す
+	return m_nNumVtx;
+}
+
+//============================================================
 //	メッシュの頂点位置の設定処理
 //============================================================
 D3DXVECTOR3 CObjectMeshField::GetMeshVertexPosition(const int nID)
@@ -793,4 +802,45 @@ void CObjectMeshField::SetScrollTex(const float fTexU, const float fTexV)
 		// 頂点バッファをアンロックする
 		m_pVtxBuff->Unlock();
 	}
+}
+
+//============================================================
+//	法線の正規化処理
+//============================================================
+void CObjectMeshField::NormalizeNormal(void)
+{
+	// ポインタを宣言
+	VERTEX_3D *pVtx;	// 頂点情報へのポインタ
+
+	// 頂点バッファをロックし、頂点情報へのポインタを取得
+	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+	// 法線の正規化
+	useful::NormalizeNormal
+	( // 引数
+		pVtx[1].pos,	// 左位置
+		pVtx[0].pos,	// 中心位置
+		pVtx[2].pos,	// 右位置
+		pVtx[0].nor		// 法線
+	);
+
+	// 法線の正規化
+	useful::NormalizeNormal
+	( // 引数
+		pVtx[2].pos,	// 左位置
+		pVtx[3].pos,	// 中心位置
+		pVtx[1].pos,	// 右位置
+		pVtx[3].nor		// 法線
+	);
+
+	// 法線ベクトルの設定
+	pVtx[1].nor = (pVtx[0].nor + pVtx[3].nor) / 2;
+	pVtx[2].nor = (pVtx[0].nor + pVtx[3].nor) / 2;
+
+	// 法線を正規化
+	D3DXVec3Normalize(&pVtx[1].nor, &pVtx[1].nor);
+	D3DXVec3Normalize(&pVtx[2].nor, &pVtx[2].nor);
+
+	// 頂点バッファをアンロックする
+	m_pVtxBuff->Unlock();
 }
