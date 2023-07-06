@@ -61,6 +61,9 @@ public:
 	);
 
 	// メンバ関数
+	void NormalizeNormal(void);		// 法線の正規化
+	bool LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove);	// メッシュ着地
+
 	void BindTexture(const int nTextureID);				// テクスチャ割当
 	void SetPosition(const D3DXVECTOR3& rPos);			// 位置設定
 	void SetRotation(const D3DXVECTOR3& rRot);			// 向き設定
@@ -78,9 +81,9 @@ public:
 	D3DCULL GetCulling(void) const;				// カリング取得
 	bool GetLighting(void) const;				// ライティング取得
 	POSGRID2 GetPattern(void) const;			// 分割数取得
-	D3DXVECTOR3 GetMeshVertexPosition(const int nID);			// メッシュの頂点位置取得
-	float GetPositionHeight(const D3DXVECTOR3&rPos);			// メッシュの着地位置取得
-	bool LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove);	// メッシュ着地
+	int GetNumVertex(void) const;				// 頂点数取得
+	D3DXVECTOR3 GetMeshVertexPosition(const int nID);	// メッシュの頂点位置取得
+	float GetPositionHeight(const D3DXVECTOR3&rPos);	// メッシュの着地位置取得
 
 protected:
 	// メンバ関数
@@ -94,9 +97,19 @@ protected:
 	);
 
 private:
+	// メンバ関数
+	D3DXVECTOR3 GetNormalLeft(VERTEX_3D *pVtx);			// 法線の取得 (左)
+	D3DXVECTOR3 GetNormalLeftTop(VERTEX_3D *pVtx);		// 法線の取得 (左上)
+	D3DXVECTOR3 GetNormalLeftBottom(VERTEX_3D *pVtx);	// 法線の取得 (左下)
+	D3DXVECTOR3 GetNormalRight(VERTEX_3D *pVtx);		// 法線の取得 (右)
+	D3DXVECTOR3 GetNormalRightTop(VERTEX_3D *pVtx);		// 法線の取得 (右上)
+	D3DXVECTOR3 GetNormalRightBottom(VERTEX_3D *pVtx);	// 法線の取得 (右下)
+
 	// メンバ変数
 	LPDIRECT3DVERTEXBUFFER9 m_pVtxBuff;	// 頂点バッファへのポインタ
 	LPDIRECT3DINDEXBUFFER9  m_pIdxBuff;	// インデックスバッファへのポインタ
+	D3DXVECTOR3 *m_pNorBuff;	// 法線バッファへのポインタ
+	int *m_pNumNorBuff;			// 法線の使用数バッファへのポインタ
 
 	MeshField m_meshField;	// メッシュフィールドの情報
 	POSGRID2 m_part;		// 分割数

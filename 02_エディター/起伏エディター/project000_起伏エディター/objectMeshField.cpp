@@ -306,6 +306,228 @@ CObjectMeshField *CObjectMeshField::Create
 }
 
 //============================================================
+//	法線の正規化処理
+//============================================================
+void CObjectMeshField::NormalizeNormal(void)
+{
+	// 変数を宣言
+	int nNumNor = 0;	// 法線データ格納用
+
+	// ポインタを宣言
+	VERTEX_3D *pVtx;	// 頂点情報へのポインタ
+
+	//--------------------------------------------------------
+	//	法線の設定
+	//--------------------------------------------------------
+	// 頂点バッファをロックし、頂点情報へのポインタを取得
+	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+	for (int nCntHeight = 0; nCntHeight < m_part.y + 1; nCntHeight++)
+	{ // 縦の分割数 +1回繰り返す
+
+		for (int nCntWidth = 0; nCntWidth < m_part.x + 1; nCntWidth++)
+		{ // 横の分割数 +1回繰り返す
+
+			// 変数を宣言
+			int nNumVtx = nCntWidth + (nCntHeight * (m_part.x + 1));	// 現在の頂点番号
+
+			if (nNumVtx == 0)
+			{ // 頂点番号が左上の場合
+
+				// 法線の使用数を 2に設定
+				m_pNumNorBuff[nNumVtx] = 2;
+
+				// 法線の設定
+				m_pNorBuff[nNumNor + 0] = GetNormalRightTop(pVtx);
+				m_pNorBuff[nNumNor + 1] = GetNormalRightBottom(pVtx);
+
+				// 法線データを 2つ分進める
+				nNumNor += 2;
+			}
+			else if (nNumVtx == m_nNumVtx - 1)
+			{ // 頂点番号が右下の場合
+
+				// 法線の使用数を 2に設定
+				m_pNumNorBuff[nNumVtx] = 2;
+
+				// 法線の設定
+				m_pNorBuff[nNumNor + 0] = GetNormalLeftTop(pVtx);
+				m_pNorBuff[nNumNor + 1] = GetNormalLeftBottom(pVtx);
+
+				// 法線データを 2つ分進める
+				nNumNor += 2;
+			}
+			else if (nNumVtx == m_part.x)
+			{ // 頂点番号が右上の場合
+
+				// 法線の使用数を 1に設定
+				m_pNumNorBuff[nNumVtx] = 1;
+
+				// 法線の設定
+				m_pNorBuff[nNumNor + 0] = GetNormalLeft(pVtx);
+
+				// 法線データを 1つ分進める
+				nNumNor += 1;
+			}
+			else if (nNumVtx == (m_nNumVtx - 1) - m_part.x)
+			{ // 頂点番号が左下の場合
+
+				// 法線の使用数を 1に設定
+				m_pNumNorBuff[nNumVtx] = 1;
+
+				// 法線の設定
+				m_pNorBuff[nNumNor + 0] = GetNormalRight(pVtx);
+
+				// 法線データを 1つ分進める
+				nNumNor += 1;
+			}
+			else if (nNumVtx < m_part.x)
+			{ // 頂点番号が角を除いた上一行の頂点の場合
+
+				// 法線の使用数を 3に設定
+				m_pNumNorBuff[nNumVtx] = 3;
+
+				// 法線の設定
+				m_pNorBuff[nNumNor + 0] = GetNormalRightTop(pVtx);
+				m_pNorBuff[nNumNor + 1] = GetNormalRightBottom(pVtx);
+				m_pNorBuff[nNumNor + 2] = GetNormalLeft(pVtx);
+
+				// 法線データを 3つ分進める
+				nNumNor += 3;
+			}
+			else if (nNumVtx > (m_part.x + 1) * m_part.y)
+			{ // 頂点番号が角を除いた下一行の頂点の場合
+
+				// 法線の使用数を 3に設定
+				m_pNumNorBuff[nNumVtx] = 3;
+
+				// 法線の設定
+				m_pNorBuff[nNumNor + 0] = GetNormalRight(pVtx);
+				m_pNorBuff[nNumNor + 1] = GetNormalLeftTop(pVtx);
+				m_pNorBuff[nNumNor + 2] = GetNormalLeftBottom(pVtx);
+
+				// 法線データを 3つ分進める
+				nNumNor += 3;
+			}
+			else if (nCntWidth == 0)
+			{ // 頂点番号が角を除いた左一行の頂点の場合
+
+				// 法線の使用数を 3に設定
+				m_pNumNorBuff[nNumVtx] = 3;
+
+				// 法線の設定
+				m_pNorBuff[nNumNor + 0] = GetNormalRight(pVtx);
+				m_pNorBuff[nNumNor + 1] = GetNormalRightTop(pVtx);
+				m_pNorBuff[nNumNor + 2] = GetNormalRightBottom(pVtx);
+
+				// 法線データを 3つ分進める
+				nNumNor += 3;
+			}
+			else if (nCntWidth == m_part.x)
+			{ // 頂点番号が角を除いた右一行の頂点の場合
+
+				// 法線の使用数を 3に設定
+				m_pNumNorBuff[nNumVtx] = 3;
+
+				// 法線の設定
+				m_pNorBuff[nNumNor + 0] = GetNormalLeft(pVtx);
+				m_pNorBuff[nNumNor + 1] = GetNormalLeftTop(pVtx);
+				m_pNorBuff[nNumNor + 2] = GetNormalLeftBottom(pVtx);
+
+				// 法線データを 3つ分進める
+				nNumNor += 3;
+			}
+			else
+			{ // 頂点番号が外周内の頂点の場合
+
+				// 法線の使用数を 6に設定
+				m_pNumNorBuff[nNumVtx] = 6;
+
+				// 法線の設定
+				m_pNorBuff[nNumNor + 0] = GetNormalRight(pVtx);
+				m_pNorBuff[nNumNor + 1] = GetNormalRightTop(pVtx);
+				m_pNorBuff[nNumNor + 2] = GetNormalRightBottom(pVtx);
+				m_pNorBuff[nNumNor + 3] = GetNormalLeft(pVtx);
+				m_pNorBuff[nNumNor + 4] = GetNormalLeftTop(pVtx);
+				m_pNorBuff[nNumNor + 5] = GetNormalLeftBottom(pVtx);
+
+				// 法線データを 6つ分進める
+				nNumNor += 6;
+			}
+
+			// 頂点データのポインタを 1つ分進める
+			pVtx += 1;
+		}
+	}
+
+	// 頂点バッファをアンロックする
+	m_pVtxBuff->Unlock();
+
+	//--------------------------------------------------------
+	//	法線の平均化
+	//--------------------------------------------------------
+	// 法線データ格納用変数を初期化
+	nNumNor = 0;
+
+	// 頂点バッファをロックし、頂点情報へのポインタを取得
+	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+	for (int nCntVtx = 0; nCntVtx < m_nNumVtx; nCntVtx++)
+	{ // 頂点数分繰り返す
+
+		// 変数を宣言
+		D3DXVECTOR3 nor = VEC3_ZERO;	// 法線設定用
+
+		for (int nCntNor = 0; nCntNor < m_pNumNorBuff[nCntVtx]; nCntNor++)
+		{ // 設定されている法線数分繰り返す
+
+			// 法線を加算
+			nor += m_pNorBuff[nNumNor];
+
+			// 法線データを 1つ分進める
+			nNumNor++;
+		}
+
+		// 法線を平均化
+		nor /= (float)m_pNumNorBuff[nCntVtx];
+
+		// 法線を設定
+		pVtx->nor = nor;
+
+		// 頂点データのポインタを 1つ分進める
+		pVtx += 1;
+	}
+
+	// 頂点バッファをアンロックする
+	m_pVtxBuff->Unlock();
+}
+
+//============================================================
+//	範囲外の着地処理
+//============================================================
+bool CObjectMeshField::LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove)
+{
+	// 変数を宣言
+	float fLandHeight = GetPositionHeight(rPos);	// 着地位置
+
+	if (rPos.y < fLandHeight)
+	{ // 位置が地面より下の場合
+
+		// 位置を補正
+		rPos.y = fLandHeight;
+
+		// 移動量を初期化
+		rMove.y = 0.0f;
+
+		// 着地している状況を返す
+		return true;
+	}
+
+	// 着地していない状況を返す
+	return false;
+}
+
+//============================================================
 //	テクスチャ割当処理
 //============================================================
 void CObjectMeshField::BindTexture(const int nTextureID)
@@ -736,31 +958,6 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3&rPos)
 }
 
 //============================================================
-//	範囲外の着地処理
-//============================================================
-bool CObjectMeshField::LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove)
-{
-	// 変数を宣言
-	float fLandHeight = GetPositionHeight(rPos);	// 着地位置
-
-	if (rPos.y < fLandHeight)
-	{ // 位置が地面より下の場合
-
-		// 位置を補正
-		rPos.y = fLandHeight;
-
-		// 移動量を初期化
-		rMove.y = 0.0f;
-
-		// 着地している状況を返す
-		return true;
-	}
-
-	// 着地していない状況を返す
-	return false;
-}
-
-//============================================================
 //	頂点情報の設定処理
 //============================================================
 void CObjectMeshField::SetVtx(void)
@@ -787,9 +984,6 @@ void CObjectMeshField::SetVtx(void)
 					0.0f,																					// y
 					-(nCntHeight * (m_meshField.size.y / (float)m_part.y) - (m_meshField.size.y * 0.5f))	// z
 				);
-
-				// 法線ベクトルの設定
-				pVtx[0].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 
 				// 頂点カラーの設定
 				pVtx[0].col = m_meshField.col;
@@ -884,203 +1078,6 @@ void CObjectMeshField::SetScrollTex(const float fTexU, const float fTexV)
 		// 頂点バッファをアンロックする
 		m_pVtxBuff->Unlock();
 	}
-}
-
-//============================================================
-//	法線の正規化処理
-//============================================================
-void CObjectMeshField::NormalizeNormal(void)
-{
-	// 変数を宣言
-	int nNumNor = 0;	// 法線データ格納用
-
-	// ポインタを宣言
-	VERTEX_3D *pVtx;	// 頂点情報へのポインタ
-
-	//--------------------------------------------------------
-	//	法線の設定
-	//--------------------------------------------------------
-	// 頂点バッファをロックし、頂点情報へのポインタを取得
-	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
-
-	for (int nCntHeight = 0; nCntHeight < m_part.y + 1; nCntHeight++)
-	{ // 縦の分割数 +1回繰り返す
-
-		for (int nCntWidth = 0; nCntWidth < m_part.x + 1; nCntWidth++)
-		{ // 横の分割数 +1回繰り返す
-
-			// 変数を宣言
-			int nNumVtx = nCntWidth + (nCntHeight * (m_part.x + 1));	// 現在の頂点番号
-
-			if (nNumVtx == 0)
-			{ // 頂点番号が左上の場合
-
-				// 法線の使用数を 2に設定
-				m_pNumNorBuff[nNumVtx] = 2;
-
-				// 法線の設定
-				m_pNorBuff[nNumNor + 0] = GetNormalRightTop(pVtx);
-				m_pNorBuff[nNumNor + 1] = GetNormalRightBottom(pVtx);
-
-				// 法線データを 2つ分進める
-				nNumNor += 2;
-			}
-			else if (nNumVtx == m_nNumVtx - 1)
-			{ // 頂点番号が右下の場合
-
-				// 法線の使用数を 2に設定
-				m_pNumNorBuff[nNumVtx] = 2;
-
-				// 法線の設定
-				m_pNorBuff[nNumNor + 0] = GetNormalLeftTop(pVtx);
-				m_pNorBuff[nNumNor + 1] = GetNormalLeftBottom(pVtx);
-
-				// 法線データを 2つ分進める
-				nNumNor += 2;
-			}
-			else if (nNumVtx == m_part.x)
-			{ // 頂点番号が右上の場合
-
-				// 法線の使用数を 1に設定
-				m_pNumNorBuff[nNumVtx] = 1;
-
-				// 法線の設定
-				m_pNorBuff[nNumNor + 0] = GetNormalLeft(pVtx);
-
-				// 法線データを 1つ分進める
-				nNumNor += 1;
-			}
-			else if (nNumVtx == (m_nNumVtx - 1) - m_part.x)
-			{ // 頂点番号が左下の場合
-
-				// 法線の使用数を 1に設定
-				m_pNumNorBuff[nNumVtx] = 1;
-
-				// 法線の設定
-				m_pNorBuff[nNumNor + 0] = GetNormalRight(pVtx);
-
-				// 法線データを 1つ分進める
-				nNumNor += 1;
-			}
-			else if (nNumVtx < m_part.x)
-			{ // 頂点番号が角を除いた上一行の頂点の場合
-
-				// 法線の使用数を 3に設定
-				m_pNumNorBuff[nNumVtx] = 3;
-
-				// 法線の設定
-				m_pNorBuff[nNumNor + 0] = GetNormalRightTop(pVtx);
-				m_pNorBuff[nNumNor + 1] = GetNormalRightBottom(pVtx);
-				m_pNorBuff[nNumNor + 2] = GetNormalLeft(pVtx);
-
-				// 法線データを 3つ分進める
-				nNumNor += 3;
-			}
-			else if (nNumVtx > (m_part.x + 1) * m_part.y)
-			{ // 頂点番号が角を除いた下一行の頂点の場合
-
-				// 法線の使用数を 3に設定
-				m_pNumNorBuff[nNumVtx] = 3;
-
-				// 法線の設定
-				m_pNorBuff[nNumNor + 0] = GetNormalRight(pVtx);
-				m_pNorBuff[nNumNor + 1] = GetNormalLeftTop(pVtx);
-				m_pNorBuff[nNumNor + 2] = GetNormalLeftBottom(pVtx);
-
-				// 法線データを 3つ分進める
-				nNumNor += 3;
-			}
-			else if (nCntWidth == 0)
-			{ // 頂点番号が角を除いた左一行の頂点の場合
-
-				// 法線の使用数を 3に設定
-				m_pNumNorBuff[nNumVtx] = 3;
-
-				// 法線の設定
-				m_pNorBuff[nNumNor + 0] = GetNormalRight(pVtx);
-				m_pNorBuff[nNumNor + 1] = GetNormalRightTop(pVtx);
-				m_pNorBuff[nNumNor + 2] = GetNormalRightBottom(pVtx);
-
-				// 法線データを 3つ分進める
-				nNumNor += 3;
-			}
-			else if (nCntWidth == m_part.x)
-			{ // 頂点番号が角を除いた右一行の頂点の場合
-
-				// 法線の使用数を 3に設定
-				m_pNumNorBuff[nNumVtx] = 3;
-
-				// 法線の設定
-				m_pNorBuff[nNumNor + 0] = GetNormalLeft(pVtx);
-				m_pNorBuff[nNumNor + 1] = GetNormalLeftTop(pVtx);
-				m_pNorBuff[nNumNor + 2] = GetNormalLeftBottom(pVtx);
-
-				// 法線データを 3つ分進める
-				nNumNor += 3;
-			}
-			else
-			{ // 頂点番号が外周内の頂点の場合
-
-				// 法線の使用数を 6に設定
-				m_pNumNorBuff[nNumVtx] = 6;
-
-				// 法線の設定
-				m_pNorBuff[nNumNor + 0] = GetNormalRight(pVtx);
-				m_pNorBuff[nNumNor + 1] = GetNormalRightTop(pVtx);
-				m_pNorBuff[nNumNor + 2] = GetNormalRightBottom(pVtx);
-				m_pNorBuff[nNumNor + 3] = GetNormalLeft(pVtx);
-				m_pNorBuff[nNumNor + 4] = GetNormalLeftTop(pVtx);
-				m_pNorBuff[nNumNor + 5] = GetNormalLeftBottom(pVtx);
-
-				// 法線データを 6つ分進める
-				nNumNor += 6;
-			}
-
-			// 頂点データのポインタを 1つ分進める
-			pVtx += 1;
-		}
-	}
-
-	// 頂点バッファをアンロックする
-	m_pVtxBuff->Unlock();
-
-	//--------------------------------------------------------
-	//	法線の平均化
-	//--------------------------------------------------------
-	// 法線データ格納用変数を初期化
-	nNumNor = 0;
-
-	// 頂点バッファをロックし、頂点情報へのポインタを取得
-	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
-
-	for (int nCntVtx = 0; nCntVtx < m_nNumVtx; nCntVtx++)
-	{ // 頂点数分繰り返す
-
-		// 変数を宣言
-		D3DXVECTOR3 nor = VEC3_ZERO;	// 法線設定用
-
-		for (int nCntNor = 0; nCntNor < m_pNumNorBuff[nCntVtx]; nCntNor++)
-		{ // 設定されている法線数分繰り返す
-
-			// 法線を加算
-			nor += m_pNorBuff[nNumNor];
-
-			// 法線データを 1つ分進める
-			nNumNor++;
-		}
-
-		// 法線を平均化
-		nor /= (float)m_pNumNorBuff[nCntVtx];
-
-		// 法線を設定
-		pVtx->nor = nor;
-
-		// 頂点データのポインタを 1つ分進める
-		pVtx += 1;
-	}
-
-	// 頂点バッファをアンロックする
-	m_pVtxBuff->Unlock();
 }
 
 //============================================================

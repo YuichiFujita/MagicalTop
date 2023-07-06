@@ -61,10 +61,10 @@ public:
 	);
 
 	// メンバ関数
-	void BindTexture(const int nTextureID);						// テクスチャ割当
+	void NormalizeNormal(void);		// 法線の正規化
 	bool LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove);	// メッシュ着地
-	void NormalizeNormal(void);									// 法線の正規化
 
+	void BindTexture(const int nTextureID);				// テクスチャ割当
 	void SetPosition(const D3DXVECTOR3& rPos);			// 位置設定
 	void SetRotation(const D3DXVECTOR3& rRot);			// 向き設定
 	void SetScalingBiaxial(const D3DXVECTOR2& rSize);	// 大きさ設定

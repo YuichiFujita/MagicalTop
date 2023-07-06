@@ -38,7 +38,19 @@ public:
 	static HRESULT Release(CEdit *&prEdit);	// 破棄
 
 private:
+	// メンバ関数
+	void SetBursh(void);	// ブラシ設定
+	void SetVtxUp(void);	// 上昇量設定
+	void SetVtx(void);		// 頂点設定
+	void SetNor(void);		// 法線設定
+	void DrawManual(void);	// 操作説明表示
+	void Save(void);		// 保存
+	void Load(void);		// 読込
 
+	// メンバ変数
+	float m_fBrushRadius;	// 筆の太さ
+	float m_fVtxUp;			// 頂点の上昇量
+	bool m_bAutoNor;		// 法線の自動設定状況
 };
 
 #endif	// _EDIT_H_
