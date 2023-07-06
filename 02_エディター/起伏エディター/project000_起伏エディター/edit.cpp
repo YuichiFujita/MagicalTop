@@ -63,7 +63,7 @@ void CEdit::Update(void)
 {
 #define PLAY_RADIUS	(100.0f)	// 
 #define VTX_RADIUS	(10.0f)		// 
-#define VTX_UP		(1.5f)		// 
+#define VTX_UP		(50.0f)		// 
 
 	// ポインタを宣言
 	CInputKeyboard *pKey = CManager::GetKeyboard();	// キーボード情報

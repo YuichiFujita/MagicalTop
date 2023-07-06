@@ -97,10 +97,18 @@ protected:
 private:
 	// メンバ関数
 	void NormalizeNormal(void);	// 法線の正規化
+	D3DXVECTOR3 GetNormalLeft(VERTEX_3D *pVtx);			// 法線の取得 (左)
+	D3DXVECTOR3 GetNormalLeftTop(VERTEX_3D *pVtx);		// 法線の取得 (左上)
+	D3DXVECTOR3 GetNormalLeftBottom(VERTEX_3D *pVtx);	// 法線の取得 (左下)
+	D3DXVECTOR3 GetNormalRight(VERTEX_3D *pVtx);		// 法線の取得 (右)
+	D3DXVECTOR3 GetNormalRightTop(VERTEX_3D *pVtx);		// 法線の取得 (右上)
+	D3DXVECTOR3 GetNormalRightBottom(VERTEX_3D *pVtx);	// 法線の取得 (右下)
 
 	// メンバ変数
 	LPDIRECT3DVERTEXBUFFER9 m_pVtxBuff;	// 頂点バッファへのポインタ
 	LPDIRECT3DINDEXBUFFER9  m_pIdxBuff;	// インデックスバッファへのポインタ
+	D3DXVECTOR3 *m_pNorBuff;	// 法線バッファへのポインタ
+	int *m_pNumNorBuff;			// 法線の使用数バッファへのポインタ
 
 	MeshField m_meshField;	// メッシュフィールドの情報
 	POSGRID2 m_part;		// 分割数
