@@ -61,7 +61,10 @@ public:
 	);
 
 	// メンバ関数
-	void BindTexture(const int nTextureID);				// テクスチャ割当
+	void BindTexture(const int nTextureID);						// テクスチャ割当
+	bool LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove);	// メッシュ着地
+	void NormalizeNormal(void);									// 法線の正規化
+
 	void SetPosition(const D3DXVECTOR3& rPos);			// 位置設定
 	void SetRotation(const D3DXVECTOR3& rRot);			// 向き設定
 	void SetScalingBiaxial(const D3DXVECTOR2& rSize);	// 大きさ設定
@@ -79,9 +82,8 @@ public:
 	bool GetLighting(void) const;				// ライティング取得
 	POSGRID2 GetPattern(void) const;			// 分割数取得
 	int GetNumVertex(void) const;				// 頂点数取得
-	D3DXVECTOR3 GetMeshVertexPosition(const int nID);			// メッシュの頂点位置取得
-	float GetPositionHeight(const D3DXVECTOR3&rPos);			// メッシュの着地位置取得
-	bool LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove);	// メッシュ着地
+	D3DXVECTOR3 GetMeshVertexPosition(const int nID);	// メッシュの頂点位置取得
+	float GetPositionHeight(const D3DXVECTOR3&rPos);	// メッシュの着地位置取得
 
 protected:
 	// メンバ関数
@@ -96,7 +98,6 @@ protected:
 
 private:
 	// メンバ関数
-	void NormalizeNormal(void);	// 法線の正規化
 	D3DXVECTOR3 GetNormalLeft(VERTEX_3D *pVtx);			// 法線の取得 (左)
 	D3DXVECTOR3 GetNormalLeftTop(VERTEX_3D *pVtx);		// 法線の取得 (左上)
 	D3DXVECTOR3 GetNormalLeftBottom(VERTEX_3D *pVtx);	// 法線の取得 (左下)
