@@ -72,8 +72,9 @@ public:
 	void SetCulling(const D3DCULL cull);				// カリング設定
 	void SetLighting(const bool bLight);				// ライティング設定
 	HRESULT SetPattern(const POSGRID2& rPart);			// 分割数設定
+	void SetGapPosition(const int nID, const D3DXVECTOR3& rPos);		// 座標のずれ設定
 	void SetMeshVertexPosition(const int nID, const D3DXVECTOR3& rPos);	// メッシュの頂点位置設定
-	void SetPositionGap(const POSGRID2& rPart, D3DXVECTOR3 *pPosGap);	// 座標のずれ設定
+	void SetTerrain(const POSGRID2& rPart, D3DXVECTOR3 *pPosGap);		// 地形設定
 
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
@@ -83,15 +84,16 @@ public:
 	bool GetLighting(void) const;				// ライティング取得
 	POSGRID2 GetPattern(void) const;			// 分割数取得
 	int GetNumVertex(void) const;				// 頂点数取得
+	D3DXVECTOR3 GetGapPosition(const int nID);			// 座標のずれ取得
 	D3DXVECTOR3 GetMeshVertexPosition(const int nID);	// メッシュの頂点位置取得
 	float GetPositionHeight(const D3DXVECTOR3&rPos);	// メッシュの着地位置取得
 
 protected:
 	// メンバ関数
-	void SetVtx(void);	// 頂点情報の設定
-	void SetIdx(void);	// インデックス情報の設定
+	void SetVtx(bool bNor);	// 頂点情報の設定
+	void SetIdx(void);		// インデックス情報の設定
 
-	void SetScrollTex	// スクロールのテクスチャ座標の設定
+	void SetScrollTex		// スクロールのテクスチャ座標の設定
 	( // 引数
 		const float fTexU,	// テクスチャの横座標の開始位置
 		const float fTexV	// テクスチャの縦座標の開始位置

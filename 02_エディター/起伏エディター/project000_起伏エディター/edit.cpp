@@ -19,6 +19,8 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
+#define SAVE_TXT	"data\\TXT\\save.txt"	// セーブテキスト相対パス
+
 #define INIT_BRUSH_RADIUS	(100.0f)	// 筆の太さの初期値
 #define INIT_VTX_UP			(2.0f)		// 頂点上昇量の初期値
 
@@ -78,6 +80,9 @@ void CEdit::Uninit(void)
 //============================================================
 void CEdit::Update(void)
 {
+	// ポインタを宣言
+	CInputKeyboard *pKey = CManager::GetKeyboard();	// キーボード情報
+
 	// 操作説明表示
 	DrawManual();
 
@@ -92,6 +97,19 @@ void CEdit::Update(void)
 
 	// 法線設定
 	SetNor();
+
+	if (pKey->GetPress(DIK_F2))
+	{ // [F2] が押された場合
+
+		// 起伏の保存
+		Save();
+	}
+	if (pKey->GetPress(DIK_F3))
+	{ // [F3] が押された場合
+
+		// 起伏の読込
+		Load();
+	}
 }
 
 //============================================================
@@ -285,8 +303,8 @@ void CEdit::DrawManual(void)
 
 	// 操作説明を表示
 	pDebug->Print("========================================\n");
-	pDebug->Print("【保存】[F1]　←間に合いませんでした☆彡\n");
-	pDebug->Print("【読込】[F2]　←間に合いませんでした☆彡\n");
+	pDebug->Print("【保存】[F2]\n");
+	pDebug->Print("【読込】[F3]\n");
 	pDebug->Print("========================================\n");
 	pDebug->Print("【頂点上昇】[0]\n");
 	pDebug->Print("【頂点下降】[9]\n");
@@ -320,7 +338,81 @@ void CEdit::DrawManual(void)
 //============================================================
 void CEdit::Save(void)
 {
+	// 変数を宣言
+	POSGRID2 part = GRID2_ONE;	// 分割数
 
+	// ポインタを宣言
+	FILE *pFile;	// ファイルポインタ
+	CField *pField = CManager::GetField();	// フィールド情報
+
+	// ファイルを書き込み形式で開く
+	pFile = fopen(SAVE_TXT, "w");
+
+	if (pFile != NULL)
+	{ // ファイルが開けた場合
+
+		// 見出し
+		fprintf(pFile, "#==============================================================================\n");
+		fprintf(pFile, "#\n");
+		fprintf(pFile, "#	地形保存テキスト [save.txt]\n");
+		fprintf(pFile, "#	Author：you\n");
+		fprintf(pFile, "#\n");
+		fprintf(pFile, "#==============================================================================\n");
+		fprintf(pFile, "<>*************<> ここから下をコピーし [field.txt] に張り付け <>*************<>\n");
+		fprintf(pFile, "\n");
+
+		// 起伏情報の開始地点をテキストに書き出し
+		fprintf(pFile, "TERRAINSET\n\n");
+		fprintf(pFile, "	FIELDSET\n");
+
+		// 分割数の書き出し
+		part = pField->GetPattern();
+		fprintf(pFile, "		# 分割数\n");
+		fprintf(pFile, "		PART = %d %d\n\n", part.x, part.y);
+
+		// 頂点座標のずれ量の書き出し
+		fprintf(pFile, "		# 頂点座標のずれ量\n");
+		fprintf(pFile, "		GAPSET\n");
+
+		for (int nCntHeight = 0; nCntHeight < part.y + 1; nCntHeight++)
+		{ // 縦の分割数 +1回繰り返す
+
+			// 空白
+			fprintf(pFile, "		");
+
+			for (int nCntWidth = 0; nCntWidth < part.x + 1; nCntWidth++)
+			{ // 横の分割数 +1回繰り返す
+
+				// 変数を宣言
+				int nNumVtx = nCntWidth + (nCntHeight * (part.x + 1));	// 現在の頂点番号
+				D3DXVECTOR3 posGap = D3DXVECTOR3						// 頂点座標のずれ量
+				( // 引数
+					0.0f,
+					-(pField->GetGapPosition(nNumVtx).y - pField->GetMeshVertexPosition(nNumVtx).y),
+					0.0f
+				);
+
+				// 頂点座標のずれ量を書き出し
+				fprintf(pFile, "%.3f %.3f %.3f , ", posGap.x, posGap.y, posGap.z);
+			}
+
+			// 改行
+			fprintf(pFile, "\n");
+		}
+
+		// 起伏情報の終了地点をテキストに書き出し
+		fprintf(pFile, "	END_FIELDSET\n\n");
+		fprintf(pFile, "END_TERRAINSET\n");
+
+		// ファイルを閉じる
+		fclose(pFile);
+	}
+	else
+	{ // ファイルが開けなかった場合
+
+		// エラーメッセージボックス
+		MessageBox(NULL, "起伏の書き出しに失敗！", "警告！", MB_ICONWARNING);
+	}
 }
 
 //============================================================
@@ -328,5 +420,90 @@ void CEdit::Save(void)
 //============================================================
 void CEdit::Load(void)
 {
+	// 変数を宣言
+	POSGRID2 part = GRID2_ZERO;		// 分割数の代入用
+	D3DXVECTOR3 pos = VEC3_ZERO;	// 頂点座標のずれ量の代入用
+	int nEnd = 0;					// テキスト読み込み終了の確認用
 
+	// 変数配列を宣言
+	char aString[MAX_STRING];	// テキストの文字列の代入用
+
+	// ポインタを宣言
+	FILE *pFile;	// ファイルポインタ
+	CField *pField = CManager::GetField();	// フィールド情報
+
+	// ファイルを読み込み形式で開く
+	pFile = fopen(SAVE_TXT, "r");
+
+	if (pFile != NULL)
+	{ // ファイルが開けた場合
+
+		do
+		{ // 読み込んだ文字列が EOF ではない場合ループ
+
+			// ファイルから文字列を読み込む
+			nEnd = fscanf(pFile, "%s", &aString[0]);	// テキストを読み込みきったら EOF を返す
+
+			// 地形の設定
+			if (strcmp(&aString[0], "TERRAINSET") == 0)
+			{ // 読み込んだ文字列が TERRAINSET の場合
+
+				do
+				{ // 読み込んだ文字列が END_TERRAINSET ではない場合ループ
+
+					// ファイルから文字列を読み込む
+					fscanf(pFile, "%s", &aString[0]);
+
+					if (strcmp(&aString[0], "FIELDSET") == 0)
+					{ // 読み込んだ文字列が FIELDSET の場合
+
+						do
+						{ // 読み込んだ文字列が END_FIELDSET ではない場合ループ
+
+							// ファイルから文字列を読み込む
+							fscanf(pFile, "%s", &aString[0]);
+
+							if (strcmp(&aString[0], "PART") == 0)
+							{ // 読み込んだ文字列が PART の場合
+
+								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
+								fscanf(pFile, "%d", &part.x);		// 分割数Xを読み込む
+								fscanf(pFile, "%d", &part.y);		// 分割数Yを読み込む
+
+								// 分割数の設定
+								pField->SetPattern(part);
+							}
+							else if (strcmp(&aString[0], "GAPSET") == 0)
+							{ // 読み込んだ文字列が GAPSET の場合
+
+								for (int nCntVtx = 0; nCntVtx < pField->GetNumVertex(); nCntVtx++)
+								{ // 頂点数分繰り返す
+
+									fscanf(pFile, "%f", &pos.x);		// 頂点座標のずれ量Xを読み込む
+									fscanf(pFile, "%f", &pos.y);		// 頂点座標のずれ量Yを読み込む
+									fscanf(pFile, "%f", &pos.z);		// 頂点座標のずれ量Zを読み込む
+									fscanf(pFile, "%s", &aString[0]);	// , を読み込む (不要)
+
+									// 頂点座標のずれ量の設定
+									pField->SetMeshVertexPosition(nCntVtx, pField->GetMeshVertexPosition(nCntVtx) + pos);
+								}
+							}
+						} while (strcmp(&aString[0], "END_FIELDSET") != 0);	// 読み込んだ文字列が END_FIELDSET ではない場合ループ
+
+						// 法線の設定・正規化
+						pField->NormalizeNormal();
+					}
+				} while (strcmp(&aString[0], "END_TERRAINSET") != 0);	// 読み込んだ文字列が END_TERRAINSET ではない場合ループ
+			}
+		} while (nEnd != EOF);	// 読み込んだ文字列が EOF ではない場合ループ
+		
+		// ファイルを閉じる
+		fclose(pFile);
+	}
+	else
+	{ // ファイルが開けなかった場合
+
+		// エラーメッセージボックス
+		MessageBox(NULL, "起伏の読み込みに失敗！", "警告！", MB_ICONWARNING);
+	}
 }

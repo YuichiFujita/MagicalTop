@@ -216,8 +216,8 @@ void CField::SetTerrain(const TERRAIN terrain)
 	if (terrain < TERRAIN_MAX)
 	{ // 値が範囲内の場合
 
-		// 座標のずれ量を設定
-		SetPositionGap(m_aTerrainInfo[terrain].part, m_aTerrainInfo[terrain].pPosGap);
+		// 地形を設定
+		CObjectMeshField::SetTerrain(m_aTerrainInfo[terrain].part, m_aTerrainInfo[terrain].pPosGap);
 	}
 	else { assert(false); }	// 範囲外
 }
