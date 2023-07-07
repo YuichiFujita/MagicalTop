@@ -14,6 +14,7 @@
 #include "debugproc.h"
 #include "collision.h"
 #include "effect3D.h"
+#include "field.h"
 
 //************************************************************
 //	マクロ定義
@@ -235,6 +236,7 @@ CMagic::StatusInfo CMagic::GetStatusInfo(const TYPE type)
 void CMagic::SetMove(D3DXVECTOR3 rot, const float fMove)
 {
 	// 向きの正規化
+	useful::NormalizeRot(rot.x);
 	useful::NormalizeRot(rot.y);
 
 	// 移動量を求める
@@ -418,12 +420,22 @@ void CNormalMagic::Update(void)
 	// 変数を宣言
 	D3DXVECTOR3 pos = GetPosition();	// 位置
 
-	// 魔法の更新
-	CMagic::Update();
+	if (pos.y <= CManager::GetField()->GetPositionHeight(pos))
+	{ // 地面に当たっている場合
+
+		// オブジェクトの終了
+		Uninit();
+
+		// 関数を抜ける
+		return;
+	}
 
 	// エフェクトを生成
 	CEffect3D::Create(CEffect3D::TYPE_NORMAL, pos, VEC3_ZERO, VEC3_ZERO, D3DXCOLOR(0.6f, 0.65f, 0.0f, 1.0f), 38, 56.0f, 1.8f, 0.06f);
 	CEffect3D::Create(CEffect3D::TYPE_NORMAL, pos, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, 24, 50.0f, 2.3f, 0.06f);
+
+	// 魔法の更新
+	CMagic::Update();
 }
 
 //============================================================

@@ -62,9 +62,11 @@ public:
 	// ステータス構造体
 	typedef struct
 	{
+		D3DXVECTOR3 bullPos;		// 弾の発射位置
 		int		nLife;				// 体力
 		int		nScore;				// スコア加算量
 		int		nCounterAttack;		// 攻撃頻度
+		int		nBullParts;			// 弾の発射パーツ
 		int		nBullLife;			// 弾の寿命
 		float	fBullRadius;		// 弾の半径
 		float	fBullMove;			// 弾の移動量
@@ -101,21 +103,25 @@ public:
 	void SetRotation(const D3DXVECTOR3& rRot);		// 向き設定
 	void SetMoveRotation(const D3DXVECTOR3& rMove);	// 向き変更量設定
 
-	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
-	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
-	D3DXVECTOR3 GetOldPosition(void) const;		// 過去位置取得
-	D3DXVECTOR3 GetMovePosition(void) const;	// 位置移動量取得
-	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
-	D3DXVECTOR3 GetMoveRotation(void) const;	// 向き変更量取得
-	float GetRadius(void) const;				// 半径取得
-	StatusInfo GetStatusInfo(void) const;		// ステータス情報取得
-	PartsInfo GetPartsInfo(void) const;			// パーツ情報取得
+	D3DXMATRIX GetMtxWorld(void) const;					// マトリックス取得
+	D3DXVECTOR3 GetPosition(void) const;				// 位置取得
+	D3DXVECTOR3 GetOldPosition(void) const;				// 過去位置取得
+	D3DXVECTOR3 GetMovePosition(void) const;			// 位置移動量取得
+	D3DXVECTOR3 GetRotation(void) const;				// 向き取得
+	D3DXVECTOR3 GetMoveRotation(void) const;			// 向き変更量取得
+	float GetRadius(void) const;						// 半径取得
+	CMultiModel *GetMultiModel(const int nID) const;	// マルチモデル取得
+	StatusInfo GetStatusInfo(void) const;				// ステータス情報取得
+	PartsInfo GetPartsInfo(void) const;					// パーツ情報取得
+
+	// 純粋仮想関数
+	virtual const char* GetModelFileName(const int nModel) const = 0;	// モデルファイル取得
 
 protected:
 	// メンバ関数
-	virtual void CollisionFind(void);	// 検知範囲の当たり判定
-	void Look(const D3DXVECTOR3& rPos);	// 対象視認
-	void Attack(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot);	// 攻撃
+	virtual void CollisionFind(void);		// 検知範囲の当たり判定
+	void Look(const D3DXVECTOR3& rPos);		// 対象視認
+	void Attack(const D3DXVECTOR3& rRot);	// 攻撃
 	void CollisionTarget(D3DXVECTOR3& rPos, D3DXVECTOR3& rPosOld);	// ターゲットとの当たり判定
 	void CollisionEnemy(D3DXVECTOR3& rPos);							// 敵との当たり判定
 
@@ -127,6 +133,10 @@ private:
 	// メンバ変数
 	const StatusInfo m_status;	// ステータス定数
 	const PartsInfo m_parts;	// パーツ定数
+
+	CMultiModel	*m_apMultiModel[MAX_PARTS];	// モデルの情報
+	int m_nNumModel;	// パーツの総数
+
 	D3DXMATRIX	m_mtxWorld;		// ワールドマトリックス
 	D3DXVECTOR3	m_pos;			// 現在位置
 	D3DXVECTOR3	m_oldPos;		// 過去位置
@@ -160,6 +170,7 @@ public:
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
 	void Draw(void);	// 描画
+	const char* GetModelFileName(const int nModel) const;	// モデルファイル取得
 
 private:
 	// オーバーライド関数
@@ -168,10 +179,6 @@ private:
 
 	// 静的メンバ変数
 	static const char *mc_apModelFile[];	// モデル定数
-
-	// メンバ変数
-	CMultiModel	*m_apMultiModel[MAX_PARTS];	// モデルの情報
-	int m_nNumModel;	// パーツの総数
 };
 
 #endif	// _ENEMY_H_

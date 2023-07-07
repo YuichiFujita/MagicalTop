@@ -33,8 +33,8 @@ public:
 	// 地形列挙
 	typedef enum
 	{
-		TERRAIN_128x128 = 0,	// 128x128分割数の地形
-		TERRAIN_MAX				// この列挙型の総数
+		TERRAIN_80x80 = 0,	// 80x80分割数の地形
+		TERRAIN_MAX			// この列挙型の総数
 	}TERRAIN;
 
 	// コンストラクタ

@@ -20,11 +20,15 @@
 #include "stage.h"
 #include "score.h"
 #include "particle3D.h"
+#include "field.h"
 
 //************************************************************
 //	マクロ定義
 //************************************************************
 #define ENEMY_SETUP_TXT	"data\\TXT\\enemy.txt"	// セットアップテキスト相対パス
+
+#define ENE_REV		(0.02f)	// プレイヤー移動量の減衰係数
+#define ENE_GRAVITY	(1.0f)	// プレイヤー重力
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -47,6 +51,8 @@ const char *CEnemyCar::mc_apModelFile[] =	// 戦車モデル定数
 CEnemy::CEnemy(const TYPE type) : CObject(CObject::LABEL_ENEMY), m_status(m_aStatusInfo[type]), m_parts(m_aPartsInfo[type])
 {
 	// メンバ変数をクリア
+	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
+	m_nNumModel = 0;	// パーツの総数
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
 	m_pos		= VEC3_ZERO;	// 現在位置
 	m_oldPos	= VEC3_ZERO;	// 過去位置
@@ -70,7 +76,15 @@ CEnemy::~CEnemy()
 //============================================================
 HRESULT CEnemy::Init(void)
 {
+	// 変数を宣言
+	int nModelID;	// モデルインデックス
+
+	// ポインタを宣言
+	CModel *pModel = CManager::GetModel();	// モデルへのポインタ
+
 	// メンバ変数を初期化
+	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
+	m_nNumModel = 0;	// パーツの総数
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
 	m_pos		= VEC3_ZERO;		// 現在位置
 	m_oldPos	= VEC3_ZERO;		// 過去位置
@@ -79,6 +93,34 @@ HRESULT CEnemy::Init(void)
 	m_moveRot	= VEC3_ZERO;		// 向き変更量
 	m_nLife		= m_status.nLife;	// 体力
 	m_nCounterAtk = 0;				// 攻撃管理カウンター
+
+	// パーツ数を代入
+	m_nNumModel = m_parts.nNumParts;
+
+	for (int nCntEnemy = 0; nCntEnemy < m_nNumModel; nCntEnemy++)
+	{ // パーツ数分繰り返す
+
+		// モデルの生成
+		m_apMultiModel[nCntEnemy] = CMultiModel::Create(m_parts.aInfo[nCntEnemy].pos, m_parts.aInfo[nCntEnemy].rot);
+
+		// モデルの登録・割当
+		nModelID = pModel->Regist(GetModelFileName(nCntEnemy));
+		m_apMultiModel[nCntEnemy]->BindModel(pModel->GetModel(nModelID));
+
+		// 親モデルの設定
+		if (m_parts.aInfo[nCntEnemy].nParentID == NONE_IDX)
+		{ // 親がない場合
+
+			// NULLを設定
+			m_apMultiModel[nCntEnemy]->SetParent(NULL);
+		}
+		else
+		{ // 親がいる場合
+
+			// 親のアドレスを設定
+			m_apMultiModel[nCntEnemy]->SetParent(m_apMultiModel[m_parts.aInfo[nCntEnemy].nParentID]);
+		}
+	}
 
 	// 成功を返す
 	return S_OK;
@@ -89,6 +131,23 @@ HRESULT CEnemy::Init(void)
 //============================================================
 void CEnemy::Uninit(void)
 {
+	// マルチモデルを破棄
+	for (int nCntEnemy = 0; nCntEnemy < MAX_PARTS; nCntEnemy++)
+	{ // パーツの最大数分繰り返す
+
+		if (USED(m_apMultiModel[nCntEnemy]))
+		{ // パーツが使用中の場合
+
+			// 破棄処理
+			if (FAILED(m_apMultiModel[nCntEnemy]->Release(m_apMultiModel[nCntEnemy])))
+			{ // 破棄に失敗した場合
+
+				// 例外処理
+				assert(false);
+			}
+		}
+	}
+
 	// 敵を破棄
 	Release();
 }
@@ -126,6 +185,13 @@ void CEnemy::Draw(void)
 
 	// ワールドマトリックスの設定
 	pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
+
+	for (int nCntEnemy = 0; nCntEnemy < m_nNumModel; nCntEnemy++)
+	{ // パーツの総数分繰り返す
+
+		// パーツの描画
+		m_apMultiModel[nCntEnemy]->Draw();
+	}
 }
 
 //============================================================
@@ -350,6 +416,20 @@ float CEnemy::GetRadius(void) const
 }
 
 //============================================================
+//	マルチモデル取得処理
+//============================================================
+CMultiModel *CEnemy::GetMultiModel(const int nID) const
+{
+	if (nID < m_nNumModel)
+	{ // 使用可能なインデックスの場合
+
+		// マルチモデルの情報を返す
+		return m_apMultiModel[nID];
+	}
+	else { assert(false); return m_apMultiModel[0]; }
+}
+
+//============================================================
 //	ステータス情報取得処理
 //============================================================
 CEnemy::StatusInfo CEnemy::GetStatusInfo(void) const
@@ -422,7 +502,7 @@ void CEnemy::CollisionFind(void)
 			}
 
 			// 攻撃
-			Attack(m_pos, D3DXVECTOR3(m_rot.x + (-D3DX_PI * 0.5f), m_rot.y, 0.0f));
+			Attack(D3DXVECTOR3(m_rot.x + (-D3DX_PI * 0.5f), m_rot.y, 0.0f));
 		}
 	}
 }
@@ -455,13 +535,17 @@ void CEnemy::Look(const D3DXVECTOR3& rPos)
 //============================================================
 //	攻撃処理
 //============================================================
-void CEnemy::Attack(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
+void CEnemy::Attack(const D3DXVECTOR3& rRot)
 {
 	// カウンターを加算
 	m_nCounterAtk++;
 
 	if (m_nCounterAtk >= m_status.nCounterAttack)
 	{ // カウンターが一定値以上の場合
+
+		// 変数を宣言
+		D3DXMATRIX mtx = m_apMultiModel[m_status.nBullParts]->GetMtxWorld();			// 発射パーツのマトリックス
+		D3DXVECTOR3 pos = D3DXVECTOR3(mtx._41, mtx._42, mtx._43) + m_status.bullPos;	// 発射位置
 
 		// カウンターを初期化
 		m_nCounterAtk = 0;
@@ -470,7 +554,7 @@ void CEnemy::Attack(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 		CBullet::Create
 		( // 引数
 			CBullet::TYPE_ENEMY,			// 種類
-			rPos,							// 位置
+			pos,							// 位置
 			VEC3_ALL(m_status.fBullRadius),	// 大きさ
 			XCOL_WHITE,						// 色
 			rRot,							// 射撃向き
@@ -560,9 +644,7 @@ void CEnemy::CollisionEnemy(D3DXVECTOR3& rPos)
 //============================================================
 CEnemyCar::CEnemyCar(const TYPE type) : CEnemy(type)
 {
-	// メンバ変数をクリア
-	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
-	m_nNumModel = 0;	// パーツの総数
+
 }
 
 //============================================================
@@ -578,51 +660,12 @@ CEnemyCar::~CEnemyCar()
 //============================================================
 HRESULT CEnemyCar::Init(void)
 {
-	// 変数を宣言
-	PartsInfo parts = GetPartsInfo();	// パーツ情報
-	int nModelID;	// モデルインデックス
-
-	// ポインタを宣言
-	CModel *pModel = CManager::GetModel();	// モデルへのポインタ
-
 	// 敵の初期化
 	if (FAILED(CEnemy::Init()))
 	{ // 初期化に失敗した場合
 
 		// 失敗を返す
 		return E_FAIL;
-	}
-
-	// メンバ変数を初期化
-	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
-	m_nNumModel = 0;	// パーツの総数
-
-	// パーツ数を代入
-	m_nNumModel = parts.nNumParts;
-
-	for (int nCntEnemy = 0; nCntEnemy < m_nNumModel; nCntEnemy++)
-	{ // パーツ数分繰り返す
-
-		// モデルの生成
-		m_apMultiModel[nCntEnemy] = CMultiModel::Create(parts.aInfo[nCntEnemy].pos, parts.aInfo[nCntEnemy].rot);
-
-		// モデルの登録・割当
-		nModelID = pModel->Regist(mc_apModelFile[(MODEL)nCntEnemy]);
-		m_apMultiModel[nCntEnemy]->BindModel(pModel->GetModel(nModelID));
-
-		// 親モデルの設定
-		if (parts.aInfo[nCntEnemy].nParentID == NONE_IDX)
-		{ // 親がない場合
-
-			// NULLを設定
-			m_apMultiModel[nCntEnemy]->SetParent(NULL);
-		}
-		else
-		{ // 親がいる場合
-
-			// 親のアドレスを設定
-			m_apMultiModel[nCntEnemy]->SetParent(m_apMultiModel[parts.aInfo[nCntEnemy].nParentID]);
-		}
 	}
 
 	// 成功を返す
@@ -634,23 +677,6 @@ HRESULT CEnemyCar::Init(void)
 //============================================================
 void CEnemyCar::Uninit(void)
 {
-	// マルチモデルを破棄
-	for (int nCntEnemy = 0; nCntEnemy < MAX_PARTS; nCntEnemy++)
-	{ // パーツの最大数分繰り返す
-
-		if (USED(m_apMultiModel[nCntEnemy]))
-		{ // パーツが使用中の場合
-
-			// 破棄処理
-			if (FAILED(m_apMultiModel[nCntEnemy]->Release(m_apMultiModel[nCntEnemy])))
-			{ // 破棄に失敗した場合
-
-				// 例外処理
-				assert(false);
-			}
-		}
-	}
-
 	// 敵の終了
 	CEnemy::Uninit();
 }
@@ -674,13 +700,20 @@ void CEnemyCar::Draw(void)
 {
 	// 敵の描画
 	CEnemy::Draw();
+}
 
-	for (int nCntEnemy = 0; nCntEnemy < m_nNumModel; nCntEnemy++)
-	{ // パーツの総数分繰り返す
+//============================================================
+//	モデルファイル取得処理
+//============================================================
+const char* CEnemyCar::GetModelFileName(const int nModel) const
+{
+	if (nModel < MODEL_MAX)
+	{ // 使用できるインデックスの場合
 
-		// パーツの描画
-		m_apMultiModel[nCntEnemy]->Draw();
+		// 引数のインデックスのモデルを返す
+		return mc_apModelFile[nModel];
 	}
+	else { assert(false); return "\0"; }	// 範囲外
 }
 
 //============================================================
@@ -689,11 +722,12 @@ void CEnemyCar::Draw(void)
 void CEnemyCar::CollisionFind(void)
 {
 	// 変数を宣言
-	StatusInfo  status		= GetStatusInfo();	// 敵ステータス
-	D3DXVECTOR3 posEnemy	= GetPosition();	// 敵位置
-	D3DXVECTOR3 rotEnemy	= GetRotation();	// 敵向き
-	D3DXVECTOR3 posLook		= VEC3_ZERO;		// 視認対象位置
-	D3DXVECTOR3 rotCannon	= VEC3_ZERO;		// キャノン向き
+	StatusInfo  status		= GetStatusInfo();		// 敵ステータス
+	D3DXVECTOR3 posEnemy	= GetPosition();		// 敵位置
+	D3DXVECTOR3 moveEnemy	= GetMovePosition();	// 敵移動量
+	D3DXVECTOR3 rotEnemy	= GetRotation();		// 敵向き
+	D3DXVECTOR3 posLook		= VEC3_ZERO;			// 視認対象位置
+	D3DXVECTOR3 rotCannon	= VEC3_ZERO;			// キャノン向き
 	float fPlayerRadius = CManager::GetPlayer()->GetRadius();	// プレイヤー半径
 
 	// TODO：移動の確認・移動量、向き変更量を使う
@@ -725,14 +759,27 @@ void CEnemyCar::CollisionFind(void)
 			rotEnemy = GetRotation();
 
 			// 対象の方向に移動 (前進)
-			posEnemy.x -= sinf(rotEnemy.y) * status.fForwardMove;
-			posEnemy.z -= cosf(rotEnemy.y) * status.fForwardMove;
+			moveEnemy.x -= sinf(rotEnemy.y) * status.fForwardMove;
+			moveEnemy.z -= cosf(rotEnemy.y) * status.fForwardMove;
+
+			// 重力を加算
+			moveEnemy.y -= ENE_GRAVITY;
+
+			// 移動量を加算
+			posEnemy += moveEnemy;
+
+			// 移動量を減衰
+			moveEnemy.x += (0.0f - moveEnemy.x) * ENE_REV;
+			moveEnemy.z += (0.0f - moveEnemy.z) * ENE_REV;
 
 			// ターゲットとの当たり判定
 			CollisionTarget(posEnemy, GetOldPosition());
 
 			// 敵との当たり判定
 			CollisionEnemy(posEnemy);
+
+			// 着地判定
+			CManager::GetField()->LandPosition(posEnemy, moveEnemy);
 
 			// ステージ範囲外の補正
 			CManager::GetStage()->LimitPosition(posEnemy, status.fRadius);
@@ -753,8 +800,18 @@ void CEnemyCar::CollisionFind(void)
 				rotEnemy = GetRotation();
 
 				// 対象の逆方向に移動 (後退)
-				posEnemy.x += sinf(rotEnemy.y) * status.fBackwardMove;
-				posEnemy.z += cosf(rotEnemy.y) * status.fBackwardMove;
+				moveEnemy.x += sinf(rotEnemy.y) * status.fBackwardMove;
+				moveEnemy.z += cosf(rotEnemy.y) * status.fBackwardMove;
+
+				// 重力を加算
+				moveEnemy.y -= ENE_GRAVITY;
+
+				// 移動量を加算
+				posEnemy += moveEnemy;
+
+				// 移動量を減衰
+				moveEnemy.x += (0.0f - moveEnemy.x) * ENE_REV;
+				moveEnemy.z += (0.0f - moveEnemy.z) * ENE_REV;
 			}
 
 			// ターゲットとの当たり判定
@@ -763,13 +820,15 @@ void CEnemyCar::CollisionFind(void)
 			// 敵との当たり判定
 			CollisionEnemy(posEnemy);
 
+			// 着地判定
+			CManager::GetField()->LandPosition(posEnemy, moveEnemy);
+
 			// ステージ範囲外の補正
 			CManager::GetStage()->LimitPosition(posEnemy, status.fRadius);
 
 			// 攻撃
 			Attack
 			( // 引数
-				posEnemy,	// 弾の発射位置
 				D3DXVECTOR3	// 弾の発射向き
 				( // 引数
 					rotCannon.x + (-D3DX_PI * 0.5f),	// x
@@ -782,6 +841,9 @@ void CEnemyCar::CollisionFind(void)
 
 	// 位置を反映
 	SetPosition(posEnemy);
+
+	// 位置移動量を反映
+	SetMovePosition(moveEnemy);
 
 	// 向きを反映
 	SetRotation(rotEnemy);
@@ -798,7 +860,7 @@ void CEnemyCar::SetRotationCannon(const D3DXVECTOR3& rLookPos, D3DXVECTOR3& rRot
 	float fDiffRot = 0.0f;	// 向き
 
 	// キャノンの向きを取得
-	rRotCannon = m_apMultiModel[MODEL_CANNON]->GetRotation() + GetRotation();	// 本体の向きを加算
+	rRotCannon = GetMultiModel(MODEL_CANNON)->GetRotation() + GetRotation();	// 本体の向きを加算
 	useful::NormalizeRot(rRotCannon.y);	// キャノン向きの正規化
 
 	// 目標向きの計算
@@ -814,7 +876,7 @@ void CEnemyCar::SetRotationCannon(const D3DXVECTOR3& rLookPos, D3DXVECTOR3& rRot
 	useful::NormalizeRot(rRotCannon.y);	// キャノン向きの正規化
 
 	// 向きを設定
-	m_apMultiModel[MODEL_CANNON]->SetRotation(rRotCannon - GetRotation());		// 本体の向きを減算
+	GetMultiModel(MODEL_CANNON)->SetRotation(rRotCannon - GetRotation());		// 本体の向きを減算
 }
 
 //************************************************************
@@ -987,6 +1049,20 @@ void CEnemy::LoadSetup(void)
 
 								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].fBullRadius);	// 弾の半径を読み込む
+							}
+							else if (strcmp(&aString[0], "BULLET_PARTS") == 0)
+							{ // 読み込んだ文字列が BULLET_PARTS の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nType].nBullParts);	// 弾の発射パーツを読み込む
+							}
+							else if (strcmp(&aString[0], "BULLET_POS") == 0)
+							{ // 読み込んだ文字列が BULLET_POS の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].bullPos.x);	// 弾の発射位置Xを読み込む
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].bullPos.y);	// 弾の発射位置Yを読み込む
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].bullPos.z);	// 弾の発射位置Zを読み込む
 							}
 							else if (strcmp(&aString[0], "ATTACK_CNT") == 0)
 							{ // 読み込んだ文字列が ATTACK_CNT の場合

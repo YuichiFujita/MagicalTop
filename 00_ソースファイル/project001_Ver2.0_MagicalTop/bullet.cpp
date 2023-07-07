@@ -13,6 +13,7 @@
 #include "texture.h"
 
 #include "score.h"
+#include "field.h"
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -102,6 +103,16 @@ void CBullet::Update(void)
 
 	// 移動量を加算
 	pos += m_move;
+
+	if (pos.y <= CManager::GetField()->GetPositionHeight(pos))
+	{ // 地面に当たっている場合
+
+		// オブジェクトの終了
+		Uninit();
+
+		// 関数を抜ける
+		return;
+	}
 
 	// 位置を設定
 	CObjectBillboard::SetPosition(pos);

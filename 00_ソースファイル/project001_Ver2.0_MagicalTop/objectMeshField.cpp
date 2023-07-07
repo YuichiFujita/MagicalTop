@@ -18,6 +18,8 @@
 //************************************************************
 #define NUM_VTX_TRIANGLE	(3)	// 三角形ポリゴンの頂点数
 
+#define COLL_RADIUS	(100.0f)	// 当たり判定を行う距離
+
 //************************************************************
 //	子クラス [CObjectMeshField] のメンバ関数
 //************************************************************
@@ -1008,12 +1010,13 @@ D3DXVECTOR3 CObjectMeshField::GetMeshVertexPosition(const int nID)
 //============================================================
 //	メッシュの着地位置の取得処理
 //============================================================
-float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3&rPos)
+float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3& rPos)
 {
 	// 変数を宣言
-	int nNumCul;		// 法線ベクトル用の頂点計算用
-	int nNumVtx;		// 法線を求める頂点番号
-	D3DXVECTOR3 nor;	// 法線ベクトル
+	int nNumCul;			// 法線ベクトル用の頂点計算用
+	int nNumVtx;			// 法線を求める頂点番号
+	D3DXVECTOR3 nor;		// 法線ベクトル
+	D3DXVECTOR3 pos = rPos;	// 引数の位置
 
 	// 変数配列を宣言
 	D3DXVECTOR3 aVtxPos[NUM_VTX_TRIANGLE];		// ポリゴンの頂点座標
@@ -1034,47 +1037,60 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3&rPos)
 				// 法線を求める頂点番号を設定
 				nNumVtx = ((nCntWidth + 1) + (nCntHeight * (m_part.x + 1))) + (nCntVtx * m_part.x);
 
-				// ポリゴンの頂点位置を取得
-				aVtxPos[0] = GetMeshVertexPosition(nNumVtx);
-				aVtxPos[1] = GetMeshVertexPosition(nNumVtx - (1 * nNumCul));
-				aVtxPos[2] = GetMeshVertexPosition(nNumVtx + ((m_part.x + 1) * nNumCul));
+				if (collision::CirclePillar(pos, GetMeshVertexPosition(nNumVtx), COLL_RADIUS, 0.0f))
+				{ // 頂点座標が近くにある場合
 
-				for (int nCnt = 0; nCnt < NUM_VTX_TRIANGLE; nCnt++)
-				{ // 三角形ポリゴンの頂点数分繰り返す
+					// ポリゴンの頂点位置を取得
+					aVtxPos[0] = GetMeshVertexPosition(nNumVtx);
+					aVtxPos[1] = GetMeshVertexPosition(nNumVtx - (1 * nNumCul));
+					aVtxPos[2] = GetMeshVertexPosition(nNumVtx + ((m_part.x + 1) * nNumCul));
 
-					// 変数を宣言
-					D3DXMATRIX mtxWorld, mtxRot, mtxTrans;	// 計算用マトリックス
+#if 0	// 回転を考慮した頂点計算
+					for (int nCntVtx = 0; nCntVtx < NUM_VTX_TRIANGLE; nCntVtx++)
+					{ // 三角形ポリゴンの頂点数分繰り返す
 
-					// ワールドマトリックスの初期化
-					D3DXMatrixIdentity(&mtxWorld);
+						// 変数を宣言
+						D3DXMATRIX mtxWorld, mtxRot, mtxTrans;	// 計算用マトリックス
 
-					// 頂点位置を反映
-					D3DXMatrixTranslation(&mtxTrans, aVtxPos[nCnt].x, aVtxPos[nCnt].y, aVtxPos[nCnt].z);
-					D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+						// ワールドマトリックスの初期化
+						D3DXMatrixIdentity(&mtxWorld);
 
-					// ポリゴン向きを反映
-					D3DXMatrixRotationYawPitchRoll(&mtxRot, m_meshField.rot.y, m_meshField.rot.x, m_meshField.rot.z);
-					D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
+						// 頂点位置を反映
+						D3DXMatrixTranslation(&mtxTrans, aVtxPos[nCntVtx].x, aVtxPos[nCntVtx].y, aVtxPos[nCntVtx].z);
+						D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
-					// ポリゴン位置を反映
-					D3DXMatrixTranslation(&mtxTrans, m_meshField.pos.x, m_meshField.pos.y, m_meshField.pos.z);
-					D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+						// ポリゴン向きを反映
+						D3DXMatrixRotationYawPitchRoll(&mtxRot, m_meshField.rot.y, m_meshField.rot.x, m_meshField.rot.z);
+						D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
 
-					// 計算したマトリックスから座標を設定
-					aVtxMtxPos[nCnt] = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
+						// ポリゴン位置を反映
+						D3DXMatrixTranslation(&mtxTrans, m_meshField.pos.x, m_meshField.pos.y, m_meshField.pos.z);
+						D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+
+						// 計算したマトリックスから座標を設定
+						aVtxMtxPos[nCntVtx] = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
 				}
+#else	// 回転を考慮しない頂点計算
+					for (int nCntVtx = 0; nCntVtx < NUM_VTX_TRIANGLE; nCntVtx++)
+					{ // 三角形ポリゴンの頂点数分繰り返す
 
-				if (collision::TrianglePillar(aVtxMtxPos[0], aVtxMtxPos[1], aVtxMtxPos[2], rPos))
-				{ // ポリゴンの範囲内にいる場合
+						// 座標を設定
+						aVtxMtxPos[nCntVtx] = m_meshField.pos + aVtxPos[nCntVtx];
+					}
+#endif
 
-					// 法線を求める
-					useful::NormalizeNormal(aVtxMtxPos[1], aVtxMtxPos[0], aVtxMtxPos[2], nor);
+					if (collision::TrianglePillar(aVtxMtxPos[0], aVtxMtxPos[1], aVtxMtxPos[2], rPos))
+					{ // ポリゴンの範囲内にいる場合
 
-					if (nor.y != 0.0f)
-					{ // 法線が設定されている場合
+						// 法線を求める
+						useful::NormalizeNormal(aVtxMtxPos[1], aVtxMtxPos[0], aVtxMtxPos[2], nor);
 
-						// プレイヤーの着地点を返す
-						return (((rPos.x - aVtxMtxPos[0].x) * nor.x + (-aVtxMtxPos[0].y) * nor.y + (rPos.z - aVtxMtxPos[0].z) * nor.z) * -1.0f) / nor.y;
+						if (nor.y != 0.0f)
+						{ // 法線が設定されている場合
+
+							// プレイヤーの着地点を返す
+							return (((rPos.x - aVtxMtxPos[0].x) * nor.x + (-aVtxMtxPos[0].y) * nor.y + (rPos.z - aVtxMtxPos[0].z) * nor.z) * -1.0f) / nor.y;
+						}
 					}
 				}
 			}
