@@ -49,13 +49,13 @@ public:
 		const D3DXVECTOR3& rPos,	// 位置
 		const D3DXVECTOR3& rSize,	// 大きさ
 		const D3DXCOLOR& rCol,		// 色
-		const D3DXVECTOR3& rRot,	// 射撃向き
+		const D3DXVECTOR3& rVec,	// 移動方向
 		const float fMove,			// 移動速度
 		const int nLife				// 寿命
 	);
 
 	// メンバ関数
-	void SetMove(D3DXVECTOR3 rot, const float fMove);	// 移動量設定
+	void SetMove(D3DXVECTOR3 vec, const float fMove);	// 移動量設定
 	void SetType(const TYPE type);	// 種類設定
 	void SetLife(const int nLife);	// 寿命設定
 

@@ -206,20 +206,16 @@ void CMagicManager::ShotMagic(void)
 		{ // ロックオンしていた場合
 
 			// 変数を宣言
-			float fMoveRot = atan2f	// 敵方向
-			( // 引数
-				posPlayer.x - m_apLockCursor[nCntLock]->GetLockObject()->GetPosition().x,
-				posPlayer.z - m_apLockCursor[nCntLock]->GetLockObject()->GetPosition().z
-			);
 			D3DXVECTOR3 magicPos = D3DXVECTOR3(posPlayer.x, posPlayer.y + PLAY_MAGIC_POS_PLUS_Y, posPlayer.z);	// 発射位置
-			D3DXVECTOR3 magicRot = D3DXVECTOR3(rotPlayer.x + (-D3DX_PI * 0.5f), fMoveRot, 0.0f);	// 発射向き
+			D3DXVECTOR3 vecMove = m_apLockCursor[nCntLock]->GetLockObject()->GetPosition() - posPlayer;			// 移動方向
 
 			// 魔法オブジェクトの生成
 			CMagic::Create
 			( // 引数
 				m_magic,	// 種類
-				magicPos,	// 発射位置
-				magicRot	// 発射向き
+				magicPos,	// 位置
+				VEC3_ZERO,	// 向き
+				vecMove		// 移動方向
 			);
 
 			// ロックオンをしている状態にする
@@ -232,14 +228,22 @@ void CMagicManager::ShotMagic(void)
 
 		// 変数を宣言
 		D3DXVECTOR3 magicPos = D3DXVECTOR3(posPlayer.x, posPlayer.y + PLAY_MAGIC_POS_PLUS_Y, posPlayer.z);	// 発射位置
-		D3DXVECTOR3 magicRot = D3DXVECTOR3(rotPlayer.x + (-D3DX_PI * 0.5f), rotPlayer.y, 0.0f);	// 発射向き
+		D3DXVECTOR3 vecMove;					// 移動方向
+		float fRotVec = rotPlayer.y + D3DX_PI;	// 発射方向
+
+		// 向きを正規化
+		useful::NormalizeRot(fRotVec);
+
+		// 移動方向を設定
+		vecMove = D3DXVECTOR3(sinf(fRotVec), 0.0f, cosf(fRotVec));
 
 		// 魔法オブジェクトの生成
 		CMagic::Create
 		( // 引数
 			m_magic,	// 種類
-			magicPos,	// 発射位置
-			magicRot	// 発射向き
+			magicPos,	// 位置
+			VEC3_ZERO,	// 向き
+			vecMove		// 移動方向
 		);
 	}
 }

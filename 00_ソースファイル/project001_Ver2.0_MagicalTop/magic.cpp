@@ -143,7 +143,8 @@ CMagic *CMagic::Create
 (
 	const TYPE type,			// 種類
 	const D3DXVECTOR3& rPos,	// 位置
-	const D3DXVECTOR3& rRot		// 向き
+	const D3DXVECTOR3& rRot,	// 向き
+	const D3DXVECTOR3& rVec		// 移動方向
 )
 {
 	// ポインタを宣言
@@ -194,7 +195,7 @@ CMagic *CMagic::Create
 			pMagic->SetRotation(rRot);
 
 			// 移動量を設定
-			pMagic->SetMove(rRot, pMagic->GetStatusInfo().fMove);
+			pMagic->SetMove(rVec, pMagic->GetStatusInfo().fMove);
 
 			// 寿命の設定
 			pMagic->SetLife(pMagic->GetStatusInfo().nLife);
@@ -233,16 +234,13 @@ CMagic::StatusInfo CMagic::GetStatusInfo(const TYPE type)
 //============================================================
 //	移動量の設定処理
 //============================================================
-void CMagic::SetMove(D3DXVECTOR3 rot, const float fMove)
+void CMagic::SetMove(D3DXVECTOR3 vec, const float fMove)
 {
-	// 向きの正規化
-	useful::NormalizeRot(rot.x);
-	useful::NormalizeRot(rot.y);
+	// ベクトルの正規化
+	D3DXVec3Normalize(&vec, &vec);
 
-	// 移動量を求める
-	m_movePos.x = (fMove * sinf(rot.x)) * sinf(rot.y);
-	m_movePos.y = (fMove * cosf(rot.x));
-	m_movePos.z = (fMove * sinf(rot.x)) * cosf(rot.y);
+	// 移動量を設定
+	m_movePos = vec * fMove;
 }
 
 //============================================================

@@ -1013,10 +1013,10 @@ D3DXVECTOR3 CObjectMeshField::GetMeshVertexPosition(const int nID)
 float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3& rPos)
 {
 	// 変数を宣言
-	int nNumCul;			// 法線ベクトル用の頂点計算用
-	int nNumVtx;			// 法線を求める頂点番号
-	D3DXVECTOR3 nor;		// 法線ベクトル
-	D3DXVECTOR3 pos = rPos;	// 引数の位置
+	int nNumCul;		// 法線ベクトル用の頂点計算用
+	int nNumVtx;		// 法線を求める頂点番号
+	D3DXVECTOR3 nor;	// 法線ベクトル
+	D3DXVECTOR3 pos;	// ターゲット位置
 
 	// 変数配列を宣言
 	D3DXVECTOR3 aVtxPos[NUM_VTX_TRIANGLE];		// ポリゴンの頂点座標
@@ -1036,6 +1036,9 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3& rPos)
 
 				// 法線を求める頂点番号を設定
 				nNumVtx = ((nCntWidth + 1) + (nCntHeight * (m_part.x + 1))) + (nCntVtx * m_part.x);
+
+				// ターゲット位置を設定
+				pos = rPos;
 
 				if (collision::CirclePillar(pos, GetMeshVertexPosition(nNumVtx), COLL_RADIUS, 0.0f))
 				{ // 頂点座標が近くにある場合

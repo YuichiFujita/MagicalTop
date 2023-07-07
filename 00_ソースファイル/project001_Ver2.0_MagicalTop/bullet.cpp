@@ -133,15 +133,13 @@ void CBullet::Draw(void)
 //============================================================
 //	移動量の設定処理
 //============================================================
-void CBullet::SetMove(D3DXVECTOR3 rot, const float fMove)
+void CBullet::SetMove(D3DXVECTOR3 vec, const float fMove)
 {
-	// 向きの正規化
-	useful::NormalizeRot(rot.y);
+	// ベクトルの正規化
+	D3DXVec3Normalize(&vec, &vec);
 
-	// 移動量を求める
-	m_move.x = (fMove * sinf(rot.x)) * sinf(rot.y);
-	m_move.y = (fMove * cosf(rot.x));
-	m_move.z = (fMove * sinf(rot.x)) * cosf(rot.y);
+	// 移動量を設定
+	m_move = vec * fMove;
 }
 
 //============================================================
@@ -165,7 +163,7 @@ void CBullet::SetLife(const int nLife)
 //============================================================
 //	生成処理
 //============================================================
-CBullet *CBullet::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, const D3DXCOLOR& rCol, const D3DXVECTOR3& rRot, const float fMove, const int nLife)
+CBullet *CBullet::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, const D3DXCOLOR& rCol, const D3DXVECTOR3& rVec, const float fMove, const int nLife)
 {
 	// 変数を宣言
 	int nTextureID;	// テクスチャインデックス
@@ -219,7 +217,7 @@ CBullet *CBullet::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVEC
 			pBullet->SetType(type);
 
 			// 移動量を設定
-			pBullet->SetMove(rRot, fMove);
+			pBullet->SetMove(rVec, fMove);
 
 			// 寿命の設定
 			pBullet->SetLife(nLife);

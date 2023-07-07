@@ -502,7 +502,7 @@ void CEnemy::CollisionFind(void)
 			}
 
 			// 攻撃
-			Attack(D3DXVECTOR3(m_rot.x + (-D3DX_PI * 0.5f), m_rot.y, 0.0f));
+			Attack(posLook);
 		}
 	}
 }
@@ -535,7 +535,7 @@ void CEnemy::Look(const D3DXVECTOR3& rPos)
 //============================================================
 //	攻撃処理
 //============================================================
-void CEnemy::Attack(const D3DXVECTOR3& rRot)
+void CEnemy::Attack(const D3DXVECTOR3& rTarget)
 {
 	// カウンターを加算
 	m_nCounterAtk++;
@@ -544,23 +544,39 @@ void CEnemy::Attack(const D3DXVECTOR3& rRot)
 	{ // カウンターが一定値以上の場合
 
 		// 変数を宣言
-		D3DXMATRIX mtx = m_apMultiModel[m_status.nBullParts]->GetMtxWorld();			// 発射パーツのマトリックス
-		D3DXVECTOR3 pos = D3DXVECTOR3(mtx._41, mtx._42, mtx._43) + m_status.bullPos;	// 発射位置
+		D3DXVECTOR3 bullPos;			// 発射位置
+		D3DXMATRIX mtxTrans, mtxWorld;	// 計算用マトリックス
 
-		// カウンターを初期化
-		m_nCounterAtk = 0;
+		// ワールドマトリックスの初期化
+		D3DXMatrixIdentity(&mtxWorld);
+
+		// 位置を反映
+		D3DXMatrixTranslation(&mtxTrans, m_status.bullPos.x, m_status.bullPos.y, m_status.bullPos.z);
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+
+		// マトリックスを掛け合わせる
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &m_apMultiModel[m_status.nBullParts]->GetMtxWorld());
+
+		// マトリックスから位置を求める
+		bullPos = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
 
 		// 弾オブジェクトの生成
 		CBullet::Create
 		( // 引数
 			CBullet::TYPE_ENEMY,			// 種類
-			pos,							// 位置
+			bullPos,						// 位置
 			VEC3_ALL(m_status.fBullRadius),	// 大きさ
 			XCOL_WHITE,						// 色
-			rRot,							// 射撃向き
+			rTarget - bullPos,				// 移動方向
 			m_status.fBullMove,				// 移動速度
 			m_status.nBullLife				// 寿命
 		);
+
+		// パーティクル3Dの作成
+		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, bullPos);
+
+		// カウンターを初期化
+		m_nCounterAtk = 0;
 	}
 }
 
@@ -827,15 +843,7 @@ void CEnemyCar::CollisionFind(void)
 			CManager::GetStage()->LimitPosition(posEnemy, status.fRadius);
 
 			// 攻撃
-			Attack
-			( // 引数
-				D3DXVECTOR3	// 弾の発射向き
-				( // 引数
-					rotCannon.x + (-D3DX_PI * 0.5f),	// x
-					rotCannon.y,						// y
-					0.0f								// z
-				)
-			);
+			Attack(posLook);
 		}
 	}
 
