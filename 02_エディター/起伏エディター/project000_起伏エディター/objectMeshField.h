@@ -73,6 +73,7 @@ public:
 	void SetLighting(const bool bLight);				// ライティング設定
 	HRESULT SetPattern(const POSGRID2& rPart);			// 分割数設定
 	void SetMeshVertexPosition(const int nID, const D3DXVECTOR3& rPos);	// メッシュの頂点位置設定
+	void SetPositionGap(const POSGRID2& rPart, D3DXVECTOR3 *pPosGap);	// 座標のずれ設定
 
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
@@ -108,6 +109,7 @@ private:
 	// メンバ変数
 	LPDIRECT3DVERTEXBUFFER9 m_pVtxBuff;	// 頂点バッファへのポインタ
 	LPDIRECT3DINDEXBUFFER9  m_pIdxBuff;	// インデックスバッファへのポインタ
+	D3DXVECTOR3 *m_pPosGapBuff;	// 座標のずれバッファへのポインタ
 	D3DXVECTOR3 *m_pNorBuff;	// 法線バッファへのポインタ
 	int *m_pNumNorBuff;			// 法線の使用数バッファへのポインタ
 

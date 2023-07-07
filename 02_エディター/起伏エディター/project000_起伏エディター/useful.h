@@ -13,7 +13,7 @@
 //************************************************************
 //	インクルードファイル
 //************************************************************
-#include "main.h"
+//#include "main.h"
 
 //************************************************************
 //	マクロ定義
@@ -64,6 +64,10 @@ struct POSGRID2
 	// デストラクタ
 	~POSGRID2() {}
 
+	// メンバ関数
+	bool operator==(const POSGRID2& grid) const;
+	bool operator!=(const POSGRID2& grid) const;
+
 	// メンバ変数
 	int x;	// 方眼座標 (x)
 	int y;	// 方眼座標 (y)
@@ -78,6 +82,10 @@ struct POSGRID3
 
 	// デストラクタ
 	~POSGRID3() {}
+
+	// メンバ関数
+	bool operator==(const POSGRID3& grid) const;
+	bool operator!=(const POSGRID3& grid) const;
 
 	// メンバ変数
 	int x;	// 方眼座標 (x)
