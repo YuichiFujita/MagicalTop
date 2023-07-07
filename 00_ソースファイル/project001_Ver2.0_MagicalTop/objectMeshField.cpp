@@ -29,6 +29,7 @@ CObjectMeshField::CObjectMeshField()
 	// メンバ変数をクリア
 	m_pVtxBuff = NULL;		// 頂点バッファ
 	m_pIdxBuff = NULL;		// インデックスバッファ
+	m_pPosGapBuff = NULL;	// 座標のずれバッファ
 	m_pNorBuff = NULL;		// 法線バッファ
 	m_pNumNorBuff = NULL;	// 法線の使用数バッファ
 	m_part = GRID2_ZERO;	// 分割数
@@ -46,6 +47,7 @@ CObjectMeshField::CObjectMeshField(const CObject::LABEL label, const int nPriori
 	// メンバ変数をクリア
 	m_pVtxBuff = NULL;		// 頂点バッファ
 	m_pIdxBuff = NULL;		// インデックスバッファ
+	m_pPosGapBuff = NULL;	// 座標のずれバッファ
 	m_pNorBuff = NULL;		// 法線バッファ
 	m_pNumNorBuff = NULL;	// 法線の使用数バッファ
 	m_part = GRID2_ZERO;	// 分割数
@@ -74,6 +76,7 @@ HRESULT CObjectMeshField::Init(void)
 	// メンバ変数を初期化
 	m_pVtxBuff = NULL;		// 頂点バッファ
 	m_pIdxBuff = NULL;		// インデックスバッファ
+	m_pPosGapBuff = NULL;	// 座標のずれバッファ
 	m_pNorBuff = NULL;		// 法線バッファ
 	m_pNumNorBuff = NULL;	// 法線の使用数バッファ
 	m_part = GRID2_ZERO;	// 分割数
@@ -121,6 +124,15 @@ void CObjectMeshField::Uninit(void)
 		// メモリ開放
 		m_pIdxBuff->Release();
 		m_pIdxBuff = NULL;
+	}
+
+	// 座標のずれバッファの破棄
+	if (USED(m_pPosGapBuff))
+	{ // 座標のずれバッファが使用中の場合
+
+		// メモリ開放
+		delete[] m_pPosGapBuff;
+		m_pPosGapBuff = NULL;
 	}
 
 	// 法線バッファの破棄
@@ -566,7 +578,7 @@ void CObjectMeshField::SetScalingBiaxial(const D3DXVECTOR2& rSize)
 	m_meshField.size = rSize;
 
 	// 頂点情報の設定
-	SetVtx();
+	SetVtx(false);
 }
 
 //============================================================
@@ -578,7 +590,7 @@ void CObjectMeshField::SetColor(const D3DXCOLOR& rCol)
 	m_meshField.col = rCol;
 
 	// 頂点情報の設定
-	SetVtx();
+	SetVtx(false);
 }
 
 //============================================================
@@ -607,6 +619,9 @@ HRESULT CObjectMeshField::SetPattern(const POSGRID2& rPart)
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
+	//--------------------------------------------------------
+	//	変更情報を設定
+	//--------------------------------------------------------
 	// 引数の分割数を設定
 	m_part = rPart;
 
@@ -614,6 +629,9 @@ HRESULT CObjectMeshField::SetPattern(const POSGRID2& rPart)
 	m_nNumVtx = (m_part.x + 1) * (m_part.y + 1); // 必要頂点数
 	m_nNumIdx = (m_part.x + 1) * (((m_part.y + 1) * 2) - 2) + (m_part.y * 2) - 2; // 必要インデックス数
 
+	//--------------------------------------------------------
+	//	頂点バッファの破棄・生成
+	//--------------------------------------------------------
 	// 頂点バッファの破棄
 	if (USED(m_pVtxBuff))
 	{ // 頂点バッファが使用中の場合
@@ -646,6 +664,9 @@ HRESULT CObjectMeshField::SetPattern(const POSGRID2& rPart)
 	}
 	else { assert(false); return E_FAIL; }	// 使用中
 
+	//--------------------------------------------------------
+	//	インデックスバッファの破棄・生成
+	//--------------------------------------------------------
 	// インデックスバッファの破棄
 	if (USED(m_pIdxBuff))
 	{ // インデックスバッファが使用中の場合
@@ -678,6 +699,38 @@ HRESULT CObjectMeshField::SetPattern(const POSGRID2& rPart)
 	}
 	else { assert(false); return E_FAIL; }	// 使用中
 
+	//--------------------------------------------------------
+	//	座標のずれバッファの破棄・生成
+	//--------------------------------------------------------
+	// 座標のずれバッファの破棄
+	if (USED(m_pPosGapBuff))
+	{ // 座標のずれバッファが使用中の場合
+
+		// メモリ開放
+		delete[] m_pPosGapBuff;
+		m_pPosGapBuff = NULL;
+	}
+
+	// 座標のずれバッファの情報を設定
+	if (UNUSED(m_pPosGapBuff))
+	{ // 非使用中の場合
+
+		// 座標のずれバッファのメモリ確保
+		m_pPosGapBuff = new D3DXVECTOR3[m_nNumVtx];
+
+		if (USED(m_pPosGapBuff))
+		{ // 確保に成功した場合
+
+			// メモリクリア
+			memset(m_pPosGapBuff, 0, sizeof(D3DXVECTOR3) * m_nNumVtx);
+		}
+		else { assert(false); return E_FAIL; }	// 確保失敗
+	}
+	else { assert(false); return E_FAIL; }	// 使用中
+
+	//--------------------------------------------------------
+	//	法線バッファの破棄・生成
+	//--------------------------------------------------------
 	// 法線バッファの破棄
 	if (USED(m_pNorBuff))
 	{ // 法線バッファが使用中の場合
@@ -707,6 +760,9 @@ HRESULT CObjectMeshField::SetPattern(const POSGRID2& rPart)
 	}
 	else { assert(false); return E_FAIL; }	// 使用中
 
+	//--------------------------------------------------------
+	//	法線の使用数バッファの破棄・生成
+	//--------------------------------------------------------
 	// 法線の使用数バッファの破棄
 	if (USED(m_pNumNorBuff))
 	{ // 法線の使用数バッファが使用中の場合
@@ -733,12 +789,32 @@ HRESULT CObjectMeshField::SetPattern(const POSGRID2& rPart)
 	}
 	else { assert(false); return E_FAIL; }	// 使用中
 
+	//--------------------------------------------------------
+	//	分割数を反映
+	//--------------------------------------------------------
 	// 頂点・インデックス情報の設定
-	SetVtx();
+	SetVtx(true);
 	SetIdx();
 
 	// 成功を返す
 	return S_OK;
+}
+
+//============================================================
+//	座標のずれの設定処理
+//============================================================
+void CObjectMeshField::SetGapPosition(const int nID, const D3DXVECTOR3& rPos)
+{
+	if (USED(m_pPosGapBuff))
+	{ // 使用中の場合
+
+		if (nID < (m_part.x + 1) * (m_part.y + 1))
+		{ // インデックスが使用可能な場合
+
+			// 頂点のずれを設定
+			m_pPosGapBuff[nID] = rPos;
+		}
+	}
 }
 
 //============================================================
@@ -768,6 +844,35 @@ void CObjectMeshField::SetMeshVertexPosition(const int nID, const D3DXVECTOR3& r
 			m_pVtxBuff->Unlock();
 		}
 	}
+}
+
+//============================================================
+//	地形の設定処理
+//============================================================
+void CObjectMeshField::SetTerrain(const POSGRID2& rPart, D3DXVECTOR3 *pPosGap)
+{
+	if (rPart != m_part)
+	{ // 分割数が違う場合
+
+		// 分割数を設定
+		SetPattern(rPart);
+	}
+
+	if (USED(m_pPosGapBuff) && rPart == m_part)
+	{ // 座標のずれバッファが使用中且つ、同じ分割数の場合
+
+		for (int nCntVtx = 0; nCntVtx < m_nNumVtx; nCntVtx++, pPosGap++)
+		{ // 頂点数分繰り返す
+
+			// 引数の座標のずれ量を設定
+			m_pPosGapBuff[nCntVtx] = *pPosGap;
+		}
+	}
+	else { assert(false); }	// 非使用中
+
+	// 頂点・インデックス情報の設定
+	SetVtx(true);
+	SetIdx();
 }
 
 //============================================================
@@ -840,6 +945,29 @@ int CObjectMeshField::GetNumVertex(void) const
 {
 	// 頂点数を返す
 	return m_nNumVtx;
+}
+
+//============================================================
+//	座標のずれ取得処理
+//============================================================
+D3DXVECTOR3 CObjectMeshField::GetGapPosition(const int nID)
+{
+	// 変数を宣言
+	D3DXVECTOR3 pos;	// 頂点のずれの代入用
+
+	if (USED(m_pPosGapBuff))
+	{ // 使用中の場合
+
+		if (nID < (m_part.x + 1) * (m_part.y + 1))
+		{ // インデックスが使用可能な場合
+
+			// 頂点のずれを設定
+			pos = m_pPosGapBuff[nID];
+		}
+	}
+
+	// 引数のインデックスの頂点のずれを返す
+	return pos;
 }
 
 //============================================================
@@ -960,8 +1088,11 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3&rPos)
 //============================================================
 //	頂点情報の設定処理
 //============================================================
-void CObjectMeshField::SetVtx(void)
+void CObjectMeshField::SetVtx(bool bNor)
 {
+	// 変数を宣言
+	int nNumVtx = 0;	// 現在の頂点番号
+
 	// ポインタを宣言
 	VERTEX_3D *pVtx;	// 頂点情報へのポインタ
 
@@ -977,6 +1108,9 @@ void CObjectMeshField::SetVtx(void)
 			for (int nCntWidth = 0; nCntWidth < m_part.x + 1; nCntWidth++)
 			{ // 横の分割数 +1回繰り返す
 
+				// 現在の頂点番号を設定
+				nNumVtx = nCntWidth + (nCntHeight * (m_part.x + 1));
+
 				// 頂点座標の設定
 				pVtx[0].pos = D3DXVECTOR3
 				( // 引数
@@ -984,6 +1118,7 @@ void CObjectMeshField::SetVtx(void)
 					0.0f,																					// y
 					-(nCntHeight * (m_meshField.size.y / (float)m_part.y) - (m_meshField.size.y * 0.5f))	// z
 				);
+				pVtx[0].pos += m_pPosGapBuff[nNumVtx];	// 頂点からのずれ量を加算
 
 				// 頂点カラーの設定
 				pVtx[0].col = m_meshField.col;
@@ -1000,8 +1135,12 @@ void CObjectMeshField::SetVtx(void)
 		m_pVtxBuff->Unlock();
 	}
 
-	// 法線の設定・正規化
-	NormalizeNormal();
+	if (bNor)
+	{ // 法線の正規化も行う場合
+
+		// 法線の設定・正規化
+		NormalizeNormal();
+	}
 }
 
 //============================================================

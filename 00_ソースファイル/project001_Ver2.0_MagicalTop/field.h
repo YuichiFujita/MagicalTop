@@ -30,11 +30,25 @@ public:
 		TEXTURE_MAX			// この列挙型の総数
 	}TEXTURE;
 
+	// 地形列挙
+	typedef enum
+	{
+		TERRAIN_128x128 = 0,	// 128x128分割数の地形
+		TERRAIN_MAX				// この列挙型の総数
+	}TERRAIN;
+
 	// コンストラクタ
 	CField();
 
 	// デストラクタ
 	~CField();
+
+	// 地形情報構造体
+	typedef struct
+	{
+		D3DXVECTOR3 *pPosGap;	// 頂点座標のずれ量
+		POSGRID2 part;			// 分割数
+	}TerrainInfo;
 
 	// オーバーライド関数
 	HRESULT Init(void);	// 初期化
@@ -43,6 +57,7 @@ public:
 	void Draw(void);	// 描画
 
 	// 静的メンバ関数
+	static void LoadSetup(void);	// セットアップ
 	static CField *Create	// 生成
 	( // 引数
 		const TEXTURE texture,		// 種類
@@ -55,9 +70,13 @@ public:
 		const bool bLight = true			// ライティング状況
 	);
 
+	// メンバ関数
+	void SetTerrain(const TERRAIN terrain);	// 地形設定
+
 private:
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];	// テクスチャ定数
+	static TerrainInfo m_aTerrainInfo[TERRAIN_MAX];	// 地形情報
 };
 
 #endif	// _FIELD_H_
