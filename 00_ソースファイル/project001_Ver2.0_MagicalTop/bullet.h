@@ -60,6 +60,9 @@ public:
 	void SetLife(const int nLife);	// 寿命設定
 
 private:
+	// メンバ関数
+	bool CollisionTarget(void);	// ターゲットとの当たり判定
+
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 

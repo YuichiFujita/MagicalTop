@@ -12,7 +12,8 @@
 #include "renderer.h"
 #include "texture.h"
 
-#include "score.h"
+#include "collision.h"
+#include "target.h"
 #include "field.h"
 
 //************************************************************
@@ -104,8 +105,20 @@ void CBullet::Update(void)
 	// 移動量を加算
 	pos += m_move;
 
+	// 地面との当たり判定
 	if (pos.y <= CManager::GetField()->GetPositionHeight(pos))
 	{ // 地面に当たっている場合
+
+		// オブジェクトの終了
+		Uninit();
+
+		// 関数を抜ける
+		return;
+	}
+
+	// ターゲットとの当たり判定
+	if (CollisionTarget())
+	{ // ターゲットに当たっている場合
 
 		// オブジェクトの終了
 		Uninit();
@@ -237,4 +250,42 @@ CBullet *CBullet::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVEC
 		}
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	ターゲットとの当たり判定
+//============================================================
+bool CBullet::CollisionTarget(void)
+{
+	// 変数を宣言
+	bool bHit = false;	// 判定状況
+
+	// ポインタを宣言
+	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
+
+	if (USED(pTarget))
+	{ // ターゲットが使用されている場合
+
+		// 変数を宣言
+		D3DXVECTOR3 sizeBullet = GetScaling();
+
+		// ターゲットとの衝突判定
+		bHit = collision::Circle3D
+		( // 引数
+			GetPosition(),
+			pTarget->GetPosition(),
+			(sizeBullet.x + sizeBullet.y) * 0.5f,
+			pTarget->GetRadius()
+		);
+
+		if (bHit)
+		{ // 当たっていた場合
+
+			// 敵のヒット処理
+			pTarget->Hit(200);	// TODO：定数
+		}
+	}
+
+	// 判定状況を返す
+	return bHit;
 }

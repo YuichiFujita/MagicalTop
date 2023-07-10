@@ -99,6 +99,13 @@ HRESULT CEnemy::Init(void)
 
 	// 体力ゲージ3Dを生成
 	m_pLifeGauge = CLifeGauge3D::Create(m_status.nLife, m_status.nLife, (int)(ENE_DMG_FRAME * 0.5f), m_status.fLifeUp, this);
+	if (UNUSED(m_pLifeGauge))
+	{ // 生成に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// パーツ数を代入
 	m_nNumModel = m_parts.nNumParts;

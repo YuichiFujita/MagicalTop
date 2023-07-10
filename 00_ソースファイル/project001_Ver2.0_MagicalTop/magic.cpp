@@ -105,6 +105,9 @@ void CMagic::Update(void)
 	if (CollisionEnemy())
 	{ // 敵と当たっていた場合
 
+		// オブジェクトの終了
+		Uninit();
+
 		// 関数を抜ける
 		return;
 	}
@@ -351,9 +354,6 @@ bool CMagic::CollisionEnemy(void)
 
 				// 敵のヒット処理
 				pObject->Hit(m_status.nDamage);
-
-				// 魔法オブジェクトの終了
-				Uninit();
 
 				// 当たった判定を返す
 				return true;

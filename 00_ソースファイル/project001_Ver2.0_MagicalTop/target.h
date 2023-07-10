@@ -21,6 +21,7 @@
 //	前方宣言
 //************************************************************
 class CObjectMeshCube;	// オブジェクトメッシュキューブクラス
+class CLifeGauge3D;		// 体力ゲージ3Dクラス
 
 //************************************************************
 //	クラス定義
@@ -47,6 +48,7 @@ public:
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
 	void Draw(void);	// 描画
+	void Hit(const int nDmg);	// ヒット
 
 	// 静的メンバ関数
 	static CTarget *Create	// 生成
@@ -66,6 +68,7 @@ private:
 
 	// メンバ変数
 	CObjectMeshCube *m_pMeshCube;	// メッシュキューブの情報
+	CLifeGauge3D *m_pLifeGauge;		// 体力の情報
 	float m_fSinRot;	// 浮遊向き
 };
 

@@ -12,6 +12,8 @@
 #include "renderer.h"
 #include "model.h"
 #include "objectMeshCube.h"
+#include "lifeGauge3D.h"
+#include "particle3D.h"
 
 //************************************************************
 //	マクロ定義
@@ -25,6 +27,10 @@
 
 #define ADD_SIN_ROT	(D3DXToRadian(1))	// 浮遊向きの加算量
 #define ADD_CUBEROT	(D3DXVECTOR3(0.01f, 0.001f, 0.01f))	// キューブの回転量
+
+#define TARG_LIFE	(1000)		// ターゲットの体力
+#define TARG_POSUP	(160.0f)	// ターゲットのY位置の加算量
+#define TARG_DMG_FRAME	(20)	// ターゲットのダメージ状態フレーム
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -43,8 +49,9 @@ const char *CTarget::mc_apModelFile[] =	// モデル定数
 CTarget::CTarget() : CObjectModel(CObject::LABEL_TARGET)
 {
 	// メンバ変数をクリア
-	m_pMeshCube = NULL;	// メッシュキューブの情報
-	m_fSinRot = 0.0f;	// 浮遊向き
+	m_pMeshCube = NULL;		// メッシュキューブの情報
+	m_pLifeGauge = NULL;	// 体力の情報
+	m_fSinRot = 0.0f;		// 浮遊向き
 }
 
 //============================================================
@@ -61,8 +68,9 @@ CTarget::~CTarget()
 HRESULT CTarget::Init(void)
 {
 	// メンバ変数を初期化
-	m_pMeshCube = NULL;	// メッシュキューブの情報
-	m_fSinRot = 0.0f;	// 浮遊向き
+	m_pMeshCube = NULL;		// メッシュキューブの情報
+	m_pLifeGauge = NULL;	// 体力の情報
+	m_fSinRot = 0.0f;		// 浮遊向き
 
 	// オブジェクトモデルの初期化
 	if (FAILED(CObjectModel::Init()))
@@ -92,6 +100,16 @@ HRESULT CTarget::Init(void)
 		false			// ライティング状況
 	);
 	if (UNUSED(m_pMeshCube))
+	{ // 生成に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 体力ゲージ3Dを生成
+	m_pLifeGauge = CLifeGauge3D::Create(TARG_LIFE, TARG_LIFE, (int)(TARG_DMG_FRAME * 0.5f), TARG_POSUP, this);
+	if (UNUSED(m_pLifeGauge))
 	{ // 生成に失敗した場合
 
 		// 失敗を返す
@@ -155,6 +173,35 @@ void CTarget::Draw(void)
 
 	// オブジェクトモデルの描画
 	CObjectModel::Draw();
+}
+
+//============================================================
+//	ヒット処理
+//============================================================
+void CTarget::Hit(const int nDmg)
+{
+	// 体力からダメージ分減算
+	m_pLifeGauge->AddLife(-nDmg);
+
+	if (m_pLifeGauge->GetLife() > 0)
+	{ // 生きている場合
+
+		// パーティクル3Dオブジェクトを生成
+		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition());
+	}
+	else
+	{ // 死んでいる場合
+
+		// パーティクル3Dオブジェクトを生成
+		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
+		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+
+		// TODO：TargetのUninitどうするのこれ
+#if 0
+		// ターゲットオブジェクトの終了
+		Uninit();
+#endif
+	}
 }
 
 //============================================================
