@@ -61,8 +61,8 @@ public:
 	void SetLockObject(CObject *pObject);		// ロックオン設定
 	void SetEnableDraw(const bool bDraw);		// 描画状況設定
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
-	const CObject *GetLockObject(void);			// ロックオン取得
-	bool IsDraw(void);							// 描画状況取得
+	const CObject *GetLockObject(void) const;	// ロックオン取得
+	bool IsDraw(void) const;					// 描画状況取得
 
 private:
 	// メンバ変数

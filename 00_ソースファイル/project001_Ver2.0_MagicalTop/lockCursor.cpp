@@ -293,7 +293,7 @@ D3DXVECTOR3 CLockCursor::GetPosition(void) const
 //============================================================
 //	ロックオン取得処理
 //============================================================
-const CObject *CLockCursor::GetLockObject(void)
+const CObject *CLockCursor::GetLockObject(void) const
 {
 	// ロックオン中のオブジェクトを返す
 	return m_pLock;
@@ -302,7 +302,7 @@ const CObject *CLockCursor::GetLockObject(void)
 //============================================================
 //	描画状況取得処理
 //============================================================
-bool CLockCursor::IsDraw(void)
+bool CLockCursor::IsDraw(void) const
 {
 	// 描画状況を返す
 	return m_bDraw;

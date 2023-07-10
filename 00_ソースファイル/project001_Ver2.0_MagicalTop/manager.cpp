@@ -33,6 +33,8 @@
 #include "scenery.h"
 #include "sky.h"
 
+#include "lifeGauge3D.h"
+
 #ifdef _DEBUG	// デバッグ処理
 
 #include "debug.h"

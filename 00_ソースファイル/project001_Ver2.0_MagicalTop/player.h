@@ -89,6 +89,7 @@ public:
 	);
 
 	// メンバ関数
+	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
 	void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
 	void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得

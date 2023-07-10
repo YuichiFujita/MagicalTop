@@ -12,6 +12,7 @@
 #include "renderer.h"
 #include "texture.h"
 #include "multiModel.h"
+#include "lifeGauge3D.h"
 #include "debugproc.h"
 #include "collision.h"
 #include "player.h"
@@ -29,6 +30,8 @@
 
 #define ENE_REV		(0.02f)	// プレイヤー移動量の減衰係数
 #define ENE_GRAVITY	(1.0f)	// プレイヤー重力
+
+#define ENE_DMG_FRAME	(20)	// 敵のダメージ状態フレーム
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -51,6 +54,7 @@ const char *CEnemyCar::mc_apModelFile[] =	// 戦車モデル定数
 CEnemy::CEnemy(const TYPE type) : CObject(CObject::LABEL_ENEMY), m_status(m_aStatusInfo[type]), m_parts(m_aPartsInfo[type])
 {
 	// メンバ変数をクリア
+	m_pLifeGauge = NULL;	// 体力の情報
 	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
 	m_nNumModel = 0;	// パーツの総数
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
@@ -59,7 +63,6 @@ CEnemy::CEnemy(const TYPE type) : CObject(CObject::LABEL_ENEMY), m_status(m_aSta
 	m_movePos	= VEC3_ZERO;	// 位置移動量
 	m_rot		= VEC3_ZERO;	// 向き
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
-	m_nLife		= 0;			// 体力
 	m_nCounterAtk = 0;			// 攻撃管理カウンター
 }
 
@@ -83,6 +86,7 @@ HRESULT CEnemy::Init(void)
 	CModel *pModel = CManager::GetModel();	// モデルへのポインタ
 
 	// メンバ変数を初期化
+	m_pLifeGauge = NULL;	// 体力の情報
 	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
 	m_nNumModel = 0;	// パーツの総数
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
@@ -91,8 +95,10 @@ HRESULT CEnemy::Init(void)
 	m_movePos	= VEC3_ZERO;		// 位置移動量
 	m_rot		= VEC3_ZERO;		// 向き
 	m_moveRot	= VEC3_ZERO;		// 向き変更量
-	m_nLife		= m_status.nLife;	// 体力
 	m_nCounterAtk = 0;				// 攻撃管理カウンター
+
+	// 体力ゲージ3Dを生成
+	m_pLifeGauge = CLifeGauge3D::Create(m_status.nLife, m_status.nLife, (int)(ENE_DMG_FRAME * 0.5f), m_status.fLifeUp, this);
 
 	// パーツ数を代入
 	m_nNumModel = m_parts.nNumParts;
@@ -200,9 +206,9 @@ void CEnemy::Draw(void)
 void CEnemy::Hit(const int nDmg)
 {
 	// 体力からダメージ分減算
-	m_nLife -= nDmg;
+	m_pLifeGauge->AddLife(-nDmg);
 
-	if (m_nLife > 0)
+	if (m_pLifeGauge->GetLife() > 0)
 	{ // 生きている場合
 
 		// パーティクル3Dオブジェクトを生成
@@ -1095,6 +1101,12 @@ void CEnemy::LoadSetup(void)
 
 								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].fLookRevision);	// 振り向き補正係数を読み込む
+							}
+							else if (strcmp(&aString[0], "LIFE_POSUP") == 0)
+							{ // 読み込んだ文字列が LIFE_POSUP の場合
+
+								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fLifeUp);			// 体力表示のY位置加算量を読み込む
 							}
 							else if (strcmp(&aString[0], "FIND_RADIUS") == 0)
 							{ // 読み込んだ文字列が FIND_RADIUS の場合

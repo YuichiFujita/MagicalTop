@@ -349,6 +349,29 @@ void CPlayer::SetRotation(const D3DXVECTOR3& rRot)
 }
 
 //============================================================
+//	マトリックス取得処理
+//============================================================
+D3DXMATRIX CPlayer::GetMtxWorld(void) const
+{
+	// 変数を宣言
+	D3DXMATRIX mtxRot, mtxTrans, mtxWorld;	// 計算用マトリックス
+
+	// ワールドマトリックスの初期化
+	D3DXMatrixIdentity(&mtxWorld);
+
+	// 向きを反映
+	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
+	D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
+
+	// 位置を反映
+	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
+	D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+
+	// ワールドマトリックスを返す
+	return mtxWorld;
+}
+
+//============================================================
 //	位置取得処理
 //============================================================
 D3DXVECTOR3 CPlayer::GetPosition(void) const

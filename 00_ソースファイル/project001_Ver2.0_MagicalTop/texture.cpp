@@ -91,34 +91,44 @@ int CTexture::Regist(const char *pFileName)
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
-	for (int nCntTexture = 0; nCntTexture < m_nNumAll; nCntTexture++)
-	{ // テクスチャの総数分繰り返す
+	if (USED(pFileName))
+	{ // ポインタが使用されている場合
 
-		if (strcmp(&m_pFileName[nCntTexture][0], pFileName) == 0)
-		{ // 文字列が一致した場合
+		for (int nCntTexture = 0; nCntTexture < m_nNumAll; nCntTexture++)
+		{ // テクスチャの総数分繰り返す
 
-			// すでに読み込んでいるテクスチャの配列番号を返す
-			return nCntTexture;
+			if (strcmp(&m_pFileName[nCntTexture][0], pFileName) == 0)
+			{ // 文字列が一致した場合
+
+				// すでに読み込んでいるテクスチャの配列番号を返す
+				return nCntTexture;
+			}
 		}
+
+		// テクスチャの読み込み
+		if (FAILED(D3DXCreateTextureFromFile(pDevice, pFileName, &m_apTexture[nID])))
+		{ // テクスチャの読み込みに失敗した場合
+
+			// 失敗を返す
+			assert(false);
+			return -1;
+		}
+
+		// テクスチャのファイル名を保存
+		strcpy(&m_pFileName[nID][0], pFileName);
+
+		// テクスチャの総数を加算
+		m_nNumAll++;
+
+		// 読み込んだテクスチャの配列番号を返す
+		return nID;
 	}
+	else
+	{ // ポインタが使用されていない場合
 
-	// テクスチャの読み込み
-	if (FAILED(D3DXCreateTextureFromFile(pDevice, pFileName, &m_apTexture[nID])))
-	{ // テクスチャの読み込みに失敗した場合
-
-		// 失敗を返す
-		assert(false);
-		return -1;
+		// テクスチャなしの番号を返す
+		return NONE_IDX;
 	}
-
-	// テクスチャのファイル名を保存
-	strcpy(&m_pFileName[nID][0], pFileName);
-
-	// テクスチャの総数を加算
-	m_nNumAll++;
-
-	// 読み込んだテクスチャの配列番号を返す
-	return nID;
 }
 
 //============================================================

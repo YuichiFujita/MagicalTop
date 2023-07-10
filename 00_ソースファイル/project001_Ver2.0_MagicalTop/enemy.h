@@ -20,6 +20,7 @@
 //************************************************************
 //	前方宣言
 //************************************************************
+class CLifeGauge3D;	// 体力ゲージ3Dクラス
 class CMultiModel;	// マルチモデルクラス
 
 //************************************************************
@@ -75,6 +76,7 @@ public:
 		float	fForwardMove;		// 前進の移動量
 		float	fBackwardMove;		// 後退の移動量
 		float	fLookRevision;		// プレイヤー方向を向く補正係数
+		float	fLifeUp;			// 体力表示のY位置加算量
 		float	fFindRadius;		// 検知範囲
 		float	fAttackRadius;		// 攻撃範囲
 		float	fBackwardRadius;	// 後退範囲
@@ -131,19 +133,18 @@ private:
 	static PartsInfo m_aPartsInfo[TYPE_MAX];	// パーツ情報
 
 	// メンバ変数
+	CLifeGauge3D *m_pLifeGauge;				// 体力の情報
+	CMultiModel	*m_apMultiModel[MAX_PARTS];	// モデルの情報
+	int m_nNumModel;						// パーツの総数
+
 	const StatusInfo m_status;	// ステータス定数
 	const PartsInfo m_parts;	// パーツ定数
-
-	CMultiModel	*m_apMultiModel[MAX_PARTS];	// モデルの情報
-	int m_nNumModel;	// パーツの総数
-
 	D3DXMATRIX	m_mtxWorld;		// ワールドマトリックス
 	D3DXVECTOR3	m_pos;			// 現在位置
 	D3DXVECTOR3	m_oldPos;		// 過去位置
 	D3DXVECTOR3	m_movePos;		// 位置移動量
 	D3DXVECTOR3	m_rot;			// 向き
 	D3DXVECTOR3	m_moveRot;		// 向き変更量
-	int m_nLife;				// 体力
 	int m_nCounterAtk;			// 攻撃管理カウンター
 };
 
