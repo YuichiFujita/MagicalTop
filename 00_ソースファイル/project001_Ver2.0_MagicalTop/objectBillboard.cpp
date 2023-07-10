@@ -29,10 +29,11 @@ CObjectBillboard::CObjectBillboard()
 	// メンバ変数をクリア
 	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pos	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
-	m_rot	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
-	m_size	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
-	m_col	= D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
+	m_pos     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
+	m_rot     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
+	m_size    = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
+	m_col     = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
+	m_origin  = ORIGIN_CENTER;	// 原点
 	m_fAngle  = 0.0f;	// 対角線の角度
 	m_fLength = 0.0f;	// 対角線の長さ
 	m_nTextureID = 0;	// テクスチャインデックス
@@ -46,10 +47,11 @@ CObjectBillboard::CObjectBillboard(const CObject::LABEL label, const int nPriori
 	// メンバ変数をクリア
 	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pos	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
-	m_rot	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
-	m_size	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
-	m_col	= D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
+	m_pos     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
+	m_rot     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
+	m_size    = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
+	m_col     = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
+	m_origin  = ORIGIN_CENTER;	// 原点
 	m_fAngle  = 0.0f;	// 対角線の角度
 	m_fLength = 0.0f;	// 対角線の長さ
 	m_nTextureID = 0;	// テクスチャインデックス
@@ -74,10 +76,11 @@ HRESULT CObjectBillboard::Init(void)
 	// メンバ変数を初期化
 	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pos	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
-	m_rot	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
-	m_size	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
-	m_col	= D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);	// 色
+	m_pos     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
+	m_rot     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
+	m_size    = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
+	m_col     = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
+	m_origin  = ORIGIN_CENTER;	// 原点
 	m_fAngle  = 0.0f;	// 対角線の角度
 	m_fLength = 0.0f;	// 対角線の長さ
 	m_nTextureID = -1;	// テクスチャインデックス
@@ -200,7 +203,14 @@ void CObjectBillboard::Draw(void)
 //============================================================
 //	生成処理
 //============================================================
-CObjectBillboard *CObjectBillboard::Create(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, const D3DXVECTOR3& rRot, const D3DXCOLOR& rCol)
+CObjectBillboard *CObjectBillboard::Create
+(
+	const D3DXVECTOR3& rPos,	// 位置
+	const D3DXVECTOR3& rSize,	// 大きさ
+	const D3DXVECTOR3& rRot,	// 向き
+	const D3DXCOLOR& rCol,		// 色
+	const ORIGIN origin			// 原点
+)
 {
 	// ポインタを宣言
 	CObjectBillboard *pObjectBillboard = NULL;	// オブジェクトビルボード生成用
@@ -230,6 +240,9 @@ CObjectBillboard *CObjectBillboard::Create(const D3DXVECTOR3& rPos, const D3DXVE
 				// 失敗を返す
 				return NULL;
 			}
+
+			// 原点を設定
+			pObjectBillboard->SetOrigin(origin);
 
 			// 位置を設定
 			pObjectBillboard->SetPosition(rPos);
@@ -306,11 +319,32 @@ void CObjectBillboard::SetScaling(const D3DXVECTOR3& rSize)
 	// 引数の大きさを代入
 	m_size = rSize;
 
-	// 対角線の角度を求める
-	m_fAngle = atan2f(m_size.x, m_size.y);
+	switch (m_origin)
+	{ // 原点ごとの処理
+	case ORIGIN_CENTER:	// 中央
 
-	// 対角線の長さを求める
-	m_fLength = sqrtf(m_size.x * m_size.x + m_size.y * m_size.y) * 0.5f;
+		// 対角線の角度を求める
+		m_fAngle = atan2f(m_size.x, m_size.y);
+
+		// 対角線の長さを求める
+		m_fLength = sqrtf(m_size.x * m_size.x + m_size.y * m_size.y) * 0.5f;
+
+		break;
+
+	case ORIGIN_DOWN:	// 下
+
+		// 対角線の角度を求める
+		m_fAngle = atan2f(m_size.x, m_size.y);
+
+		// 対角線の長さを求める
+		m_fLength = sqrtf(m_size.x * m_size.x + (m_size.y * 2.0f) * (m_size.y * 2.0f)) * 0.5f;
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
 
 	// 頂点情報の設定
 	SetVtx();
@@ -323,6 +357,45 @@ void CObjectBillboard::SetColor(const D3DXCOLOR& rCol)
 {
 	// 引数の色を代入
 	m_col = rCol;
+
+	// 頂点情報の設定
+	SetVtx();
+}
+
+//============================================================
+//	原点の設定処理
+//============================================================
+void CObjectBillboard::SetOrigin(const ORIGIN origin)
+{
+	// 引数の原点を設定
+	m_origin = origin;
+
+	switch (m_origin)
+	{ // 原点ごとの処理
+	case ORIGIN_CENTER:	// 中央
+
+		// 対角線の角度を求める
+		m_fAngle = atan2f(m_size.x, m_size.y);
+
+		// 対角線の長さを求める
+		m_fLength = sqrtf(m_size.x * m_size.x + m_size.y * m_size.y) * 0.5f;
+
+		break;
+
+	case ORIGIN_DOWN:	// 下
+
+		// 対角線の角度を求める
+		m_fAngle = atan2f(m_size.x, m_size.y);
+
+		// 対角線の長さを求める
+		m_fLength = sqrtf(m_size.x * m_size.x + (m_size.y * 2.0f) * (m_size.y * 2.0f)) * 0.5f;
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
 
 	// 頂点情報の設定
 	SetVtx();
@@ -365,6 +438,15 @@ D3DXCOLOR CObjectBillboard::GetColor(void) const
 }
 
 //============================================================
+//	原点取得処理
+//============================================================
+CObjectBillboard::ORIGIN CObjectBillboard::GetOrigin(void) const
+{
+	// 原点を返す
+	return m_origin;
+}
+
+//============================================================
 //	頂点情報の設定処理
 //============================================================
 void CObjectBillboard::SetVtx(void)
@@ -375,22 +457,54 @@ void CObjectBillboard::SetVtx(void)
 	// 頂点バッファをロックし、頂点情報へのポインタを取得
 	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
-	// 頂点座標の設定
-	pVtx[0].pos.x = 0.0f + sinf(m_rot.z + (D3DX_PI + m_fAngle)) * m_fLength;
-	pVtx[0].pos.y = 0.0f - cosf(m_rot.z + (D3DX_PI + m_fAngle)) * m_fLength;
-	pVtx[0].pos.z = 0.0f;
+	switch (m_origin)
+	{ // 原点ごとの処理
+	case ORIGIN_CENTER:	// 中央
 
-	pVtx[1].pos.x = 0.0f + sinf(m_rot.z + (D3DX_PI - m_fAngle)) * m_fLength;
-	pVtx[1].pos.y = 0.0f - cosf(m_rot.z + (D3DX_PI - m_fAngle)) * m_fLength;
-	pVtx[1].pos.z = 0.0f;
+		// 頂点座標の設定
+		pVtx[0].pos.x = 0.0f + sinf(m_rot.z + (D3DX_PI + m_fAngle)) * m_fLength;
+		pVtx[0].pos.y = 0.0f - cosf(m_rot.z + (D3DX_PI + m_fAngle)) * m_fLength;
+		pVtx[0].pos.z = 0.0f;
 
-	pVtx[2].pos.x = 0.0f + sinf(m_rot.z - m_fAngle) * m_fLength;
-	pVtx[2].pos.y = 0.0f - cosf(m_rot.z - m_fAngle) * m_fLength;
-	pVtx[2].pos.z = 0.0f;
+		pVtx[1].pos.x = 0.0f + sinf(m_rot.z + (D3DX_PI - m_fAngle)) * m_fLength;
+		pVtx[1].pos.y = 0.0f - cosf(m_rot.z + (D3DX_PI - m_fAngle)) * m_fLength;
+		pVtx[1].pos.z = 0.0f;
 
-	pVtx[3].pos.x = 0.0f + sinf(m_rot.z + m_fAngle) * m_fLength;
-	pVtx[3].pos.y = 0.0f - cosf(m_rot.z + m_fAngle) * m_fLength;
-	pVtx[3].pos.z = 0.0f;
+		pVtx[2].pos.x = 0.0f + sinf(m_rot.z - m_fAngle) * m_fLength;
+		pVtx[2].pos.y = 0.0f - cosf(m_rot.z - m_fAngle) * m_fLength;
+		pVtx[2].pos.z = 0.0f;
+
+		pVtx[3].pos.x = 0.0f + sinf(m_rot.z + m_fAngle) * m_fLength;
+		pVtx[3].pos.y = 0.0f - cosf(m_rot.z + m_fAngle) * m_fLength;
+		pVtx[3].pos.z = 0.0f;
+
+		break;
+
+	case ORIGIN_DOWN:	// 下
+
+		// 頂点座標の設定
+		pVtx[0].pos.x = 0.0f + sinf(m_rot.z + (D3DX_PI + m_fAngle)) * m_fLength;
+		pVtx[0].pos.y = 0.0f - cosf(m_rot.z + (D3DX_PI + m_fAngle)) * m_fLength;
+		pVtx[0].pos.z = 0.0f;
+
+		pVtx[1].pos.x = 0.0f + sinf(m_rot.z + (D3DX_PI - m_fAngle)) * m_fLength;
+		pVtx[1].pos.y = 0.0f - cosf(m_rot.z + (D3DX_PI - m_fAngle)) * m_fLength;
+		pVtx[1].pos.z = 0.0f;
+
+		pVtx[2].pos.x = 0.0f + sinf(m_rot.z - (D3DX_PI * 0.5f)) * m_size.x;
+		pVtx[2].pos.y = 0.0f - cosf(m_rot.z - (D3DX_PI * 0.5f)) * m_size.x;
+		pVtx[2].pos.z = 0.0f;
+
+		pVtx[3].pos.x = 0.0f + sinf(m_rot.z + (D3DX_PI * 0.5f)) * m_size.x;
+		pVtx[3].pos.y = 0.0f - cosf(m_rot.z + (D3DX_PI * 0.5f)) * m_size.x;
+		pVtx[3].pos.z = 0.0f;
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
 
 	// 法線ベクトルの設定
 	pVtx[0].nor = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
