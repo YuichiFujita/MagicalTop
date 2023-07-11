@@ -63,10 +63,12 @@ public:
 
 private:
 	// メンバ関数
-	void MoveFollowCamera(void);	// 位置の更新 (追従)
-	void MoveCamera(void);	// 位置の更新 (操作)
-	void DisCamera(void);	// 距離の更新 (操作)
-	void RotCamera(void);	// 向きの更新 (操作)
+	void Follow(void);		// カメラの更新 (追従)
+	void Bargaining(void);	// カメラの更新 (寄り引き)
+	void Control(void);		// カメラの更新 (操作)
+	void Move(void);		// 位置の更新 (操作)
+	void Distance(void);	// 距離の更新 (操作)
+	void Rotation(void);	// 向きの更新 (操作)
 
 	// メンバ変数
 	Camera m_camera;	// カメラの情報

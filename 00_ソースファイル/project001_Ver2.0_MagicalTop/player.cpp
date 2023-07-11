@@ -411,6 +411,8 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 	CInputKeyboard	*pKeyboard = CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad = CManager::GetPad();				// パッド
 
+	// TODODODO：移動方式変える
+#if 0
 	// 移動操作
 	if (pKeyboard->GetPress(DIK_W))
 	{ // 奥移動の操作が行われた場合
@@ -512,6 +514,120 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 		// 目標向きを更新
 		m_destRot.y = D3DXToRadian(270) + rot.y;
 	}
+#else
+	// 移動量を更新
+	m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * 1.5f;
+	m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * 1.5f;
+
+	// 目標向きを更新
+	m_destRot.y = D3DXToRadian(90) + rot.y;
+
+	// 移動操作
+	if (pKeyboard->GetPress(DIK_W))
+	{ // 奥移動の操作が行われた場合
+
+		// 移動モーションを設定
+		currentMotion = MOTION_MOVE;
+
+		if (pKeyboard->GetPress(DIK_A))
+		{ // 左移動の操作も行われた場合 (左奥移動)
+
+			// 移動量を更新
+			m_move.x += sinf(rot.y - (D3DX_PI * 0.25f)) * PLAY_MOVE;
+			m_move.z += cosf(rot.y - (D3DX_PI * 0.25f)) * PLAY_MOVE;
+
+			// 目標向きを更新
+			m_destRot.y = D3DXToRadian(135) + rot.y;
+		}
+		else if (pKeyboard->GetPress(DIK_D))
+		{ // 右移動の操作も行われた場合 (右奥移動)
+
+			// 移動量を更新
+			m_move.x -= sinf(rot.y - (D3DX_PI * 0.75f)) * PLAY_MOVE;
+			m_move.z -= cosf(rot.y - (D3DX_PI * 0.75f)) * PLAY_MOVE;
+
+			// 目標向きを更新
+			m_destRot.y = D3DXToRadian(225) + rot.y;
+		}
+		else
+		{ // 奥移動の操作だけが行われた場合 (奥移動)
+
+			// 移動量を更新
+			m_move.x += sinf(rot.y) * PLAY_MOVE;
+			m_move.z += cosf(rot.y) * PLAY_MOVE;
+
+			// 目標向きを更新
+			m_destRot.y = D3DXToRadian(180) + rot.y;
+		}
+	}
+	else if (pKeyboard->GetPress(DIK_S))
+	{ // 手前移動の操作が行われた場合
+
+		// 移動モーションを設定
+		currentMotion = MOTION_MOVE;
+
+		if (pKeyboard->GetPress(DIK_A))
+		{ // 左移動の操作も行われた場合 (左手前移動)
+
+			// 移動量を更新
+			m_move.x += sinf(rot.y - (D3DX_PI * 0.75f)) * PLAY_MOVE;
+			m_move.z += cosf(rot.y - (D3DX_PI * 0.75f)) * PLAY_MOVE;
+
+			// 目標向きを更新
+			m_destRot.y = D3DXToRadian(45) + rot.y;
+		}
+		else if (pKeyboard->GetPress(DIK_D))
+		{ // 右移動の操作も行われた場合 (右手前移動)
+
+			// 移動量を更新
+			m_move.x -= sinf(rot.y - (D3DX_PI * 0.25f)) * PLAY_MOVE;
+			m_move.z -= cosf(rot.y - (D3DX_PI * 0.25f)) * PLAY_MOVE;
+
+			// 目標向きを更新
+			m_destRot.y = D3DXToRadian(315) + rot.y;
+		}
+		else
+		{ // 手前移動の操作だけが行われた場合 (手前移動)
+
+			// 移動量を更新
+			m_move.x -= sinf(rot.y) * PLAY_MOVE;
+			m_move.z -= cosf(rot.y) * PLAY_MOVE;
+
+			// 目標向きを更新
+			m_destRot.y = D3DXToRadian(0) + rot.y;
+		}
+	}
+
+#if 0
+	else if (pKeyboard->GetPress(DIK_A))
+	{ // 左移動の操作が行われた場合
+
+		// 移動モーションを設定
+		currentMotion = MOTION_MOVE;
+
+		// 移動量を更新
+		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * PLAY_MOVE;
+		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * PLAY_MOVE;
+
+		// 目標向きを更新
+		m_destRot.y = D3DXToRadian(90) + rot.y;
+	}
+	else if (pKeyboard->GetPress(DIK_D))
+	{ // 右移動の操作が行われた場合
+
+		// 移動モーションを設定
+		currentMotion = MOTION_MOVE;
+
+		// 移動量を更新
+		m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * PLAY_MOVE;
+		m_move.z -= cosf(rot.y - (D3DX_PI * 0.5f)) * PLAY_MOVE;
+
+		// 目標向きを更新
+		m_destRot.y = D3DXToRadian(270) + rot.y;
+	}
+#endif
+
+#endif
 
 	// 現在のモーションを返す
 	return currentMotion;
@@ -729,21 +845,13 @@ void CPlayer::CollisionTarget(void)
 	if (USED(pTarget))
 	{ // ターゲットが使用されている場合
 
-		// 変数を宣言
-		D3DXVECTOR3 posTarget  = pTarget->GetPosition();
-		D3DXVECTOR3 sizeTarget = VEC3_ALL(pTarget->GetRadius());
-		D3DXVECTOR3 sizePlayer = VEC3_ALL(PLAY_RADIUS);
-
 		// ターゲットとの衝突判定
-		collision::BoxPillar
+		collision::CirclePillar
 		( // 引数
-			m_pos,		// 判定位置
-			m_oldPos,	// 判定過去位置
-			posTarget,	// 判定目標位置
-			sizePlayer,	// 判定サイズ(右・上・後)
-			sizePlayer,	// 判定サイズ(左・下・前)
-			sizeTarget,	// 判定目標サイズ(右・上・後)
-			sizeTarget	// 判定目標サイズ(左・下・前)
+			m_pos,					// 判定位置
+			pTarget->GetPosition(),	// 判定目標位置
+			PLAY_RADIUS,			// 判定半径
+			pTarget->GetRadius()	// 判定目標半径
 		);
 	}
 }

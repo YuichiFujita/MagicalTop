@@ -604,21 +604,13 @@ void CEnemy::CollisionTarget(D3DXVECTOR3& rPos, D3DXVECTOR3& rPosOld)
 	if (USED(pTarget))
 	{ // ターゲットが使用されている場合
 
-		// 変数を宣言
-		D3DXVECTOR3 posTarget = pTarget->GetPosition();
-		D3DXVECTOR3 sizeTarget = VEC3_ALL(pTarget->GetRadius());
-		D3DXVECTOR3 sizeEnemy = VEC3_ALL(m_status.fRadius);
-
 		// ターゲットとの衝突判定
-		collision::BoxPillar
+		collision::CirclePillar
 		( // 引数
-			rPos,		// 判定位置
-			rPosOld,	// 判定過去位置
-			posTarget,	// 判定目標位置
-			sizeEnemy,	// 判定サイズ(右・上・後)
-			sizeEnemy,	// 判定サイズ(左・下・前)
-			sizeTarget,	// 判定目標サイズ(右・上・後)
-			sizeTarget	// 判定目標サイズ(左・下・前)
+			rPos,					// 判定位置
+			pTarget->GetPosition(),	// 判定目標位置
+			m_status.fRadius,		// 判定半径
+			pTarget->GetRadius()	// 判定目標半径
 		);
 	}
 }
