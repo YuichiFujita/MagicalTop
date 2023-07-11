@@ -185,6 +185,7 @@
     <ClCompile Include="objectMeshField.cpp" />
     <ClCompile Include="objectMeshWall.cpp" />
     <ClCompile Include="objectModel.cpp" />
+    <ClCompile Include="objectTornado.cpp" />
     <ClCompile Include="particle2D.cpp" />
     <ClCompile Include="particle3D.cpp" />
     <ClCompile Include="player.cpp" />
@@ -240,6 +241,7 @@
     <ClInclude Include="objectMeshField.h" />
     <ClInclude Include="objectMeshWall.h" />
     <ClInclude Include="objectModel.h" />
+    <ClInclude Include="objectTornado.h" />
     <ClInclude Include="particle2D.h" />
     <ClInclude Include="particle3D.h" />
     <ClInclude Include="player.h" />
