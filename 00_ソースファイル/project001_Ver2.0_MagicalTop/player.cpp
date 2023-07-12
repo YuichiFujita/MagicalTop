@@ -28,7 +28,7 @@
 //************************************************************
 #define PLAYER_SETUP_TXT	"data\\TXT\\player.txt"	// セットアップテキスト相対パス
 
-#define MAX_MOVEX		(2.3f)	// 自動歩行時の速度割合用
+#define MAX_MOVEX		(2.8f)	// 自動歩行時の速度割合用
 #define PULSROT_MOVEZ	(20)	// 前後移動時のプレイヤー向きの変更量
 #define PLUS_MOVEX		(0.5f)	// 左右回転の移動量の加算量
 #define PLAY_MOVEZ		(2.0f)	// 前後の移動量
@@ -197,7 +197,6 @@ void CPlayer::Update(void)
 
 	// ターゲットとの距離を設定
 	m_fDisTarget = sqrtf((m_pos.x - posTarget.x) * (m_pos.x - posTarget.x) + (m_pos.z - posTarget.z) * (m_pos.z - posTarget.z)) * 0.5f;
-	CManager::GetDebugProc()->Print("%f\n", m_fDisTarget);
 
 	// 移動操作
 	currentMotion = Move(currentMotion);
@@ -399,6 +398,15 @@ D3DXVECTOR3 CPlayer::GetRotation(void) const
 {
 	// 向きを返す
 	return m_rot;
+}
+
+//============================================================
+//	ターゲットとの距離取得処理
+//============================================================
+float CPlayer::GetDistanceTarget(void) const
+{
+	// ターゲットとの距離を返す
+	return m_fDisTarget;
 }
 
 //============================================================

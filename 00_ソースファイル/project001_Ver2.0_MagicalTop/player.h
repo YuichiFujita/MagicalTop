@@ -102,6 +102,7 @@ public:
 	void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
+	float GetDistanceTarget(void) const;		// ターゲットとの距離取得
 	float GetRadius(void) const;				// 半径取得
 
 private:

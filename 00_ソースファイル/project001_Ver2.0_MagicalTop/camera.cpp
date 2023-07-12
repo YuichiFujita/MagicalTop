@@ -1,59 +1,69 @@
-//============================================================
+ï»¿//============================================================
 //
-//	ƒJƒƒ‰ˆ— [camera.cpp]
-//	AuthorF“¡“c—Eˆê
+//	ã‚«ãƒ¡ãƒ©å‡¦ç† [camera.cpp]
+//	Authorï¼šè—¤ç”°å‹‡ä¸€
 //
 //============================================================
 //************************************************************
-//	ƒCƒ“ƒNƒ‹[ƒhƒtƒ@ƒCƒ‹
+//	ã‚¤ãƒ³ã‚¯ãƒ«ãƒ¼ãƒ‰ãƒ•ã‚¡ã‚¤ãƒ«
 //************************************************************
 #include "camera.h"
 #include "manager.h"
 #include "renderer.h"
 #include "input.h"
-#include "player.h"
-
 #include "debugproc.h"
+
+#include "player.h"
 #include "target.h"
 
 //************************************************************
-//	ƒ}ƒNƒ’è‹`
+//	ãƒã‚¯ãƒ­å®šç¾©
 //************************************************************
-#define VIEW_ANGLE	(D3DXToRadian(45.0f))	// ‹–ìŠp
-#define VIEW_ASPECT	((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT)	// ƒAƒXƒyƒNƒg”ä
+// ã‚«ãƒ¡ãƒ©åŸºæœ¬æƒ…å ±ãƒã‚¯ãƒ­
+#define VIEW_ANGLE	(D3DXToRadian(45.0f))	// è¦–é‡è§’
+#define VIEW_ASPECT	((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT)	// ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”
+#define VIEW_NEAR	(10.0f)		// ãƒ¢ãƒ‡ãƒ«ãŒè¦‹ãˆã‚‹Zè»¸ã®æœ€å°å€¤
+#define VIEW_FAR	(50000.0f)	// ãƒ¢ãƒ‡ãƒ«ãŒè¦‹ãˆã‚‹Zè»¸ã®æœ€å¤§å€¤
 
-#define VIEW_NEAR	(10.0f)		// ƒ‚ƒfƒ‹‚ªŒ©‚¦‚éZ²‚ÌÅ¬’l
-#define VIEW_FAR	(50000.0f)	// ƒ‚ƒfƒ‹‚ªŒ©‚¦‚éZ²‚ÌÅ‘å’l
+// ã‚«ãƒ¡ãƒ©è¿½å¾“ãƒã‚¯ãƒ­
+#define REV_ROT		(0.2f)		// ã‚«ãƒ¡ãƒ©å‘ãã®è£œæ­£ä¿‚æ•°
+#define POS_R_PLUS	(25.0f)		// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®ã¨æ³¨è¦–ç‚¹ã®ä½ç½®ã®è·é›¢
+#define POS_V_Y		(900.0f)	// è¿½å¾“æ™‚ã®è¦–ç‚¹ã® yåº§æ¨™
+#define REV_POS_V	(D3DXVECTOR2(0.225f, 0.045f))	// è¦–ç‚¹ã®è£œæ­£ä¿‚æ•°
+#define REV_POS_R	(D3DXVECTOR2(0.25f, 0.05f))		// æ³¨è¦–ç‚¹ã®è£œæ­£ä¿‚æ•°
 
-#define REV_ROT		(0.2f)		// ƒJƒƒ‰Œü‚«‚Ì•â³ŒW”
-#define POS_R_PLUS	(25.0f)		// ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚Æ’‹“_‚ÌˆÊ’u‚Ì‹——£
-#define POS_V_Y		(900.0f)	// ’Ç]‚Ì‹“_‚Ì yÀ•W
-#define REV_POS_V	(D3DXVECTOR2(0.225f, 0.045f))	// ‹“_‚Ì•â³ŒW”
-#define REV_POS_R	(D3DXVECTOR2(0.25f, 0.05f))		// ’‹“_‚Ì•â³ŒW”
+// ã‚«ãƒ¡ãƒ©å¯„ã‚Šå¼•ããƒã‚¯ãƒ­
+#define REV_CENTER	(1.0f)		// ä¸­é–“ä½ç½®ã®è£œæ­£ä¿‚æ•° (0.0fï¼šã‚¿ãƒ¼ã‚²ãƒƒãƒˆæ–¹å‘, 1.0fï¼šãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ–¹å‘)
+#define FIRST_DIS	(-800.0f)	// ã‚«ãƒ¡ãƒ©è·é›¢ã®æœ€ä½å€¤
+#define POSR_Y		(350.0f)	// ã‚«ãƒ¡ãƒ©æ³¨è¦–ç‚¹ã®yåº§æ¨™
+#define MIN_POSV_Y	(600.0f)	// ã‚«ãƒ¡ãƒ©è¦–ç‚¹ä½ç½®ã®æœ€ä½å€¤
+#define REV_PULS_DIS	(0.85f)	// ã‚«ãƒ¡ãƒ©è·é›¢åŠ ç®—é‡ã®è£œæ­£ä¿‚æ•°
+#define REV_PLUS_POSV_Y	(1.0f)	// ã‚«ãƒ¡ãƒ©è¦–ç‚¹yä½ç½®åŠ ç®—é‡ã®è£œæ­£ä¿‚æ•°
 
-#define REV_MOVE_MOUSE	(1.6f)		// ƒ}ƒEƒX‘€ì‚Å‚ÌƒJƒƒ‰‚ÌˆÚ“®‚Ì•â³ŒW”
-#define REV_DIS_MOUSE	(-0.3f)		// ƒ}ƒEƒX‘€ì‚Å‚ÌƒJƒƒ‰‚Ì‹——£‚Ì•â³ŒW”
-#define REV_ROT_MOUSE	(0.008f)	// ƒ}ƒEƒX‘€ì‚Å‚ÌƒJƒƒ‰‚Ì‰ñ“]—Ê‚Ì•â³ŒW”
+// ã‚«ãƒ¡ãƒ©æ“ä½œãƒã‚¯ãƒ­
+#define REV_MOVE_MOUSE	(1.6f)		// ãƒã‚¦ã‚¹æ“ä½œã§ã®ã‚«ãƒ¡ãƒ©ã®ç§»å‹•ã®è£œæ­£ä¿‚æ•°
+#define REV_DIS_MOUSE	(-0.3f)		// ãƒã‚¦ã‚¹æ“ä½œã§ã®ã‚«ãƒ¡ãƒ©ã®è·é›¢ã®è£œæ­£ä¿‚æ•°
+#define REV_ROT_MOUSE	(0.008f)	// ãƒã‚¦ã‚¹æ“ä½œã§ã®ã‚«ãƒ¡ãƒ©ã®å›è»¢é‡ã®è£œæ­£ä¿‚æ•°
 
-#define MIN_DIS	(-10000.0f)	// ƒJƒƒ‰‚Ì‹“_‚©‚ç’‹“_‚Ö‚Ì‹——£‚ÌÅ¬
-#define MAX_DIS	(-1.0f)		// ƒJƒƒ‰‚Ì‹“_‚©‚ç’‹“_‚Ö‚Ì‹——£‚ÌÅ‘å
-#define LIMIT_ROT_HIGH	(D3DX_PI - 0.1f)	// x‰ñ“]‚Ì§ŒÀ’l (ã)
-#define LIMIT_ROT_LOW	(0.1f)				// x‰ñ“]‚Ì§ŒÀ’l (‰º)
+#define MIN_DIS	(-10000.0f)	// ã‚«ãƒ¡ãƒ©ã®è¦–ç‚¹ã‹ã‚‰æ³¨è¦–ç‚¹ã¸ã®è·é›¢ã®æœ€å°
+#define MAX_DIS	(-1.0f)		// ã‚«ãƒ¡ãƒ©ã®è¦–ç‚¹ã‹ã‚‰æ³¨è¦–ç‚¹ã¸ã®è·é›¢ã®æœ€å¤§
+#define LIMIT_ROT_HIGH	(D3DX_PI - 0.1f)	// xå›è»¢ã®åˆ¶é™å€¤ (ä¸Š)
+#define LIMIT_ROT_LOW	(0.1f)				// xå›è»¢ã®åˆ¶é™å€¤ (ä¸‹)
 
 //************************************************************
-//	eƒNƒ‰ƒX [CCamera] ‚Ìƒƒ“ƒoŠÖ”
+//	è¦ªã‚¯ãƒ©ã‚¹ [CCamera] ã®ãƒ¡ãƒ³ãƒé–¢æ•°
 //************************************************************
 //============================================================
-//	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+//	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 //============================================================
 CCamera::CCamera()
 {
-	// ƒƒ“ƒo•Ï”‚ğƒNƒŠƒA
-	memset(&m_camera, 0, sizeof(m_camera));	// ƒJƒƒ‰‚Ìî•ñ
+	// ãƒ¡ãƒ³ãƒå¤‰æ•°ã‚’ã‚¯ãƒªã‚¢
+	memset(&m_camera, 0, sizeof(m_camera));	// ã‚«ãƒ¡ãƒ©ã®æƒ…å ±
 }
 
 //============================================================
-//	ƒfƒXƒgƒ‰ƒNƒ^
+//	ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 //============================================================
 CCamera::~CCamera()
 {
@@ -61,45 +71,45 @@ CCamera::~CCamera()
 }
 
 //============================================================
-//	‰Šú‰»ˆ—
+//	åˆæœŸåŒ–å‡¦ç†
 //============================================================
 HRESULT CCamera::Init(void)
 {
-	// ƒJƒƒ‰î•ñ‚ğ‰Šú‰»
+	// ã‚«ãƒ¡ãƒ©æƒ…å ±ã‚’åˆæœŸåŒ–
 #if 0
-	m_camera.posV		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// Œ»İ‚Ì‹“_
-	m_camera.posR		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// Œ»İ‚Ì’‹“_
-	m_camera.destPosV	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// –Ú•W‚Ì‹“_
-	m_camera.destPosR	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// –Ú•W‚Ì’‹“_
-	m_camera.vecU		= D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// ã•ûŒüƒxƒNƒgƒ‹
-	m_camera.rot		= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// Œ»İ‚ÌŒü‚«
-	m_camera.destRot	= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// –Ú•W‚ÌŒü‚«
-	m_camera.fDis		= -800.0f;							// ‹“_‚Æ’‹“_‚Ì‹——£
+	m_camera.posV		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// ç¾åœ¨ã®è¦–ç‚¹
+	m_camera.posR		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// ç¾åœ¨ã®æ³¨è¦–ç‚¹
+	m_camera.destPosV	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// ç›®æ¨™ã®è¦–ç‚¹
+	m_camera.destPosR	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// ç›®æ¨™ã®æ³¨è¦–ç‚¹
+	m_camera.vecU		= D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// ä¸Šæ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«
+	m_camera.rot		= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// ç¾åœ¨ã®å‘ã
+	m_camera.destRot	= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// ç›®æ¨™ã®å‘ã
+	m_camera.fDis		= -800.0f;							// è¦–ç‚¹ã¨æ³¨è¦–ç‚¹ã®è·é›¢
 #else
-	m_camera.posV		= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// Œ»İ‚Ì‹“_
-	m_camera.posR		= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// Œ»İ‚Ì’‹“_
-	m_camera.destPosV	= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// –Ú•W‚Ì‹“_
-	m_camera.destPosR	= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// –Ú•W‚Ì’‹“_
-	m_camera.vecU		= D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// ã•ûŒüƒxƒNƒgƒ‹
-	m_camera.rot		= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// Œ»İ‚ÌŒü‚«
-	m_camera.destRot	= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// –Ú•W‚ÌŒü‚«
-	m_camera.fDis		= -800.0f;							// ‹“_‚Æ’‹“_‚Ì‹——£
+	m_camera.posV		= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// ç¾åœ¨ã®è¦–ç‚¹
+	m_camera.posR		= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// ç¾åœ¨ã®æ³¨è¦–ç‚¹
+	m_camera.destPosV	= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// ç›®æ¨™ã®è¦–ç‚¹
+	m_camera.destPosR	= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// ç›®æ¨™ã®æ³¨è¦–ç‚¹
+	m_camera.vecU		= D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// ä¸Šæ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«
+	m_camera.rot		= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// ç¾åœ¨ã®å‘ã
+	m_camera.destRot	= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// ç›®æ¨™ã®å‘ã
+	m_camera.fDis		= -800.0f;							// è¦–ç‚¹ã¨æ³¨è¦–ç‚¹ã®è·é›¢
 #endif
 
-	// ƒrƒ…[ƒ|[ƒgî•ñ‚ğ‰Šú‰»
-	m_camera.viewport.X			= 0;				// ¶ã‹÷‚ÌƒsƒNƒZƒ‹À•W (x)
-	m_camera.viewport.Y			= 0;				// ¶ã‹÷‚ÌƒsƒNƒZƒ‹À•W (y)
-	m_camera.viewport.Width		= SCREEN_WIDTH;		// •`‰æ‚·‚é‰æ–Ê‚Ì‰¡•
-	m_camera.viewport.Height	= SCREEN_HEIGHT;	// •`‰æ‚·‚é‰æ–Ê‚Ìc•
+	// ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆæƒ…å ±ã‚’åˆæœŸåŒ–
+	m_camera.viewport.X			= 0;				// å·¦ä¸Šéš…ã®ãƒ”ã‚¯ã‚»ãƒ«åº§æ¨™ (x)
+	m_camera.viewport.Y			= 0;				// å·¦ä¸Šéš…ã®ãƒ”ã‚¯ã‚»ãƒ«åº§æ¨™ (y)
+	m_camera.viewport.Width		= SCREEN_WIDTH;		// æç”»ã™ã‚‹ç”»é¢ã®æ¨ªå¹…
+	m_camera.viewport.Height	= SCREEN_HEIGHT;	// æç”»ã™ã‚‹ç”»é¢ã®ç¸¦å¹…
 	m_camera.viewport.MinZ		= 0.0f;
 	m_camera.viewport.MaxZ		= 1.0f;
 
-	// ¬Œ÷‚ğ•Ô‚·
+	// æˆåŠŸã‚’è¿”ã™
 	return S_OK;
 }
 
 //============================================================
-//	I—¹ˆ—
+//	çµ‚äº†å‡¦ç†
 //============================================================
 void CCamera::Uninit(void)
 {
@@ -107,393 +117,351 @@ void CCamera::Uninit(void)
 }
 
 //============================================================
-//	XVˆ—
+//	æ›´æ–°å‡¦ç†
 //============================================================
 void CCamera::Update(void)
 {
 #if 1
 #if 0
-	// ƒJƒƒ‰‚ÌXV (’Ç])
+	// ã‚«ãƒ¡ãƒ©ã®æ›´æ–° (è¿½å¾“)
 	Follow();
 #else
-	// ƒJƒƒ‰‚ÌXV (Šñ‚èˆø‚«)
+	// ã‚«ãƒ¡ãƒ©ã®æ›´æ–° (å¯„ã‚Šå¼•ã)
 	Bargaining();
 #endif
 #else
-	// ƒJƒƒ‰‚ÌXV (‘€ì)
+	// ã‚«ãƒ¡ãƒ©ã®æ›´æ–° (æ“ä½œ)
 	Control();
 #endif
 
-	// ƒfƒoƒbƒO•\¦
-	CManager::GetDebugProc()->Print(" ‹“_ F%f %f %f\n", m_camera.posV.x, m_camera.posV.y, m_camera.posV.z);
-	CManager::GetDebugProc()->Print("’‹“_F%f %f %f\n", m_camera.posR.x, m_camera.posR.y, m_camera.posR.z);
-	CManager::GetDebugProc()->Print(" Œü‚« F%f %f %f\n", m_camera.rot.x, m_camera.rot.y, m_camera.rot.z);
-	CManager::GetDebugProc()->Print(" ‹——£ F%f\n", m_camera.fDis);
+	// ãƒ‡ãƒãƒƒã‚°è¡¨ç¤º
+	CManager::GetDebugProc()->Print(" è¦–ç‚¹ ï¼š%f %f %f\n", m_camera.posV.x, m_camera.posV.y, m_camera.posV.z);
+	CManager::GetDebugProc()->Print("æ³¨è¦–ç‚¹ï¼š%f %f %f\n", m_camera.posR.x, m_camera.posR.y, m_camera.posR.z);
+	CManager::GetDebugProc()->Print(" å‘ã ï¼š%f %f %f\n", m_camera.rot.x, m_camera.rot.y, m_camera.rot.z);
+	CManager::GetDebugProc()->Print(" è·é›¢ ï¼š%f\n", m_camera.fDis);
 }
 
 //============================================================
-//	ƒJƒƒ‰İ’èˆ—
+//	ã‚«ãƒ¡ãƒ©è¨­å®šå‡¦ç†
 //============================================================
 void CCamera::SetCamera(void)
 {
-	// ƒ|ƒCƒ“ƒ^‚ğéŒ¾
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// ƒfƒoƒCƒX‚Ìƒ|ƒCƒ“ƒ^
+	// ãƒã‚¤ãƒ³ã‚¿ã‚’å®£è¨€
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// ãƒ‡ãƒã‚¤ã‚¹ã®ãƒã‚¤ãƒ³ã‚¿
 
-	// ƒrƒ…[ƒ|[ƒg‚Ìİ’è
+	// ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆã®è¨­å®š
 	pDevice->SetViewport(&m_camera.viewport);
 
-	// ƒvƒƒWƒFƒNƒVƒ‡ƒ“ƒ}ƒgƒŠƒbƒNƒX‚Ì‰Šú‰»
+	// ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³ãƒãƒˆãƒªãƒƒã‚¯ã‚¹ã®åˆæœŸåŒ–
 	D3DXMatrixIdentity(&m_camera.mtxProjection);
 
-	// ƒvƒƒWƒFƒNƒVƒ‡ƒ“ƒ}ƒgƒŠƒbƒNƒX‚ğì¬
+	// ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³ãƒãƒˆãƒªãƒƒã‚¯ã‚¹ã‚’ä½œæˆ
 	D3DXMatrixPerspectiveFovLH
-	( // ˆø”
-		&m_camera.mtxProjection,	// ƒvƒƒWƒFƒNƒVƒ‡ƒ“ƒ}ƒgƒŠƒbƒNƒX
-		VIEW_ANGLE,		// ‹–ìŠp
-		VIEW_ASPECT,	// ‰æ–Ê‚ÌƒAƒXƒyƒNƒg”ä
-		VIEW_NEAR,		// Z²‚ÌÅ¬’l
-		VIEW_FAR		// Z²‚ÌÅ‘å’l
+	( // å¼•æ•°
+		&m_camera.mtxProjection,	// ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³ãƒãƒˆãƒªãƒƒã‚¯ã‚¹
+		VIEW_ANGLE,		// è¦–é‡è§’
+		VIEW_ASPECT,	// ç”»é¢ã®ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”
+		VIEW_NEAR,		// Zè»¸ã®æœ€å°å€¤
+		VIEW_FAR		// Zè»¸ã®æœ€å¤§å€¤
 	);
 
-	// ƒvƒƒWƒFƒNƒVƒ‡ƒ“ƒ}ƒgƒŠƒbƒNƒX‚Ìİ’è
+	// ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³ãƒãƒˆãƒªãƒƒã‚¯ã‚¹ã®è¨­å®š
 	pDevice->SetTransform(D3DTS_PROJECTION, &m_camera.mtxProjection);
 
-	// ƒrƒ…[ƒ}ƒgƒŠƒbƒNƒX‚Ì‰Šú‰»
+	// ãƒ“ãƒ¥ãƒ¼ãƒãƒˆãƒªãƒƒã‚¯ã‚¹ã®åˆæœŸåŒ–
 	D3DXMatrixIdentity(&m_camera.mtxView);
 
-	// ƒrƒ…[ƒ}ƒgƒŠƒbƒNƒX‚Ìì¬
+	// ãƒ“ãƒ¥ãƒ¼ãƒãƒˆãƒªãƒƒã‚¯ã‚¹ã®ä½œæˆ
 	D3DXMatrixLookAtLH
-	( // ˆø”
-		&m_camera.mtxView,	// ƒrƒ…[ƒ}ƒgƒŠƒbƒNƒX
-		&m_camera.posV,		// ‹“_
-		&m_camera.posR,		// ’‹“_
-		&m_camera.vecU		// ã•ûŒüƒxƒNƒgƒ‹
+	( // å¼•æ•°
+		&m_camera.mtxView,	// ãƒ“ãƒ¥ãƒ¼ãƒãƒˆãƒªãƒƒã‚¯ã‚¹
+		&m_camera.posV,		// è¦–ç‚¹
+		&m_camera.posR,		// æ³¨è¦–ç‚¹
+		&m_camera.vecU		// ä¸Šæ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«
 	);
 
-	// ƒrƒ…[ƒ}ƒgƒŠƒbƒNƒX‚Ìİ’è
+	// ãƒ“ãƒ¥ãƒ¼ãƒãƒˆãƒªãƒƒã‚¯ã‚¹ã®è¨­å®š
 	pDevice->SetTransform(D3DTS_VIEW, &m_camera.mtxView);
 }
 
 //============================================================
-//	ƒJƒƒ‰‚Ì–Ú•WˆÊ’u‚Ìİ’èˆ—
+//	ã‚«ãƒ¡ãƒ©ã®ç›®æ¨™ä½ç½®ã®è¨­å®šå‡¦ç†
 //============================================================
 void CCamera::SetDestCamera(void)
 {
-	// •Ï”‚ğéŒ¾
-	D3DXVECTOR3 pos = CManager::GetPlayer()->GetPosition();		// ƒvƒŒƒCƒ„[ˆÊ’u
-	D3DXVECTOR3 rot = CManager::GetPlayer()->GetRotation();		// ƒvƒŒƒCƒ„[Œü‚«
+	// å¤‰æ•°ã‚’å®£è¨€
+	D3DXVECTOR3 pos = CManager::GetPlayer()->GetPosition();		// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ä½ç½®
+	D3DXVECTOR3 rot = CManager::GetPlayer()->GetRotation();		// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼å‘ã
 
-	// –Ú•W‚Ì’‹“_‚ÌˆÊ’u‚ğXV
-	m_camera.destPosR.x = m_camera.posR.x = pos.x + sinf(rot.y + D3DX_PI) * POS_R_PLUS;	// ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚æ‚è­‚µ‘O
-	m_camera.destPosR.y = m_camera.posR.y = pos.y;										// ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚Æ“¯‚¶
-	m_camera.destPosR.z = m_camera.posR.z = pos.z + cosf(rot.y + D3DX_PI) * POS_R_PLUS;	// ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚æ‚è­‚µ‘O
+	// ç›®æ¨™ã®æ³¨è¦–ç‚¹ã®ä½ç½®ã‚’æ›´æ–°
+	m_camera.destPosR.x = m_camera.posR.x = pos.x + sinf(rot.y + D3DX_PI) * POS_R_PLUS;	// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®ã‚ˆã‚Šå°‘ã—å‰
+	m_camera.destPosR.y = m_camera.posR.y = pos.y;										// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®ã¨åŒã˜
+	m_camera.destPosR.z = m_camera.posR.z = pos.z + cosf(rot.y + D3DX_PI) * POS_R_PLUS;	// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®ã‚ˆã‚Šå°‘ã—å‰
 
-	// –Ú•W‚Ì‹“_‚ÌˆÊ’u‚ğXV
-	m_camera.destPosV.x = m_camera.posV.x = m_camera.posR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));	// –Ú•W’‹“_‚©‚ç‹——£•ª—£‚ê‚½ˆÊ’u
-	m_camera.destPosV.y = m_camera.posV.y = POS_V_Y;																			// ŒÅ’è‚Ì‚‚³
-	m_camera.destPosV.z = m_camera.posV.z = m_camera.posR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// –Ú•W’‹“_‚©‚ç‹——£•ª—£‚ê‚½ˆÊ’u
+	// ç›®æ¨™ã®è¦–ç‚¹ã®ä½ç½®ã‚’æ›´æ–°
+	m_camera.destPosV.x = m_camera.posV.x = m_camera.posR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));	// ç›®æ¨™æ³¨è¦–ç‚¹ã‹ã‚‰è·é›¢åˆ†é›¢ã‚ŒãŸä½ç½®
+	m_camera.destPosV.y = m_camera.posV.y = POS_V_Y;																			// å›ºå®šã®é«˜ã•
+	m_camera.destPosV.z = m_camera.posV.z = m_camera.posR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// ç›®æ¨™æ³¨è¦–ç‚¹ã‹ã‚‰è·é›¢åˆ†é›¢ã‚ŒãŸä½ç½®
 
-	// TODOFÅ‰‚ÉƒJƒƒ‰“®‚©‚È‚¢‚æ‚¤‚É’¼‚·
+	// TODOï¼šæœ€åˆã«ã‚«ãƒ¡ãƒ©å‹•ã‹ãªã„ã‚ˆã†ã«ç›´ã™
 }
 
 //============================================================
-//	Œü‚«‚Ìİ’èˆ—
+//	å‘ãã®è¨­å®šå‡¦ç†
 //============================================================
 void CCamera::SetRotation(const D3DXVECTOR3& rRot)
 {
-	// ˆø”‚ÌƒJƒƒ‰‚ÌŒü‚«‚ğİ’è
+	// å¼•æ•°ã®ã‚«ãƒ¡ãƒ©ã®å‘ãã‚’è¨­å®š
 	m_camera.rot = rRot;
 
-	// Œü‚«‚ğ³‹K‰»
+	// å‘ãã‚’æ­£è¦åŒ–
 	useful::NormalizeRot(m_camera.rot.x);
 	useful::NormalizeRot(m_camera.rot.y);
 	useful::NormalizeRot(m_camera.rot.z);
 }
 
 //============================================================
-//	–Ú•WŒü‚«‚Ìİ’èˆ—
+//	ç›®æ¨™å‘ãã®è¨­å®šå‡¦ç†
 //============================================================
 void CCamera::SetDestRotation(const D3DXVECTOR3& rRot)
 {
-	// ˆø”‚ÌƒJƒƒ‰‚Ì–Ú•WŒü‚«‚ğİ’è
+	// å¼•æ•°ã®ã‚«ãƒ¡ãƒ©ã®ç›®æ¨™å‘ãã‚’è¨­å®š
 	m_camera.destRot = rRot;
 
-	// Œü‚«‚ğ³‹K‰»
+	// å‘ãã‚’æ­£è¦åŒ–
 	useful::NormalizeRot(m_camera.destRot.x);
 	useful::NormalizeRot(m_camera.destRot.y);
 	useful::NormalizeRot(m_camera.destRot.z);
 }
 
 //============================================================
-//	ƒJƒƒ‰æ“¾ˆ—
+//	ã‚«ãƒ¡ãƒ©å–å¾—å‡¦ç†
 //============================================================
 CCamera::Camera CCamera::GetCamera(void)
 {
-	// ƒJƒƒ‰‚Ìî•ñ‚ğ•Ô‚·
+	// ã‚«ãƒ¡ãƒ©ã®æƒ…å ±ã‚’è¿”ã™
 	return m_camera;
 }
 
 //============================================================
-//	Œü‚«æ“¾ˆ—
+//	å‘ãå–å¾—å‡¦ç†
 //============================================================
 D3DXVECTOR3 CCamera::GetRotation(void) const
 {
-	// ƒJƒƒ‰‚ÌŒü‚«‚ğ•Ô‚·
+	// ã‚«ãƒ¡ãƒ©ã®å‘ãã‚’è¿”ã™
 	return m_camera.rot;
 }
 
 //============================================================
-//	–Ú•WŒü‚«æ“¾ˆ—
+//	ç›®æ¨™å‘ãå–å¾—å‡¦ç†
 //============================================================
 D3DXVECTOR3 CCamera::GetDestRotation(void) const
 {
-	// ƒJƒƒ‰‚Ì–Ú•WŒü‚«‚ğ•Ô‚·
+	// ã‚«ãƒ¡ãƒ©ã®ç›®æ¨™å‘ãã‚’è¿”ã™
 	return m_camera.destRot;
 }
 
 //============================================================
-//	¶¬ˆ—
+//	ç”Ÿæˆå‡¦ç†
 //============================================================
 CCamera *CCamera::Create(void)
 {
-	// ƒ|ƒCƒ“ƒ^‚ğéŒ¾
-	CCamera *pCamera = NULL;	// ƒJƒƒ‰¶¬—p
+	// ãƒã‚¤ãƒ³ã‚¿ã‚’å®£è¨€
+	CCamera *pCamera = NULL;	// ã‚«ãƒ¡ãƒ©ç”Ÿæˆç”¨
 
 	if (UNUSED(pCamera))
-	{ // g—p‚³‚ê‚Ä‚¢‚È‚¢ê‡
+	{ // ä½¿ç”¨ã•ã‚Œã¦ã„ãªã„å ´åˆ
 
-		// ƒƒ‚ƒŠ‚ğŠm•Û
-		pCamera = new CCamera;	// ƒJƒƒ‰
+		// ãƒ¡ãƒ¢ãƒªã‚’ç¢ºä¿
+		pCamera = new CCamera;	// ã‚«ãƒ¡ãƒ©
 	}
-	else { assert(false); return NULL; }	// g—p’†
+	else { assert(false); return NULL; }	// ä½¿ç”¨ä¸­
 
 	if (USED(pCamera))
-	{ // Šm•Û‚É¬Œ÷‚µ‚Ä‚¢‚éê‡
+	{ // ç¢ºä¿ã«æˆåŠŸã—ã¦ã„ã‚‹å ´åˆ
 
-		// ƒJƒƒ‰‚Ì‰Šú‰»
+		// ã‚«ãƒ¡ãƒ©ã®åˆæœŸåŒ–
 		if (FAILED(pCamera->Init()))
-		{ // ‰Šú‰»‚É¸”s‚µ‚½ê‡
+		{ // åˆæœŸåŒ–ã«å¤±æ•—ã—ãŸå ´åˆ
 
-			// ƒƒ‚ƒŠŠJ•ú
+			// ãƒ¡ãƒ¢ãƒªé–‹æ”¾
 			delete pCamera;
 			pCamera = NULL;
 
-			// ¸”s‚ğ•Ô‚·
+			// å¤±æ•—ã‚’è¿”ã™
 			return NULL;
 		}
 
-		// Šm•Û‚µ‚½ƒAƒhƒŒƒX‚ğ•Ô‚·
+		// ç¢ºä¿ã—ãŸã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’è¿”ã™
 		return pCamera;
 	}
-	else { assert(false); return NULL; }	// Šm•Û¸”s
+	else { assert(false); return NULL; }	// ç¢ºä¿å¤±æ•—
 }
 
 //============================================================
-//	”jŠüˆ—
+//	ç ´æ£„å‡¦ç†
 //============================================================
 HRESULT CCamera::Release(CCamera *&prCamera)
 {
 	if (USED(prCamera))
-	{ // g—p’†‚Ìê‡
+	{ // ä½¿ç”¨ä¸­ã®å ´åˆ
 
-		// ƒJƒƒ‰‚ÌI—¹
+		// ã‚«ãƒ¡ãƒ©ã®çµ‚äº†
 		prCamera->Uninit();
 
-		// ƒƒ‚ƒŠŠJ•ú
+		// ãƒ¡ãƒ¢ãƒªé–‹æ”¾
 		delete prCamera;
 		prCamera = NULL;
 
-		// ¬Œ÷‚ğ•Ô‚·
+		// æˆåŠŸã‚’è¿”ã™
 		return S_OK;
 	}
-	else { assert(false); return E_FAIL; }	// ”ñg—p’†
+	else { assert(false); return E_FAIL; }	// éä½¿ç”¨ä¸­
 }
 
 //============================================================
-//	ƒJƒƒ‰‚ÌXVˆ— (’Ç])
+//	ã‚«ãƒ¡ãƒ©ã®æ›´æ–°å‡¦ç† (è¿½å¾“)
 //============================================================
 void CCamera::Follow(void)
 {
-	// •Ï”‚ğéŒ¾
-	D3DXVECTOR3 diffRot  = VEC3_ZERO;	// ƒJƒƒ‰‚ÌŒü‚«·•ª
-	D3DXVECTOR3 diffPosV = VEC3_ZERO;	// ƒJƒƒ‰‚Ì‹“_‚ÌˆÊ’u·•ª
-	D3DXVECTOR3 diffPosR = VEC3_ZERO;	// ƒJƒƒ‰‚Ì’‹“_‚ÌˆÊ’u·•ª
-	D3DXVECTOR3 pos =  CManager::GetPlayer()->GetPosition();	// ƒvƒŒƒCƒ„[ˆÊ’u
-	D3DXVECTOR3 rot =  CManager::GetPlayer()->GetRotation();	// ƒvƒŒƒCƒ„[Œü‚«
+	// å¤‰æ•°ã‚’å®£è¨€
+	D3DXVECTOR3 diffRot  = VEC3_ZERO;	// ã‚«ãƒ¡ãƒ©ã®å‘ãå·®åˆ†
+	D3DXVECTOR3 diffPosV = VEC3_ZERO;	// ã‚«ãƒ¡ãƒ©ã®è¦–ç‚¹ã®ä½ç½®å·®åˆ†
+	D3DXVECTOR3 diffPosR = VEC3_ZERO;	// ã‚«ãƒ¡ãƒ©ã®æ³¨è¦–ç‚¹ã®ä½ç½®å·®åˆ†
+	D3DXVECTOR3 pos =  CManager::GetPlayer()->GetPosition();	// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ä½ç½®
+	D3DXVECTOR3 rot =  CManager::GetPlayer()->GetRotation();	// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼å‘ã
 
-	// –Ú•W‚ÌŒü‚«‚Ü‚Å‚Ì·•ª‚ğŒvZ
+	// ç›®æ¨™ã®å‘ãã¾ã§ã®å·®åˆ†ã‚’è¨ˆç®—
 	diffRot = m_camera.destRot - m_camera.rot;
-	useful::NormalizeRot(diffRot.y);		// ·•ªŒü‚«³‹K‰»
+	useful::NormalizeRot(diffRot.y);		// å·®åˆ†å‘ãæ­£è¦åŒ–
 
-	// Œü‚«‚ğXV
+	// å‘ãã‚’æ›´æ–°
 	m_camera.rot.y += diffRot.y * REV_ROT;
-	useful::NormalizeRot(m_camera.rot.y);	// Œü‚«³‹K‰»
+	useful::NormalizeRot(m_camera.rot.y);	// å‘ãæ­£è¦åŒ–
 
-	// –Ú•W‚Ì’‹“_‚ÌˆÊ’u‚ğXV
-	m_camera.destPosR.x = pos.x + sinf(rot.y + D3DX_PI) * POS_R_PLUS;	// ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚æ‚è­‚µ‘O
-	m_camera.destPosR.y = pos.y;										// ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚Æ“¯‚¶
-	m_camera.destPosR.z = pos.z + cosf(rot.y + D3DX_PI) * POS_R_PLUS;	// ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚æ‚è­‚µ‘O
+	// ç›®æ¨™ã®æ³¨è¦–ç‚¹ã®ä½ç½®ã‚’æ›´æ–°
+	m_camera.destPosR.x = pos.x + sinf(rot.y + D3DX_PI) * POS_R_PLUS;	// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®ã‚ˆã‚Šå°‘ã—å‰
+	m_camera.destPosR.y = pos.y;										// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®ã¨åŒã˜
+	m_camera.destPosR.z = pos.z + cosf(rot.y + D3DX_PI) * POS_R_PLUS;	// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®ã‚ˆã‚Šå°‘ã—å‰
 
-	// –Ú•W‚Ì‹“_‚ÌˆÊ’u‚ğXV
-	m_camera.destPosV.x = m_camera.destPosR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));	// –Ú•W’‹“_‚©‚ç‹——£•ª—£‚ê‚½ˆÊ’u
-	m_camera.destPosV.y = POS_V_Y;																					// ŒÅ’è‚Ì‚‚³
-	m_camera.destPosV.z = m_camera.destPosR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// –Ú•W’‹“_‚©‚ç‹——£•ª—£‚ê‚½ˆÊ’u
+	// ç›®æ¨™ã®è¦–ç‚¹ã®ä½ç½®ã‚’æ›´æ–°
+	m_camera.destPosV.x = m_camera.destPosR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));	// ç›®æ¨™æ³¨è¦–ç‚¹ã‹ã‚‰è·é›¢åˆ†é›¢ã‚ŒãŸä½ç½®
+	m_camera.destPosV.y = POS_V_Y;																					// å›ºå®šã®é«˜ã•
+	m_camera.destPosV.z = m_camera.destPosR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// ç›®æ¨™æ³¨è¦–ç‚¹ã‹ã‚‰è·é›¢åˆ†é›¢ã‚ŒãŸä½ç½®
 
-	// –Ú•W‚ÌˆÊ’u‚Ü‚Å‚Ì·•ª‚ğŒvZ
-	diffPosV = m_camera.destPosV - m_camera.posV;	// ‹“_
-	diffPosR = m_camera.destPosR - m_camera.posR;	// ’‹“_
+	// ç›®æ¨™ã®ä½ç½®ã¾ã§ã®å·®åˆ†ã‚’è¨ˆç®—
+	diffPosV = m_camera.destPosV - m_camera.posV;	// è¦–ç‚¹
+	diffPosR = m_camera.destPosR - m_camera.posR;	// æ³¨è¦–ç‚¹
 
-	// ‹“_‚ÌˆÊ’u‚ğXV
+	// è¦–ç‚¹ã®ä½ç½®ã‚’æ›´æ–°
 	m_camera.posV.x += diffPosV.x * REV_POS_V.x;
 	m_camera.posV.y += diffPosV.y * REV_POS_V.y;
 	m_camera.posV.z += diffPosV.z * REV_POS_V.x;
 
-	// ’‹“_‚ÌˆÊ’u‚ğXV
+	// æ³¨è¦–ç‚¹ã®ä½ç½®ã‚’æ›´æ–°
 	m_camera.posR.x += diffPosR.x * REV_POS_R.x;
 	m_camera.posR.y += diffPosR.y * REV_POS_R.y;
 	m_camera.posR.z += diffPosR.z * REV_POS_R.x;
 }
 
 //============================================================
-//	ƒJƒƒ‰‚ÌXVˆ— (Šñ‚èˆø‚«)
+//	ã‚«ãƒ¡ãƒ©ã®æ›´æ–°å‡¦ç† (å¯„ã‚Šå¼•ã)
 //============================================================
 void CCamera::Bargaining(void)
 {
-	// TODODODOF‚¢‚¢Š´‚¶‚ÉƒJƒƒ‰Šæ’£‚é
-#if 0
-	// •Ï”‚ğéŒ¾
-	D3DXVECTOR3 diffRot  = VEC3_ZERO;	// ƒJƒƒ‰‚ÌŒü‚«·•ª
-	D3DXVECTOR3 diffPosV = VEC3_ZERO;	// ƒJƒƒ‰‚Ì‹“_‚ÌˆÊ’u·•ª
-	D3DXVECTOR3 diffPosR = VEC3_ZERO;	// ƒJƒƒ‰‚Ì’‹“_‚ÌˆÊ’u·•ª
-	D3DXVECTOR3 pos =  CManager::GetPlayer()->GetPosition();	// ƒvƒŒƒCƒ„[ˆÊ’u
-	D3DXVECTOR3 rot =  CManager::GetPlayer()->GetRotation();	// ƒvƒŒƒCƒ„[Œü‚«
+	if (USED(CManager::GetPlayer()) && USED(CManager::GetTarget()))
+	{ // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãƒ»ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãŒä½¿ç”¨ã•ã‚Œã¦ã„ã‚‹å ´åˆ
 
-	// –Ú•W‚ÌŒü‚«‚Ü‚Å‚Ì·•ª‚ğŒvZ
-	diffRot = m_camera.destRot - m_camera.rot;
-	useful::NormalizeRot(diffRot.y);		// ·•ªŒü‚«³‹K‰»
+		// å¤‰æ•°ã‚’å®£è¨€
+		D3DXVECTOR3 posPlayer = CManager::GetPlayer()->GetPosition();	// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ä½ç½®
+		D3DXVECTOR3 posTarget = CManager::GetTarget()->GetPosition();	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä½ç½®
+		D3DXVECTOR3 destPosR = VEC3_ZERO;	// ã‚«ãƒ¡ãƒ©ã®æ³¨è¦–ç‚¹ã®ç›®æ¨™ä½ç½®
+		D3DXVECTOR3 diffPosR = VEC3_ZERO;	// ã‚«ãƒ¡ãƒ©ã®æ³¨è¦–ç‚¹ã®ä½ç½®å·®åˆ†
+		D3DXVECTOR3 diffPosV = VEC3_ZERO;	// ã‚«ãƒ¡ãƒ©ã®è¦–ç‚¹ã®ä½ç½®å·®åˆ†
+		float fDisTarget = CManager::GetPlayer()->GetDistanceTarget();	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼é–“ã®è·é›¢
+		float fDiffRot = 0.0f;	// ã‚«ãƒ¡ãƒ©ã®å‘ãå·®åˆ†
 
-	// Œü‚«‚ğXV
-	m_camera.rot.y += diffRot.y * REV_ROT;
-	useful::NormalizeRot(m_camera.rot.y);	// Œü‚«³‹K‰»
+		// å·®åˆ†å‘ãã‚’æ±‚ã‚ã‚‹
+		fDiffRot = m_camera.destRot.y - m_camera.rot.y;
+		useful::NormalizeRot(fDiffRot);			// å·®åˆ†å‘ãæ­£è¦åŒ–
 
-	D3DXVECTOR3 camPos = (pos - CManager::GetTarget()->GetPosition());
-	m_camera.rot.y = atan2f(CManager::GetTarget()->GetPosition().x - pos.x, CManager::GetTarget()->GetPosition().z - pos.z);
+		// å‘ãã‚’æ›´æ–°
+		m_camera.rot.y += fDiffRot * REV_ROT;
+		useful::NormalizeRot(m_camera.rot.y);	// å‘ãæ­£è¦åŒ–
 
-	float fff = sqrtf(camPos.x * camPos.x + camPos.z * camPos.z) * 0.5f;
-	m_camera.fDis = -800 + -(fff * 1.0f);
+		// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä¸­é–“ä½ç½®ã‚’æ±‚ã‚ã‚‹
+		destPosR = (posPlayer - posTarget) * REV_CENTER;	// ä¸­é–“ä½ç½®ã‚’è¨­å®š
+		destPosR.y = 0.0f;	// yåº§æ¨™ã‚’åˆæœŸåŒ–
 
-	// –Ú•W‚Ì’‹“_‚ÌˆÊ’u‚ğXV
-	m_camera.destPosR.x = camPos.x;	// ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚æ‚è­‚µ‘O
-	m_camera.destPosR.y = camPos.y + 300.0f;	// ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚Æ“¯‚¶
-	m_camera.destPosR.z = camPos.z;	// ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚æ‚è­‚µ‘O
+		// ã‚«ãƒ¡ãƒ©ã®å‘ãã‚’ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã«å‘ã‹ã›ã‚‹
+		m_camera.rot.y = atan2f(posTarget.x - posPlayer.x, posTarget.z - posPlayer.z);
 
-	// –Ú•W‚Ì‹“_‚ÌˆÊ’u‚ğXV
-	m_camera.destPosV.x = m_camera.destPosR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));	// –Ú•W’‹“_‚©‚ç‹——£•ª—£‚ê‚½ˆÊ’u
-	m_camera.destPosV.y = 700 + (fff * 1.0f);																					// ŒÅ’è‚Ì‚‚³
-	m_camera.destPosV.z = m_camera.destPosR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// –Ú•W’‹“_‚©‚ç‹——£•ª—£‚ê‚½ˆÊ’u
+		// ã‚«ãƒ¡ãƒ©ã®è·é›¢ã‚’è¨­å®š
+		m_camera.fDis = FIRST_DIS - (fDisTarget * REV_PULS_DIS);
 
-	// –Ú•W‚ÌˆÊ’u‚Ü‚Å‚Ì·•ª‚ğŒvZ
-	diffPosV = m_camera.destPosV - m_camera.posV;	// ‹“_
-	diffPosR = m_camera.destPosR - m_camera.posR;	// ’‹“_
+		// ç›®æ¨™ã®æ³¨è¦–ç‚¹ã®ä½ç½®ã‚’æ›´æ–°
+		m_camera.destPosR.x = destPosR.x;
+		m_camera.destPosR.y = POSR_Y;
+		m_camera.destPosR.z = destPosR.z;
 
-	// ‹“_‚ÌˆÊ’u‚ğXV
-	m_camera.posV.x += diffPosV.x * REV_POS_V.x;
-	m_camera.posV.y += diffPosV.y * REV_POS_V.y;
-	m_camera.posV.z += diffPosV.z * REV_POS_V.x;
+		// ç›®æ¨™ã®è¦–ç‚¹ã®ä½ç½®ã‚’æ›´æ–°
+		m_camera.destPosV.x = m_camera.destPosR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));
+		m_camera.destPosV.y = MIN_POSV_Y + (fDisTarget * REV_PLUS_POSV_Y);
+		m_camera.destPosV.z = m_camera.destPosR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));
 
-	// ’‹“_‚ÌˆÊ’u‚ğXV
-	m_camera.posR.x += diffPosR.x * REV_POS_R.x;
-	m_camera.posR.y += diffPosR.y * REV_POS_R.y;
-	m_camera.posR.z += diffPosR.z * REV_POS_R.x;
-#else
-	if (USED(CManager::GetPlayer()))
-	{ // ƒvƒŒƒCƒ„[‚ªg—p‚³‚ê‚Ä‚¢‚éê‡
+		// ç›®æ¨™ã®ä½ç½®ã¾ã§ã®å·®åˆ†ã‚’è¨ˆç®—
+		diffPosV = m_camera.destPosV - m_camera.posV;	// è¦–ç‚¹
+		diffPosR = m_camera.destPosR - m_camera.posR;	// æ³¨è¦–ç‚¹
 
-	// •Ï”‚ğéŒ¾
-		D3DXVECTOR3 diffRot = VEC3_ZERO;	// ƒJƒƒ‰‚ÌŒü‚«·•ª
-		D3DXVECTOR3 diffPosV = VEC3_ZERO;	// ƒJƒƒ‰‚Ì‹“_‚ÌˆÊ’u·•ª
-		D3DXVECTOR3 diffPosR = VEC3_ZERO;	// ƒJƒƒ‰‚Ì’‹“_‚ÌˆÊ’u·•ª
-		D3DXVECTOR3 pos = CManager::GetPlayer()->GetPosition();	// ƒvƒŒƒCƒ„[ˆÊ’u
-		D3DXVECTOR3 rot = CManager::GetPlayer()->GetRotation();	// ƒvƒŒƒCƒ„[Œü‚«
-
-		// –Ú•W‚ÌŒü‚«‚Ü‚Å‚Ì·•ª‚ğŒvZ
-		diffRot = m_camera.destRot - m_camera.rot;
-		useful::NormalizeRot(diffRot.y);		// ·•ªŒü‚«³‹K‰»
-
-		// Œü‚«‚ğXV
-		m_camera.rot.y += diffRot.y * REV_ROT;
-		useful::NormalizeRot(m_camera.rot.y);	// Œü‚«³‹K‰»
-
-		D3DXVECTOR3 camPos = (pos - CManager::GetTarget()->GetPosition());
-		m_camera.rot.y = atan2f(CManager::GetTarget()->GetPosition().x - pos.x, CManager::GetTarget()->GetPosition().z - pos.z);
-
-		float fff = sqrtf(camPos.x * camPos.x + camPos.z * camPos.z) * 0.5f;
-		m_camera.fDis = -800 + -(fff * 1.0f);
-
-		// –Ú•W‚Ì’‹“_‚ÌˆÊ’u‚ğXV
-		m_camera.destPosR.x = camPos.x;				// ƒvƒŒƒCƒ„[‚Æ“¯ˆÊ’u
-		m_camera.destPosR.y = camPos.y + 300.0f;	// ƒvƒŒƒCƒ„[‚Ìã‹óˆÊ’u
-		m_camera.destPosR.z = camPos.z;				// ƒvƒŒƒCƒ„[‚Æ“¯ˆÊ’u
-
-		// –Ú•W‚Ì‹“_‚ÌˆÊ’u‚ğXV
-		m_camera.destPosV.x = m_camera.destPosR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));	// –Ú•W’‹“_‚©‚ç‹——£•ª—£‚ê‚½ˆÊ’u
-		m_camera.destPosV.y = 700.0f + (fff);																			// ŒÅ’è‚Ì‚‚³
-		m_camera.destPosV.z = m_camera.destPosR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// –Ú•W’‹“_‚©‚ç‹——£•ª—£‚ê‚½ˆÊ’u
-
-		// –Ú•W‚ÌˆÊ’u‚Ü‚Å‚Ì·•ª‚ğŒvZ
-		diffPosV = m_camera.destPosV - m_camera.posV;	// ‹“_
-		diffPosR = m_camera.destPosR - m_camera.posR;	// ’‹“_
-
-		// ‹“_‚ÌˆÊ’u‚ğXV
+		// è¦–ç‚¹ã®ä½ç½®ã‚’æ›´æ–°
 		m_camera.posV.x += diffPosV.x * REV_POS_V.x;
 		m_camera.posV.y += diffPosV.y * REV_POS_V.y;
 		m_camera.posV.z += diffPosV.z * REV_POS_V.x;
 
-		// ’‹“_‚ÌˆÊ’u‚ğXV
+		// æ³¨è¦–ç‚¹ã®ä½ç½®ã‚’æ›´æ–°
 		m_camera.posR.x += diffPosR.x * REV_POS_R.x;
 		m_camera.posR.y += diffPosR.y * REV_POS_R.y;
 		m_camera.posR.z += diffPosR.z * REV_POS_R.x;
 	}
-#endif
 }
 
 //============================================================
-//	ƒJƒƒ‰‚ÌXVˆ— (‘€ì)
+//	ã‚«ãƒ¡ãƒ©ã®æ›´æ–°å‡¦ç† (æ“ä½œ)
 //============================================================
 void CCamera::Control(void)
 {
-	// ˆÊ’u‚ÌXV
+	// ä½ç½®ã®æ›´æ–°
 	Move();
 
-	// ‹——£‚ÌXV
+	// è·é›¢ã®æ›´æ–°
 	Distance();
 
-	// Œü‚«‚ÌXV
+	// å‘ãã®æ›´æ–°
 	Rotation();
 }
 
 //============================================================
-//	ˆÊ’u‚ÌXVˆ— (‘€ì)
+//	ä½ç½®ã®æ›´æ–°å‡¦ç† (æ“ä½œ)
 //============================================================
 void CCamera::Move(void)
 {
-	// ƒ|ƒCƒ“ƒ^‚ğéŒ¾
-	CInputMouse	*pMouse = CManager::GetMouse();	// ƒ}ƒEƒX‚Ìæ“¾
+	// ãƒã‚¤ãƒ³ã‚¿ã‚’å®£è¨€
+	CInputMouse	*pMouse = CManager::GetMouse();	// ãƒã‚¦ã‚¹ã®å–å¾—
 
-	// •Ï”‚ğéŒ¾
-	D3DXVECTOR3 mouseMove = pMouse->GetMove();	// ƒ}ƒEƒX‚ÌˆÚ“®—Ê
+	// å¤‰æ•°ã‚’å®£è¨€
+	D3DXVECTOR3 mouseMove = pMouse->GetMove();	// ãƒã‚¦ã‚¹ã®ç§»å‹•é‡
 
-	// ƒ}ƒEƒX‘€ì‚ÌXV
+	// ãƒã‚¦ã‚¹æ“ä½œã®æ›´æ–°
 	if (pMouse->GetPress(CInputMouse::KEY_LEFT) == true && pMouse->GetPress(CInputMouse::KEY_RIGHT) == true)
-	{ // ‰EƒNƒŠƒbƒN‚Æ¶ƒNƒŠƒbƒN‚ª‰Ÿ‚³‚ê‚Ä‚¢‚éê‡
+	{ // å³ã‚¯ãƒªãƒƒã‚¯ã¨å·¦ã‚¯ãƒªãƒƒã‚¯ãŒæŠ¼ã•ã‚Œã¦ã„ã‚‹å ´åˆ
 
-		// ‹“_‚ğˆÚ“®
+		// è¦–ç‚¹ã‚’ç§»å‹•
 		m_camera.posV.x -= sinf(m_camera.rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
 		m_camera.posV.z -= cosf(m_camera.rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
 		m_camera.posV.x += sinf(m_camera.rot.y) * mouseMove.y * REV_MOVE_MOUSE;
 		m_camera.posV.z += cosf(m_camera.rot.y) * mouseMove.y * REV_MOVE_MOUSE;
 
-		// ’‹“_‚ğˆÚ“®
+		// æ³¨è¦–ç‚¹ã‚’ç§»å‹•
 		m_camera.posR.x -= sinf(m_camera.rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
 		m_camera.posR.z -= cosf(m_camera.rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
 		m_camera.posR.x += sinf(m_camera.rot.y) * mouseMove.y * REV_MOVE_MOUSE;
@@ -502,75 +470,75 @@ void CCamera::Move(void)
 }
 
 //============================================================
-//	‹——£‚ÌXVˆ— (‘€ì)
+//	è·é›¢ã®æ›´æ–°å‡¦ç† (æ“ä½œ)
 //============================================================
 void CCamera::Distance(void)
 {
-	// ƒ|ƒCƒ“ƒ^‚ğéŒ¾
-	CInputMouse	*pMouse = CManager::GetMouse();	// ƒ}ƒEƒX‚Ìæ“¾
+	// ãƒã‚¤ãƒ³ã‚¿ã‚’å®£è¨€
+	CInputMouse	*pMouse = CManager::GetMouse();	// ãƒã‚¦ã‚¹ã®å–å¾—
 
-	// •Ï”‚ğéŒ¾
-	D3DXVECTOR3 mouseMove = pMouse->GetMove();	// ƒ}ƒEƒX‚ÌˆÚ“®—Ê
+	// å¤‰æ•°ã‚’å®£è¨€
+	D3DXVECTOR3 mouseMove = pMouse->GetMove();	// ãƒã‚¦ã‚¹ã®ç§»å‹•é‡
 
-	// ƒ}ƒEƒX‘€ì‚ÌXV
+	// ãƒã‚¦ã‚¹æ“ä½œã®æ›´æ–°
 	if (mouseMove.z != 0.0f)
-	{ // ƒ}ƒEƒXƒzƒC[ƒ‹‚ª‘€ì‚³‚ê‚½ê‡
+	{ // ãƒã‚¦ã‚¹ãƒ›ã‚¤ãƒ¼ãƒ«ãŒæ“ä½œã•ã‚ŒãŸå ´åˆ
 
-		// ‹——£‚ğ‰ÁZ
+		// è·é›¢ã‚’åŠ ç®—
 		m_camera.fDis += mouseMove.z * REV_DIS_MOUSE;
 	}
 
-	// ‹——£‚Ì•â³
+	// è·é›¢ã®è£œæ­£
 	useful::LimitNum(m_camera.fDis, MIN_DIS, MAX_DIS);
 }
 
 //============================================================
-//	Œü‚«‚ÌXVˆ— (‘€ì)
+//	å‘ãã®æ›´æ–°å‡¦ç† (æ“ä½œ)
 //============================================================
 void CCamera::Rotation(void)
 {
-	// ƒ|ƒCƒ“ƒ^‚ğéŒ¾
-	CInputMouse	*pMouse = CManager::GetMouse();	// ƒ}ƒEƒX‚Ìæ“¾
+	// ãƒã‚¤ãƒ³ã‚¿ã‚’å®£è¨€
+	CInputMouse	*pMouse = CManager::GetMouse();	// ãƒã‚¦ã‚¹ã®å–å¾—
 
-	// •Ï”‚ğéŒ¾
-	D3DXVECTOR3 mouseMove = pMouse->GetMove();	// ƒ}ƒEƒX‚ÌˆÚ“®—Ê
+	// å¤‰æ•°ã‚’å®£è¨€
+	D3DXVECTOR3 mouseMove = pMouse->GetMove();	// ãƒã‚¦ã‚¹ã®ç§»å‹•é‡
 
-	// ƒ}ƒEƒX‘€ì‚ÌXV
+	// ãƒã‚¦ã‚¹æ“ä½œã®æ›´æ–°
 	if (pMouse->GetPress(CInputMouse::KEY_LEFT) == true && pMouse->GetPress(CInputMouse::KEY_RIGHT) == false)
-	{ // ¶ƒNƒŠƒbƒN‚¾‚¯‚ª‰Ÿ‚³‚ê‚Ä‚¢‚éê‡
+	{ // å·¦ã‚¯ãƒªãƒƒã‚¯ã ã‘ãŒæŠ¼ã•ã‚Œã¦ã„ã‚‹å ´åˆ
 
-		// ƒJƒƒ‰‚Ì y²‚ğ‰ñ“]
+		// ã‚«ãƒ¡ãƒ©ã® yè»¸ã‚’å›è»¢
 		m_camera.rot.y += mouseMove.x * REV_ROT_MOUSE;
 
-		// ƒJƒƒ‰‚Ì x²‚ğ‰ñ“]
+		// ã‚«ãƒ¡ãƒ©ã® xè»¸ã‚’å›è»¢
 		m_camera.rot.x += mouseMove.y * REV_ROT_MOUSE;
 	}
 
-	// Œü‚«‚Ì•â³
+	// å‘ãã®è£œæ­£
 	useful::LimitNum(m_camera.rot.x, LIMIT_ROT_LOW, LIMIT_ROT_HIGH);
 	useful::NormalizeRot(m_camera.rot.y);
 
-	// ‹“_‚ÌXV
+	// è¦–ç‚¹ã®æ›´æ–°
 	m_camera.posV.x = m_camera.posR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));
 	m_camera.posV.y = m_camera.posR.y + ((m_camera.fDis * cosf(m_camera.rot.x)));
 	m_camera.posV.z = m_camera.posR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));
 
-	// ƒ}ƒEƒX‘€ì‚ÌXV
+	// ãƒã‚¦ã‚¹æ“ä½œã®æ›´æ–°
 	if (pMouse->GetPress(CInputMouse::KEY_RIGHT) == true && pMouse->GetPress(CInputMouse::KEY_LEFT) == false)
-	{ // ‰EƒNƒŠƒbƒN‚¾‚¯‚ª‰Ÿ‚³‚ê‚Ä‚¢‚éê‡
+	{ // å³ã‚¯ãƒªãƒƒã‚¯ã ã‘ãŒæŠ¼ã•ã‚Œã¦ã„ã‚‹å ´åˆ
 
-		// ƒJƒƒ‰‚Ì y²‚ğ‰ñ“]
+		// ã‚«ãƒ¡ãƒ©ã® yè»¸ã‚’å›è»¢
 		m_camera.rot.y += mouseMove.x * REV_ROT_MOUSE;
 
-		// ƒJƒƒ‰‚Ì x²‚ğ‰ñ“]
+		// ã‚«ãƒ¡ãƒ©ã® xè»¸ã‚’å›è»¢
 		m_camera.rot.x += mouseMove.y * REV_ROT_MOUSE;
 	}
 
-	// Œü‚«‚Ì•â³
+	// å‘ãã®è£œæ­£
 	useful::LimitNum(m_camera.rot.x, LIMIT_ROT_LOW, LIMIT_ROT_HIGH);
 	useful::NormalizeRot(m_camera.rot.y);
 
-	// ’‹“_‚ÌXV
+	// æ³¨è¦–ç‚¹ã®æ›´æ–°
 	m_camera.posR.x = m_camera.posV.x + ((-m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));
 	m_camera.posR.y = m_camera.posV.y + ((-m_camera.fDis * cosf(m_camera.rot.x)));
 	m_camera.posR.z = m_camera.posV.z + ((-m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));
