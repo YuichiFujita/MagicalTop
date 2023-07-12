@@ -104,13 +104,12 @@ void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot
 			}
 
 			// Ž‹ŠE“à”»’è
-			bHit = collision::Sector
+			bHit = collision::Circle2D
 			( // ˆø”
 				rPos,					// ”»’èˆÊ’u
 				pObject->GetPosition(),	// ”»’è–Ú•WˆÊ’u
-				rRot.y,					// ”»’èŒü‚«
-				status.fViewRadius,		// Ž‹ŠE”ÍˆÍ
-				status.fViewAngle,		// Ž‹–ìŠp
+				status.fViewRadius,		// ”»’è”¼Œa
+				pObject->GetRadius(),	// ”»’è–Ú•W”¼Œa
 				&fLength				// ”»’è–Ú•W‚Æ‚Ì‹——£
 			);
 

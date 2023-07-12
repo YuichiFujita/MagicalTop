@@ -22,13 +22,14 @@
 #include "target.h"
 #include "stage.h"
 #include "field.h"
+#include "particle3D.h"
 
 //************************************************************
 //	マクロ定義
 //************************************************************
 #define PLAYER_SETUP_TXT	"data\\TXT\\player.txt"	// セットアップテキスト相対パス
 
-#define MAX_MOVEX		(2.8f)	// 自動歩行時の速度割合用
+#define MAX_MOVEX		(5.0f)	// 自動歩行時の速度割合用
 #define PULSROT_MOVEZ	(20)	// 前後移動時のプレイヤー向きの変更量
 #define PLUS_MOVEX		(0.5f)	// 左右回転の移動量の加算量
 #define PLAY_MOVEZ		(2.0f)	// 前後の移動量
@@ -276,6 +277,38 @@ void CPlayer::Draw(void)
 
 		// パーツの描画
 		m_apMultiModel[nCntPlayer]->Draw();
+	}
+}
+
+//============================================================
+//	ヒット処理
+//============================================================
+void CPlayer::Hit(const int nDmg)
+{
+#if 0
+	// 体力からダメージ分減算
+	m_pLifeGauge->AddLife(-nDmg);
+
+	if (m_pLifeGauge->GetLife() > 0)
+	{ // 生きている場合
+
+		// パーティクル3Dオブジェクトを生成
+		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition());
+	}
+	else
+#endif
+
+	{ // 死んでいる場合
+
+		// パーティクル3Dオブジェクトを生成
+		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
+		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+
+		// TODO：PlayerのUninitどうするのこれ
+#if 0
+		// プレイヤーオブジェクトの終了
+		Uninit();
+#endif
 	}
 }
 

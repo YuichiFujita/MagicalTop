@@ -35,7 +35,8 @@ namespace collision
 		D3DXVECTOR3 centerPos,	// 判定位置
 		D3DXVECTOR3 targetPos,	// 判定目標位置
 		float fCenterRadius,	// 判定半径
-		float fTargetRadius		// 判定目標半径
+		float fTargetRadius,	// 判定目標半径
+		float *pLength = NULL	// 判定目標との距離
 	);
 	bool Circle3D	// 3軸の円の当たり判定
 	( // 引数

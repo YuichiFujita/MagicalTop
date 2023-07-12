@@ -50,7 +50,6 @@ public:
 		float	fHeight;		// 縦幅
 		float	fMove;			// 移動量
 		float	fViewRadius;	// 視界範囲
-		float	fViewAngle;		// 視野角
 		bool	bHoming;		// ホーミングの ON/OFF
 	}StatusInfo;
 

@@ -189,6 +189,7 @@ void CCamera::SetCamera(void)
 //============================================================
 void CCamera::SetDestCamera(void)
 {
+#if 0
 	// 変数を宣言
 	D3DXVECTOR3 pos = CManager::GetPlayer()->GetPosition();		// プレイヤー位置
 	D3DXVECTOR3 rot = CManager::GetPlayer()->GetRotation();		// プレイヤー向き
@@ -204,6 +205,44 @@ void CCamera::SetDestCamera(void)
 	m_camera.destPosV.z = m_camera.posV.z = m_camera.posR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// 目標注視点から距離分離れた位置
 
 	// TODO：最初にカメラ動かないように直す
+#else
+	if (USED(CManager::GetPlayer()) && USED(CManager::GetTarget()))
+	{ // プレイヤー・ターゲットが使用されている場合
+
+		// 変数を宣言
+		D3DXVECTOR3 posPlayer = CManager::GetPlayer()->GetPosition();	// プレイヤー位置
+		D3DXVECTOR3 posTarget = CManager::GetTarget()->GetPosition();	// ターゲット位置
+		D3DXVECTOR3 destPosR = VEC3_ZERO;	// カメラの注視点の目標位置
+		D3DXVECTOR3 diffPosR = VEC3_ZERO;	// カメラの注視点の位置差分
+		D3DXVECTOR3 diffPosV = VEC3_ZERO;	// カメラの視点の位置差分
+		float fDisTarget = sqrtf((posPlayer.x - posTarget.x) * (posPlayer.x - posTarget.x) + (posPlayer.z - posTarget.z) * (posPlayer.z - posTarget.z)) * 0.5f;	// ターゲットとプレイヤー間の距離
+		float fDiffRot = 0.0f;	// カメラの向き差分
+
+		// 向きを求める
+		m_camera.rot.y = m_camera.destRot.y - m_camera.rot.y;
+		useful::NormalizeRot(m_camera.rot.y);	// 向き正規化
+
+		// ターゲットとプレイヤーの中間位置を求める
+		destPosR = (posPlayer - posTarget) * REV_CENTER;	// 中間位置を設定
+		destPosR.y = 0.0f;	// y座標を初期化
+
+		// カメラの向きをターゲットに向かせる
+		m_camera.rot.y = atan2f(posTarget.x - posPlayer.x, posTarget.z - posPlayer.z);
+
+		// カメラの距離を設定
+		m_camera.fDis = FIRST_DIS - (fDisTarget * REV_PULS_DIS);
+
+		// 目標の注視点の位置を更新
+		m_camera.posV.x = destPosR.x;
+		m_camera.posV.y = POSR_Y;
+		m_camera.posV.z = destPosR.z;
+
+		// 目標の視点の位置を更新
+		m_camera.posR.x = m_camera.destPosR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));
+		m_camera.posR.y = MIN_POSV_Y + (fDisTarget * REV_PLUS_POSV_Y);
+		m_camera.posR.z = m_camera.destPosR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));
+	}
+#endif
 }
 
 //============================================================

@@ -14,6 +14,7 @@
 
 #include "collision.h"
 #include "target.h"
+#include "player.h"
 #include "field.h"
 
 //************************************************************
@@ -30,12 +31,12 @@ const char *CBullet::mc_apTextureFile[] =	// テクスチャ定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CBullet::CBullet() : CObjectBillboard(CObject::LABEL_BULLET)
+CBullet::CBullet(const int nDamage) : CObjectBillboard(CObject::LABEL_BULLET), m_nDamage(nDamage)
 {
 	// メンバ変数をクリア
-	m_move  = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 移動量
+	m_move  = VEC3_ZERO;	// 移動量
 	m_type  = TYPE_ENEMY;	// 種類
-	m_nLife = 0;	// 寿命
+	m_nLife = 0;			// 寿命
 }
 
 //============================================================
@@ -52,9 +53,9 @@ CBullet::~CBullet()
 HRESULT CBullet::Init(void)
 {
 	// メンバ変数を初期化
-	m_move  = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 移動量
+	m_move  = VEC3_ZERO;	// 移動量
 	m_type  = TYPE_ENEMY;	// 種類
-	m_nLife = 0;	// 寿命
+	m_nLife = 0;			// 寿命
 
 	// オブジェクトビルボードの初期化
 	if (FAILED(CObjectBillboard::Init()))
@@ -127,6 +128,17 @@ void CBullet::Update(void)
 		return;
 	}
 
+	// プレイヤーとの当たり判定
+	if (CollisionPlayer())
+	{ // プレイヤーに当たっている場合
+
+		// オブジェクトの終了
+		Uninit();
+
+		// 関数を抜ける
+		return;
+	}
+
 	// 位置を設定
 	CObjectBillboard::SetPosition(pos);
 
@@ -176,7 +188,17 @@ void CBullet::SetLife(const int nLife)
 //============================================================
 //	生成処理
 //============================================================
-CBullet *CBullet::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, const D3DXCOLOR& rCol, const D3DXVECTOR3& rVec, const float fMove, const int nLife)
+CBullet *CBullet::Create
+(
+	const TYPE type,			// 種類
+	const D3DXVECTOR3& rPos,	// 位置
+	const D3DXVECTOR3& rSize,	// 大きさ
+	const D3DXCOLOR& rCol,		// 色
+	const D3DXVECTOR3& rVec,	// 移動方向
+	const float fMove,			// 移動速度
+	const int nLife,			// 寿命
+	const int nDamage			// 攻撃力
+)
 {
 	// 変数を宣言
 	int nTextureID;	// テクスチャインデックス
@@ -189,7 +211,7 @@ CBullet *CBullet::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVEC
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pBullet = new CBullet;	// 弾
+		pBullet = new CBullet(nDamage);	// 弾
 	}
 	else { assert(false); return NULL; }	// 使用中
 
@@ -269,20 +291,58 @@ bool CBullet::CollisionTarget(void)
 		// 変数を宣言
 		D3DXVECTOR3 sizeBullet = GetScaling();
 
-		// ターゲットとの衝突判定
+		// ターゲットとの当たり判定
 		bHit = collision::Circle3D
 		( // 引数
-			GetPosition(),
-			pTarget->GetPosition(),
-			(sizeBullet.x + sizeBullet.y) * 0.5f,
-			pTarget->GetRadius()
+			GetPosition(),							// 弾位置
+			pTarget->GetPosition(),					// ターゲット位置
+			(sizeBullet.x + sizeBullet.y) * 0.5f,	// 弾半径
+			pTarget->GetRadius()					// ターゲット半径
 		);
 
 		if (bHit)
 		{ // 当たっていた場合
 
-			// 敵のヒット処理
-			pTarget->Hit(200);	// TODO：定数
+			// ターゲットのヒット処理
+			pTarget->Hit(m_nDamage);
+		}
+	}
+
+	// 判定状況を返す
+	return bHit;
+}
+
+//============================================================
+//	プレイヤーとの当たり判定
+//============================================================
+bool CBullet::CollisionPlayer(void)
+{
+	// 変数を宣言
+	bool bHit = false;	// 判定状況
+
+	// ポインタを宣言
+	CPlayer *pPlayer = CManager::GetPlayer();	// プレイヤー情報
+
+	if (USED(pPlayer))
+	{ // プレイヤーが使用されている場合
+
+		// 変数を宣言
+		D3DXVECTOR3 sizeBullet = GetScaling();
+
+		// プレイヤーとの当たり判定
+		bHit = collision::Circle3D
+		( // 引数
+			GetPosition(),							// 弾位置
+			pPlayer->GetPosition(),					// プレイヤー位置
+			(sizeBullet.x + sizeBullet.y) * 0.5f,	// 弾半径
+			pPlayer->GetRadius()					// プレイヤー半径
+		);
+
+		if (bHit)
+		{ // 当たっていた場合
+
+			// プレイヤーのヒット処理
+			pPlayer->Hit(m_nDamage);
 		}
 	}
 

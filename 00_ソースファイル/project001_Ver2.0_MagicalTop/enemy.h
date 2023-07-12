@@ -69,6 +69,7 @@ public:
 		int		nCounterAttack;		// UŒ‚•p“x
 		int		nBullParts;			// ’e‚Ì”­Ëƒp[ƒc
 		int		nBullLife;			// ’e‚Ìõ–½
+		int		nBullDamage;		// ’e‚ÌUŒ‚—Í
 		float	fBullRadius;		// ’e‚Ì”¼Œa
 		float	fBullMove;			// ’e‚ÌˆÚ“®—Ê
 		float	fRadius;			// ”¼Œa

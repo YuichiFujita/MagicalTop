@@ -271,13 +271,13 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	//--------------------------------------------------------
 	//	初期設定
 	//--------------------------------------------------------
-	// 敵セットアップの読み込み
+	// 敵セットアップの読込
 	CEnemy::LoadSetup();
 
-	// 魔法セットアップの読み込み
+	// 魔法セットアップの読込
 	CMagic::LoadSetup();
 
-#if 0
+#if 1
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, -2000.0f), VEC3_ZERO);

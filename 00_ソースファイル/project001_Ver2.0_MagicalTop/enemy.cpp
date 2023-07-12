@@ -582,7 +582,8 @@ void CEnemy::Attack(const D3DXVECTOR3& rTarget)
 			XCOL_WHITE,						// 色
 			rTarget - bullPos,				// 移動方向
 			m_status.fBullMove,				// 移動速度
-			m_status.nBullLife				// 寿命
+			m_status.nBullLife,				// 寿命
+			m_status.nBullDamage			// 攻撃力
 		);
 
 		// パーティクル3Dの作成
@@ -1050,6 +1051,12 @@ void CEnemy::LoadSetup(void)
 
 								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
 								fscanf(pFile, "%d", &m_aStatusInfo[nType].nBullLife);	// 弾の寿命を読み込む
+							}
+							else if (strcmp(&aString[0], "BULLET_DAMAGE") == 0)
+							{ // 読み込んだ文字列が BULLET_DAMAGE の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nType].nBullDamage);	// 弾の攻撃力を読み込む
 							}
 							else if (strcmp(&aString[0], "BULLET_MOVE") == 0)
 							{ // 読み込んだ文字列が BULLET_MOVE の場合

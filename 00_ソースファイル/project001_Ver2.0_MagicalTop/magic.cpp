@@ -543,15 +543,6 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].fViewRadius);	// 視界範囲を読み込む
 							}
-							else if (strcmp(&aString[0], "VIEW_ANGLE") == 0)
-							{ // 読み込んだ文字列が VIEW_ANGLE の場合
-
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fViewAngle);	// 視野角を読み込む
-
-								// 視野角をラジアンに変換
-								m_aStatusInfo[nType].fViewAngle = D3DXToRadian(m_aStatusInfo[nType].fViewAngle);
-							}
 							else if (strcmp(&aString[0], "HOMING_ENABLE") == 0)
 							{ // 読み込んだ文字列が HOMING_ENABLE の場合
 

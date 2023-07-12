@@ -46,7 +46,8 @@ bool collision::Circle2D
 	D3DXVECTOR3 centerPos,	// 判定位置
 	D3DXVECTOR3 targetPos,	// 判定目標位置
 	float fCenterRadius,	// 判定半径
-	float fTargetRadius		// 判定目標半径
+	float fTargetRadius,	// 判定目標半径
+	float *pLength			// 判定目標との距離
 )
 {
 	// 変数を宣言
@@ -55,6 +56,13 @@ bool collision::Circle2D
 	// 判定位置と判定目標位置の距離を求める
 	fLength = (centerPos.x - targetPos.x) * (centerPos.x - targetPos.x)
 			+ (centerPos.z - targetPos.z) * (centerPos.z - targetPos.z);
+
+	if (USED(pLength))
+	{ // ポインタが使用されている場合
+
+		// 判定目標との距離を代入
+		*pLength = fLength;
+	}
 
 	if (fLength < ((fCenterRadius + fTargetRadius) * (fCenterRadius + fTargetRadius)))
 	{ // 判定内の場合

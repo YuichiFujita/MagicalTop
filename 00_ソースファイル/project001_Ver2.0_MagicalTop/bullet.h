@@ -31,7 +31,7 @@ public:
 	}TYPE;
 
 	// コンストラクタ
-	CBullet();
+	CBullet(const int nDamage);
 
 	// デストラクタ
 	~CBullet();
@@ -51,7 +51,8 @@ public:
 		const D3DXCOLOR& rCol,		// 色
 		const D3DXVECTOR3& rVec,	// 移動方向
 		const float fMove,			// 移動速度
-		const int nLife				// 寿命
+		const int nLife,			// 寿命
+		const int nDamage			// 攻撃力
 	);
 
 	// メンバ関数
@@ -62,14 +63,16 @@ public:
 private:
 	// メンバ関数
 	bool CollisionTarget(void);	// ターゲットとの当たり判定
+	bool CollisionPlayer(void);	// プレイヤーとの当たり判定
 
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 
 	// メンバ変数
-	D3DXVECTOR3 m_move;	// 移動量
-	TYPE m_type;		// 種類
-	int m_nLife;		// 寿命
+	D3DXVECTOR3 m_move;		// 移動量
+	TYPE m_type;			// 種類
+	int m_nLife;			// 寿命
+	const int m_nDamage;	// 攻撃力定数
 };
 
 #endif	// _BULLET_H_

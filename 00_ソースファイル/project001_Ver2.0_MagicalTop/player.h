@@ -88,6 +88,7 @@ public:
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
 	void Draw(void);	// 描画
+	void Hit(const int nDmg);	// ヒット
 
 	// 静的メンバ関数
 	static CPlayer *Create	// 生成
