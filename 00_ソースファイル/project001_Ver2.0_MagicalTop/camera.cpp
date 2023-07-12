@@ -360,7 +360,7 @@ void CCamera::Follow(void)
 void CCamera::Bargaining(void)
 {
 	// TODODODO：いい感じにカメラ頑張る
-
+#if 0
 	// 変数を宣言
 	D3DXVECTOR3 diffRot  = VEC3_ZERO;	// カメラの向き差分
 	D3DXVECTOR3 diffPosV = VEC3_ZERO;	// カメラの視点の位置差分
@@ -405,6 +405,56 @@ void CCamera::Bargaining(void)
 	m_camera.posR.x += diffPosR.x * REV_POS_R.x;
 	m_camera.posR.y += diffPosR.y * REV_POS_R.y;
 	m_camera.posR.z += diffPosR.z * REV_POS_R.x;
+#else
+	if (USED(CManager::GetPlayer()))
+	{ // プレイヤーが使用されている場合
+
+	// 変数を宣言
+		D3DXVECTOR3 diffRot = VEC3_ZERO;	// カメラの向き差分
+		D3DXVECTOR3 diffPosV = VEC3_ZERO;	// カメラの視点の位置差分
+		D3DXVECTOR3 diffPosR = VEC3_ZERO;	// カメラの注視点の位置差分
+		D3DXVECTOR3 pos = CManager::GetPlayer()->GetPosition();	// プレイヤー位置
+		D3DXVECTOR3 rot = CManager::GetPlayer()->GetRotation();	// プレイヤー向き
+
+		// 目標の向きまでの差分を計算
+		diffRot = m_camera.destRot - m_camera.rot;
+		useful::NormalizeRot(diffRot.y);		// 差分向き正規化
+
+		// 向きを更新
+		m_camera.rot.y += diffRot.y * REV_ROT;
+		useful::NormalizeRot(m_camera.rot.y);	// 向き正規化
+
+		D3DXVECTOR3 camPos = (pos - CManager::GetTarget()->GetPosition());
+		m_camera.rot.y = atan2f(CManager::GetTarget()->GetPosition().x - pos.x, CManager::GetTarget()->GetPosition().z - pos.z);
+
+		float fff = sqrtf(camPos.x * camPos.x + camPos.z * camPos.z) * 0.5f;
+		m_camera.fDis = -800 + -(fff * 1.0f);
+
+		// 目標の注視点の位置を更新
+		m_camera.destPosR.x = camPos.x;				// プレイヤーと同位置
+		m_camera.destPosR.y = camPos.y + 300.0f;	// プレイヤーの上空位置
+		m_camera.destPosR.z = camPos.z;				// プレイヤーと同位置
+
+		// 目標の視点の位置を更新
+		m_camera.destPosV.x = m_camera.destPosR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));	// 目標注視点から距離分離れた位置
+		m_camera.destPosV.y = 700.0f + (fff);																			// 固定の高さ
+		m_camera.destPosV.z = m_camera.destPosR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// 目標注視点から距離分離れた位置
+
+		// 目標の位置までの差分を計算
+		diffPosV = m_camera.destPosV - m_camera.posV;	// 視点
+		diffPosR = m_camera.destPosR - m_camera.posR;	// 注視点
+
+		// 視点の位置を更新
+		m_camera.posV.x += diffPosV.x * REV_POS_V.x;
+		m_camera.posV.y += diffPosV.y * REV_POS_V.y;
+		m_camera.posV.z += diffPosV.z * REV_POS_V.x;
+
+		// 注視点の位置を更新
+		m_camera.posR.x += diffPosR.x * REV_POS_R.x;
+		m_camera.posR.y += diffPosR.y * REV_POS_R.y;
+		m_camera.posR.z += diffPosR.z * REV_POS_R.x;
+	}
+#endif
 }
 
 //============================================================

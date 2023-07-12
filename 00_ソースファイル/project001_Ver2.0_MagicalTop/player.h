@@ -58,12 +58,6 @@ public:
 		MODEL_MAX		// この列挙型の総数
 	}MODEL;
 
-	// コンストラクタ
-	CPlayer();
-
-	// デストラクタ
-	~CPlayer();
-
 	// モーション列挙
 	typedef enum
 	{
@@ -74,6 +68,20 @@ public:
 		MOTION_LANDING,		// 着地モーション
 		MOTION_MAX			// この列挙型の総数
 	}MOTION;
+
+	// 回転列挙
+	typedef enum
+	{
+		ROTATION_LEFT = 0,	// 左回転
+		ROTATION_RIGHT,		// 右回転
+		ROTATION_MAX		// この列挙型の総数
+	}ROTATION;
+
+	// コンストラクタ
+	CPlayer();
+
+	// デストラクタ
+	~CPlayer();
 
 	// オーバーライド関数
 	HRESULT Init(void);	// 初期化
@@ -123,8 +131,10 @@ private:
 	D3DXVECTOR3	m_move;		// 移動量
 	D3DXVECTOR3	m_rot;		// 現在向き
 	D3DXVECTOR3	m_destRot;	// 目標向き
-	int  m_nNumModel;		// パーツの総数
-	bool m_bJump;			// ジャンプ状況
+	ROTATION m_rotation;	// 回転方向
+	int   m_nNumModel;		// パーツの総数
+	float m_fDisTarget;		// ターゲットとの距離
+	bool  m_bJump;			// ジャンプ状況
 };
 
 #endif	// _PLAYER_H_

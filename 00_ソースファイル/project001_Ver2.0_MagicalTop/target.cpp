@@ -19,11 +19,11 @@
 //	マクロ定義
 //************************************************************
 #define CUBE_SIZE	(D3DXVECTOR3(25.0f, 25.0f, 25.0f))	// キューブの大きさ
-#define CUBE_BORD	(2.5f)	// キューブの縁取りの太さ
+#define CUBE_BORD	(2.5f)		// キューブの縁取りの太さ
 
-#define TARG_RADIUS	(60.0f)	// ターゲット半径
-#define ADD_POS_Y	(92.0f)	// 台座位置からのキューブ相対位置の加算量
-#define MUL_SIN_POS	(10.0f)	// サインカーブの補正係数
+#define TARG_RADIUS	(100.0f)	// ターゲット半径
+#define ADD_POS_Y	(92.0f)		// 台座位置からのキューブ相対位置の加算量
+#define MUL_SIN_POS	(10.0f)		// サインカーブの補正係数
 
 #define ADD_SIN_ROT	(D3DXToRadian(1))	// 浮遊向きの加算量
 #define ADD_CUBEROT	(D3DXVECTOR3(0.01f, 0.001f, 0.01f))	// キューブの回転量
