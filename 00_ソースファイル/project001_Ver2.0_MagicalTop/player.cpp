@@ -45,21 +45,21 @@
 //************************************************************
 const char *CPlayer::mc_apModelFile[] =	// モデル定数
 {
-	"data\\MODEL\\body.x",		// 体モデル
-	"data\\MODEL\\head.x",		// 頭モデル
-	"data\\MODEL\\sleeve_l.x",	// 左腕モデル
-	"data\\MODEL\\sleeve_r.x",	// 右腕モデル
-	"data\\MODEL\\wrist_l.x",	// 左手首モデル
-	"data\\MODEL\\wrist_r.x",	// 右手首モデル
-	"data\\MODEL\\hand_l.x",	// 左手モデル
-	"data\\MODEL\\hand_r.x",	// 右手モデル
-	"data\\MODEL\\pants_l.x",	// 左足モデル
-	"data\\MODEL\\pants_r.x",	// 右足モデル
-	"data\\MODEL\\leg_l.x",		// 左腿モデル
-	"data\\MODEL\\leg_r.x",		// 右腿モデル
-	"data\\MODEL\\shoes_l.x",	// 左靴モデル
-	"data\\MODEL\\shoes_r.x",	// 右靴モデル
-	"data\\MODEL\\knife.x",		// ナイフモデル
+	"data\\MODEL\\PLAYER\\body.x",		// 体モデル
+	"data\\MODEL\\PLAYER\\head.x",		// 頭モデル
+	"data\\MODEL\\PLAYER\\sleeve_l.x",	// 左腕モデル
+	"data\\MODEL\\PLAYER\\sleeve_r.x",	// 右腕モデル
+	"data\\MODEL\\PLAYER\\wrist_l.x",	// 左手首モデル
+	"data\\MODEL\\PLAYER\\wrist_r.x",	// 右手首モデル
+	"data\\MODEL\\PLAYER\\hand_l.x",	// 左手モデル
+	"data\\MODEL\\PLAYER\\hand_r.x",	// 右手モデル
+	"data\\MODEL\\PLAYER\\pants_l.x",	// 左足モデル
+	"data\\MODEL\\PLAYER\\pants_r.x",	// 右足モデル
+	"data\\MODEL\\PLAYER\\leg_l.x",		// 左腿モデル
+	"data\\MODEL\\PLAYER\\leg_r.x",		// 右腿モデル
+	"data\\MODEL\\PLAYER\\shoes_l.x",	// 左靴モデル
+	"data\\MODEL\\PLAYER\\shoes_r.x",	// 右靴モデル
+	"data\\MODEL\\PLAYER\\knife.x",		// ナイフモデル
 };
 
 //************************************************************

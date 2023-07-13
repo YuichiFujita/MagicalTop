@@ -41,8 +41,8 @@ CEnemy::PartsInfo CEnemy::m_aPartsInfo[CEnemy::TYPE_MAX] = {};		// パーツ情報
 
 const char *CEnemyCar::mc_apModelFile[] =	// 戦車モデル定数
 {
-	"data\\MODEL\\caterpillar000.x",	// キャタピラ
-	"data\\MODEL\\cannon000.x",			// キャノン
+	"data\\MODEL\\ENEMY\\CAR\\caterpillar000.x",	// キャタピラ
+	"data\\MODEL\\ENEMY\\CAR\\cannon000.x",			// キャノン
 };
 
 //************************************************************
