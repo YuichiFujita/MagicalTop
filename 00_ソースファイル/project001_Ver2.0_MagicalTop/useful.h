@@ -13,7 +13,7 @@
 //************************************************************
 //	インクルードファイル
 //************************************************************
-//#include "main.h"
+#include "main.h"
 
 //************************************************************
 //	マクロ定義
@@ -122,10 +122,15 @@ namespace useful
 		const T min,	// 最小範囲
 		const T max		// 最大範囲
 	);
-	template<class T> void useful::SortNum	// 値のソート
+	template<class T> void useful::SortNum	// ソート
 	( // 引数
 		T *pSortNum,		// ソート配列
 		const int nMaxKeep	// 配列サイズ
+	);
+	template<class T> void useful::Shuffle	// シャッフル
+	(
+		T *pShuffleData,		// シャッフル配列
+		const int nMaxShuffle	// 配列サイズ
 	);
 }
 
@@ -133,7 +138,7 @@ namespace useful
 //	テンプレート関数
 //************************************************************
 //============================================================
-//	値の範囲内制限
+//	値の範囲内制限処理
 //============================================================
 template<class T> bool useful::LimitNum
 (
@@ -166,7 +171,7 @@ template<class T> bool useful::LimitNum
 }
 
 //============================================================
-//	値のソート
+//	ソート処理
 //============================================================
 template<class T> void useful::SortNum
 (
@@ -203,6 +208,29 @@ template<class T> void useful::SortNum
 			pSortNum[nCntKeep]		= pSortNum[nCurrentMaxID];
 			pSortNum[nCurrentMaxID]	= keepNum;
 		}
+	}
+}
+
+//============================================================
+//	シャッフル処理
+//============================================================
+template<class T> void useful::Shuffle
+(
+	T *pShuffleData,		// シャッフル配列
+	const int nMaxShuffle	// 配列サイズ
+)
+{
+	for (int nCntShu = nMaxShuffle - 1; nCntShu > 0; nCntShu--)
+	{ // 引数の総数分繰り返す
+
+		// 変数を宣言
+		T swap;		// 要素の入れ替え用
+		int nRandom = rand() % nCntShu;	// 要素を入れ替えるインデックス
+
+		// 要素の入れ替え
+		swap					= pShuffleData[nRandom];
+		pShuffleData[nRandom]	= pShuffleData[nCntShu];
+		pShuffleData[nCntShu]	= swap;
 	}
 }
 
