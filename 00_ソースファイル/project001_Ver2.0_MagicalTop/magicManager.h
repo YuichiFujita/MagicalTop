@@ -49,10 +49,10 @@ public:
 	// メンバ関数
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
-	void LockOnMagic(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot);	// 魔法ロックオン
-	void ShotMagic(void);					// 魔法発射
-	void SetMagic(const CMagic::TYPE type);	// 魔法設定
-	CMagic::TYPE GetMagic(void) const;		// 魔法取得
+	void LockOnMagic(const D3DXVECTOR3& rPos);	// 魔法ロックオン
+	void ShotMagic(void);						// 魔法発射
+	void SetMagic(const CMagic::TYPE type);		// 魔法設定
+	CMagic::TYPE GetMagic(void) const;			// 魔法取得
 
 	// 静的メンバ関数
 	static CMagicManager *Create(void);	// 生成

@@ -73,7 +73,7 @@ void CMagicManager::Uninit(void)
 //============================================================
 //	魔法のロックオン処理
 //============================================================
-void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
+void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos)
 {
 	// 変数を宣言
 	CMagic::StatusInfo status = CMagic::GetStatusInfo(m_magic);	// 魔法ステータス

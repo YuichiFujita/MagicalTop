@@ -250,6 +250,33 @@ void CObjectChara::SetRotation(const D3DXVECTOR3& rRot)
 }
 
 //============================================================
+//	モーション種類取得処理
+//============================================================
+int CObjectChara::GetMotionType(void) const
+{
+	// モーションの種類を返す
+	return m_pMotion->GetType();
+}
+
+//============================================================
+//	モーション終了取得処理
+//============================================================
+bool CObjectChara::IsMotionFinish(void) const
+{
+	// モーションの終了状況を返す
+	return m_pMotion->IsFinish();
+}
+
+//============================================================
+//	モーションループ取得処理
+//============================================================
+bool CObjectChara::IsMotionLoop(const int nType) const
+{
+	// 引数の種類のモーションループ状況を返す
+	return m_pMotion->IsLoop(nType);
+}
+
+//============================================================
 //	位置取得処理
 //============================================================
 D3DXVECTOR3 CObjectChara::GetPosition(void) const
@@ -265,4 +292,22 @@ D3DXVECTOR3 CObjectChara::GetRotation(void) const
 {
 	// 向きを返す
 	return m_rot;
+}
+
+//============================================================
+//	パーツ位置取得処理
+//============================================================
+D3DXVECTOR3 CObjectChara::GetPartsPosition(const int nID) const
+{
+	// 引数インデックスのパーツの位置を返す
+	return m_apMultiModel[nID]->GetPosition();
+}
+
+//============================================================
+//	パーツ向き取得処理
+//============================================================
+D3DXVECTOR3 CObjectChara::GetPartsRotation(const int nID) const
+{
+	// 引数インデックスのパーツの向きを返す
+	return m_apMultiModel[nID]->GetRotation();
 }

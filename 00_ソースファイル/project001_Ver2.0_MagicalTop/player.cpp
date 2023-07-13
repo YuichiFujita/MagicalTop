@@ -68,16 +68,12 @@ const char *CPlayer::mc_apModelFile[] =	// モデル定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CPlayer::CPlayer() : CObject(CObject::LABEL_PLAYER)
+CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 {
 	// メンバ変数をクリア
-	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
-	m_pMotion		= NULL;				// モーションの情報
 	m_pMagic		= NULL;				// 魔法マネージャーの情報
-	m_pos			= VEC3_ZERO;		// 現在位置
 	m_oldPos		= VEC3_ZERO;		// 過去位置
 	m_move			= VEC3_ZERO;		// 移動量
-	m_rot			= VEC3_ZERO;		// 現在向き
 	m_destRot		= VEC3_ZERO;		// 目標向き
 	m_rotation		= ROTATION_LEFT;	// 回転方向
 	m_nNumModel		= 0;				// パーツの総数
@@ -99,10 +95,8 @@ CPlayer::~CPlayer()
 HRESULT CPlayer::Init(void)
 {
 	// メンバ変数を初期化
-	m_pos			= VEC3_ZERO;		// 現在位置
 	m_oldPos		= VEC3_ZERO;		// 過去位置
 	m_move			= VEC3_ZERO;		// 移動量
-	m_rot			= VEC3_ZERO;		// 現在向き
 	m_destRot		= VEC3_ZERO;		// 目標向き
 	m_rotation		= ROTATION_LEFT;	// 回転方向
 	m_nNumModel		= 0;				// パーツの総数
@@ -119,10 +113,9 @@ HRESULT CPlayer::Init(void)
 		return E_FAIL;
 	}
 
-	// モーションオブジェクトの生成
-	m_pMotion = CMotion::Create();
-	if (UNUSED(m_pMotion))
-	{ // 非使用中の場合
+	// オブジェクトキャラクターの初期化
+	if (FAILED(CObjectChara::Init()))
+	{ // 初期化に失敗した場合
 
 		// 失敗を返す
 		assert(false);
@@ -133,10 +126,10 @@ HRESULT CPlayer::Init(void)
 	LoadSetup();
 
 	// モデル情報の設定
-	m_pMotion->SetModel(&m_apMultiModel[0], m_nNumModel);
+	SetModelInfo();
 
 	// モーションの設定
-	m_pMotion->Set(MOTION_NEUTRAL);
+	SetMotion(MOTION_NEUTRAL);
 
 	// 成功を返す
 	return S_OK;
@@ -147,31 +140,6 @@ HRESULT CPlayer::Init(void)
 //============================================================
 void CPlayer::Uninit(void)
 {
-	// マルチモデルを破棄
-	for (int nCntPlayer = 0; nCntPlayer < MAX_PARTS; nCntPlayer++)
-	{ // パーツの最大数分繰り返す
-
-		if (USED(m_apMultiModel[nCntPlayer]))
-		{ // パーツが使用中の場合
-
-			// 破棄処理
-			if (FAILED(m_apMultiModel[nCntPlayer]->Release(m_apMultiModel[nCntPlayer])))
-			{ // 破棄に失敗した場合
-
-				// 例外処理
-				assert(false);
-			}
-		}
-	}
-
-	// モーションを破棄
-	if (FAILED(m_pMotion->Release(m_pMotion)))
-	{ // 破棄に失敗した場合
-
-		// 例外処理
-		assert(false);
-	}
-
 	// 魔法マネージャーを破棄
 	if (FAILED(m_pMagic->Release(m_pMagic)))
 	{ // 破棄に失敗した場合
@@ -180,8 +148,8 @@ void CPlayer::Uninit(void)
 		assert(false);
 	}
 
-	// プレイヤーを破棄
-	Release();
+	// オブジェクトキャラクターの終了
+	CObjectChara::Uninit();
 }
 
 //============================================================
@@ -190,61 +158,59 @@ void CPlayer::Uninit(void)
 void CPlayer::Update(void)
 {
 	// 変数を宣言
-	MOTION currentMotion = MOTION_NEUTRAL;	// 現在のモーション
+	MOTION currentMotion  = MOTION_NEUTRAL;	// 現在のモーション
+	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
+	D3DXVECTOR3 rotPlayer = GetRotation();	// プレイヤー向き
 	D3DXVECTOR3 posTarget = CManager::GetTarget()->GetPosition();	// ターゲット位置
 
 	// 過去位置を更新
-	m_oldPos = m_pos;
+	m_oldPos = posPlayer;
 
 	// ターゲットとの距離を設定
-	m_fDisTarget = sqrtf((m_pos.x - posTarget.x) * (m_pos.x - posTarget.x) + (m_pos.z - posTarget.z) * (m_pos.z - posTarget.z)) * 0.5f;
+	m_fDisTarget = sqrtf((posPlayer.x - posTarget.x) * (posPlayer.x - posTarget.x)+ (posPlayer.z - posTarget.z) * (posPlayer.z - posTarget.z)) * 0.5f;
 
 	// 移動操作
 	currentMotion = Move(currentMotion);
 
 	// 向き更新
-	Rot();
+	Rot(rotPlayer);
 
 	// ジャンプ操作
 	currentMotion = Jump(currentMotion);
 
-	// 重力を加算
-	m_move.y -= PLAY_GRAVITY;
-
-	// 移動量を加算
-	m_pos += m_move;
-
-	// 移動量を減衰
-	m_move.x += (0.0f - m_move.x) * PLAY_REV;
-	m_move.z += (0.0f - m_move.z) * PLAY_REV;
+	// 位置更新
+	Pos(posPlayer);
 
 	// 当たり判定
-	CollisionTarget();	// ターゲット
-	CollisionEnemy();	// 敵
+	CollisionTarget(posPlayer);	// ターゲット
+	CollisionEnemy(posPlayer);	// 敵
 
 	// ステージ範囲外の補正
-	CManager::GetStage()->LimitPosition(m_pos, PLAY_RADIUS);
+	CManager::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
 
 	// 着地判定
-	if (Land(currentMotion) == MOTION_LANDING)
+	if (Land(currentMotion, posPlayer) == MOTION_LANDING)
 	{ // 着地していた場合
 
-		if (m_pMotion->GetType() == MOTION_JUMP)
+		if (GetMotionType() == MOTION_JUMP)
 		{ // 再生中モーションがジャンプだった場合
 
 			// 着地モーションの設定
-			m_pMotion->Set(MOTION_LANDING);
+			SetMotion(MOTION_LANDING);
 		}
 	}
 
 	// 射撃操作
-	currentMotion = Magic(currentMotion);
+	currentMotion = Magic(currentMotion, posPlayer);
 
-	// カメラ操作
-	Camera();
-
-	// モーション更新
+	// モーション・オブジェクトキャラクター更新
 	Motion(currentMotion);
+
+	// 位置を更新
+	SetPosition(posPlayer);
+
+	// 向きを更新
+	SetRotation(rotPlayer);
 }
 
 //============================================================
@@ -252,32 +218,8 @@ void CPlayer::Update(void)
 //============================================================
 void CPlayer::Draw(void)
 {
-	// 変数を宣言
-	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス
-
-	// ポインタを宣言
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
-
-	// ワールドマトリックスの初期化
-	D3DXMatrixIdentity(&m_mtxWorld);
-
-	// 向きを反映
-	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
-	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
-
-	// 位置を反映
-	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
-	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxTrans);
-
-	// ワールドマトリックスの設定
-	pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
-
-	for (int nCntPlayer = 0; nCntPlayer < m_nNumModel; nCntPlayer++)
-	{ // パーツの総数分繰り返す
-
-		// パーツの描画
-		m_apMultiModel[nCntPlayer]->Draw();
-	}
+	// オブジェクトキャラクターの描画
+	CObjectChara::Draw();
 }
 
 //============================================================
@@ -370,67 +312,28 @@ CPlayer *CPlayer::Create(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 }
 
 //============================================================
-//	位置の設定処理
-//============================================================
-void CPlayer::SetPosition(const D3DXVECTOR3& rPos)
-{
-	// 引数の位置を設定
-	m_pos = rPos;
-}
-
-//============================================================
-//	向きの設定処理
-//============================================================
-void CPlayer::SetRotation(const D3DXVECTOR3& rRot)
-{
-	// 引数の向きを設定
-	m_rot = rRot;
-
-	// 向きの正規化
-	useful::NormalizeRot(m_rot.x);
-	useful::NormalizeRot(m_rot.y);
-	useful::NormalizeRot(m_rot.z);
-}
-
-//============================================================
 //	マトリックス取得処理
 //============================================================
 D3DXMATRIX CPlayer::GetMtxWorld(void) const
 {
 	// 変数を宣言
-	D3DXMATRIX mtxRot, mtxTrans, mtxWorld;	// 計算用マトリックス
+	D3DXMATRIX  mtxRot, mtxTrans, mtxWorld;	// 計算用マトリックス
+	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
+	D3DXVECTOR3 rotPlayer = GetRotation();	// プレイヤー向き
 
 	// ワールドマトリックスの初期化
 	D3DXMatrixIdentity(&mtxWorld);
 
 	// 向きを反映
-	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
+	D3DXMatrixRotationYawPitchRoll(&mtxRot, rotPlayer.y, rotPlayer.x, rotPlayer.z);
 	D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
 
 	// 位置を反映
-	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
+	D3DXMatrixTranslation(&mtxTrans, posPlayer.x, posPlayer.y, posPlayer.z);
 	D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
 	// ワールドマトリックスを返す
 	return mtxWorld;
-}
-
-//============================================================
-//	位置取得処理
-//============================================================
-D3DXVECTOR3 CPlayer::GetPosition(void) const
-{
-	// 位置を返す
-	return m_pos;
-}
-
-//============================================================
-//	向き取得処理
-//============================================================
-D3DXVECTOR3 CPlayer::GetRotation(void) const
-{
-	// 向きを返す
-	return m_rot;
 }
 
 //============================================================
@@ -612,7 +515,7 @@ CPlayer::MOTION CPlayer::Jump(MOTION motion)
 //============================================================
 //	魔法処理
 //============================================================
-CPlayer::MOTION CPlayer::Magic(MOTION motion)
+CPlayer::MOTION CPlayer::Magic(MOTION motion, D3DXVECTOR3& rPos)
 {
 	// 変数を宣言
 	MOTION currentMotion = motion;	// 現在のモーション
@@ -622,7 +525,7 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion)
 	CInputPad		*pPad = CManager::GetPad();				// パッド
 
 	// 魔法のロックオン
-	m_pMagic->LockOnMagic(m_pos, D3DXVECTOR3(m_rot.x, m_rot.y + D3DX_PI, m_rot.z));
+	m_pMagic->LockOnMagic(rPos);
 
 	if (pKeyboard->GetTrigger(DIK_RETURN))
 	{ // 魔法の操作が行われた場合
@@ -641,14 +544,14 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion)
 //============================================================
 //	着地処理
 //============================================================
-CPlayer::MOTION CPlayer::Land(MOTION motion)
+CPlayer::MOTION CPlayer::Land(MOTION motion, D3DXVECTOR3& rPos)
 {
 	// 変数を宣言
-	MOTION currentMotion = motion;	// 現在のモーション
+	MOTION currentMotion  = motion;			// 現在のモーション
 
 	// 着地判定
-	if (CManager::GetField()->LandPosition(m_pos, m_move)
-	||  CManager::GetStage()->LandPosition(m_pos, m_move, 0.0f))
+	if (CManager::GetField()->LandPosition(rPos, m_move)
+	||  CManager::GetStage()->LandPosition(rPos, m_move, 0.0f))
 	{ // プレイヤーが着地していた場合
 
 		// 着地モーションを設定
@@ -674,32 +577,32 @@ CPlayer::MOTION CPlayer::Land(MOTION motion)
 void CPlayer::Motion(MOTION motion)
 {
 	// 変数を宣言
-	MOTION animMotion = (MOTION)m_pMotion->GetType();	// 現在再生中のモーション
+	MOTION animMotion = (MOTION)GetMotionType();	// 現在再生中のモーション
 
-	if (m_pMotion->IsLoop(animMotion) == true)
+	if (IsMotionLoop(animMotion) == true)
 	{ // ループするモーションだった場合
 
-		if (m_pMotion->GetType() != motion)
+		if (animMotion != motion)
 		{ // 現在のモーションが再生中のモーションと一致しない場合
 
 			// 現在のモーションの設定
-			m_pMotion->Set(motion);
+			SetMotion(motion);
 		}
 	}
 
-	// モーションの更新
-	m_pMotion->Update();
+	// オブジェクトキャラクターの更新
+	CObjectChara::Update();
 
 	// モーションの遷移
-	if (m_pMotion->IsFinish())
+	if (IsMotionFinish())
 	{ // モーションが終了していた場合
 
-		switch (m_pMotion->GetType())
+		switch (GetMotionType())
 		{ // モーションの種類ごとの処理
 		case MOTION_ACTION:		// アクション状態
 
 			// 待機モーションに移行
-			m_pMotion->Set(MOTION_NEUTRAL);
+			SetMotion(MOTION_NEUTRAL);
 
 			// 処理を抜ける
 			break;
@@ -714,7 +617,7 @@ void CPlayer::Motion(MOTION motion)
 		case MOTION_LANDING:	// 着地状態
 
 			// 待機モーションに移行
-			m_pMotion->Set(MOTION_NEUTRAL);
+			SetMotion(MOTION_NEUTRAL);
 
 			// 処理を抜ける
 			break;
@@ -723,9 +626,25 @@ void CPlayer::Motion(MOTION motion)
 }
 
 //============================================================
+//	位置処理
+//============================================================
+void CPlayer::Pos(D3DXVECTOR3& rPos)
+{
+	// 重力を加算
+	m_move.y -= PLAY_GRAVITY;
+
+	// 移動量を加算
+	rPos += m_move;
+
+	// 移動量を減衰
+	m_move.x += (0.0f - m_move.x) * PLAY_REV;
+	m_move.z += (0.0f - m_move.z) * PLAY_REV;
+}
+
+//============================================================
 //	向き処理
 //============================================================
-void CPlayer::Rot(void)
+void CPlayer::Rot(D3DXVECTOR3& rRot)
 {
 	// 変数を宣言
 	float fDiffRot = 0.0f;	// 差分向き
@@ -734,52 +653,22 @@ void CPlayer::Rot(void)
 	useful::NormalizeRot(m_destRot.y);
 
 	// 目標向きまでの差分を計算
-	fDiffRot = m_destRot.y - m_rot.y;
+	fDiffRot = m_destRot.y - rRot.y;
 
 	// 差分向きの正規化
 	useful::NormalizeRot(fDiffRot);
 
 	// 向きの更新
-	m_rot.y += fDiffRot * PLAY_REV_ROTA;
+	rRot.y += fDiffRot * PLAY_REV_ROTA;
 
 	// 向きの正規化
-	useful::NormalizeRot(m_rot.y);
-}
-
-//============================================================
-//	カメラ処理
-//============================================================
-void CPlayer::Camera(void)
-{
-	// 変数を宣言
-	D3DXVECTOR3 rot = CManager::GetCamera()->GetDestRotation();	// カメラ向き
-
-	// ポインタを宣言
-	CInputKeyboard	*pKeyboard = CManager::GetKeyboard();	// キーボード
-	CInputPad		*pPad = CManager::GetPad();				// パッド
-
-	// カメラ操作
-	if (pKeyboard->GetPress(DIK_J))
-	{ // カメラ左回転の操作が行われた場合
-
-		// カメラ向きを変更
-		rot.y -= PLAY_CAM_ROTA;
-	}
-	if (pKeyboard->GetPress(DIK_L))
-	{ // カメラ右回転の操作が行われた場合
-
-		// カメラ向きを変更
-		rot.y += PLAY_CAM_ROTA;
-	}
-
-	// カメラの向きを設定
-	CManager::GetCamera()->SetDestRotation(rot);
+	useful::NormalizeRot(rRot.y);
 }
 
 //============================================================
 //	ターゲットとの当たり判定
 //============================================================
-void CPlayer::CollisionTarget(void)
+void CPlayer::CollisionTarget(D3DXVECTOR3& rPos)
 {
 	// ポインタを宣言
 	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
@@ -790,7 +679,7 @@ void CPlayer::CollisionTarget(void)
 		// ターゲットとの衝突判定
 		collision::CirclePillar
 		( // 引数
-			m_pos,					// 判定位置
+			rPos,					// 判定位置
 			pTarget->GetPosition(),	// 判定目標位置
 			PLAY_RADIUS,			// 判定半径
 			pTarget->GetRadius()	// 判定目標半径
@@ -801,7 +690,7 @@ void CPlayer::CollisionTarget(void)
 //============================================================
 //	敵との当たり判定
 //============================================================
-void CPlayer::CollisionEnemy(void)
+void CPlayer::CollisionEnemy(D3DXVECTOR3& rPos)
 {
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
@@ -823,7 +712,7 @@ void CPlayer::CollisionEnemy(void)
 			// ターゲットとの衝突判定
 			collision::CirclePillar
 			( // 引数
-				m_pos,					// 判定位置
+				rPos,					// 判定位置
 				pObject->GetPosition(),	// 判定目標位置
 				PLAY_RADIUS,			// 判定半径
 				pObject->GetRadius()	// 判定目標半径
@@ -847,19 +736,15 @@ void CPlayer::LoadSetup(void)
 	int nNowKey		= 0;	// 現在のキー番号
 	int nLoop		= 0;	// ループのON/OFFの変換用
 	int nEnd		= 0;	// テキスト読み込み終了の確認用
-	int nModelID	= 0;	// モデルインデックス
-
-	// ポインタを宣言
-	CModel *pModel = CManager::GetModel();	// モデルへのポインタ
-
-	// ポーズ代入用の変数を初期化
-	memset(&info, 0, sizeof(info));
 
 	// 変数配列を宣言
 	char aString[MAX_STRING];	// テキストの文字列の代入用
 
 	// ポインタを宣言
 	FILE *pFile;	// ファイルポインタ
+
+	// ポーズ代入用の変数を初期化
+	memset(&info, 0, sizeof(info));
 
 	// ファイルを読み込み形式で開く
 	pFile = fopen(PLAYER_SETUP_TXT, "r");
@@ -922,31 +807,8 @@ void CPlayer::LoadSetup(void)
 							}
 						} while (strcmp(&aString[0], "END_PARTSSET") != 0);	// 読み込んだ文字列が END_PARTSSET ではない場合ループ
 
-						// モデルの生成
-						m_apMultiModel[nID] = CMultiModel::Create(pos, rot);
-
-						// モデルを登録
-						nModelID = pModel->Regist(mc_apModelFile[(MODEL)nID]);
-
-						// モデルを割当
-						m_apMultiModel[nID]->BindModel(pModel->GetModel(nModelID));
-
-						// 親モデルの設定
-						if (nParentID == NONE_IDX)
-						{ // 親がない場合
-
-							// NULLを設定
-							m_apMultiModel[nID]->SetParent(NULL);
-						}
-						else
-						{ // 親がいる場合
-
-							// 親のアドレスを設定
-							m_apMultiModel[nID]->SetParent(m_apMultiModel[nParentID]);
-						}
-
-						// パーツの総数を加算
-						m_nNumModel++;
+						// パーツ情報の設定
+						CObjectChara::SetPartsInfo(nID, nParentID, pos, rot, mc_apModelFile[nID]);
 					}
 				} while (strcmp(&aString[0], "END_CHARACTERSET") != 0);		// 読み込んだ文字列が END_CHARACTERSET ではない場合ループ
 			}
@@ -1015,7 +877,7 @@ void CPlayer::LoadSetup(void)
 										fscanf(pFile, "%f", &info.aKeyInfo[nNowPose].aKey[nNowKey].pos.z);	// Z位置を読み込む
 
 										// 読み込んだ位置にパーツの初期位置を加算
-										info.aKeyInfo[nNowPose].aKey[nNowKey].pos += m_apMultiModel[nNowKey]->GetPosition();
+										info.aKeyInfo[nNowPose].aKey[nNowKey].pos += GetPartsPosition(nNowKey);
 									}
 									else if (strcmp(&aString[0], "ROT") == 0)
 									{ // 読み込んだ文字列が ROT の場合
@@ -1026,7 +888,12 @@ void CPlayer::LoadSetup(void)
 										fscanf(pFile, "%f", &info.aKeyInfo[nNowPose].aKey[nNowKey].rot.z);	// Z向きを読み込む
 
 										// 読み込んだ向きにパーツの初期向きを加算
-										info.aKeyInfo[nNowPose].aKey[nNowKey].rot += m_apMultiModel[nNowKey]->GetRotation();
+										info.aKeyInfo[nNowPose].aKey[nNowKey].rot += GetPartsRotation(nNowKey);
+
+										// 初期向きを正規化
+										useful::NormalizeRot(info.aKeyInfo[nNowPose].aKey[nNowKey].rot.x);
+										useful::NormalizeRot(info.aKeyInfo[nNowPose].aKey[nNowKey].rot.y);
+										useful::NormalizeRot(info.aKeyInfo[nNowPose].aKey[nNowKey].rot.z);
 									}
 
 								} while (strcmp(&aString[0], "END_KEY") != 0);	// 読み込んだ文字列が END_KEY ではない場合ループ
@@ -1042,7 +909,7 @@ void CPlayer::LoadSetup(void)
 				} while (strcmp(&aString[0], "END_MOTIONSET") != 0);	// 読み込んだ文字列が END_MOTIONSET ではない場合ループ
 
 				// モーション情報の設定
-				m_pMotion->SetInfo(info);
+				CObjectChara::SetMotionInfo(info);
 			}
 
 		} while (nEnd != EOF);	// 読み込んだ文字列が EOF ではない場合ループ

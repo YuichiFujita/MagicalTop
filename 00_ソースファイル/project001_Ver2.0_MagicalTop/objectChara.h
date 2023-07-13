@@ -53,12 +53,17 @@ public:
 		const char *pFileName		// ファイル名
 	);
 	void SetModelInfo(void);	// モデル情報設定
-	void SetMotionInfo(CMotion::MotionInfo info);	// モーション情報設定
-	void SetMotion(const int nType);				// モーション設定
-	void SetPosition(const D3DXVECTOR3& rPos);		// 位置設定
-	void SetRotation(const D3DXVECTOR3& rRot);		// 向き設定
-	D3DXVECTOR3 GetPosition(void) const;			// 位置取得
-	D3DXVECTOR3 GetRotation(void) const;			// 向き取得
+	void SetMotionInfo(CMotion::MotionInfo info);		// モーション情報設定
+	void SetMotion(const int nType);					// モーション設定
+	void SetPosition(const D3DXVECTOR3& rPos);			// 位置設定
+	void SetRotation(const D3DXVECTOR3& rRot);			// 向き設定
+	int  GetMotionType(void) const;						// モーション種類取得
+	bool IsMotionFinish(void) const;					// モーション終了取得
+	bool IsMotionLoop(const int nType) const;			// モーションループ取得
+	D3DXVECTOR3 GetPosition(void) const;				// 位置取得
+	D3DXVECTOR3 GetRotation(void) const;				// 向き取得
+	D3DXVECTOR3 GetPartsPosition(const int nID) const;	// パーツ位置取得
+	D3DXVECTOR3 GetPartsRotation(const int nID) const;	// パーツ向き取得
 
 private:
 	// メンバ変数

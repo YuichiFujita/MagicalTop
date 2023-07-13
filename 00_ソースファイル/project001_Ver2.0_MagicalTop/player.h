@@ -14,8 +14,7 @@
 //	インクルードファイル
 //************************************************************
 #include "main.h"
-#include "object.h"
-#include "motion.h"
+#include "objectChara.h"
 #include "magic.h"
 
 //************************************************************
@@ -26,15 +25,13 @@
 //************************************************************
 //	前方宣言
 //************************************************************
-class CMultiModel;		// マルチモデルクラス
-class CMotion;			// モーションクラス
 class CMagicManager;	// 魔法マネージャークラス
 
 //************************************************************
 //	クラス定義
 //************************************************************
 // プレイヤークラス
-class CPlayer : public CObject
+class CPlayer : public CObjectChara
 {
 public:
 	// 種類列挙
@@ -98,45 +95,35 @@ public:
 	);
 
 	// メンバ関数
-	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
-	void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
-	void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
-	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
-	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
-	float GetDistanceTarget(void) const;		// ターゲットとの距離取得
-	float GetRadius(void) const;				// 半径取得
+	D3DXMATRIX GetMtxWorld(void) const;		// マトリックス取得
+	float GetDistanceTarget(void) const;	// ターゲットとの距離取得
+	float GetRadius(void) const;			// 半径取得
 
 private:
 	// メンバ関数
-	MOTION Move(MOTION motion);		// 移動
-	MOTION Jump(MOTION motion);		// ジャンプ
-	MOTION Magic(MOTION motion);	// 魔法
-	MOTION Land(MOTION motion);		// 着地
-	void Motion(MOTION motion);		// モーション
-	void Rot(void);					// 向き
-	void Camera(void);				// カメラ
-	void CollisionTarget(void);		// ターゲットとの当たり判定
-	void CollisionEnemy(void);		// 敵との当たり判定
-	void LoadSetup(void);			// セットアップ
+	MOTION Move(MOTION motion);						// 移動
+	MOTION Jump(MOTION motion);						// ジャンプ
+	MOTION Magic(MOTION motion, D3DXVECTOR3& rPos);	// 魔法
+	MOTION Land(MOTION motion, D3DXVECTOR3& rPos);	// 着地
+	void Motion(MOTION motion);						// モーション
+	void Pos(D3DXVECTOR3& rPos);					// 位置
+	void Rot(D3DXVECTOR3& rRot);					// 向き
+	void CollisionTarget(D3DXVECTOR3& rPos);		// ターゲットとの当たり判定
+	void CollisionEnemy(D3DXVECTOR3& rPos);			// 敵との当たり判定
+	void LoadSetup(void);							// セットアップ
 
 	// 静的メンバ変数
 	static const char *mc_apModelFile[];	// モデル定数
 
 	// メンバ変数
-	CMultiModel		*m_apMultiModel[MAX_PARTS];	// モデルの情報
-	CMotion			*m_pMotion;	// モーションの情報
-	CMagicManager	*m_pMagic;	// 魔法マネージャーの情報
-
-	D3DXMATRIX	m_mtxWorld;	// ワールドマトリックス
-	D3DXVECTOR3	m_pos;		// 現在位置
-	D3DXVECTOR3	m_oldPos;	// 過去位置
-	D3DXVECTOR3	m_move;		// 移動量
-	D3DXVECTOR3	m_rot;		// 現在向き
-	D3DXVECTOR3	m_destRot;	// 目標向き
-	ROTATION m_rotation;	// 回転方向
-	int   m_nNumModel;		// パーツの総数
-	float m_fDisTarget;		// ターゲットとの距離
-	bool  m_bJump;			// ジャンプ状況
+	CMagicManager *m_pMagic;	// 魔法マネージャーの情報
+	D3DXVECTOR3	m_oldPos;		// 過去位置
+	D3DXVECTOR3	m_move;			// 移動量
+	D3DXVECTOR3	m_destRot;		// 目標向き
+	ROTATION m_rotation;		// 回転方向
+	int   m_nNumModel;			// パーツの総数
+	float m_fDisTarget;			// ターゲットとの距離
+	bool  m_bJump;				// ジャンプ状況
 };
 
 #endif	// _PLAYER_H_
