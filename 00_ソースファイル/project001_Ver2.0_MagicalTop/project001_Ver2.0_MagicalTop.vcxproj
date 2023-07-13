@@ -179,6 +179,7 @@
     <ClCompile Include="object2D.cpp" />
     <ClCompile Include="object3D.cpp" />
     <ClCompile Include="objectBillboard.cpp" />
+    <ClCompile Include="objectChara.cpp" />
     <ClCompile Include="objectMeshCube.cpp" />
     <ClCompile Include="objectMeshCylinder.cpp" />
     <ClCompile Include="objectMeshDome.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="object2D.h" />
     <ClInclude Include="object3D.h" />
     <ClInclude Include="objectBillboard.h" />
+    <ClInclude Include="objectChara.h" />
     <ClInclude Include="objectMeshCube.h" />
     <ClInclude Include="objectMeshCylinder.h" />
     <ClInclude Include="objectMeshDome.h" />
