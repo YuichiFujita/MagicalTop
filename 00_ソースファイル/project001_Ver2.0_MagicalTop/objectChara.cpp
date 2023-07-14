@@ -311,3 +311,17 @@ D3DXVECTOR3 CObjectChara::GetPartsRotation(const int nID) const
 	// 引数インデックスのパーツの向きを返す
 	return m_apMultiModel[nID]->GetRotation();
 }
+
+//============================================================
+//	マルチモデル取得処理
+//============================================================
+CMultiModel CObjectChara::GetMultiModel(const int nID) const
+{
+	if (nID < m_nNumModel)
+	{ // 使用可能なインデックスの場合
+
+		// マルチモデルの情報を返す
+		return *m_apMultiModel[nID];
+	}
+	else { assert(false); return *m_apMultiModel[0]; }
+}

@@ -64,6 +64,7 @@ public:
 	D3DXVECTOR3 GetRotation(void) const;				// 向き取得
 	D3DXVECTOR3 GetPartsPosition(const int nID) const;	// パーツ位置取得
 	D3DXVECTOR3 GetPartsRotation(const int nID) const;	// パーツ向き取得
+	CMultiModel GetMultiModel(const int nID) const;		// マルチモデル取得
 
 private:
 	// メンバ変数

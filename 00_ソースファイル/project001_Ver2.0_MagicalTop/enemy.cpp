@@ -51,19 +51,14 @@ const char *CEnemyCar::mc_apModelFile[] =	// 戦車モデル定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CEnemy::CEnemy(const TYPE type) : CObject(CObject::LABEL_ENEMY), m_status(m_aStatusInfo[type]), m_parts(m_aPartsInfo[type])
+CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_status(m_aStatusInfo[type]), m_parts(m_aPartsInfo[type])
 {
 	// メンバ変数をクリア
 	m_pLifeGauge = NULL;	// 体力の情報
-	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
-	m_nNumModel = 0;	// パーツの総数
-	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
-	m_pos		= VEC3_ZERO;	// 現在位置
-	m_oldPos	= VEC3_ZERO;	// 過去位置
-	m_movePos	= VEC3_ZERO;	// 位置移動量
-	m_rot		= VEC3_ZERO;	// 向き
-	m_moveRot	= VEC3_ZERO;	// 向き変更量
-	m_nCounterAtk = 0;			// 攻撃管理カウンター
+	m_oldPos  = VEC3_ZERO;	// 過去位置
+	m_movePos = VEC3_ZERO;	// 位置移動量
+	m_moveRot = VEC3_ZERO;	// 向き変更量
+	m_nCounterAtk = 0;		// 攻撃管理カウンター
 }
 
 //============================================================
@@ -79,25 +74,14 @@ CEnemy::~CEnemy()
 //============================================================
 HRESULT CEnemy::Init(void)
 {
-	// 変数を宣言
-	int nModelID;	// モデルインデックス
-
-	// ポインタを宣言
-	CModel *pModel = CManager::GetModel();	// モデルへのポインタ
-
 	// メンバ変数を初期化
 	m_pLifeGauge = NULL;	// 体力の情報
-	memset(&m_apMultiModel[0], 0, sizeof(m_apMultiModel));	// モデルの情報
-	m_nNumModel = 0;	// パーツの総数
-	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
-	m_pos		= VEC3_ZERO;		// 現在位置
-	m_oldPos	= VEC3_ZERO;		// 過去位置
-	m_movePos	= VEC3_ZERO;		// 位置移動量
-	m_rot		= VEC3_ZERO;		// 向き
-	m_moveRot	= VEC3_ZERO;		// 向き変更量
-	m_nCounterAtk = 0;				// 攻撃管理カウンター
+	m_oldPos  = VEC3_ZERO;	// 過去位置
+	m_movePos = VEC3_ZERO;	// 位置移動量
+	m_moveRot = VEC3_ZERO;	// 向き変更量
+	m_nCounterAtk = 0;		// 攻撃管理カウンター
 
-	// 体力ゲージ3Dを生成
+	// 体力ゲージ3Dの生成
 	m_pLifeGauge = CLifeGauge3D::Create(m_status.nLife, m_status.nLife, (int)(ENE_DMG_FRAME * 0.5f), m_status.fLifeUp, this);
 	if (UNUSED(m_pLifeGauge))
 	{ // 生成に失敗した場合
@@ -107,32 +91,27 @@ HRESULT CEnemy::Init(void)
 		return E_FAIL;
 	}
 
-	// パーツ数を代入
-	m_nNumModel = m_parts.nNumParts;
+	// オブジェクトキャラクターの初期化
+	if (FAILED(CObjectChara::Init()))
+	{ // 初期化に失敗した場合
 
-	for (int nCntEnemy = 0; nCntEnemy < m_nNumModel; nCntEnemy++)
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	for (int nCntEnemy = 0; nCntEnemy < m_parts.nNumParts; nCntEnemy++)
 	{ // パーツ数分繰り返す
 
-		// モデルの生成
-		m_apMultiModel[nCntEnemy] = CMultiModel::Create(m_parts.aInfo[nCntEnemy].pos, m_parts.aInfo[nCntEnemy].rot);
-
-		// モデルの登録・割当
-		nModelID = pModel->Regist(GetModelFileName(nCntEnemy));
-		m_apMultiModel[nCntEnemy]->BindModel(pModel->GetModel(nModelID));
-
-		// 親モデルの設定
-		if (m_parts.aInfo[nCntEnemy].nParentID == NONE_IDX)
-		{ // 親がない場合
-
-			// NULLを設定
-			m_apMultiModel[nCntEnemy]->SetParent(NULL);
-		}
-		else
-		{ // 親がいる場合
-
-			// 親のアドレスを設定
-			m_apMultiModel[nCntEnemy]->SetParent(m_apMultiModel[m_parts.aInfo[nCntEnemy].nParentID]);
-		}
+		// パーツ情報の設定
+		CObjectChara::SetPartsInfo
+		( // 引数
+			nCntEnemy,							// パーツインデックス
+			m_parts.aInfo[nCntEnemy].nParentID,	// 親インデックス
+			m_parts.aInfo[nCntEnemy].pos,		// 位置
+			m_parts.aInfo[nCntEnemy].rot,		// 向き
+			GetModelFileName(nCntEnemy)			// ファイル名
+		);
 	}
 
 	// 成功を返す
@@ -144,25 +123,8 @@ HRESULT CEnemy::Init(void)
 //============================================================
 void CEnemy::Uninit(void)
 {
-	// マルチモデルを破棄
-	for (int nCntEnemy = 0; nCntEnemy < MAX_PARTS; nCntEnemy++)
-	{ // パーツの最大数分繰り返す
-
-		if (USED(m_apMultiModel[nCntEnemy]))
-		{ // パーツが使用中の場合
-
-			// 破棄処理
-			if (FAILED(m_apMultiModel[nCntEnemy]->Release(m_apMultiModel[nCntEnemy])))
-			{ // 破棄に失敗した場合
-
-				// 例外処理
-				assert(false);
-			}
-		}
-	}
-
-	// 敵を破棄
-	Release();
+	// オブジェクトキャラクターの終了
+	CObjectChara::Uninit();
 }
 
 //============================================================
@@ -171,7 +133,10 @@ void CEnemy::Uninit(void)
 void CEnemy::Update(void)
 {
 	// 過去位置を更新
-	m_oldPos = m_pos;
+	m_oldPos = GetPosition();
+
+	// オブジェクトキャラクターの更新
+	CObjectChara::Update();
 }
 
 //============================================================
@@ -179,32 +144,8 @@ void CEnemy::Update(void)
 //============================================================
 void CEnemy::Draw(void)
 {
-	// 変数を宣言
-	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス
-
-	// ポインタを宣言
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
-
-	// ワールドマトリックスの初期化
-	D3DXMatrixIdentity(&m_mtxWorld);
-
-	// 向きを反映
-	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
-	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
-
-	// 位置を反映
-	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
-	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxTrans);
-
-	// ワールドマトリックスの設定
-	pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
-
-	for (int nCntEnemy = 0; nCntEnemy < m_nNumModel; nCntEnemy++)
-	{ // パーツの総数分繰り返す
-
-		// パーツの描画
-		m_apMultiModel[nCntEnemy]->Draw();
-	}
+	// オブジェクトキャラクターの描画
+	CObjectChara::Draw();
 }
 
 //============================================================
@@ -212,6 +153,9 @@ void CEnemy::Draw(void)
 //============================================================
 void CEnemy::Hit(const int nDmg)
 {
+	// 変数を宣言
+	D3DXVECTOR3 posEnemy = GetPosition();	// 敵位置
+
 	// 体力からダメージ分減算
 	m_pLifeGauge->AddLife(-nDmg);
 
@@ -219,14 +163,14 @@ void CEnemy::Hit(const int nDmg)
 	{ // 生きている場合
 
 		// パーティクル3Dオブジェクトを生成
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, m_pos);
+		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy);
 	}
 	else
 	{ // 死んでいる場合
 
 		// パーティクル3Dオブジェクトを生成
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, m_pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, m_pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
+		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
 		// スコアを加算
 		CManager::GetScore()->Add(m_status.nScore);
@@ -306,35 +250,12 @@ CEnemy *CEnemy::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVECTO
 }
 
 //============================================================
-//	位置の設定処理
-//============================================================
-void CEnemy::SetPosition(const D3DXVECTOR3& rPos)
-{
-	// 引数の位置を設定
-	m_pos = rPos;
-}
-
-//============================================================
 //	位置移動量の設定処理
 //============================================================
 void CEnemy::SetMovePosition(const D3DXVECTOR3& rMove)
 {
 	// 引数の位置移動量を設定
 	m_movePos = rMove;
-}
-
-//============================================================
-//	向きの設定処理
-//============================================================
-void CEnemy::SetRotation(const D3DXVECTOR3& rRot)
-{
-	// 引数の向きを設定
-	m_rot = rRot;
-
-	// 向きの正規化
-	useful::NormalizeRot(m_rot.x);
-	useful::NormalizeRot(m_rot.y);
-	useful::NormalizeRot(m_rot.z);
 }
 
 //============================================================
@@ -358,29 +279,22 @@ D3DXMATRIX CEnemy::GetMtxWorld(void) const
 {
 	// 変数を宣言
 	D3DXMATRIX mtxRot, mtxTrans, mtxWorld;	// 計算用マトリックス
+	D3DXVECTOR3 posEnemy = GetPosition();	// 敵位置
+	D3DXVECTOR3 rotEnemy = GetRotation();	// 敵向き
 
 	// ワールドマトリックスの初期化
 	D3DXMatrixIdentity(&mtxWorld);
 
 	// 向きを反映
-	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
+	D3DXMatrixRotationYawPitchRoll(&mtxRot, rotEnemy.y, rotEnemy.x, rotEnemy.z);
 	D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
 
 	// 位置を反映
-	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
+	D3DXMatrixTranslation(&mtxTrans, posEnemy.x, posEnemy.y, posEnemy.z);
 	D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
 	// ワールドマトリックスを返す
 	return mtxWorld;
-}
-
-//============================================================
-//	位置取得処理
-//============================================================
-D3DXVECTOR3 CEnemy::GetPosition(void) const
-{
-	// 位置を返す
-	return m_pos;
 }
 
 //============================================================
@@ -402,15 +316,6 @@ D3DXVECTOR3 CEnemy::GetMovePosition(void) const
 }
 
 //============================================================
-//	向き取得処理
-//============================================================
-D3DXVECTOR3 CEnemy::GetRotation(void) const
-{
-	// 向きを返す
-	return m_rot;
-}
-
-//============================================================
 //	向き変更量取得処理
 //============================================================
 D3DXVECTOR3 CEnemy::GetMoveRotation(void) const
@@ -426,20 +331,6 @@ float CEnemy::GetRadius(void) const
 {
 	// 半径を返す
 	return m_status.fRadius;
-}
-
-//============================================================
-//	マルチモデル取得処理
-//============================================================
-CMultiModel *CEnemy::GetMultiModel(const int nID) const
-{
-	if (nID < m_nNumModel)
-	{ // 使用可能なインデックスの場合
-
-		// マルチモデルの情報を返す
-		return m_apMultiModel[nID];
-	}
-	else { assert(false); return m_apMultiModel[0]; }
 }
 
 //============================================================
@@ -467,6 +358,8 @@ void CEnemy::CollisionFind(void)
 {
 	// 変数を宣言
 	D3DXVECTOR3 posLook;	// 視認対象位置
+	D3DXVECTOR3 posEnemy = GetPosition();	// 敵位置
+	D3DXVECTOR3 rotEnemy = GetRotation();	// 敵向き
 	float fPlayerRadius = CManager::GetPlayer()->GetRadius();	// プレイヤー半径
 
 	// TODO：プレイヤー死んだらManagerのPlayerもNULLにする
@@ -474,7 +367,7 @@ void CEnemy::CollisionFind(void)
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 視認対象の設定
-		if (collision::Circle2D(CManager::GetPlayer()->GetPosition(), m_pos, fPlayerRadius, m_status.fFindRadius) == false)
+		if (collision::Circle2D(CManager::GetPlayer()->GetPosition(), posEnemy, fPlayerRadius, m_status.fFindRadius) == false)
 		{ // 敵の検知範囲外の場合
 
 			// 視認対象位置を設定
@@ -488,61 +381,63 @@ void CEnemy::CollisionFind(void)
 		}
 
 		// 対象の方向を向かせる
-		Look(posLook);
+		Look(posLook, posEnemy, rotEnemy);
 
-		if (collision::Circle2D(posLook, m_pos, fPlayerRadius, m_status.fAttackRadius) == false)
+		if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, m_status.fAttackRadius) == false)
 		{ // 敵の攻撃範囲外の場合
 
 			// 対象の方向に移動 (前進)
-			m_pos.x -= sinf(m_rot.y) * m_status.fForwardMove;
-			m_pos.z -= cosf(m_rot.y) * m_status.fForwardMove;
+			posEnemy.x -= sinf(rotEnemy.y) * m_status.fForwardMove;
+			posEnemy.z -= cosf(rotEnemy.y) * m_status.fForwardMove;
 
 			// ステージ範囲外の補正
-			CManager::GetStage()->LimitPosition(m_pos, m_status.fRadius);
+			CManager::GetStage()->LimitPosition(posEnemy, m_status.fRadius);
 		}
 		else
 		{ // 敵の攻撃範囲内の場合
 
-			if (collision::Circle2D(posLook, m_pos, fPlayerRadius, m_status.fBackwardRadius) == true && m_status.bBackward == true)
+			if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, m_status.fBackwardRadius) == true && m_status.bBackward == true)
 			{ // 敵の後退範囲内且つ、後退がONの場合
 
 				// 対象の逆方向に移動 (後退)
-				m_pos.x += sinf(m_rot.y) * m_status.fBackwardMove;
-				m_pos.z += cosf(m_rot.y) * m_status.fBackwardMove;
+				posEnemy.x += sinf(rotEnemy.y) * m_status.fBackwardMove;
+				posEnemy.z += cosf(rotEnemy.y) * m_status.fBackwardMove;
 
 				// ステージ範囲外の補正
-				CManager::GetStage()->LimitPosition(m_pos, m_status.fRadius);
+				CManager::GetStage()->LimitPosition(posEnemy, m_status.fRadius);
 			}
 
 			// 攻撃
 			Attack(posLook);
 		}
 	}
+
+	// 位置を更新
+	SetPosition(posEnemy);
+
+	// 向きを更新
+	SetRotation(rotEnemy);
 }
 
 //============================================================
 //	対象視認処理
 //============================================================
-void CEnemy::Look(const D3DXVECTOR3& rPos)
+void CEnemy::Look(const D3DXVECTOR3& rPosLook, const D3DXVECTOR3& rPosEnemy, D3DXVECTOR3& rRotEnemy)
 {
 	// 変数を宣言
 	float fDestRot = 0.0f;	// 目標向き
 	float fDiffRot = 0.0f;	// 向き
 
-	// プレイヤーの向きを代入
-	fDestRot = atan2f(m_pos.x - rPos.x, m_pos.z - rPos.z);	// 目標向き
+	// 視認対象の方向を代入
+	fDestRot = atan2f(rPosEnemy.x - rPosLook.x, rPosEnemy.z - rPosLook.z);	// 目標向き
 
-	// 目標向きまでの差分を計算
-	fDiffRot = fDestRot - m_rot.y;
-
-	// 差分向きの正規化
-	useful::NormalizeRot(fDiffRot);
+	// 差分向きを求める
+	fDiffRot = fDestRot - rRotEnemy.y;
+	useful::NormalizeRot(fDiffRot);		// 差分向きの正規化
 
 	// 向きの更新
-	m_rot.y += fDiffRot * m_status.fLookRevision;
-
-	// 向きの正規化
-	useful::NormalizeRot(m_rot.y);
+	rRotEnemy.y += fDiffRot * m_status.fLookRevision;
+	useful::NormalizeRot(rRotEnemy.y);	// 向きの正規化
 }
 
 //============================================================
@@ -557,8 +452,9 @@ void CEnemy::Attack(const D3DXVECTOR3& rTarget)
 	{ // カウンターが一定値以上の場合
 
 		// 変数を宣言
-		D3DXVECTOR3 bullPos;			// 発射位置
-		D3DXMATRIX mtxTrans, mtxWorld;	// 計算用マトリックス
+		D3DXVECTOR3 posBull;			// 発射位置
+		D3DXVECTOR3 vecBull;			// 発射方向
+		D3DXMATRIX  mtxTrans, mtxWorld;	// 計算用マトリックス
 
 		// ワールドマトリックスの初期化
 		D3DXMatrixIdentity(&mtxWorld);
@@ -568,26 +464,31 @@ void CEnemy::Attack(const D3DXVECTOR3& rTarget)
 		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
 		// マトリックスを掛け合わせる
-		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &m_apMultiModel[m_status.nBullParts]->GetMtxWorld());
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &GetMultiModel(m_status.nBullParts).GetMtxWorld());
 
 		// マトリックスから位置を求める
-		bullPos = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
+		posBull = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
+
+		// 弾の移動方向を求める
+		vecBull = rTarget - posBull;
+		D3DXVec3Normalize(&vecBull, &vecBull);		// 移動方向を正規化
+		useful::LimitNum(vecBull.y, -0.1f, 0.1f);	// 移動方向 yを制限	// TODO：定数マクロ化
 
 		// 弾オブジェクトの生成
 		CBullet::Create
 		( // 引数
 			CBullet::TYPE_ENEMY,			// 種類
-			bullPos,						// 位置
+			posBull,						// 位置
 			VEC3_ALL(m_status.fBullRadius),	// 大きさ
 			XCOL_WHITE,						// 色
-			rTarget - bullPos,				// 移動方向
+			vecBull,						// 移動方向
 			m_status.fBullMove,				// 移動速度
 			m_status.nBullLife,				// 寿命
 			m_status.nBullDamage			// 攻撃力
 		);
 
-		// パーティクル3Dの作成
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, bullPos);
+		// パーティクル3Dオブジェクトの生成
+		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posBull);
 
 		// カウンターを初期化
 		m_nCounterAtk = 0;
@@ -597,7 +498,7 @@ void CEnemy::Attack(const D3DXVECTOR3& rTarget)
 //============================================================
 //	ターゲットとの当たり判定
 //============================================================
-void CEnemy::CollisionTarget(D3DXVECTOR3& rPos, D3DXVECTOR3& rPosOld)
+void CEnemy::CollisionTarget(D3DXVECTOR3& rPos)
 {
 	// ポインタを宣言
 	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
@@ -735,7 +636,7 @@ const char* CEnemyCar::GetModelFileName(const int nModel) const
 		// 引数のインデックスのモデルを返す
 		return mc_apModelFile[nModel];
 	}
-	else { assert(false); return "\0"; }	// 範囲外
+	else { assert(false); return NONE_STRING; }	// 範囲外
 }
 
 //============================================================
@@ -775,10 +676,7 @@ void CEnemyCar::CollisionFind(void)
 		{ // 敵の攻撃範囲外の場合
 
 			// 対象の方向を向かせる
-			Look(posLook);
-
-			// 向きを取得
-			rotEnemy = GetRotation();
+			Look(posLook, posEnemy, rotEnemy);
 
 			// 対象の方向に移動 (前進)
 			moveEnemy.x -= sinf(rotEnemy.y) * status.fForwardMove;
@@ -795,7 +693,7 @@ void CEnemyCar::CollisionFind(void)
 			moveEnemy.z += (0.0f - moveEnemy.z) * ENE_REV;
 
 			// ターゲットとの当たり判定
-			CollisionTarget(posEnemy, GetOldPosition());
+			CollisionTarget(posEnemy);
 
 			// 敵との当たり判定
 			CollisionEnemy(posEnemy);
@@ -816,10 +714,7 @@ void CEnemyCar::CollisionFind(void)
 			{ // 敵の後退範囲内且つ、後退がONの場合
 
 				// 対象の方向を向かせる
-				Look(posLook);
-
-				// 向きを取得
-				rotEnemy = GetRotation();
+				Look(posLook, posEnemy, rotEnemy);
 
 				// 対象の逆方向に移動 (後退)
 				moveEnemy.x += sinf(rotEnemy.y) * status.fBackwardMove;
@@ -837,7 +732,7 @@ void CEnemyCar::CollisionFind(void)
 			}
 
 			// ターゲットとの当たり判定
-			CollisionTarget(posEnemy, GetOldPosition());
+			CollisionTarget(posEnemy);
 
 			// 敵との当たり判定
 			CollisionEnemy(posEnemy);
@@ -874,7 +769,7 @@ void CEnemyCar::SetRotationCannon(const D3DXVECTOR3& rLookPos, D3DXVECTOR3& rRot
 	float fDiffRot = 0.0f;	// 向き
 
 	// キャノンの向きを取得
-	rRotCannon = GetMultiModel(MODEL_CANNON)->GetRotation() + GetRotation();	// 本体の向きを加算
+	rRotCannon = GetMultiModel(MODEL_CANNON).GetRotation() + GetRotation();	// 本体の向きを加算
 	useful::NormalizeRot(rRotCannon.y);	// キャノン向きの正規化
 
 	// 目標向きの計算
@@ -890,7 +785,7 @@ void CEnemyCar::SetRotationCannon(const D3DXVECTOR3& rLookPos, D3DXVECTOR3& rRot
 	useful::NormalizeRot(rRotCannon.y);	// キャノン向きの正規化
 
 	// 向きを設定
-	GetMultiModel(MODEL_CANNON)->SetRotation(rRotCannon - GetRotation());		// 本体の向きを減算
+	GetMultiModel(MODEL_CANNON).SetRotation(rRotCannon - GetRotation());	// 本体の向きを減算
 }
 
 //************************************************************

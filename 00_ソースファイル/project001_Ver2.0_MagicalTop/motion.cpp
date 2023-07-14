@@ -76,65 +76,72 @@ void CMotion::Update(void)
 	D3DXVECTOR3 currentRot;		// 現在フレームの向き
 	int nType = m_info.nType;	// モーション種類
 	int nPose = m_info.nPose;	// モーションポーズ番号
-	int nNextPose = (nPose + 1) % m_info.aMotionInfo[nType].nNumKey;	// 次のモーションポーズ番号
+	int nNextPose;				// 次のモーションポーズ番号
 
-	// パーツの位置の更新
-	for (int nCntKey = 0; nCntKey < m_nNumModel; nCntKey++)
-	{ // モデルのパーツ数分繰り返す
+	if (m_info.aMotionInfo[nType].nNumKey > 0)
+	{ // キーが設定されている場合
 
-		// 位置・向きの差分を求める
-		diffPos = m_info.aMotionInfo[nType].aKeyInfo[nNextPose].aKey[nCntKey].pos - m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].pos;
-		diffRot = m_info.aMotionInfo[nType].aKeyInfo[nNextPose].aKey[nCntKey].rot - m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].rot;
+		// 次のモーションポーズ番号を求める
+		nNextPose = (nPose + 1) % m_info.aMotionInfo[nType].nNumKey;
 
-		// 差分向きの正規化
-		useful::NormalizeRot(diffRot.x);
-		useful::NormalizeRot(diffRot.y);
-		useful::NormalizeRot(diffRot.z);
+		// パーツの位置の更新
+		for (int nCntKey = 0; nCntKey < m_nNumModel; nCntKey++)
+		{ // モデルのパーツ数分繰り返す
 
-		// 現在のパーツの位置・向きを更新
-		m_ppModel[nCntKey]->SetPosition(m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].pos + diffPos * ((float)m_info.nCounter / (float)m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame));
-		m_ppModel[nCntKey]->SetRotation(m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].rot + diffRot * ((float)m_info.nCounter / (float)m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame));
-	}
+			// 位置・向きの差分を求める
+			diffPos = m_info.aMotionInfo[nType].aKeyInfo[nNextPose].aKey[nCntKey].pos - m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].pos;
+			diffRot = m_info.aMotionInfo[nType].aKeyInfo[nNextPose].aKey[nCntKey].rot - m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].rot;
 
-	// モーションの遷移の更新
-	if (m_info.nCounter >= m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame)
-	{ // 現在のモーションカウンターが現在のポーズの再生フレーム数を超えている場合
+			// 差分向きの正規化
+			useful::NormalizeRot(diffRot.x);
+			useful::NormalizeRot(diffRot.y);
+			useful::NormalizeRot(diffRot.z);
 
-		// 次のポーズに移行
-		if (m_info.aMotionInfo[nType].bLoop == true)
-		{ // モーションがループする設定の場合
-
-			// モーションカウンターを初期化
-			m_info.nCounter = 0;
-
-			// ポーズカウントを加算 (総数に達した場合 0に戻す)
-			m_info.nPose = (m_info.nPose + 1) % m_info.aMotionInfo[nType].nNumKey;
+			// 現在のパーツの位置・向きを更新
+			m_ppModel[nCntKey]->SetPosition(m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].pos + diffPos * ((float)m_info.nCounter / (float)m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame));
+			m_ppModel[nCntKey]->SetRotation(m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].rot + diffRot * ((float)m_info.nCounter / (float)m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame));
 		}
-		else
-		{ // モーションがループしない設定の場合
 
-			if (m_info.nPose < m_info.aMotionInfo[nType].nNumKey - SUB_STOP)
-			{ // 現在のポーズが最終のポーズではない場合
+		// モーションの遷移の更新
+		if (m_info.nCounter >= m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame)
+		{ // 現在のモーションカウンターが現在のポーズの再生フレーム数を超えている場合
+
+			// 次のポーズに移行
+			if (m_info.aMotionInfo[nType].bLoop == true)
+			{ // モーションがループする設定の場合
 
 				// モーションカウンターを初期化
 				m_info.nCounter = 0;
 
-				// ポーズカウントを加算
-				m_info.nPose++;
+				// ポーズカウントを加算 (総数に達した場合 0に戻す)
+				m_info.nPose = (m_info.nPose + 1) % m_info.aMotionInfo[nType].nNumKey;
 			}
 			else
-			{ // 現在のポーズが最終のポーズの場合
+			{ // モーションがループしない設定の場合
 
-				// モーションを終了状態にする
-				m_info.bFinish = true;
+				if (m_info.nPose < m_info.aMotionInfo[nType].nNumKey - SUB_STOP)
+				{ // 現在のポーズが最終のポーズではない場合
+
+					// モーションカウンターを初期化
+					m_info.nCounter = 0;
+
+					// ポーズカウントを加算
+					m_info.nPose++;
+				}
+				else
+				{ // 現在のポーズが最終のポーズの場合
+
+					// モーションを終了状態にする
+					m_info.bFinish = true;
+				}
 			}
 		}
-	}
-	else
-	{ // 現在のモーションカウンターが現在のポーズの再生フレーム数を超えていない場合
+		else
+		{ // 現在のモーションカウンターが現在のポーズの再生フレーム数を超えていない場合
 
-		// モーションカウンターを加算
-		m_info.nCounter++;
+			// モーションカウンターを加算
+			m_info.nCounter++;
+		}
 	}
 }
 

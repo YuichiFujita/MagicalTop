@@ -107,7 +107,7 @@ HRESULT CTarget::Init(void)
 		return E_FAIL;
 	}
 
-	// 体力ゲージ3Dを生成
+	// 体力ゲージ3Dの生成
 	m_pLifeGauge = CLifeGauge3D::Create(TARG_LIFE, TARG_LIFE, (int)(TARG_DMG_FRAME * 0.5f), TARG_POSUP, this);
 	if (UNUSED(m_pLifeGauge))
 	{ // 生成に失敗した場合
