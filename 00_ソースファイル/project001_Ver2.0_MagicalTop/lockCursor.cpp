@@ -202,36 +202,22 @@ CLockCursor *CLockCursor::Create(const D3DXVECTOR3& rPos, const bool bDraw)
 	if (USED(pLockCursor))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pLockCursor->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// ロックオン表示の初期化
-			if (FAILED(pLockCursor->Init()))
-			{ // 初期化に失敗した場合
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pLockCursor->SetPosition(rPos);
-
-			// 描画状況を設定
-			pLockCursor->SetEnableDraw(bDraw);
-
-			// 確保したアドレスを返す
-			return pLockCursor;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
-
-			// メモリ開放
-			delete pLockCursor;
-			pLockCursor = NULL;
+		// ロックオン表示の初期化
+		if (FAILED(pLockCursor->Init()))
+		{ // 初期化に失敗した場合
 
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pLockCursor->SetPosition(rPos);
+
+		// 描画状況を設定
+		pLockCursor->SetEnableDraw(bDraw);
+
+		// 確保したアドレスを返す
+		return pLockCursor;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

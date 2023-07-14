@@ -20,7 +20,6 @@
 //************************************************************
 #define FVF_VERTEX_3D	(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1)	// 頂点フォーマット [3D]
 
-#define MAX_OBJECT		(1024)	// オブジェクトの最大数
 #define MAX_PRIO		(8)		// 優先順位の総数
 #define DEFAULT_PRIO	(3)		// デフォルトの優先順位
 
@@ -35,11 +34,6 @@ struct VERTEX_3D
 	D3DCOLOR	col;	// 頂点カラー
 	D3DXVECTOR2	tex;	// テクスチャ座標
 };
-
-//************************************************************
-//	前方宣言
-//************************************************************
-class CObject2D;	// オブジェクト2Dクラス
 
 //************************************************************
 //	クラス定義
@@ -99,6 +93,8 @@ public:
 	static void ReleaseAll(void);	// 全破棄
 	static void UpdateAll(void);	// 全更新
 	static void DrawAll(void);		// 全描画
+
+#if 0
 	static CObject *GetObject	// オブジェクト取得
 	( // 引数
 		const int nPriority,	// 優先順位
@@ -115,12 +111,21 @@ public:
 	LABEL GetLabel(void) const;				// ラベル取得
 	void  SetPriority(const int nPriority);	// 優先順位設定
 	int   GetPriority(void) const;			// 優先順位取得
+#else
+	static bool CheckUse(const CObject *pObject);	// 使用確認
+
+	// メンバ関数
+	void	SetLabel(const LABEL label);	// ラベル設定
+	LABEL	GetLabel(void) const;			// ラベル取得
+	int		GetPriority(void) const;		// 優先順位取得
+#endif
 
 protected:
 	// メンバ関数
 	void Release(void);	// 破棄
 
 private:
+#if 0
 	// 静的メンバ変数
 	static CObject *m_apObject[MAX_PRIO][MAX_OBJECT];	// オブジェクトの情報
 	static int m_nNumAll;	// オブジェクトの総数
@@ -130,6 +135,18 @@ private:
 	LABEL m_label;		// 自身のオブジェクトラベル
 	int   m_nPriority;	// 自身の優先順位
 	int   m_nID;		// 自身のインデックス
+#else
+	// 静的メンバ変数
+	static CObject *m_apTop[MAX_PRIO];	// 先頭のオブジェクトへのポインタ
+	static CObject *m_apCur[MAX_PRIO];	// 最後尾のオブジェクトへのポインタ
+	static int m_nNumAll;				// オブジェクトの総数
+
+	// メンバ変数
+	LABEL m_label;		// 自身のオブジェクトラベル
+	int m_nPriority;	// 自身の優先順位
+	CObject *m_pPrev;	// 前のオブジェクトへのポインタ
+	CObject *m_pNext;	// 次のオブジェクトへのポインタ
+#endif
 };
 
 #endif	// _OBJECT_H_

@@ -213,56 +213,9 @@ CObjectMeshWall *CObjectMeshWall::Create
 	if (USED(pObjectMeshWall))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pObjectMeshWall->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// オブジェクトメッシュウォールの初期化
-			if (FAILED(pObjectMeshWall->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pObjectMeshWall;
-				pObjectMeshWall = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pObjectMeshWall->SetPosition(rPos);
-
-			// 向きを設定
-			pObjectMeshWall->SetRotation(rRot);
-
-			// 大きさを設定
-			pObjectMeshWall->SetScalingBiaxial(rSize);
-
-			// 色を設定
-			pObjectMeshWall->SetColor(rCol);
-
-			// カリングを設定
-			pObjectMeshWall->SetCulling(cull);
-
-			// ライティングを設定
-			pObjectMeshWall->SetLighting(bLight);
-
-			// 分割数を設定
-			if (FAILED(pObjectMeshWall->SetPattern(rPart)))
-			{ // 分割数の設定に失敗した場合
-
-				// メモリ開放
-				delete pObjectMeshWall;
-				pObjectMeshWall = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pObjectMeshWall;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// オブジェクトメッシュウォールの初期化
+		if (FAILED(pObjectMeshWall->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pObjectMeshWall;
@@ -271,6 +224,39 @@ CObjectMeshWall *CObjectMeshWall::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pObjectMeshWall->SetPosition(rPos);
+
+		// 向きを設定
+		pObjectMeshWall->SetRotation(rRot);
+
+		// 大きさを設定
+		pObjectMeshWall->SetScalingBiaxial(rSize);
+
+		// 色を設定
+		pObjectMeshWall->SetColor(rCol);
+
+		// カリングを設定
+		pObjectMeshWall->SetCulling(cull);
+
+		// ライティングを設定
+		pObjectMeshWall->SetLighting(bLight);
+
+		// 分割数を設定
+		if (FAILED(pObjectMeshWall->SetPattern(rPart)))
+		{ // 分割数の設定に失敗した場合
+
+			// メモリ開放
+			delete pObjectMeshWall;
+			pObjectMeshWall = NULL;
+
+			// 失敗を返す
+			return NULL;
+		}
+
+		// 確保したアドレスを返す
+		return pObjectMeshWall;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

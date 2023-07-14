@@ -283,80 +283,9 @@ CObjectTornado *CObjectTornado::Create
 	if (USED(pObjectTornado))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pObjectTornado->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// オブジェクト竜巻の初期化
-			if (FAILED(pObjectTornado->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pObjectTornado;
-				pObjectTornado = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pObjectTornado->SetPosition(rPos);
-
-			// 向きを設定
-			pObjectTornado->SetDirectionRotation(rDireRot);
-
-			// 色を設定
-			pObjectTornado->SetColor(rCol);
-
-			// 親のマトリックスを設定
-			pObjectTornado->SetMatrixParent(pMtxParent);
-
-			// ポリゴンの太さを設定
-			pObjectTornado->SetThickness(fThickness);
-
-			// ポリゴン外周のy座標加算量を設定
-			pObjectTornado->SetOuterPlus(fOuterPlus);
-
-			// 生成時の横ずれ量を設定
-			pObjectTornado->SetWidth(fSetWidth);
-
-			// 生成時の透明度を設定
-			pObjectTornado->SetAlpha(fSetAlpha);
-
-			// 横ずれの加算量を設定
-			pObjectTornado->SetAddWidth(fAddWidth);
-
-			// 縦ずれの加算量を設定
-			pObjectTornado->SetAddHeight(fAddHeight);
-
-			// 透明度の減算量を設定
-			pObjectTornado->SetSubAlpha(fSubAlpha);
-
-			// カリングを設定
-			pObjectTornado->SetCulling(cull);
-
-			// ライティングを設定
-			pObjectTornado->SetLighting(bLight);
-
-			// 成長性を設定
-			pObjectTornado->SetGrow(fMoveRot, fGrowWidth, fGrowHeight, fGrowAlpha);
-
-			// 渦を設定
-			if (FAILED(pObjectTornado->SetVortex(nNumAround, nPattern)))
-			{ // 渦の設定に失敗した場合
-
-				// メモリ開放
-				delete pObjectTornado;
-				pObjectTornado = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pObjectTornado;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// オブジェクト竜巻の初期化
+		if (FAILED(pObjectTornado->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pObjectTornado;
@@ -365,6 +294,63 @@ CObjectTornado *CObjectTornado::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pObjectTornado->SetPosition(rPos);
+
+		// 向きを設定
+		pObjectTornado->SetDirectionRotation(rDireRot);
+
+		// 色を設定
+		pObjectTornado->SetColor(rCol);
+
+		// 親のマトリックスを設定
+		pObjectTornado->SetMatrixParent(pMtxParent);
+
+		// ポリゴンの太さを設定
+		pObjectTornado->SetThickness(fThickness);
+
+		// ポリゴン外周のy座標加算量を設定
+		pObjectTornado->SetOuterPlus(fOuterPlus);
+
+		// 生成時の横ずれ量を設定
+		pObjectTornado->SetWidth(fSetWidth);
+
+		// 生成時の透明度を設定
+		pObjectTornado->SetAlpha(fSetAlpha);
+
+		// 横ずれの加算量を設定
+		pObjectTornado->SetAddWidth(fAddWidth);
+
+		// 縦ずれの加算量を設定
+		pObjectTornado->SetAddHeight(fAddHeight);
+
+		// 透明度の減算量を設定
+		pObjectTornado->SetSubAlpha(fSubAlpha);
+
+		// カリングを設定
+		pObjectTornado->SetCulling(cull);
+
+		// ライティングを設定
+		pObjectTornado->SetLighting(bLight);
+
+		// 成長性を設定
+		pObjectTornado->SetGrow(fMoveRot, fGrowWidth, fGrowHeight, fGrowAlpha);
+
+		// 渦を設定
+		if (FAILED(pObjectTornado->SetVortex(nNumAround, nPattern)))
+		{ // 渦の設定に失敗した場合
+
+			// メモリ開放
+			delete pObjectTornado;
+			pObjectTornado = NULL;
+
+			// 失敗を返す
+			return NULL;
+		}
+
+		// 確保したアドレスを返す
+		return pObjectTornado;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

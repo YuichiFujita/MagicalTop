@@ -82,6 +82,8 @@ void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos)
 	// 変数配列を宣言
 	LockInfo aLockData[MAX_LOCK] = {};	// ロックオン情報
 
+	// TODO：当たり判定
+#if 0
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
 
@@ -142,6 +144,7 @@ void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos)
 			}
 		}
 	}
+#endif
 
 	// 前回のロックオンの削除
 	for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)

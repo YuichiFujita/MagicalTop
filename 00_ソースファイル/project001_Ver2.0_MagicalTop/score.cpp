@@ -132,26 +132,9 @@ CScore *CScore::Create(void)
 	if (USED(pScore))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pScore->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// スコアの初期化
-			if (FAILED(pScore->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pScore;
-				pScore = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pScore;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// スコアの初期化
+		if (FAILED(pScore->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pScore;
@@ -160,6 +143,9 @@ CScore *CScore::Create(void)
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 確保したアドレスを返す
+		return pScore;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

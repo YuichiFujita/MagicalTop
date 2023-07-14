@@ -176,38 +176,9 @@ CMagic *CMagic::Create
 	if (USED(pMagic))
 	{ // 使用されている場合
 		
-		if (SUCCEEDED(pMagic->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// 魔法の初期化
-			if (FAILED(pMagic->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pMagic;
-				pMagic = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pMagic->SetPosition(rPos);
-
-			// 向きを設定
-			pMagic->SetRotation(rRot);
-
-			// 移動量を設定
-			pMagic->SetMove(rVec, pMagic->GetStatusInfo().fMove);
-
-			// 寿命の設定
-			pMagic->SetLife(pMagic->GetStatusInfo().nLife);
-
-			// 確保したアドレスを返す
-			return pMagic;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// 魔法の初期化
+		if (FAILED(pMagic->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pMagic;
@@ -216,6 +187,21 @@ CMagic *CMagic::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pMagic->SetPosition(rPos);
+
+		// 向きを設定
+		pMagic->SetRotation(rRot);
+
+		// 移動量を設定
+		pMagic->SetMove(rVec, pMagic->GetStatusInfo().fMove);
+
+		// 寿命の設定
+		pMagic->SetLife(pMagic->GetStatusInfo().nLife);
+
+		// 確保したアドレスを返す
+		return pMagic;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }
@@ -331,6 +317,8 @@ bool CMagic::Collision(CObject *pObject)
 //============================================================
 bool CMagic::CollisionEnemy(void)
 {
+	// TODO：当たり判定
+#if 0
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
 
@@ -360,6 +348,7 @@ bool CMagic::CollisionEnemy(void)
 			}
 		}
 	}
+#endif
 
 	// 当たっていない判定を返す
 	return false;

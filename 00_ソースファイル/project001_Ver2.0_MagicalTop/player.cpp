@@ -272,33 +272,10 @@ CPlayer *CPlayer::Create(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 
 	if (USED(pPlayer))
 	{ // 使用されている場合
-		
-		if (SUCCEEDED(pPlayer->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
 
-			// プレイヤーの初期化
-			if (FAILED(pPlayer->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pPlayer;
-				pPlayer = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pPlayer->SetPosition(rPos);
-
-			// 向きを設定
-			pPlayer->SetRotation(rRot);
-
-			// 確保したアドレスを返す
-			return pPlayer;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// プレイヤーの初期化
+		if (FAILED(pPlayer->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pPlayer;
@@ -307,6 +284,15 @@ CPlayer *CPlayer::Create(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pPlayer->SetPosition(rPos);
+
+		// 向きを設定
+		pPlayer->SetRotation(rRot);
+
+		// 確保したアドレスを返す
+		return pPlayer;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }
@@ -692,6 +678,8 @@ void CPlayer::CollisionTarget(D3DXVECTOR3& rPos)
 //============================================================
 void CPlayer::CollisionEnemy(D3DXVECTOR3& rPos)
 {
+	// TODO：当たり判定
+#if 0
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
 
@@ -719,6 +707,7 @@ void CPlayer::CollisionEnemy(D3DXVECTOR3& rPos)
 			);
 		}
 	}
+#endif
 }
 
 //============================================================

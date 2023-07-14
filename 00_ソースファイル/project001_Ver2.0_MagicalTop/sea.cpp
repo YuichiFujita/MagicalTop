@@ -219,30 +219,16 @@ CSea *CSea::Create(void)
 	if (USED(pSea))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pSea->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// 海の初期化
-			if (FAILED(pSea->Init()))
-			{ // 初期化に失敗した場合
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pSea;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
-
-			// メモリ開放
-			delete pSea;
-			pSea = NULL;
+		// 海の初期化
+		if (FAILED(pSea->Init()))
+		{ // 初期化に失敗した場合
 
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 確保したアドレスを返す
+		return pSea;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

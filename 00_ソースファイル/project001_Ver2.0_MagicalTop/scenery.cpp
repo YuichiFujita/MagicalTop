@@ -131,65 +131,9 @@ CScenery *CScenery::Create
 	if (USED(pScenery))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pScenery->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// 景色の初期化
-			if (FAILED(pScenery->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pScenery;
-				pScenery = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// テクスチャを登録
-			nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
-
-			// テクスチャを割当
-			pScenery->BindTexture(nTextureID);
-
-			// 位置を設定
-			pScenery->SetPosition(rPos);
-
-			// 向きを設定
-			pScenery->SetRotation(rRot);
-
-			// 色を設定
-			pScenery->SetColor(rCol);
-
-			// 半径を設定
-			pScenery->SetRadius(fRadius);
-
-			// 縦幅を設定
-			pScenery->SetHeight(fHeight);
-
-			// カリングを設定
-			pScenery->SetCulling(cull);
-
-			// ライティングを設定
-			pScenery->SetLighting(bLight);
-
-			// 分割数を設定
-			if (FAILED(pScenery->SetPattern(rPart)))
-			{ // 分割数の設定に失敗した場合
-
-				// メモリ開放
-				delete pScenery;
-				pScenery = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pScenery;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// 景色の初期化
+		if (FAILED(pScenery->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pScenery;
@@ -198,6 +142,48 @@ CScenery *CScenery::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// テクスチャを登録
+		nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
+
+		// テクスチャを割当
+		pScenery->BindTexture(nTextureID);
+
+		// 位置を設定
+		pScenery->SetPosition(rPos);
+
+		// 向きを設定
+		pScenery->SetRotation(rRot);
+
+		// 色を設定
+		pScenery->SetColor(rCol);
+
+		// 半径を設定
+		pScenery->SetRadius(fRadius);
+
+		// 縦幅を設定
+		pScenery->SetHeight(fHeight);
+
+		// カリングを設定
+		pScenery->SetCulling(cull);
+
+		// ライティングを設定
+		pScenery->SetLighting(bLight);
+
+		// 分割数を設定
+		if (FAILED(pScenery->SetPattern(rPart)))
+		{ // 分割数の設定に失敗した場合
+
+			// メモリ開放
+			delete pScenery;
+			pScenery = NULL;
+
+			// 失敗を返す
+			return NULL;
+		}
+
+		// 確保したアドレスを返す
+		return pScenery;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

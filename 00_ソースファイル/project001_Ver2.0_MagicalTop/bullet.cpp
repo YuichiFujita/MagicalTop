@@ -218,50 +218,9 @@ CBullet *CBullet::Create
 	if (USED(pBullet))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pBullet->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// 弾の初期化
-			if (FAILED(pBullet->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pBullet;
-				pBullet = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// テクスチャを登録
-			nTextureID = pTexture->Regist(mc_apTextureFile[type]);
-
-			// テクスチャを割当
-			pBullet->BindTexture(nTextureID);
-
-			// 位置を設定
-			pBullet->SetPosition(rPos);
-
-			// 大きさを設定
-			pBullet->SetScaling(rSize);
-
-			// 色を設定
-			pBullet->SetColor(rCol);
-
-			// 種類を設定
-			pBullet->SetType(type);
-
-			// 移動量を設定
-			pBullet->SetMove(rVec, fMove);
-
-			// 寿命の設定
-			pBullet->SetLife(nLife);
-
-			// 確保したアドレスを返す
-			return pBullet;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// 弾の初期化
+		if (FAILED(pBullet->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pBullet;
@@ -270,6 +229,33 @@ CBullet *CBullet::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// テクスチャを登録
+		nTextureID = pTexture->Regist(mc_apTextureFile[type]);
+
+		// テクスチャを割当
+		pBullet->BindTexture(nTextureID);
+
+		// 位置を設定
+		pBullet->SetPosition(rPos);
+
+		// 大きさを設定
+		pBullet->SetScaling(rSize);
+
+		// 色を設定
+		pBullet->SetColor(rCol);
+
+		// 種類を設定
+		pBullet->SetType(type);
+
+		// 移動量を設定
+		pBullet->SetMove(rVec, fMove);
+
+		// 寿命の設定
+		pBullet->SetLife(nLife);
+
+		// 確保したアドレスを返す
+		return pBullet;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

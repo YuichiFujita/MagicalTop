@@ -323,26 +323,9 @@ CParticle2D *CParticle2D::Create(const TYPE type, const D3DXVECTOR3& rPos, const
 	if (USED(pParticle2D))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pParticle2D->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// パーティクル2Dの初期化
-			if (FAILED(pParticle2D->Init(type, rPos, rCol)))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pParticle2D;
-				pParticle2D = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pParticle2D;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// パーティクル2Dの初期化
+		if (FAILED(pParticle2D->Init(type, rPos, rCol)))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pParticle2D;
@@ -351,6 +334,9 @@ CParticle2D *CParticle2D::Create(const TYPE type, const D3DXVECTOR3& rPos, const
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 確保したアドレスを返す
+		return pParticle2D;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

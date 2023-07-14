@@ -226,41 +226,9 @@ CObjectBillboard *CObjectBillboard::Create
 	if (USED(pObjectBillboard))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pObjectBillboard->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// オブジェクトビルボードの初期化
-			if (FAILED(pObjectBillboard->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pObjectBillboard;
-				pObjectBillboard = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 原点を設定
-			pObjectBillboard->SetOrigin(origin);
-
-			// 位置を設定
-			pObjectBillboard->SetPosition(rPos);
-
-			// 向きを設定
-			pObjectBillboard->SetRotation(rRot);
-
-			// 大きさを設定
-			pObjectBillboard->SetScaling(rSize);
-
-			// 色を設定
-			pObjectBillboard->SetColor(rCol);
-
-			// 確保したアドレスを返す
-			return pObjectBillboard;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// オブジェクトビルボードの初期化
+		if (FAILED(pObjectBillboard->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pObjectBillboard;
@@ -269,6 +237,24 @@ CObjectBillboard *CObjectBillboard::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 原点を設定
+		pObjectBillboard->SetOrigin(origin);
+
+		// 位置を設定
+		pObjectBillboard->SetPosition(rPos);
+
+		// 向きを設定
+		pObjectBillboard->SetRotation(rRot);
+
+		// 大きさを設定
+		pObjectBillboard->SetScaling(rSize);
+
+		// 色を設定
+		pObjectBillboard->SetColor(rCol);
+
+		// 確保したアドレスを返す
+		return pObjectBillboard;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

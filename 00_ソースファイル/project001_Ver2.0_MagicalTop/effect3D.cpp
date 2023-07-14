@@ -212,50 +212,9 @@ CEffect3D *CEffect3D::Create
 	if (USED(pEffect3D))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pEffect3D->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// エフェクト3Dの初期化
-			if (FAILED(pEffect3D->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pEffect3D;
-				pEffect3D = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// テクスチャを登録
-			nTextureID = pTexture->Regist(mc_apTextureFile[type]);
-
-			// テクスチャを割当
-			pEffect3D->BindTexture(nTextureID);
-
-			// 位置を設定
-			pEffect3D->SetPosition(rPos);
-
-			// 向きを設定
-			pEffect3D->SetRotation(rRot);
-
-			// 大きさを設定
-			pEffect3D->SetScaling(D3DXVECTOR3(fRadius, fRadius, 0.0f));
-
-			// 色を設定
-			pEffect3D->SetColor(rCol);
-
-			// 引数の情報を設定
-			pEffect3D->m_move		= rMove;		// 移動量
-			pEffect3D->m_nLife		= nLife;		// 寿命
-			pEffect3D->m_fSubSize	= fSubSize;		// 大きさの減算量
-			pEffect3D->m_fSubAlpha	= fSubAlpha;	// 透明度の減算量
-
-			// 確保したアドレスを返す
-			return pEffect3D;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// エフェクト3Dの初期化
+		if (FAILED(pEffect3D->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pEffect3D;
@@ -264,6 +223,33 @@ CEffect3D *CEffect3D::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// テクスチャを登録
+		nTextureID = pTexture->Regist(mc_apTextureFile[type]);
+
+		// テクスチャを割当
+		pEffect3D->BindTexture(nTextureID);
+
+		// 位置を設定
+		pEffect3D->SetPosition(rPos);
+
+		// 向きを設定
+		pEffect3D->SetRotation(rRot);
+
+		// 大きさを設定
+		pEffect3D->SetScaling(D3DXVECTOR3(fRadius, fRadius, 0.0f));
+
+		// 色を設定
+		pEffect3D->SetColor(rCol);
+
+		// 引数の情報を設定
+		pEffect3D->m_move		= rMove;		// 移動量
+		pEffect3D->m_nLife		= nLife;		// 寿命
+		pEffect3D->m_fSubSize	= fSubSize;		// 大きさの減算量
+		pEffect3D->m_fSubAlpha	= fSubAlpha;	// 透明度の減算量
+
+		// 確保したアドレスを返す
+		return pEffect3D;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

@@ -174,56 +174,9 @@ CScrollMeshField *CScrollMeshField::Create
 	if (USED(pScrollMeshField))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pScrollMeshField->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// スクロールメッシュフィールドの初期化
-			if (FAILED(pScrollMeshField->Init(fMoveU, fMoveV)))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pScrollMeshField;
-				pScrollMeshField = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pScrollMeshField->SetPosition(rPos);
-
-			// 向きを設定
-			pScrollMeshField->SetRotation(rRot);
-
-			// 大きさを設定
-			pScrollMeshField->SetScalingBiaxial(rSize);
-
-			// 色を設定
-			pScrollMeshField->SetColor(rCol);
-
-			// カリングを設定
-			pScrollMeshField->SetCulling(cull);
-
-			// ライティングを設定
-			pScrollMeshField->SetLighting(bLight);
-
-			// 分割数を設定
-			if (FAILED(pScrollMeshField->SetPattern(rPart)))
-			{ // 分割数の設定に失敗した場合
-
-				// メモリ開放
-				delete pScrollMeshField;
-				pScrollMeshField = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pScrollMeshField;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// スクロールメッシュフィールドの初期化
+		if (FAILED(pScrollMeshField->Init(fMoveU, fMoveV)))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pScrollMeshField;
@@ -232,6 +185,39 @@ CScrollMeshField *CScrollMeshField::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pScrollMeshField->SetPosition(rPos);
+
+		// 向きを設定
+		pScrollMeshField->SetRotation(rRot);
+
+		// 大きさを設定
+		pScrollMeshField->SetScalingBiaxial(rSize);
+
+		// 色を設定
+		pScrollMeshField->SetColor(rCol);
+
+		// カリングを設定
+		pScrollMeshField->SetCulling(cull);
+
+		// ライティングを設定
+		pScrollMeshField->SetLighting(bLight);
+
+		// 分割数を設定
+		if (FAILED(pScrollMeshField->SetPattern(rPart)))
+		{ // 分割数の設定に失敗した場合
+
+			// メモリ開放
+			delete pScrollMeshField;
+			pScrollMeshField = NULL;
+
+			// 失敗を返す
+			return NULL;
+		}
+
+		// 確保したアドレスを返す
+		return pScrollMeshField;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

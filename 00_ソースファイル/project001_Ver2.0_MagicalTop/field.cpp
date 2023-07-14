@@ -140,62 +140,9 @@ CField *CField::Create
 	if (USED(pField))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pField->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// 地面の初期化
-			if (FAILED(pField->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pField;
-				pField = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// テクスチャを登録
-			nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
-
-			// テクスチャを割当
-			pField->BindTexture(nTextureID);
-
-			// 位置を設定
-			pField->SetPosition(rPos);
-
-			// 向きを設定
-			pField->SetRotation(rRot);
-
-			// 大きさを設定
-			pField->SetScalingBiaxial(rSize);
-
-			// 色を設定
-			pField->SetColor(rCol);
-
-			// カリングを設定
-			pField->SetCulling(cull);
-
-			// ライティングを設定
-			pField->SetLighting(bLight);
-
-			// 分割数を設定
-			if (FAILED(pField->SetPattern(rPart)))
-			{ // 分割数の設定に失敗した場合
-
-				// メモリ開放
-				delete pField;
-				pField = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pField;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// 地面の初期化
+		if (FAILED(pField->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pField;
@@ -204,6 +151,45 @@ CField *CField::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// テクスチャを登録
+		nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
+
+		// テクスチャを割当
+		pField->BindTexture(nTextureID);
+
+		// 位置を設定
+		pField->SetPosition(rPos);
+
+		// 向きを設定
+		pField->SetRotation(rRot);
+
+		// 大きさを設定
+		pField->SetScalingBiaxial(rSize);
+
+		// 色を設定
+		pField->SetColor(rCol);
+
+		// カリングを設定
+		pField->SetCulling(cull);
+
+		// ライティングを設定
+		pField->SetLighting(bLight);
+
+		// 分割数を設定
+		if (FAILED(pField->SetPattern(rPart)))
+		{ // 分割数の設定に失敗した場合
+
+			// メモリ開放
+			delete pField;
+			pField = NULL;
+
+			// 失敗を返す
+			return NULL;
+		}
+
+		// 確保したアドレスを返す
+		return pField;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

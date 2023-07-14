@@ -117,62 +117,9 @@ CWall *CWall::Create
 	if (USED(pWall))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pWall->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// 壁の初期化
-			if (FAILED(pWall->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pWall;
-				pWall = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// テクスチャを登録
-			nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
-
-			// テクスチャを割当
-			pWall->BindTexture(nTextureID);
-
-			// 位置を設定
-			pWall->SetPosition(rPos);
-
-			// 向きを設定
-			pWall->SetRotation(rRot);
-
-			// 大きさを設定
-			pWall->SetScalingBiaxial(rSize);
-
-			// 色を設定
-			pWall->SetColor(rCol);
-
-			// カリングを設定
-			pWall->SetCulling(cull);
-
-			// ライティングを設定
-			pWall->SetLighting(bLight);
-
-			// 分割数を設定
-			if (FAILED(pWall->SetPattern(rPart)))
-			{ // 分割数の設定に失敗した場合
-
-				// メモリ開放
-				delete pWall;
-				pWall = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pWall;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// 壁の初期化
+		if (FAILED(pWall->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pWall;
@@ -181,6 +128,45 @@ CWall *CWall::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// テクスチャを登録
+		nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
+
+		// テクスチャを割当
+		pWall->BindTexture(nTextureID);
+
+		// 位置を設定
+		pWall->SetPosition(rPos);
+
+		// 向きを設定
+		pWall->SetRotation(rRot);
+
+		// 大きさを設定
+		pWall->SetScalingBiaxial(rSize);
+
+		// 色を設定
+		pWall->SetColor(rCol);
+
+		// カリングを設定
+		pWall->SetCulling(cull);
+
+		// ライティングを設定
+		pWall->SetLighting(bLight);
+
+		// 分割数を設定
+		if (FAILED(pWall->SetPattern(rPart)))
+		{ // 分割数の設定に失敗した場合
+
+			// メモリ開放
+			delete pWall;
+			pWall = NULL;
+
+			// 失敗を返す
+			return NULL;
+		}
+
+		// 確保したアドレスを返す
+		return pWall;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

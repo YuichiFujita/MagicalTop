@@ -211,32 +211,9 @@ CEnemy *CEnemy::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVECTO
 	if (USED(pEnemy))
 	{ // 使用されている場合
 		
-		if (SUCCEEDED(pEnemy->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// 敵の初期化
-			if (FAILED(pEnemy->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pEnemy;
-				pEnemy = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pEnemy->SetPosition(rPos);
-
-			// 向きを設定
-			pEnemy->SetRotation(rRot);
-
-			// 確保したアドレスを返す
-			return pEnemy;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// 敵の初期化
+		if (FAILED(pEnemy->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pEnemy;
@@ -245,6 +222,15 @@ CEnemy *CEnemy::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVECTO
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pEnemy->SetPosition(rPos);
+
+		// 向きを設定
+		pEnemy->SetRotation(rRot);
+
+		// 確保したアドレスを返す
+		return pEnemy;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }
@@ -522,6 +508,8 @@ void CEnemy::CollisionTarget(D3DXVECTOR3& rPos)
 //============================================================
 void CEnemy::CollisionEnemy(D3DXVECTOR3& rPos)
 {
+	// TODO：当たり判定
+#if 0
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
 
@@ -557,6 +545,7 @@ void CEnemy::CollisionEnemy(D3DXVECTOR3& rPos)
 			);
 		}
 	}
+#endif
 }
 
 //************************************************************

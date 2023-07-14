@@ -257,56 +257,9 @@ CObjectMeshField *CObjectMeshField::Create
 	if (USED(pObjectMeshField))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pObjectMeshField->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// オブジェクトメッシュフィールドの初期化
-			if (FAILED(pObjectMeshField->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pObjectMeshField;
-				pObjectMeshField = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pObjectMeshField->SetPosition(rPos);
-
-			// 向きを設定
-			pObjectMeshField->SetRotation(rRot);
-
-			// 大きさを設定
-			pObjectMeshField->SetScalingBiaxial(rSize);
-
-			// 色を設定
-			pObjectMeshField->SetColor(rCol);
-
-			// カリングを設定
-			pObjectMeshField->SetCulling(cull);
-
-			// ライティングを設定
-			pObjectMeshField->SetLighting(bLight);
-
-			// 分割数を設定
-			if (FAILED(pObjectMeshField->SetPattern(rPart)))
-			{ // 分割数の設定に失敗した場合
-
-				// メモリ開放
-				delete pObjectMeshField;
-				pObjectMeshField = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pObjectMeshField;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// オブジェクトメッシュフィールドの初期化
+		if (FAILED(pObjectMeshField->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pObjectMeshField;
@@ -315,6 +268,39 @@ CObjectMeshField *CObjectMeshField::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pObjectMeshField->SetPosition(rPos);
+
+		// 向きを設定
+		pObjectMeshField->SetRotation(rRot);
+
+		// 大きさを設定
+		pObjectMeshField->SetScalingBiaxial(rSize);
+
+		// 色を設定
+		pObjectMeshField->SetColor(rCol);
+
+		// カリングを設定
+		pObjectMeshField->SetCulling(cull);
+
+		// ライティングを設定
+		pObjectMeshField->SetLighting(bLight);
+
+		// 分割数を設定
+		if (FAILED(pObjectMeshField->SetPattern(rPart)))
+		{ // 分割数の設定に失敗した場合
+
+			// メモリ開放
+			delete pObjectMeshField;
+			pObjectMeshField = NULL;
+
+			// 失敗を返す
+			return NULL;
+		}
+
+		// 確保したアドレスを返す
+		return pObjectMeshField;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

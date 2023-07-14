@@ -131,65 +131,9 @@ CSky *CSky::Create
 	if (USED(pSky))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pSky->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// 空の初期化
-			if (FAILED(pSky->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pSky;
-				pSky = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// テクスチャを登録
-			nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
-
-			// テクスチャを割当
-			pSky->BindTexture(nTextureID);
-
-			// 位置を設定
-			pSky->SetPosition(rPos);
-
-			// 向きを設定
-			pSky->SetRotation(rRot);
-
-			// 色を設定
-			pSky->SetColor(rCol);
-
-			// 半径を設定
-			pSky->SetRadius(fRadius);
-
-			// カリングを設定
-			pSky->SetCulling(cull);
-
-			// ライティングを設定
-			pSky->SetLighting(bLight);
-
-			// 分割数を設定
-			if (FAILED(pSky->SetPattern(rPart)))
-			{ // 分割数の設定に失敗した場合
-
-				// メモリ開放
-				delete pSky;
-				pSky = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// テクスチャ分割数の設定
-			pSky->SetTexPattern(POSGRID2(rPart.x, rPart.y - 1));
-
-			// 確保したアドレスを返す
-			return pSky;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// 空の初期化
+		if (FAILED(pSky->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pSky;
@@ -198,6 +142,48 @@ CSky *CSky::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// テクスチャを登録
+		nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
+
+		// テクスチャを割当
+		pSky->BindTexture(nTextureID);
+
+		// 位置を設定
+		pSky->SetPosition(rPos);
+
+		// 向きを設定
+		pSky->SetRotation(rRot);
+
+		// 色を設定
+		pSky->SetColor(rCol);
+
+		// 半径を設定
+		pSky->SetRadius(fRadius);
+
+		// カリングを設定
+		pSky->SetCulling(cull);
+
+		// ライティングを設定
+		pSky->SetLighting(bLight);
+
+		// 分割数を設定
+		if (FAILED(pSky->SetPattern(rPart)))
+		{ // 分割数の設定に失敗した場合
+
+			// メモリ開放
+			delete pSky;
+			pSky = NULL;
+
+			// 失敗を返す
+			return NULL;
+		}
+
+		// テクスチャ分割数の設定
+		pSky->SetTexPattern(POSGRID2(rPart.x, rPart.y - 1));
+
+		// 確保したアドレスを返す
+		return pSky;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

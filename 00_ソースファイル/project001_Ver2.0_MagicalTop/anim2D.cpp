@@ -206,38 +206,9 @@ CAnim2D *CAnim2D::Create(const int nWidthPtrn, const int nHeightPtrn, const D3DX
 	if (USED(pAnim2D))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pAnim2D->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// アニメーション2Dの初期化
-			if (FAILED(pAnim2D->Init(nWidthPtrn, nHeightPtrn)))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pAnim2D;
-				pAnim2D = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pAnim2D->SetPosition(rPos);
-
-			// 向きを設定
-			pAnim2D->SetRotation(rRot);
-
-			// 大きさを設定
-			pAnim2D->SetScaling(rSize);
-
-			// 色を設定
-			pAnim2D->SetColor(rCol);
-
-			// 確保したアドレスを返す
-			return pAnim2D;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// アニメーション2Dの初期化
+		if (FAILED(pAnim2D->Init(nWidthPtrn, nHeightPtrn)))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pAnim2D;
@@ -246,6 +217,21 @@ CAnim2D *CAnim2D::Create(const int nWidthPtrn, const int nHeightPtrn, const D3DX
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pAnim2D->SetPosition(rPos);
+
+		// 向きを設定
+		pAnim2D->SetRotation(rRot);
+
+		// 大きさを設定
+		pAnim2D->SetScaling(rSize);
+
+		// 色を設定
+		pAnim2D->SetColor(rCol);
+
+		// 確保したアドレスを返す
+		return pAnim2D;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

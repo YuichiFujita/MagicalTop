@@ -248,39 +248,25 @@ CLifeGauge3D *CLifeGauge3D::Create
 	if (USED(pLifeGauge3D))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pLifeGauge3D->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// 体力ゲージ3Dの初期化
-			if (FAILED(pLifeGauge3D->Init()))
-			{ // 初期化に失敗した場合
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 体力の設定
-			pLifeGauge3D->SetLife(nLife);
-
-			// 体力表示の設定
-			pLifeGauge3D->SetLifeObject(pObject);
-
-			// Y位置加算量の設定
-			pLifeGauge3D->SetPositionUp(fPosUp);
-
-			// 確保したアドレスを返す
-			return pLifeGauge3D;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
-
-			// メモリ開放
-			delete pLifeGauge3D;
-			pLifeGauge3D = NULL;
+		// 体力ゲージ3Dの初期化
+		if (FAILED(pLifeGauge3D->Init()))
+		{ // 初期化に失敗した場合
 
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 体力の設定
+		pLifeGauge3D->SetLife(nLife);
+
+		// 体力表示の設定
+		pLifeGauge3D->SetLifeObject(pObject);
+
+		// Y位置加算量の設定
+		pLifeGauge3D->SetPositionUp(fPosUp);
+
+		// 確保したアドレスを返す
+		return pLifeGauge3D;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

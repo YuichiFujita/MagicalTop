@@ -189,38 +189,9 @@ CObject3D *CObject3D::Create(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, 
 	if (USED(pObject3D))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pObject3D->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// オブジェクト3Dの初期化
-			if (FAILED(pObject3D->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pObject3D;
-				pObject3D = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pObject3D->SetPosition(rPos);
-
-			// 向きを設定
-			pObject3D->SetRotation(rRot);
-
-			// 大きさを設定
-			pObject3D->SetScaling(rSize);
-
-			// 色を設定
-			pObject3D->SetColor(rCol);
-
-			// 確保したアドレスを返す
-			return pObject3D;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// オブジェクト3Dの初期化
+		if (FAILED(pObject3D->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pObject3D;
@@ -229,6 +200,21 @@ CObject3D *CObject3D::Create(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, 
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pObject3D->SetPosition(rPos);
+
+		// 向きを設定
+		pObject3D->SetRotation(rRot);
+
+		// 大きさを設定
+		pObject3D->SetScaling(rSize);
+
+		// 色を設定
+		pObject3D->SetColor(rCol);
+
+		// 確保したアドレスを返す
+		return pObject3D;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

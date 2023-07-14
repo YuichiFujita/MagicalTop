@@ -227,44 +227,9 @@ CTarget *CTarget::Create(const MODEL model, const D3DXVECTOR3& rPos, const D3DXV
 	if (USED(pTarget))
 	{ // 使用されている場合
 		
-		if (SUCCEEDED(pTarget->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// ターゲットの初期化
-			if (FAILED(pTarget->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pTarget;
-				pTarget = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// モデルを登録
-			nModelID = pModel->Regist(mc_apModelFile[model]);
-
-			// モデルを割当
-			pTarget->BindModel(pModel->GetModel(nModelID));
-
-			// 位置を設定
-			pTarget->SetPosition(rPos);
-
-			// 向きを設定
-			pTarget->SetRotation(rRot);
-
-			// 大きさを設定
-			pTarget->SetScaling(rScale);
-
-			// メッシュキューブの位置を設定
-			pTarget->m_pMeshCube->SetPosition(D3DXVECTOR3(rPos.x, rPos.y + ADD_POS_Y, rPos.z));
-
-			// 確保したアドレスを返す
-			return pTarget;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// ターゲットの初期化
+		if (FAILED(pTarget->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pTarget;
@@ -273,6 +238,27 @@ CTarget *CTarget::Create(const MODEL model, const D3DXVECTOR3& rPos, const D3DXV
 			// 失敗を返す
 			return NULL;
 		}
+
+		// モデルを登録
+		nModelID = pModel->Regist(mc_apModelFile[model]);
+
+		// モデルを割当
+		pTarget->BindModel(pModel->GetModel(nModelID));
+
+		// 位置を設定
+		pTarget->SetPosition(rPos);
+
+		// 向きを設定
+		pTarget->SetRotation(rRot);
+
+		// 大きさを設定
+		pTarget->SetScaling(rScale);
+
+		// メッシュキューブの位置を設定
+		pTarget->m_pMeshCube->SetPosition(D3DXVECTOR3(rPos.x, rPos.y + ADD_POS_Y, rPos.z));
+
+		// 確保したアドレスを返す
+		return pTarget;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

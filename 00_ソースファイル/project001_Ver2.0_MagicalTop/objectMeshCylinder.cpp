@@ -215,59 +215,9 @@ CObjectMeshCylinder *CObjectMeshCylinder::Create
 	if (USED(pObjectMeshCylinder))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pObjectMeshCylinder->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// オブジェクトメッシュシリンダーの初期化
-			if (FAILED(pObjectMeshCylinder->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pObjectMeshCylinder;
-				pObjectMeshCylinder = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pObjectMeshCylinder->SetPosition(rPos);
-
-			// 向きを設定
-			pObjectMeshCylinder->SetRotation(rRot);
-
-			// 色を設定
-			pObjectMeshCylinder->SetColor(rCol);
-
-			// 半径を設定
-			pObjectMeshCylinder->SetRadius(fRadius);
-
-			// 縦幅を設定
-			pObjectMeshCylinder->SetHeight(fHeight);
-
-			// カリングを設定
-			pObjectMeshCylinder->SetCulling(cull);
-
-			// ライティングを設定
-			pObjectMeshCylinder->SetLighting(bLight);
-
-			// 分割数を設定
-			if (FAILED(pObjectMeshCylinder->SetPattern(rPart)))
-			{ // 分割数の設定に失敗した場合
-
-				// メモリ開放
-				delete pObjectMeshCylinder;
-				pObjectMeshCylinder = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pObjectMeshCylinder;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// オブジェクトメッシュシリンダーの初期化
+		if (FAILED(pObjectMeshCylinder->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pObjectMeshCylinder;
@@ -276,6 +226,42 @@ CObjectMeshCylinder *CObjectMeshCylinder::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pObjectMeshCylinder->SetPosition(rPos);
+
+		// 向きを設定
+		pObjectMeshCylinder->SetRotation(rRot);
+
+		// 色を設定
+		pObjectMeshCylinder->SetColor(rCol);
+
+		// 半径を設定
+		pObjectMeshCylinder->SetRadius(fRadius);
+
+		// 縦幅を設定
+		pObjectMeshCylinder->SetHeight(fHeight);
+
+		// カリングを設定
+		pObjectMeshCylinder->SetCulling(cull);
+
+		// ライティングを設定
+		pObjectMeshCylinder->SetLighting(bLight);
+
+		// 分割数を設定
+		if (FAILED(pObjectMeshCylinder->SetPattern(rPart)))
+		{ // 分割数の設定に失敗した場合
+
+			// メモリ開放
+			delete pObjectMeshCylinder;
+			pObjectMeshCylinder = NULL;
+
+			// 失敗を返す
+			return NULL;
+		}
+
+		// 確保したアドレスを返す
+		return pObjectMeshCylinder;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

@@ -352,77 +352,9 @@ CObjectMeshCube *CObjectMeshCube::Create
 	if (USED(pObjectMeshCube))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pObjectMeshCube->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// オブジェクトメッシュキューブの初期化
-			if (FAILED(pObjectMeshCube->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pObjectMeshCube;
-				pObjectMeshCube = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// テクスチャを割当
-			pObjectMeshCube->BindTexture(rTexID);
-
-			// 位置を設定
-			pObjectMeshCube->SetPosition(rPos);
-
-			// 向きを設定
-			pObjectMeshCube->SetRotation(rRot);
-
-			// 大きさを設定
-			pObjectMeshCube->SetScaling(rSize);
-
-			// キューブ色を設定
-			pObjectMeshCube->SetCubeColor(rCubeCol);
-
-			// 縁取り色を設定
-			pObjectMeshCube->SetBorderColor(rBorderCol);
-
-			// 縁取りの状態を設定
-			if (FAILED(pObjectMeshCube->SetBorderState(bordState)))
-			{ // 分割数の設定に失敗した場合
-
-				// メモリ開放
-				delete pObjectMeshCube;
-				pObjectMeshCube = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 縁取りの太さを設定
-			pObjectMeshCube->SetBorderThick(fBordThick);
-
-			// テクスチャの状態を設定
-			pObjectMeshCube->SetTextureState(texState);
-
-			// テクスチャの分割数Xを設定
-			pObjectMeshCube->SetTexturePatternX(rTexPartX);
-
-			// テクスチャの分割数Yを設定
-			pObjectMeshCube->SetTexturePatternY(rTexPartY);
-
-			// テクスチャの分割数Zを設定
-			pObjectMeshCube->SetTexturePatternZ(rTexPartZ);
-
-			// カリングを設定
-			pObjectMeshCube->SetCulling(cull);
-
-			// ライティングを設定
-			pObjectMeshCube->SetLighting(bLight);
-
-			// 確保したアドレスを返す
-			return pObjectMeshCube;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// オブジェクトメッシュキューブの初期化
+		if (FAILED(pObjectMeshCube->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pObjectMeshCube;
@@ -431,6 +363,60 @@ CObjectMeshCube *CObjectMeshCube::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// テクスチャを割当
+		pObjectMeshCube->BindTexture(rTexID);
+
+		// 位置を設定
+		pObjectMeshCube->SetPosition(rPos);
+
+		// 向きを設定
+		pObjectMeshCube->SetRotation(rRot);
+
+		// 大きさを設定
+		pObjectMeshCube->SetScaling(rSize);
+
+		// キューブ色を設定
+		pObjectMeshCube->SetCubeColor(rCubeCol);
+
+		// 縁取り色を設定
+		pObjectMeshCube->SetBorderColor(rBorderCol);
+
+		// 縁取りの状態を設定
+		if (FAILED(pObjectMeshCube->SetBorderState(bordState)))
+		{ // 分割数の設定に失敗した場合
+
+			// メモリ開放
+			delete pObjectMeshCube;
+			pObjectMeshCube = NULL;
+
+			// 失敗を返す
+			return NULL;
+		}
+
+		// 縁取りの太さを設定
+		pObjectMeshCube->SetBorderThick(fBordThick);
+
+		// テクスチャの状態を設定
+		pObjectMeshCube->SetTextureState(texState);
+
+		// テクスチャの分割数Xを設定
+		pObjectMeshCube->SetTexturePatternX(rTexPartX);
+
+		// テクスチャの分割数Yを設定
+		pObjectMeshCube->SetTexturePatternY(rTexPartY);
+
+		// テクスチャの分割数Zを設定
+		pObjectMeshCube->SetTexturePatternZ(rTexPartZ);
+
+		// カリングを設定
+		pObjectMeshCube->SetCulling(cull);
+
+		// ライティングを設定
+		pObjectMeshCube->SetLighting(bLight);
+
+		// 確保したアドレスを返す
+		return pObjectMeshCube;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

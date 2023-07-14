@@ -163,38 +163,9 @@ CScroll2D *CScroll2D::Create(const float fMoveU, const float fMoveV, const D3DXV
 	if (USED(pScroll2D))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pScroll2D->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// スクロール2Dの初期化
-			if (FAILED(pScroll2D->Init(fMoveU, fMoveV)))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pScroll2D;
-				pScroll2D = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 位置を設定
-			pScroll2D->SetPosition(rPos);
-
-			// 向きを設定
-			pScroll2D->SetRotation(rRot);
-
-			// 大きさを設定
-			pScroll2D->SetScaling(rSize);
-
-			// 色を設定
-			pScroll2D->SetColor(rCol);
-
-			// 確保したアドレスを返す
-			return pScroll2D;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// スクロール2Dの初期化
+		if (FAILED(pScroll2D->Init(fMoveU, fMoveV)))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pScroll2D;
@@ -203,6 +174,21 @@ CScroll2D *CScroll2D::Create(const float fMoveU, const float fMoveV, const D3DXV
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pScroll2D->SetPosition(rPos);
+
+		// 向きを設定
+		pScroll2D->SetRotation(rRot);
+
+		// 大きさを設定
+		pScroll2D->SetScaling(rSize);
+
+		// 色を設定
+		pScroll2D->SetColor(rCol);
+
+		// 確保したアドレスを返す
+		return pScroll2D;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

@@ -120,32 +120,9 @@ CValue *CValue::Create(const TEXTURE texture)
 	if (USED(pValue))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pValue->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// 数字の初期化
-			if (FAILED(pValue->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pValue;
-				pValue = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// テクスチャを登録
-			nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
-
-			// テクスチャを割当
-			pValue->BindTexture(nTextureID);
-
-			// 確保したアドレスを返す
-			return pValue;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// 数字の初期化
+		if (FAILED(pValue->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pValue;
@@ -154,6 +131,15 @@ CValue *CValue::Create(const TEXTURE texture)
 			// 失敗を返す
 			return NULL;
 		}
+
+		// テクスチャを登録
+		nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
+
+		// テクスチャを割当
+		pValue->BindTexture(nTextureID);
+
+		// 確保したアドレスを返す
+		return pValue;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }
@@ -181,44 +167,9 @@ CValue *CValue::Create(const TEXTURE texture, const D3DXVECTOR3& rPos, const D3D
 	if (USED(pValue))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pValue->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// 数字の初期化
-			if (FAILED(pValue->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pValue;
-				pValue = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// テクスチャを登録
-			nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
-
-			// テクスチャを割当
-			pValue->BindTexture(nTextureID);
-
-			// 位置を設定
-			pValue->SetPosition(rPos);
-
-			// 向きを設定
-			pValue->SetRotation(rRot);
-
-			// 大きさを設定
-			pValue->SetScaling(rSize);
-
-			// 色を設定
-			pValue->SetColor(rCol);
-
-			// 確保したアドレスを返す
-			return pValue;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// 数字の初期化
+		if (FAILED(pValue->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pValue;
@@ -227,6 +178,27 @@ CValue *CValue::Create(const TEXTURE texture, const D3DXVECTOR3& rPos, const D3D
 			// 失敗を返す
 			return NULL;
 		}
+
+		// テクスチャを登録
+		nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
+
+		// テクスチャを割当
+		pValue->BindTexture(nTextureID);
+
+		// 位置を設定
+		pValue->SetPosition(rPos);
+
+		// 向きを設定
+		pValue->SetRotation(rRot);
+
+		// 大きさを設定
+		pValue->SetScaling(rSize);
+
+		// 色を設定
+		pValue->SetColor(rCol);
+
+		// 確保したアドレスを返す
+		return pValue;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

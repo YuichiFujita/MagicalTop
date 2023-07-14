@@ -220,26 +220,9 @@ CTimer *CTimer::Create(void)
 	if (USED(pTimer))
 	{ // 確保に成功している場合
 
-		if (SUCCEEDED(pTimer->GetResult()))
-		{ // オブジェクトの情報設定に成功した場合
-
-			// タイマーの初期化
-			if (FAILED(pTimer->Init()))
-			{ // 初期化に失敗した場合
-
-				// メモリ開放
-				delete pTimer;
-				pTimer = NULL;
-
-				// 失敗を返す
-				return NULL;
-			}
-
-			// 確保したアドレスを返す
-			return pTimer;
-		}
-		else
-		{ // オブジェクトの情報設定に失敗した場合
+		// タイマーの初期化
+		if (FAILED(pTimer->Init()))
+		{ // 初期化に失敗した場合
 
 			// メモリ開放
 			delete pTimer;
@@ -248,6 +231,9 @@ CTimer *CTimer::Create(void)
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 確保したアドレスを返す
+		return pTimer;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }
