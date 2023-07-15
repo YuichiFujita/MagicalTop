@@ -40,7 +40,7 @@ const char *CLifeGauge3D::mc_apTextureFile[] =	// テクスチャ定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CLifeGauge3D::CLifeGauge3D(const int nMax, const int nFrame) : CObject(CObject::LABEL_LOCK, LIFEGAUGE3D_PRIO), m_nMaxLife(nMax), m_nFrame(nFrame)	// TODO：ここロックになってる！！Release見直し！
+CLifeGauge3D::CLifeGauge3D(const int nMax, const int nFrame) : CObject(CObject::LABEL_LIFE, LIFEGAUGE3D_PRIO), m_nMaxLife(nMax), m_nFrame(nFrame)	// TODO：ここロックになってる！！Release見直し！
 {
 	// メンバ変数をクリア
 	memset(&m_apBilboard[0], 0, sizeof(m_apBilboard));	// ビルボードの情報

@@ -172,7 +172,14 @@ public:
 private:
 	// オーバーライド関数
 	void CollisionFind(void);	// 検知範囲の当たり判定
-	void SetRotationCannon(const D3DXVECTOR3& rLookPos, D3DXVECTOR3& rRotCannon);	// キャノン向き設定
+
+	// メンバ関数
+	bool SetRotationCannon		// キャノン向き設定
+	( // 引数
+		const D3DXVECTOR3& rLookPos,	// 視認対象位置
+		const D3DXVECTOR3& rEnemyPos,	// 敵位置
+		const D3DXVECTOR3& rEnemyRot	// 敵向き
+	);
 
 	// 静的メンバ変数
 	static const char *mc_apModelFile[];	// モデル定数

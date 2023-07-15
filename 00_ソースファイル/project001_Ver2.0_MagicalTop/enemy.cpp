@@ -450,7 +450,7 @@ void CEnemy::Attack(const D3DXVECTOR3& rTarget)
 		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
 		// マトリックスを掛け合わせる
-		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &GetMultiModel(m_status.nBullParts).GetMtxWorld());
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &GetMultiModel(m_status.nBullParts)->GetMtxWorld());
 
 		// マトリックスから位置を求める
 		posBull = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
@@ -508,44 +508,48 @@ void CEnemy::CollisionTarget(D3DXVECTOR3& rPos)
 //============================================================
 void CEnemy::CollisionEnemy(D3DXVECTOR3& rPos)
 {
-	// TODO：当たり判定
-#if 0
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
 
-		for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-		{ // オブジェクトの総数分繰り返す
+		// ポインタを宣言
+		CObject *pObjectTop = CObject::GetTop(nCntPri);	// 先頭オブジェクト
+
+		if (USED(pObjectTop))
+		{ // 先頭が存在する場合
 
 			// ポインタを宣言
-			CObject *pObject = CObject::GetObject(nCntPri, nCntObject);	// オブジェクト
+			CObject *pObjCheck = pObjectTop;	// オブジェクト確認用
 
-			if (UNUSED(pObject)
-			||  pObject->GetLabel() != CObject::LABEL_ENEMY)
-			{ // オブジェクトが非使用中・ラベルが敵ではない場合
+			while (USED(pObjCheck))
+			{ // オブジェクトが使用されている場合繰り返す
 
-				// 次の繰り返しに移行
-				continue;
+				// ポインタを宣言
+				CObject *pObjectNext = pObjCheck->GetNext();	// 次オブジェクト
+
+				if (pObjCheck->GetLabel() != CObject::LABEL_ENEMY || pObjCheck == GetObject())
+				{ // オブジェクトラベルが敵ではない、またはオブジェクトが自分自身だった場合
+
+					// 次のオブジェクトへのポインタを代入
+					pObjCheck = pObjectNext;
+
+					// 次の繰り返しに移行
+					continue;
+				}
+
+				// ターゲットとの衝突判定
+				collision::CirclePillar
+				( // 引数
+					rPos,						// 判定位置
+					pObjCheck->GetPosition(),	// 判定目標位置
+					m_status.fRadius,			// 判定半径
+					pObjCheck->GetRadius()		// 判定目標半径
+				);
+
+				// 次のオブジェクトへのポインタを代入
+				pObjCheck = pObjectNext;
 			}
-
-			if (pObject->GetID() == GetID()
-			&&  pObject->GetPriority() == GetPriority())
-			{ // オブジェクトが自分自身だった場合
-
-				// 次の繰り返しに移行
-				continue;
-			}
-
-			// ターゲットとの衝突判定
-			collision::CirclePillar
-			( // 引数
-				rPos,					// 判定位置
-				pObject->GetPosition(),	// 判定目標位置
-				m_status.fRadius,		// 判定半径
-				pObject->GetRadius()	// 判定目標半径
-			);
 		}
 	}
-#endif
 }
 
 //************************************************************
@@ -696,9 +700,6 @@ void CEnemyCar::CollisionFind(void)
 		else
 		{ // 敵の攻撃範囲内の場合
 
-			// キャノン向きの設定
-			SetRotationCannon(posLook, rotCannon);
-
 			if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, status.fBackwardRadius) == true && status.bBackward == true)
 			{ // 敵の後退範囲内且つ、後退がONの場合
 
@@ -732,8 +733,13 @@ void CEnemyCar::CollisionFind(void)
 			// ステージ範囲外の補正
 			CManager::GetStage()->LimitPosition(posEnemy, status.fRadius);
 
-			// 攻撃
-			Attack(posLook);
+			// キャノン向きの設定
+			if (SetRotationCannon(posLook, posEnemy, rotEnemy))
+			{ // 発射可能状態の場合
+
+				// 攻撃
+				Attack(posLook);
+			}
 		}
 	}
 
@@ -750,31 +756,45 @@ void CEnemyCar::CollisionFind(void)
 //============================================================
 //	キャノン向きの設定処理
 //============================================================
-void CEnemyCar::SetRotationCannon(const D3DXVECTOR3& rLookPos, D3DXVECTOR3& rRotCannon)
+bool CEnemyCar::SetRotationCannon(const D3DXVECTOR3& rLookPos, const D3DXVECTOR3& rEnemyPos, const D3DXVECTOR3& rEnemyRot)
 {
 	// 変数を宣言
-	D3DXVECTOR3 posEnemy = GetPosition();	// 敵位置
+	D3DXVECTOR3 cannonRot;	// 主砲向き
 	float fDestRot = 0.0f;	// 目標向き
 	float fDiffRot = 0.0f;	// 向き
 
-	// キャノンの向きを取得
-	rRotCannon = GetMultiModel(MODEL_CANNON).GetRotation() + GetRotation();	// 本体の向きを加算
-	useful::NormalizeRot(rRotCannon.y);	// キャノン向きの正規化
+	// 主砲向きを取得
+	cannonRot = GetMultiModel(MODEL_CANNON)->GetRotation() + rEnemyRot;	// 本体の向きを加算
+	useful::NormalizeRot(cannonRot.y);	// 主砲向きの正規化
 
 	// 目標向きの計算
-	fDestRot = atan2f(posEnemy.x - rLookPos.x, posEnemy.z - rLookPos.z);
+	fDestRot = atan2f(rEnemyPos.x - rLookPos.x, rEnemyPos.z - rLookPos.z);
 	useful::NormalizeRot(fDestRot);		// 目標向きの正規化
 
 	// 差分向きの計算
-	fDiffRot = fDestRot - rRotCannon.y;
+	fDiffRot = fDestRot - cannonRot.y;
 	useful::NormalizeRot(fDiffRot);		// 差分向きの正規化
 
 	// 向きの更新
-	rRotCannon.y += fDiffRot * 0.03f;	// TODO：cannonの向き補正値作る
-	useful::NormalizeRot(rRotCannon.y);	// キャノン向きの正規化
+	cannonRot.y += fDiffRot * 0.03f;	// TODO：cannonの向き補正値作る
+	useful::NormalizeRot(cannonRot.y);	// キャノン向きの正規化
 
 	// 向きを設定
-	GetMultiModel(MODEL_CANNON).SetRotation(rRotCannon - GetRotation());	// 本体の向きを減算
+	GetMultiModel(MODEL_CANNON)->SetRotation(cannonRot - rEnemyRot);	// 本体の向きを減算
+
+	if (fDestRot + D3DX_PI <= cannonRot.y + D3DX_PI + 0.25f
+	&&  fDestRot + D3DX_PI >= cannonRot.y + D3DX_PI - 0.25f)	// TODO：cannonの誤差ステータス作る
+	{ // 主砲向きと目標向きの誤差が少ない場合
+
+		// 発射可能状態を返す
+		return true;
+	}
+	else
+	{ // 主砲向きと目標向きの誤差が多い場合
+
+		// 発射不可能状態を返す
+		return false;
+	}
 }
 
 //************************************************************

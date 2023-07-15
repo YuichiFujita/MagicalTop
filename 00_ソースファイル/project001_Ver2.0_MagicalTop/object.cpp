@@ -26,79 +26,16 @@ int CObject::m_nNumAll = 0;					// オブジェクトの総数
 //============================================================
 CObject::CObject()
 {
-#if 0
-	for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-	{ // オブジェクトの最大数分繰り返す
-
-		if (UNUSED(m_apObject[DEFAULT_PRIO][nCntObject]))
-		{ // 使用されていない場合
-
-			// 自身の情報アドレスを設定
-			m_apObject[DEFAULT_PRIO][nCntObject] = this;
-
-			// 自身のインデックスを設定
-			m_nID = nCntObject;
-
-			// 自身の情報をクリア
-			m_label		= LABEL_NONE;	// オブジェクトラベル
-			m_nPriority	= DEFAULT_PRIO;	// 優先順位
-
-			// 自身の判定を設定
-			m_hrResult = S_OK;	// 成功にする
-
-			// オブジェクトの総数を加算
-			m_nNumAll++;
-
-			// 関数を抜ける
-			return;
-		}
-	}
-
-	// 自身の判定を設定
-	m_hrResult = E_FAIL;	// 失敗にする
-#else
-
-#if 0
 	if (USED(m_apCur[DEFAULT_PRIO]))
 	{ // 最後尾が存在する場合
 
-		// 現在の最後尾のオブジェクトの次のオブジェクトを設定
+		// 現在の最後尾オブジェクトの次オブジェクトを自身に設定
 		m_apCur[DEFAULT_PRIO]->m_pNext = this;
 
-		// 前のオブジェクトを設定
-		m_pPrev = m_apCur[DEFAULT_PRIO];
+		// 前オブジェクトを設定
+		m_pPrev = m_apCur[DEFAULT_PRIO];	// 現在の最後尾オブジェクト
 
-		// 次のオブジェクトをクリア
-		m_pNext = NULL;
-
-		// 自身の情報アドレスを最後尾に設定
-		m_apCur[DEFAULT_PRIO] = this;
-
-		// 自身の情報をクリア
-		m_label		= LABEL_NONE;	// オブジェクトラベル
-		m_nPriority	= DEFAULT_PRIO;	// 優先順位
-
-		// オブジェクトの総数を加算
-		m_nNumAll++;
-	}
-	else
-	{ // 最後尾が存在しない場合
-
-		// 生成したオブジェクトのアドレスを設定
-		m_apTop[DEFAULT_PRIO] = this;	// 先頭
-		m_apCur[DEFAULT_PRIO] = this;	// 最後尾
-	}
-#else
-	if (USED(m_apCur[DEFAULT_PRIO]))
-	{ // 最後尾が存在する場合
-
-		// 現在の最後尾のオブジェクトの次のオブジェクトを設定
-		m_apCur[DEFAULT_PRIO]->m_pNext = this;
-
-		// 前のオブジェクトを設定
-		m_pPrev = m_apCur[DEFAULT_PRIO];
-
-		// 次のオブジェクトをクリア
+		// 次オブジェクトをクリア
 		m_pNext = NULL;
 
 		// 自身の情報アドレスを最後尾に設定
@@ -107,14 +44,17 @@ CObject::CObject()
 	else
 	{ // 最後尾が存在しない場合
 
-		// 生成したオブジェクトのアドレスを設定
-		m_apTop[DEFAULT_PRIO] = this;	// 先頭
-		m_apCur[DEFAULT_PRIO] = this;	// 最後尾
+		// 自身の情報アドレスを先頭に設定
+		m_apTop[DEFAULT_PRIO] = this;
 
-		m_apTop[DEFAULT_PRIO]->m_pPrev = NULL;
-		m_apTop[DEFAULT_PRIO]->m_pNext = NULL;
-		m_apCur[DEFAULT_PRIO]->m_pPrev = NULL;
-		m_apCur[DEFAULT_PRIO]->m_pNext = NULL;
+		// 自身の情報アドレスを最後尾に設定
+		m_apCur[DEFAULT_PRIO] = this;
+
+		// 前オブジェクトのクリア
+		m_pPrev = NULL;
+
+		// 次オブジェクトのクリア
+		m_pNext = NULL;
 	}
 
 	// 自身の情報をクリア
@@ -123,9 +63,6 @@ CObject::CObject()
 
 	// オブジェクトの総数を加算
 	m_nNumAll++;
-#endif
-
-#endif
 }
 
 //============================================================
@@ -133,45 +70,16 @@ CObject::CObject()
 //============================================================
 CObject::CObject(const LABEL label, const int nPriority)
 {
-#if 0
-	for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-	{ // オブジェクトの最大数分繰り返す
-
-		if (UNUSED(m_apObject[nPriority][nCntObject]))
-		{ // 使用されていない場合
-
-			// 自身の情報アドレスを設定
-			m_apObject[nPriority][nCntObject] = this;
-
-			// 自身の情報を設定
-			m_label		= label;		// オブジェクトラベル
-			m_nID		= nCntObject;	// インデックス
-			m_nPriority	= nPriority;	// 優先順位
-
-			// 自身の判定を設定
-			m_hrResult = S_OK;	// 成功にする
-
-			// オブジェクトの総数を加算
-			m_nNumAll++;
-
-			// 関数を抜ける
-			return;
-		}
-	}
-
-	// 自身の判定を設定
-	m_hrResult = E_FAIL;	// 失敗にする
-#else
 	if (USED(m_apCur[nPriority]))
 	{ // 最後尾が存在する場合
 
-		// 現在の最後尾のオブジェクトの次のオブジェクトを設定
+		// 現在の最後尾オブジェクトの次オブジェクトを自身に設定
 		m_apCur[nPriority]->m_pNext = this;
 
-		// 前のオブジェクトを設定
-		m_pPrev = m_apCur[nPriority];
+		// 前オブジェクトを設定
+		m_pPrev = m_apCur[nPriority];	// 現在の最後尾オブジェクト
 
-		// 次のオブジェクトをクリア
+		// 次オブジェクトをクリア
 		m_pNext = NULL;
 
 		// 自身の情報アドレスを最後尾に設定
@@ -180,14 +88,17 @@ CObject::CObject(const LABEL label, const int nPriority)
 	else
 	{ // 最後尾が存在しない場合
 
-		// 生成したオブジェクトのアドレスを設定
-		m_apTop[nPriority] = this;	// 先頭
-		m_apCur[nPriority] = this;	// 最後尾
+		// 自身の情報アドレスを先頭に設定
+		m_apTop[nPriority] = this;
 
-		m_apTop[nPriority]->m_pPrev = NULL;
-		m_apTop[nPriority]->m_pNext = NULL;
-		m_apCur[nPriority]->m_pPrev = NULL;
-		m_apCur[nPriority]->m_pNext = NULL;
+		// 自身の情報アドレスを最後尾に設定
+		m_apCur[nPriority] = this;
+
+		// 前オブジェクトのクリア
+		m_pPrev = NULL;
+
+		// 次オブジェクトのクリア
+		m_pNext = NULL;
 	}
 
 	// 自身の情報を設定
@@ -196,7 +107,6 @@ CObject::CObject(const LABEL label, const int nPriority)
 
 	// オブジェクトの総数を加算
 	m_nNumAll++;
-#endif
 }
 
 //============================================================
@@ -204,7 +114,8 @@ CObject::CObject(const LABEL label, const int nPriority)
 //============================================================
 CObject::~CObject()
 {
-
+	// オブジェクトの総数を減算
+	m_nNumAll--;
 }
 
 //============================================================
@@ -305,29 +216,6 @@ float CObject::GetRadius(void) const
 //============================================================
 void CObject::ReleaseAll(void)
 {
-#if 0
-	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
-	{ // 優先順位の総数分繰り返す
-
-		for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-		{ // オブジェクトの最大数分繰り返す
-
-			if (USED(m_apObject[nCntPri][nCntObject]))
-			{ // 使用されている場合
-
-				if (m_apObject[nCntPri][nCntObject]->GetLabel() != LABEL_NONE)
-				{ // オブジェクトラベルが設定されている場合
-
-					// オブジェクトの終了
-					m_apObject[nCntPri][nCntObject]->Uninit();
-				}
-			}
-		}
-	}
-
-	// 例外処理
-	if (m_nNumAll != 0) { assert(false); }	// 破棄の失敗
-#else
 	// ポインタを宣言
 	CObject *pObject;	// オブジェクト代入用
 
@@ -345,6 +233,25 @@ void CObject::ReleaseAll(void)
 
 				// ポインタを宣言
 				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
+
+				// TODO：オブジェクトの他者管理これで本当に大丈夫？
+				if (USED(pObjectNext))
+				{ // 次のオブジェクトが存在する場合
+
+					while (pObjectNext->m_label == LABEL_NONE)
+					{ // 次のオブジェクトのラベルが設定されていない場合繰り返す
+
+						// さらに次のオブジェクトへのポインタを指定
+						pObjectNext = pObjectNext->m_pNext;
+
+						if (UNUSED(pObjectNext))
+						{ // さらに次のオブジェクトが存在しない場合
+
+							// 処理を抜ける
+							break;
+						}
+					}
+				}
 
 				if (pObject->m_label != LABEL_NONE)
 				{ // オブジェクトラベルが設定されている場合
@@ -361,7 +268,6 @@ void CObject::ReleaseAll(void)
 
 	// 例外処理
 	if (m_nNumAll != 0) { assert(false); }	// 破棄の失敗
-#endif
 }
 
 //============================================================
@@ -369,29 +275,6 @@ void CObject::ReleaseAll(void)
 //============================================================
 void CObject::UpdateAll(void)
 {
-#if 0
-	// デバッグ表示
-	CManager::GetDebugProc()->Print("オブジェクト数：%d\n", m_nNumAll);
-
-	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
-	{ // 優先順位の総数分繰り返す
-
-		for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-		{ // オブジェクトの最大数分繰り返す
-
-			if (USED(m_apObject[nCntPri][nCntObject]))
-			{ // 使用されている場合
-
-				if (m_apObject[nCntPri][nCntObject]->GetLabel() != LABEL_NONE)
-				{ // オブジェクトラベルが設定されている場合
-
-					// オブジェクトの更新
-					m_apObject[nCntPri][nCntObject]->Update();
-				}
-			}
-		}
-	}
-#else
 	// ポインタを宣言
 	CObject *pObject;	// オブジェクト代入用
 
@@ -412,6 +295,25 @@ void CObject::UpdateAll(void)
 
 				// ポインタを宣言
 				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
+
+				// TODO：オブジェクトの他者管理これで本当に大丈夫？
+				if (USED(pObjectNext))
+				{ // 次のオブジェクトが存在する場合
+
+					while (pObjectNext->m_label == LABEL_NONE)
+					{ // 次のオブジェクトのラベルが設定されていない場合繰り返す
+
+						// さらに次のオブジェクトへのポインタを指定
+						pObjectNext = pObjectNext->m_pNext;
+
+						if (UNUSED(pObjectNext))
+						{ // さらに次のオブジェクトが存在しない場合
+
+							// 処理を抜ける
+							break;
+						}
+					}
+				}
 
 				if (pObject->m_label != LABEL_NONE)
 				{ // オブジェクトラベルが設定されている場合
@@ -425,7 +327,6 @@ void CObject::UpdateAll(void)
 			}
 		}
 	}
-#endif
 }
 
 //============================================================
@@ -433,26 +334,6 @@ void CObject::UpdateAll(void)
 //============================================================
 void CObject::DrawAll(void)
 {
-#if 0
-	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
-	{ // 優先順位の総数分繰り返す
-
-		for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-		{ // オブジェクトの最大数分繰り返す
-
-			if (USED(m_apObject[nCntPri][nCntObject]))
-			{ // 使用されている場合
-
-				if (m_apObject[nCntPri][nCntObject]->GetLabel() != LABEL_NONE)
-				{ // オブジェクトラベルが設定されている場合
-
-					// オブジェクトの描画
-					m_apObject[nCntPri][nCntObject]->Draw();
-				}
-			}
-		}
-	}
-#else
 	// ポインタを宣言
 	CObject *pObject;	// オブジェクト代入用
 
@@ -471,6 +352,25 @@ void CObject::DrawAll(void)
 				// ポインタを宣言
 				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
 
+				// TODO：オブジェクトの他者管理これで本当に大丈夫？
+				if (USED(pObjectNext))
+				{ // 次のオブジェクトが存在する場合
+
+					while (pObjectNext->m_label == LABEL_NONE)
+					{ // 次のオブジェクトのラベルが設定されていない場合繰り返す
+
+						// さらに次のオブジェクトへのポインタを指定
+						pObjectNext = pObjectNext->m_pNext;
+
+						if (UNUSED(pObjectNext))
+						{ // さらに次のオブジェクトが存在しない場合
+
+							// 処理を抜ける
+							break;
+						}
+					}
+				}
+
 				if (pObject->m_label != LABEL_NONE)
 				{ // オブジェクトラベルが設定されている場合
 
@@ -483,22 +383,6 @@ void CObject::DrawAll(void)
 			}
 		}
 	}
-#endif
-}
-
-#if 0
-//============================================================
-//	オブジェクト取得処理
-//============================================================
-CObject *CObject::GetObject(const int nPriority, const int nID)
-{
-	if (nPriority < MAX_PRIO && nID < MAX_OBJECT)
-	{ // 引数の優先順位・インデックスが使用可能な場合
-
-		// 引数の優先順位・インデックスのオブジェクトを返す
-		return m_apObject[nPriority][nID];
-	}
-	else { assert(false); return NULL; }	// 範囲外
 }
 
 //============================================================
@@ -506,163 +390,6 @@ CObject *CObject::GetObject(const int nPriority, const int nID)
 //============================================================
 bool CObject::CheckUse(const CObject *pObject)
 {
-	if (USED(pObject))
-	{ // ポインタが使用中の場合
-
-		for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
-		{ // 優先順位の総数分繰り返す
-
-			for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-			{ // オブジェクトの総数分繰り返す
-
-				if (CObject::GetObject(nCntPri, nCntObject) == pObject)
-				{ // 同アドレスの場合
-
-					// 真を返す
-					return true;	// TODO：同じアドレスが確保されているだけの可能性がある
-				}
-			}
-		}
-
-		// 偽を返す
-		return false;
-	}
-	else
-	{ // ポインタが非使用中の場合
-
-		// 偽を返す
-		return false;
-	}
-}
-
-//============================================================
-//	失敗判定の取得処理
-//============================================================
-HRESULT CObject::GetResult(void) const
-{
-	// 失敗判定を返す
-	return m_hrResult;
-}
-
-//============================================================
-//	インデックス取得処理
-//============================================================
-int CObject::GetID(void)
-{
-	// インデックスを返す
-	return m_nID;
-}
-
-//============================================================
-//	優先順位取得処理
-//============================================================
-int CObject::GetPriority(void)
-{
-	// 優先順位を返す
-	return m_nPriority;
-}
-
-//============================================================
-//	ラベルの設定処理
-//============================================================
-void CObject::SetLabel(const LABEL label)
-{
-	if (label < LABEL_MAX)
-	{ // 引数のラベルが使用可能な場合
-
-		// 引数のラベルを設定
-		m_label = label;
-	}
-	else { assert(false); }	// 範囲外
-}
-
-//============================================================
-//	ラベルの取得処理
-//============================================================
-CObject::LABEL CObject::GetLabel(void) const
-{
-	// ラベルを返す
-	return m_label;
-}
-
-//============================================================
-//	優先順位の設定処理
-//============================================================
-void CObject::SetPriority(const int nPriority)
-{
-	if (nPriority < MAX_PRIO)
-	{ // 引数の優先順位が使用可能な場合
-
-		// 引数の優先順位を設定
-		m_nPriority = nPriority;
-	}
-	else { assert(false); }	// 範囲外
-}
-
-//============================================================
-//	優先順位の取得処理
-//============================================================
-int CObject::GetPriority(void) const
-{
-	// 優先順位を返す
-	return m_nPriority;
-}
-
-//============================================================
-//	破棄処理
-//============================================================
-void CObject::Release(void)
-{
-	// 変数を宣言
-	int nPriority = m_nPriority;	// 自身の優先順位
-	int nID = m_nID;				// 自身のインデックス
-
-	if (USED(m_apObject[nPriority][nID]))
-	{ // 使用されている場合
-
-		// メモリ開放
-		delete m_apObject[nPriority][nID];
-		m_apObject[nPriority][nID] = NULL;
-
-		// オブジェクトの総数を減算
-		m_nNumAll--;
-	}
-}
-#else
-//============================================================
-//	使用確認処理
-//============================================================
-bool CObject::CheckUse(const CObject *pObject)
-{
-#if 0
-	if (USED(pObject))
-	{ // ポインタが使用中の場合
-
-		for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
-		{ // 優先順位の総数分繰り返す
-
-			for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-			{ // オブジェクトの総数分繰り返す
-
-				if (CObject::GetObject(nCntPri, nCntObject) == pObject)
-				{ // 同アドレスの場合
-
-					// 真を返す
-					return true;	// TODO：同じアドレスが確保されているだけの可能性がある
-				}
-			}
-		}
-
-		// 偽を返す
-		return false;
-	}
-	else
-	{ // ポインタが非使用中の場合
-
-		// 偽を返す
-		return false;
-	}
-#else
 	// ポインタを宣言
 	CObject *pObjCheck;	// オブジェクト代入用
 
@@ -706,7 +433,24 @@ bool CObject::CheckUse(const CObject *pObject)
 		// 偽を返す
 		return false;
 	}
-#endif
+}
+
+//============================================================
+//	先頭オブジェクト取得処理
+//============================================================
+CObject *CObject::GetTop(const int nPriority)
+{
+	// 引数の優先順位の先頭オブジェクトを返す
+	return m_apTop[nPriority];
+}
+
+//============================================================
+//	最後尾オブジェクト取得処理
+//============================================================
+CObject *CObject::GetCur(const int nPriority)
+{
+	// 引数の優先順位の最後尾オブジェクトを返す
+	return m_apCur[nPriority];
 }
 
 //============================================================
@@ -742,44 +486,66 @@ int CObject::GetPriority(void) const
 }
 
 //============================================================
+//	オブジェクト取得処理
+//============================================================
+CObject *CObject::GetObject(void)
+{
+	// 自身のポインタを返す
+	return this;
+}
+
+//============================================================
+//	前オブジェクト取得処理
+//============================================================
+CObject *CObject::GetPrev(void) const
+{
+	// 前オブジェクトを返す
+	return m_pPrev;
+}
+
+//============================================================
+//	次オブジェクト取得処理
+//============================================================
+CObject *CObject::GetNext(void) const
+{
+	// 次オブジェクトを返す
+	return m_pNext;
+}
+
+//============================================================
 //	破棄処理
 //============================================================
 void CObject::Release(void)
 {
-#if 0
-	// 変数を宣言
-	int nPriority = m_nPriority;	// 自身の優先順位
-	int nID = m_nID;				// 自身のインデックス
-
-	if (USED(m_apObject[nPriority][nID]))
-	{ // 使用されている場合
-
-		// メモリ開放
-		delete m_apObject[nPriority][nID];
-		m_apObject[nPriority][nID] = NULL;
-
-		// オブジェクトの総数を減算
-		m_nNumAll--;
-	}
-#else
-	// アドレスの入れ替え
+	// 前のオブジェクトをつなぎなおす
 	if (USED(m_pNext))
-	{
+	{ // 次のオブジェクトが存在する場合
+
+		// 前のオブジェクトを変更
 		m_pNext->m_pPrev = m_pPrev;
 	}
+
+	// 次のオブジェクトをつなぎなおす
 	if (USED(m_pPrev))
-	{
+	{ // 前のオブジェクトが存在する場合
+
+		// 次のオブジェクトを変更
 		m_pPrev->m_pNext = m_pNext;
 	}
 
-	// TODO：TOP・CURの入れ替え
+	// 先頭オブジェクトの変更
 	if (m_apTop[m_nPriority] == this)
-	{
+	{ // 先頭オブジェクトが破棄するオブジェクトだった場合
+
+		// 次のオブジェクトを先頭に指定
 		m_apTop[m_nPriority] = m_pNext;
 	}
 
+	// 最後尾オブジェクトの変更
 	if (m_apCur[m_nPriority] == this)
-	{
+	{ // 最後尾オブジェクトが破棄するオブジェクトだった場合
+
+		// 前のオブジェクトを最後尾に指定
 		m_apCur[m_nPriority] = m_pPrev;
 	}
 
@@ -788,10 +554,5 @@ void CObject::Release(void)
 
 		// メモリ開放
 		delete this;
-
-		// オブジェクトの総数を減算
-		m_nNumAll--;
 	}
-#endif
 }
-#endif
