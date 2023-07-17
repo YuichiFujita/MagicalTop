@@ -317,38 +317,50 @@ bool CMagic::Collision(CObject *pObject)
 //============================================================
 bool CMagic::CollisionEnemy(void)
 {
-	// TODO：当たり判定
-#if 0
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
 
-		for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-		{ // オブジェクトの総数分繰り返す
+		// ポインタを宣言
+		CObject *pObjectTop = CObject::GetTop(nCntPri);	// 先頭オブジェクト
+
+		if (USED(pObjectTop))
+		{ // 先頭が存在する場合
 
 			// ポインタを宣言
-			CObject *pObject = CObject::GetObject(nCntPri, nCntObject);	// オブジェクト
+			CObject *pObjCheck = pObjectTop;	// オブジェクト確認用
 
-			if (UNUSED(pObject)
-			||  pObject->GetLabel() != CObject::LABEL_ENEMY)
-			{ // オブジェクトが非使用中・ラベルが敵ではない場合
+			while (USED(pObjCheck))
+			{ // オブジェクトが使用されている場合繰り返す
 
-				// 次の繰り返しに移行
-				continue;
-			}
+				// ポインタを宣言
+				CObject *pObjectNext = pObjCheck->GetNext();	// 次オブジェクト
 
-			// 魔法判定
-			if (Collision(pObject))
-			{ // 魔法に当たっていた場合
+				if (pObjCheck->GetLabel() != CObject::LABEL_ENEMY)
+				{ // オブジェクトラベルが敵ではない場合
 
-				// 敵のヒット処理
-				pObject->Hit(m_status.nDamage);
+					// 次のオブジェクトへのポインタを代入
+					pObjCheck = pObjectNext;
 
-				// 当たった判定を返す
-				return true;
+					// 次の繰り返しに移行
+					continue;
+				}
+
+				// 魔法判定
+				if (Collision(pObjCheck))
+				{ // 魔法に当たっていた場合
+
+					// 敵のヒット処理
+					pObjCheck->Hit(m_status.nDamage);
+
+					// 当たった判定を返す
+					return true;
+				}
+
+				// 次のオブジェクトへのポインタを代入
+				pObjCheck = pObjectNext;
 			}
 		}
 	}
-#endif
 
 	// 当たっていない判定を返す
 	return false;

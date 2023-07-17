@@ -458,7 +458,7 @@ void CEnemy::Attack(const D3DXVECTOR3& rTarget)
 		// 弾の移動方向を求める
 		vecBull = rTarget - posBull;
 		D3DXVec3Normalize(&vecBull, &vecBull);		// 移動方向を正規化
-		useful::LimitNum(vecBull.y, -0.1f, 0.1f);	// 移動方向 yを制限	// TODO：定数マクロ化
+		useful::LimitNum(vecBull.y, -0.1f, 0.1f);	// 移動方向 yを制限	// TODO：定数マクロ化	// TODO：内側はいられたとき売っちゃうの防止
 
 		// 弾オブジェクトの生成
 		CBullet::Create

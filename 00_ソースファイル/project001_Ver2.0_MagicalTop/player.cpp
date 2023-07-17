@@ -678,36 +678,48 @@ void CPlayer::CollisionTarget(D3DXVECTOR3& rPos)
 //============================================================
 void CPlayer::CollisionEnemy(D3DXVECTOR3& rPos)
 {
-	// TODO：当たり判定
-#if 0
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
 
-		for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-		{ // オブジェクトの総数分繰り返す
+		// ポインタを宣言
+		CObject *pObjectTop = CObject::GetTop(nCntPri);	// 先頭オブジェクト
+
+		if (USED(pObjectTop))
+		{ // 先頭が存在する場合
 
 			// ポインタを宣言
-			CObject *pObject = CObject::GetObject(nCntPri, nCntObject);	// オブジェクト
+			CObject *pObjCheck = pObjectTop;	// オブジェクト確認用
 
-			if (UNUSED(pObject)
-			||  pObject->GetLabel() != CObject::LABEL_ENEMY)
-			{ // オブジェクトが非使用中・ラベルが敵ではない場合
+			while (USED(pObjCheck))
+			{ // オブジェクトが使用されている場合繰り返す
 
-				// 次の繰り返しに移行
-				continue;
+				// ポインタを宣言
+				CObject *pObjectNext = pObjCheck->GetNext();	// 次オブジェクト
+
+				if (pObjCheck->GetLabel() != CObject::LABEL_ENEMY)
+				{ // オブジェクトラベルが敵ではない場合
+
+					// 次のオブジェクトへのポインタを代入
+					pObjCheck = pObjectNext;
+
+					// 次の繰り返しに移行
+					continue;
+				}
+
+				// 敵との衝突判定
+				collision::CirclePillar
+				( // 引数
+					rPos,						// 判定位置
+					pObjCheck->GetPosition(),	// 判定目標位置
+					PLAY_RADIUS,				// 判定半径
+					pObjCheck->GetRadius()		// 判定目標半径
+				);
+
+				// 次のオブジェクトへのポインタを代入
+				pObjCheck = pObjectNext;
 			}
-
-			// ターゲットとの衝突判定
-			collision::CirclePillar
-			( // 引数
-				rPos,					// 判定位置
-				pObject->GetPosition(),	// 判定目標位置
-				PLAY_RADIUS,			// 判定半径
-				pObject->GetRadius()	// 判定目標半径
-			);
 		}
 	}
-#endif
 }
 
 //============================================================

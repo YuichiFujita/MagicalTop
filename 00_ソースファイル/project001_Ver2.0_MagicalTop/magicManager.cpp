@@ -82,69 +82,81 @@ void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos)
 	// 変数配列を宣言
 	LockInfo aLockData[MAX_LOCK] = {};	// ロックオン情報
 
-	// TODO：当たり判定
-#if 0
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
 
-		for (int nCntObject = 0; nCntObject < MAX_OBJECT; nCntObject++)
-		{ // オブジェクトの総数分繰り返す
+		// ポインタを宣言
+		CObject *pObjectTop = CObject::GetTop(nCntPri);	// 先頭オブジェクト
+
+		if (USED(pObjectTop))
+		{ // 先頭が存在する場合
 
 			// 変数を宣言
-			bool bHit = false;		// 判定結果
+			bool  bHit    = false;	// 判定結果
 			float fLength = 0.0f;	// 敵との距離
 
 			// ポインタを宣言
-			CObject *pObject = CObject::GetObject(nCntPri, nCntObject);	// オブジェクト
+			CObject *pObjCheck = pObjectTop;	// オブジェクト確認用
 
-			if (UNUSED(pObject)
-			||  pObject->GetLabel() != CObject::LABEL_ENEMY)
-			{ // オブジェクトが非使用中・ラベルが敵ではない場合
+			while (USED(pObjCheck))
+			{ // オブジェクトが使用されている場合繰り返す
 
-				// 次の繰り返しに移行
-				continue;
-			}
+				// ポインタを宣言
+				CObject *pObjectNext = pObjCheck->GetNext();	// 次オブジェクト
 
-			// 視界内判定
-			bHit = collision::Circle2D
-			( // 引数
-				rPos,					// 判定位置
-				pObject->GetPosition(),	// 判定目標位置
-				status.fViewRadius,		// 判定半径
-				pObject->GetRadius(),	// 判定目標半径
-				&fLength				// 判定目標との距離
-			);
+				if (pObjCheck->GetLabel() != CObject::LABEL_ENEMY)
+				{ // オブジェクトラベルが敵ではない場合
 
-			if (bHit)
-			{ // 視界内の場合
+					// 次のオブジェクトへのポインタを代入
+					pObjCheck = pObjectNext;
 
-				if (nCurrentLock < status.nLock)
-				{ // 現在の魔法の最大ロックオン数より少ない場合
+					// 次の繰り返しに移行
+					continue;
+				}
 
-					// 現在のロックオン数を加算
-					nCurrentLock++;
+				// 視界内判定
+				bHit = collision::Circle2D
+				( // 引数
+					rPos,						// 判定位置
+					pObjCheck->GetPosition(),	// 判定目標位置
+					status.fViewRadius,			// 判定半径
+					pObjCheck->GetRadius(),		// 判定目標半径
+					&fLength					// 判定目標との距離
+				);
 
-					// 情報を設定
-					aLockData[nCurrentLock - 1].pObject = pObject;	// ロックオンしたオブジェクト
-					aLockData[nCurrentLock - 1].fLength = fLength;	// ロックオンオブジェクトとの距離
+				if (bHit)
+				{ // 視界内の場合
 
-					if (nCurrentLock >= status.nLock)
-					{ // ロックオンの最大数に到達した場合
+					if (nCurrentLock < status.nLock)
+					{ // 現在の魔法の最大ロックオン数より少ない場合
+
+						// 現在のロックオン数を加算
+						nCurrentLock++;
+
+						// 情報を設定
+						aLockData[nCurrentLock - 1].pObject = pObjCheck;	// ロックオンしたオブジェクト
+						aLockData[nCurrentLock - 1].fLength = fLength;		// ロックオンオブジェクトとの距離
+
+						if (nCurrentLock >= status.nLock)
+						{ // ロックオンの最大数に到達した場合
+
+							// ロックオンのソート
+							SortLockOnMagic(&aLockData[0], nCurrentLock, pObjCheck, fLength);
+						}
+					}
+					else
+					{ // ロックオン数が最大の場合
 
 						// ロックオンのソート
-						SortLockOnMagic(&aLockData[0], nCurrentLock, pObject, fLength);
+						SortLockOnMagic(&aLockData[0], nCurrentLock, pObjCheck, fLength);
 					}
 				}
-				else
-				{ // ロックオン数が最大の場合
 
-					// ロックオンのソート
-					SortLockOnMagic(&aLockData[0], nCurrentLock, pObject, fLength);
-				}
+				// 次のオブジェクトへのポインタを代入
+				pObjCheck = pObjectNext;
 			}
 		}
 	}
-#endif
 
 	// 前回のロックオンの削除
 	for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)
