@@ -31,6 +31,14 @@ public:
 		ORIGIN_MAX,			// この列挙型の総数
 	}ORIGIN;
 
+	// 回転列挙
+	typedef enum
+	{
+		ROTATE_NORMAL = 0,	// 通常回転
+		ROTATE_LATERAL,		// 横回転
+		ROTATE_MAX,			// この列挙型の総数
+	}ROTATE;
+
 	// コンストラクタ
 	CObjectBillboard();
 	CObjectBillboard(const CObject::LABEL label, const int nPriority = DEFAULT_PRIO);
@@ -51,7 +59,8 @@ public:
 		const D3DXVECTOR3& rSize,	// 大きさ
 		const D3DXVECTOR3& rRot = VEC3_ZERO,	// 向き
 		const D3DXCOLOR& rCol = XCOL_WHITE,		// 色
-		const ORIGIN origin = ORIGIN_CENTER		// 原点
+		const ORIGIN origin = ORIGIN_CENTER,	// 原点
+		const ROTATE rotate = ROTATE_NORMAL		// 回転
 	);
 
 	// メンバ関数
@@ -61,11 +70,13 @@ public:
 	void SetScaling(const D3DXVECTOR3& rSize);	// 大きさ設定
 	void SetColor(const D3DXCOLOR& rCol);		// 色設定
 	void SetOrigin(const ORIGIN origin);		// 原点設定
+	void SetRotate(const ROTATE rotate);		// 回転設定
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
 	D3DXVECTOR3 GetScaling(void) const;			// 大きさ取得
 	D3DXCOLOR GetColor(void) const;				// 色取得
 	ORIGIN GetOrigin(void) const;				// 原点取得
+	ROTATE GetRotate(void) const;				// 回転取得
 
 protected:
 	// メンバ関数
@@ -80,6 +91,7 @@ private:
 	D3DXVECTOR3	m_size;		// 大きさ
 	D3DXCOLOR	m_col;		// 色
 	ORIGIN		m_origin;	// 原点
+	ROTATE		m_rotate;	// 回転
 	float m_fAngle;			// 対角線の角度
 	float m_fLength;		// 対角線の長さ
 	int m_nTextureID;		// テクスチャインデックス

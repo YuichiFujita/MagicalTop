@@ -164,6 +164,7 @@
     <ClCompile Include="effect3D.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="field.cpp" />
+    <ClCompile Include="flower.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="lifeGauge3D.cpp" />
     <ClCompile Include="light.cpp" />
@@ -222,6 +223,7 @@
     <ClInclude Include="effect3D.h" />
     <ClInclude Include="enemy.h" />
     <ClInclude Include="field.h" />
+    <ClInclude Include="flower.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="lifeGauge3D.h" />
     <ClInclude Include="light.h" />

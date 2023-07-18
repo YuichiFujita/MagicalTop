@@ -33,6 +33,9 @@
 #include "scenery.h"
 #include "sky.h"
 
+// TODO
+#include "flower.h"
+
 #ifdef _DEBUG	// デバッグ処理
 
 #include "debug.h"
@@ -197,6 +200,9 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		assert(false);
 		return E_FAIL;
 	}
+
+	// TODO
+	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(200.0f, 400.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
 
 	// 海オブジェクトの生成
 	CSea::Create();

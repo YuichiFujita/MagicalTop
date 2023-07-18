@@ -29,11 +29,12 @@ CObjectBillboard::CObjectBillboard()
 	// メンバ変数をクリア
 	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pos     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
-	m_rot     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
-	m_size    = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
-	m_col     = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
+	m_pos     = VEC3_ZERO;		// 位置
+	m_rot     = VEC3_ZERO;		// 向き
+	m_size    = VEC3_ZERO;		// 大きさ
+	m_col     = XCOL_WHITE;		// 色
 	m_origin  = ORIGIN_CENTER;	// 原点
+	m_rotate  = ROTATE_NORMAL;	// 回転
 	m_fAngle  = 0.0f;	// 対角線の角度
 	m_fLength = 0.0f;	// 対角線の長さ
 	m_nTextureID = 0;	// テクスチャインデックス
@@ -47,11 +48,12 @@ CObjectBillboard::CObjectBillboard(const CObject::LABEL label, const int nPriori
 	// メンバ変数をクリア
 	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pos     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
-	m_rot     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
-	m_size    = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
-	m_col     = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
+	m_pos     = VEC3_ZERO;		// 位置
+	m_rot     = VEC3_ZERO;		// 向き
+	m_size    = VEC3_ZERO;		// 大きさ
+	m_col     = XCOL_WHITE;		// 色
 	m_origin  = ORIGIN_CENTER;	// 原点
+	m_rotate  = ROTATE_NORMAL;	// 回転
 	m_fAngle  = 0.0f;	// 対角線の角度
 	m_fLength = 0.0f;	// 対角線の長さ
 	m_nTextureID = 0;	// テクスチャインデックス
@@ -76,11 +78,12 @@ HRESULT CObjectBillboard::Init(void)
 	// メンバ変数を初期化
 	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pos     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
-	m_rot     = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
-	m_size    = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
-	m_col     = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
+	m_pos     = VEC3_ZERO;		// 位置
+	m_rot     = VEC3_ZERO;		// 向き
+	m_size    = VEC3_ZERO;		// 大きさ
+	m_col     = XCOL_WHITE;		// 色
 	m_origin  = ORIGIN_CENTER;	// 原点
+	m_rotate  = ROTATE_NORMAL;	// 回転
 	m_fAngle  = 0.0f;	// 対角線の角度
 	m_fLength = 0.0f;	// 対角線の長さ
 	m_nTextureID = -1;	// テクスチャインデックス
@@ -169,9 +172,32 @@ void CObjectBillboard::Draw(void)
 
 	// ポリゴンをカメラに対して正面に向ける
 	D3DXMatrixInverse(&m_mtxWorld, NULL, &mtxView);	// 逆行列を求める
+
+	// マトリックスのワールド座標を原点にする
 	m_mtxWorld._41 = 0.0f;
 	m_mtxWorld._42 = 0.0f;
 	m_mtxWorld._43 = 0.0f;
+
+	switch (m_rotate)
+	{ // 回転ごとの処理
+	case ROTATE_NORMAL:		// 通常回転
+
+		// 無し
+
+		break;
+
+	case ROTATE_LATERAL:	// 横回転
+
+		m_mtxWorld._21 = 0.0f;
+		m_mtxWorld._23 = 0.0f;
+		m_mtxWorld._24 = 0.0f;
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
 
 	// 位置を反映
 	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
@@ -209,7 +235,8 @@ CObjectBillboard *CObjectBillboard::Create
 	const D3DXVECTOR3& rSize,	// 大きさ
 	const D3DXVECTOR3& rRot,	// 向き
 	const D3DXCOLOR& rCol,		// 色
-	const ORIGIN origin			// 原点
+	const ORIGIN origin,		// 原点
+	const ROTATE rotate			// 回転
 )
 {
 	// ポインタを宣言
@@ -252,6 +279,9 @@ CObjectBillboard *CObjectBillboard::Create
 
 		// 色を設定
 		pObjectBillboard->SetColor(rCol);
+
+		// 回転を設定
+		pObjectBillboard->SetRotate(rotate);
 
 		// 確保したアドレスを返す
 		return pObjectBillboard;
@@ -388,6 +418,15 @@ void CObjectBillboard::SetOrigin(const ORIGIN origin)
 }
 
 //============================================================
+//	回転の設定処理
+//============================================================
+void CObjectBillboard::SetRotate(const ROTATE rotate)
+{
+	// 引数の回転を設定
+	m_rotate = rotate;
+}
+
+//============================================================
 //	位置取得処理
 //============================================================
 D3DXVECTOR3 CObjectBillboard::GetPosition(void) const
@@ -430,6 +469,15 @@ CObjectBillboard::ORIGIN CObjectBillboard::GetOrigin(void) const
 {
 	// 原点を返す
 	return m_origin;
+}
+
+//============================================================
+//	回転取得処理
+//============================================================
+CObjectBillboard::ROTATE CObjectBillboard::GetRotate(void) const
+{
+	// 回転を返す
+	return m_rotate;
 }
 
 //============================================================

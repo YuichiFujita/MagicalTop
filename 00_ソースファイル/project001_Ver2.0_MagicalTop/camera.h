@@ -50,7 +50,6 @@ public:
 	void Update(void);	// 更新
 	void SetCamera(void);		// カメラ設定
 	void SetDestCamera(void);	// カメラ目標位置設定
-
 	void SetRotation(const D3DXVECTOR3& rRot);		// 現在向き設定
 	void SetDestRotation(const D3DXVECTOR3& rRot);	// 目標向き設定
 	Camera GetCamera(void);							// カメラ取得

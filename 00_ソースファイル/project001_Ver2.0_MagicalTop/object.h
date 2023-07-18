@@ -52,6 +52,7 @@ public:
 		LABEL_MAGIC,		// 魔法
 		LABEL_LOCK,			// ロックオン
 		LABEL_BULLET,		// 弾
+		LABEL_FLOWER,		// マナフラワー
 		LABEL_SHADOW,		// 影
 		LABEL_FIELD,		// 地面
 		LABEL_WALL,			// 壁
