@@ -120,6 +120,12 @@ HRESULT CLifeGauge3D::Init(void)
 
 		// テクスチャを割当
 		m_apBilboard[nCntLife]->BindTexture(nTextureID);
+
+		// Zテストを設定
+		m_apBilboard[nCntLife]->SetFunc(D3DCMP_LESSEQUAL);
+
+		// Zバッファの使用状況を設定
+		m_apBilboard[nCntLife]->SetZEnable(true);
 	}
 
 	// 成功を返す

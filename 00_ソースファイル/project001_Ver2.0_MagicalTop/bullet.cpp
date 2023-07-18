@@ -151,8 +151,21 @@ void CBullet::Update(void)
 //============================================================
 void CBullet::Draw(void)
 {
+	// ポインタを宣言
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
+
+	// αテストを有効にする
+	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);		// αテストの有効 / 無効の設定
+	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);	// αテストの設定
+	pDevice->SetRenderState(D3DRS_ALPHAREF, 160);				// αテストの参照値設定
+
 	// オブジェクトビルボードの描画
 	CObjectBillboard::Draw();
+
+	// αテストを無効にする
+	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);		// αテストの有効 / 無効の設定
+	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);	// αテストの設定
+	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);					// αテストの参照値設定
 }
 
 //============================================================
@@ -253,6 +266,12 @@ CBullet *CBullet::Create
 
 		// 寿命の設定
 		pBullet->SetLife(nLife);
+
+		// Zテストを設定
+		pBullet->SetFunc(D3DCMP_LESSEQUAL);
+
+		// Zバッファの使用状況を設定
+		pBullet->SetZEnable(true);
 
 		// 確保したアドレスを返す
 		return pBullet;

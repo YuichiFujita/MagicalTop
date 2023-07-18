@@ -60,7 +60,9 @@ public:
 		const D3DXVECTOR3& rRot = VEC3_ZERO,	// 向き
 		const D3DXCOLOR& rCol = XCOL_WHITE,		// 色
 		const ORIGIN origin = ORIGIN_CENTER,	// 原点
-		const ROTATE rotate = ROTATE_NORMAL		// 回転
+		const ROTATE rotate = ROTATE_NORMAL,	// 回転
+		const D3DCMPFUNC func = D3DCMP_ALWAYS,	// Zテスト設定
+		const bool bZEnable = false				// Zバッファの使用状況
 	);
 
 	// メンバ関数
@@ -71,12 +73,16 @@ public:
 	void SetColor(const D3DXCOLOR& rCol);		// 色設定
 	void SetOrigin(const ORIGIN origin);		// 原点設定
 	void SetRotate(const ROTATE rotate);		// 回転設定
+	void SetFunc(const D3DCMPFUNC func);		// Zテスト設定
+	void SetZEnable(const bool bEnable);		// Zバッファの使用状況設定
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
 	D3DXVECTOR3 GetScaling(void) const;			// 大きさ取得
 	D3DXCOLOR GetColor(void) const;				// 色取得
 	ORIGIN GetOrigin(void) const;				// 原点取得
 	ROTATE GetRotate(void) const;				// 回転取得
+	D3DCMPFUNC GetFunc(void) const;				// Zテスト取得
+	bool GetZEnable(void) const;				// Zバッファの使用状況取得
 
 protected:
 	// メンバ関数
@@ -92,6 +98,8 @@ private:
 	D3DXCOLOR	m_col;		// 色
 	ORIGIN		m_origin;	// 原点
 	ROTATE		m_rotate;	// 回転
+	D3DCMPFUNC	m_func;		// Zテスト設定
+	bool m_bZEnable;		// Zバッファの使用状況
 	float m_fAngle;			// 対角線の角度
 	float m_fLength;		// 対角線の長さ
 	int m_nTextureID;		// テクスチャインデックス

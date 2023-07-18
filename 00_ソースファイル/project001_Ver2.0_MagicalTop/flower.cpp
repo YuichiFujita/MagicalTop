@@ -13,7 +13,6 @@
 #include "texture.h"
 
 #include "collision.h"
-#include "target.h"
 #include "player.h"
 #include "field.h"
 
@@ -87,6 +86,9 @@ void CFlower::Uninit(void)
 //============================================================
 void CFlower::Update(void)
 {
+	// 変数を宣言
+	D3DXVECTOR3 pos = GetPosition();	// 位置
+
 #if 0
 	// プレイヤーとの当たり判定
 	if (CollisionPlayer())
@@ -100,6 +102,12 @@ void CFlower::Update(void)
 	}
 #endif
 
+	// 位置を求める
+	pos.y = CManager::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
+
+	// 位置を更新
+	SetPosition(pos);
+
 	// オブジェクトビルボードの更新
 	CObjectBillboard::Update();
 }
@@ -109,8 +117,21 @@ void CFlower::Update(void)
 //============================================================
 void CFlower::Draw(void)
 {
+	// ポインタを宣言
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
+
+	// αテストを有効にする
+	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);		// αテストの有効 / 無効の設定
+	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);	// αテストの設定
+	pDevice->SetRenderState(D3DRS_ALPHAREF, 160);				// αテストの参照値設定
+
 	// オブジェクトビルボードの描画
 	CObjectBillboard::Draw();
+
+	// αテストを無効にする
+	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);		// αテストの有効 / 無効の設定
+	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);	// αテストの設定
+	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);					// αテストの参照値設定
 }
 
 //============================================================
@@ -174,6 +195,12 @@ CFlower *CFlower::Create
 
 		// 回転を設定
 		pFlower->SetRotate(ROTATE_LATERAL);
+
+		// Zテストを設定
+		pFlower->SetFunc(D3DCMP_LESSEQUAL);
+
+		// Zバッファの使用状況を設定
+		pFlower->SetZEnable(true);
 
 		// 確保したアドレスを返す
 		return pFlower;

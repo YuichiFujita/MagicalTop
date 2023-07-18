@@ -29,14 +29,16 @@ CObjectBillboard::CObjectBillboard()
 	// メンバ変数をクリア
 	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pos     = VEC3_ZERO;		// 位置
-	m_rot     = VEC3_ZERO;		// 向き
-	m_size    = VEC3_ZERO;		// 大きさ
-	m_col     = XCOL_WHITE;		// 色
-	m_origin  = ORIGIN_CENTER;	// 原点
-	m_rotate  = ROTATE_NORMAL;	// 回転
-	m_fAngle  = 0.0f;	// 対角線の角度
-	m_fLength = 0.0f;	// 対角線の長さ
+	m_pos      = VEC3_ZERO;		// 位置
+	m_rot      = VEC3_ZERO;		// 向き
+	m_size     = VEC3_ZERO;		// 大きさ
+	m_col      = XCOL_WHITE;	// 色
+	m_origin   = ORIGIN_CENTER;	// 原点
+	m_rotate   = ROTATE_NORMAL;	// 回転
+	m_func     = D3DCMP_ALWAYS;	// Zテスト設定
+	m_bZEnable = false;	// Zバッファの使用状況
+	m_fAngle   = 0.0f;	// 対角線の角度
+	m_fLength  = 0.0f;	// 対角線の長さ
 	m_nTextureID = 0;	// テクスチャインデックス
 }
 
@@ -48,14 +50,16 @@ CObjectBillboard::CObjectBillboard(const CObject::LABEL label, const int nPriori
 	// メンバ変数をクリア
 	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pos     = VEC3_ZERO;		// 位置
-	m_rot     = VEC3_ZERO;		// 向き
-	m_size    = VEC3_ZERO;		// 大きさ
-	m_col     = XCOL_WHITE;		// 色
-	m_origin  = ORIGIN_CENTER;	// 原点
-	m_rotate  = ROTATE_NORMAL;	// 回転
-	m_fAngle  = 0.0f;	// 対角線の角度
-	m_fLength = 0.0f;	// 対角線の長さ
+	m_pos      = VEC3_ZERO;		// 位置
+	m_rot      = VEC3_ZERO;		// 向き
+	m_size     = VEC3_ZERO;		// 大きさ
+	m_col      = XCOL_WHITE;	// 色
+	m_origin   = ORIGIN_CENTER;	// 原点
+	m_rotate   = ROTATE_NORMAL;	// 回転
+	m_func     = D3DCMP_ALWAYS;	// Zテスト設定
+	m_bZEnable = false;	// Zバッファの使用状況
+	m_fAngle   = 0.0f;	// 対角線の角度
+	m_fLength  = 0.0f;	// 対角線の長さ
 	m_nTextureID = 0;	// テクスチャインデックス
 }
 
@@ -78,14 +82,16 @@ HRESULT CObjectBillboard::Init(void)
 	// メンバ変数を初期化
 	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pos     = VEC3_ZERO;		// 位置
-	m_rot     = VEC3_ZERO;		// 向き
-	m_size    = VEC3_ZERO;		// 大きさ
-	m_col     = XCOL_WHITE;		// 色
-	m_origin  = ORIGIN_CENTER;	// 原点
-	m_rotate  = ROTATE_NORMAL;	// 回転
-	m_fAngle  = 0.0f;	// 対角線の角度
-	m_fLength = 0.0f;	// 対角線の長さ
+	m_pos      = VEC3_ZERO;		// 位置
+	m_rot      = VEC3_ZERO;		// 向き
+	m_size     = VEC3_ZERO;		// 大きさ
+	m_col      = XCOL_WHITE;	// 色
+	m_origin   = ORIGIN_CENTER;	// 原点
+	m_rotate   = ROTATE_NORMAL;	// 回転
+	m_func     = D3DCMP_ALWAYS;	// Zテスト設定
+	m_bZEnable = false;	// Zバッファの使用状況
+	m_fAngle   = 0.0f;	// 対角線の角度
+	m_fLength  = 0.0f;	// 対角線の長さ
 	m_nTextureID = -1;	// テクスチャインデックス
 
 	if (UNUSED(m_pVtxBuff))
@@ -161,8 +167,8 @@ void CObjectBillboard::Draw(void)
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
 	// Zテストを無効にする
-	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);	// Zテストの設定
-	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);		// Zバッファ更新の有効 / 無効の設定
+	pDevice->SetRenderState(D3DRS_ZFUNC, m_func);				// Zテストの設定
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, m_bZEnable);	// Zバッファ更新の有効 / 無効の設定
 
 	// ワールドマトリックスの初期化
 	D3DXMatrixIdentity(&m_mtxWorld);
@@ -223,7 +229,7 @@ void CObjectBillboard::Draw(void)
 
 	// Zテストを有効にする
 	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);	// Zテストの設定
-	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);		// Zバッファ更新の有効 / 無効の設定
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, true);		// Zバッファ更新の有効 / 無効の設定
 }
 
 //============================================================
@@ -236,7 +242,9 @@ CObjectBillboard *CObjectBillboard::Create
 	const D3DXVECTOR3& rRot,	// 向き
 	const D3DXCOLOR& rCol,		// 色
 	const ORIGIN origin,		// 原点
-	const ROTATE rotate			// 回転
+	const ROTATE rotate,		// 回転
+	const D3DCMPFUNC func,		// Zテスト設定
+	const bool bZEnable			// Zバッファの使用状況
 )
 {
 	// ポインタを宣言
@@ -282,6 +290,12 @@ CObjectBillboard *CObjectBillboard::Create
 
 		// 回転を設定
 		pObjectBillboard->SetRotate(rotate);
+
+		// Zテストを設定
+		pObjectBillboard->SetFunc(func);
+
+		// Zバッファの使用状況を設定
+		pObjectBillboard->SetZEnable(bZEnable);
 
 		// 確保したアドレスを返す
 		return pObjectBillboard;
@@ -427,6 +441,24 @@ void CObjectBillboard::SetRotate(const ROTATE rotate)
 }
 
 //============================================================
+//	Zテストの設定処理
+//============================================================
+void CObjectBillboard::SetFunc(const D3DCMPFUNC func)
+{
+	// 引数のZテストの設定を設定
+	m_func = func;
+}
+
+//============================================================
+//	Zバッファの使用状況の設定処理
+//============================================================
+void CObjectBillboard::SetZEnable(const bool bEnable)
+{
+	// 引数のZバッファの使用状況を設定
+	m_bZEnable = bEnable;
+}
+
+//============================================================
 //	位置取得処理
 //============================================================
 D3DXVECTOR3 CObjectBillboard::GetPosition(void) const
@@ -478,6 +510,24 @@ CObjectBillboard::ROTATE CObjectBillboard::GetRotate(void) const
 {
 	// 回転を返す
 	return m_rotate;
+}
+
+//============================================================
+//	Zテスト取得処理
+//============================================================
+D3DCMPFUNC CObjectBillboard::GetFunc(void) const
+{
+	// Zテストの設定を返す
+	return m_func;
+}
+
+//============================================================
+//	Zバッファの使用状況取得処理
+//============================================================
+bool CObjectBillboard::GetZEnable(void) const
+{
+	// Zバッファの使用状況を返す
+	return m_bZEnable;
 }
 
 //============================================================
