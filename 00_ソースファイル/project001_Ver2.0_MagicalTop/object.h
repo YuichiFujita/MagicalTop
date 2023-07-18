@@ -56,6 +56,7 @@ public:
 		LABEL_FIELD,		// 地面
 		LABEL_WALL,			// 壁
 		LABEL_SCENERY,		// 景色
+		LABEL_SKY,			// 空
 		LABEL_SEA,			// 海
 		LABEL_LIFE,			// 体力ゲージ
 		LABEL_SCORE,		// スコア
@@ -102,9 +103,9 @@ public:
 	void	SetLabel(const LABEL label);	// ラベル設定
 	LABEL	GetLabel(void) const;			// ラベル取得
 	int		GetPriority(void) const;		// 優先順位取得
-	CObject *GetObject(void);				// オブジェクト取得
-	CObject *GetPrev(void) const;			// 前オブジェクト取得
-	CObject *GetNext(void) const;			// 次オブジェクト取得
+	CObject	*GetObject(void);				// オブジェクト取得
+	CObject	*GetPrev(void) const;			// 前オブジェクト取得
+	CObject	*GetNext(void) const;			// 次オブジェクト取得
 
 protected:
 	// メンバ関数

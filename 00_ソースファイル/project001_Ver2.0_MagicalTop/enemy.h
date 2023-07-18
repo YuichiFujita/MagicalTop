@@ -20,7 +20,7 @@
 //	前方宣言
 //************************************************************
 class CLifeGauge3D;	// 体力ゲージ3Dクラス
-class CMultiModel;	// マルチモデルクラス
+class CShadow;		// 影クラス
 
 //************************************************************
 //	クラス定義
@@ -136,6 +136,7 @@ private:
 
 	// メンバ変数
 	CLifeGauge3D *m_pLifeGauge;	// 体力の情報
+	CShadow *m_pShadow;			// 影の情報
 	const StatusInfo m_status;	// ステータス定数
 	const PartsInfo m_parts;	// パーツ定数
 	D3DXVECTOR3	m_oldPos;		// 過去位置

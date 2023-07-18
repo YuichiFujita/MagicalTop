@@ -17,6 +17,8 @@
 //************************************************************
 #define FIELD_SETUP_TXT	"data\\TXT\\field.txt"	// セットアップテキスト相対パス
 
+#define FIELD_PRIO	(1)	// 地面の優先順位
+
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
@@ -32,7 +34,7 @@ CField::TerrainInfo CField::m_aTerrainInfo[TERRAIN_MAX] = {};	// 地形情報
 //============================================================
 //	コンストラクタ
 //============================================================
-CField::CField() : CObjectMeshField(CObject::LABEL_FIELD)
+CField::CField() : CObjectMeshField(CObject::LABEL_FIELD, FIELD_PRIO)
 {
 
 }

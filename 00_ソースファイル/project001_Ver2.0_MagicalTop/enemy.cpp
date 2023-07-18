@@ -13,6 +13,7 @@
 #include "texture.h"
 #include "multiModel.h"
 #include "lifeGauge3D.h"
+#include "shadow.h"
 #include "debugproc.h"
 #include "collision.h"
 #include "player.h"
@@ -55,6 +56,7 @@ CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_status(m
 {
 	// メンバ変数をクリア
 	m_pLifeGauge = NULL;	// 体力の情報
+	m_pShadow = NULL;		// 影の情報
 	m_oldPos  = VEC3_ZERO;	// 過去位置
 	m_movePos = VEC3_ZERO;	// 位置移動量
 	m_moveRot = VEC3_ZERO;	// 向き変更量
@@ -76,6 +78,7 @@ HRESULT CEnemy::Init(void)
 {
 	// メンバ変数を初期化
 	m_pLifeGauge = NULL;	// 体力の情報
+	m_pShadow = NULL;		// 影の情報
 	m_oldPos  = VEC3_ZERO;	// 過去位置
 	m_movePos = VEC3_ZERO;	// 位置移動量
 	m_moveRot = VEC3_ZERO;	// 向き変更量
@@ -85,6 +88,16 @@ HRESULT CEnemy::Init(void)
 	m_pLifeGauge = CLifeGauge3D::Create(m_status.nLife, m_status.nLife, (int)(ENE_DMG_FRAME * 0.5f), m_status.fLifeUp, this);
 	if (UNUSED(m_pLifeGauge))
 	{ // 生成に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 影の生成
+	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, D3DXVECTOR3(300.0f, 0.0f, 300.0f), this);
+	if (UNUSED(m_pShadow))
+	{ // 非使用中の場合
 
 		// 失敗を返す
 		assert(false);

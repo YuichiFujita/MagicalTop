@@ -3551,7 +3551,7 @@ Mesh {
    0.000000;0.000000;0.000000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Desktop\\新しいフォルダ\\data\\MODEL\\TEXTURE\\gunColor000.png";
+    "data\\MODEL\\TEXTURE\\gunColor002.png";
    }
   }
   Material {
@@ -3560,7 +3560,7 @@ Mesh {
    0.000000;0.000000;0.000000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Desktop\\新しいフォルダ\\data\\MODEL\\TEXTURE\\gunColor000.png";
+    "data\\MODEL\\TEXTURE\\gunColor002.png";
    }
   }
  }

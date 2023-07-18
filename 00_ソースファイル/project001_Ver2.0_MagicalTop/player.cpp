@@ -19,6 +19,7 @@
 #include "multiModel.h"
 #include "motion.h"
 #include "magicManager.h"
+#include "shadow.h"
 #include "target.h"
 #include "stage.h"
 #include "field.h"
@@ -28,6 +29,8 @@
 //	マクロ定義
 //************************************************************
 #define PLAYER_SETUP_TXT	"data\\TXT\\player.txt"	// セットアップテキスト相対パス
+
+#define PLAY_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 
 #define MAX_MOVEX		(5.0f)	// 自動歩行時の速度割合用
 #define PULSROT_MOVEZ	(20)	// 前後移動時のプレイヤー向きの変更量
@@ -72,6 +75,7 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 {
 	// メンバ変数をクリア
 	m_pMagic		= NULL;				// 魔法マネージャーの情報
+	m_pShadow		= NULL;				// 影の情報
 	m_oldPos		= VEC3_ZERO;		// 過去位置
 	m_move			= VEC3_ZERO;		// 移動量
 	m_destRot		= VEC3_ZERO;		// 目標向き
@@ -106,6 +110,16 @@ HRESULT CPlayer::Init(void)
 	// 魔法マネージャーの生成
 	m_pMagic = CMagicManager::Create();
 	if (UNUSED(m_pMagic))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 影の生成
+	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, PLAY_SHADOW_SIZE, this);
+	if (UNUSED(m_pShadow))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -211,6 +225,14 @@ void CPlayer::Update(void)
 
 	// 向きを更新
 	SetRotation(rotPlayer);
+
+	// 影の描画情報を設定
+	if (FAILED(m_pShadow->SetDrawInfo()))
+	{ // 描画情報の設定に失敗した場合
+
+		// 影オブジェクトの終了
+		m_pShadow->Uninit();
+	}
 }
 
 //============================================================
