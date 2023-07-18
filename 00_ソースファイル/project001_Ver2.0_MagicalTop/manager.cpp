@@ -201,12 +201,6 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		return E_FAIL;
 	}
 
-	// TODO
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(200.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(300.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(400.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(1500.0f, 1500.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-
 	// 海オブジェクトの生成
 	CSea::Create();
 
@@ -276,6 +270,12 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		assert(false);
 		return E_FAIL;
 	}
+
+	// TODO
+	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(200.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
+	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(300.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
+	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(400.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
+	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(1500.0f, 1500.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
 
 	//--------------------------------------------------------
 	//	初期設定

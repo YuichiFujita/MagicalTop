@@ -14,12 +14,14 @@
 
 #include "collision.h"
 #include "player.h"
+#include "shadow.h"
 #include "field.h"
 
 //************************************************************
 //	マクロ定義
 //************************************************************
 #define FLOWER_PRIO	(4)	// マナフラワーの優先順位
+#define FLOWER_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -38,8 +40,9 @@ const char *CFlower::mc_apTextureFile[] =	// テクスチャ定数
 CFlower::CFlower(void) : CObjectBillboard(CObject::LABEL_FLOWER, FLOWER_PRIO)
 {
 	// メンバ変数をクリア
+	m_pShadow = NULL;		// 影の情報
 	m_type = TYPE_NORMAL;	// 種類
-	m_nLife = 0;	// 寿命
+	m_nLife = 0;			// 寿命
 }
 
 //============================================================
@@ -57,7 +60,17 @@ HRESULT CFlower::Init(void)
 {
 	// メンバ変数を初期化
 	m_type = TYPE_NORMAL;	// 種類
-	m_nLife = 0;	// 寿命
+	m_nLife = 0;			// 寿命
+
+	// 影の生成
+	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, FLOWER_SHADOW_SIZE, this);
+	if (UNUSED(m_pShadow))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// オブジェクトビルボードの初期化
 	if (FAILED(CObjectBillboard::Init()))
