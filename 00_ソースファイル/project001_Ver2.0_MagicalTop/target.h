@@ -22,6 +22,7 @@
 //************************************************************
 class CObjectMeshCube;	// オブジェクトメッシュキューブクラス
 class CLifeGauge3D;		// 体力ゲージ3Dクラス
+class CShadow;			// 影クラス
 
 //************************************************************
 //	クラス定義
@@ -36,6 +37,15 @@ public:
 		MODEL_NORMAL = 0,	// 通常台座
 		MODEL_MAX			// この列挙型の総数
 	}MODEL;
+
+	// 状態列挙
+	typedef enum
+	{
+		STATE_NORMAL = 0,	// 通常状態
+		STATE_DAMAGE,		// ダメージ状態
+		STATE_HEAL,			// 回復状態
+		STATE_MAX			// この列挙型の総数
+	}STATE;
 
 	// コンストラクタ
 	CTarget();
@@ -69,7 +79,11 @@ private:
 	// メンバ変数
 	CObjectMeshCube *m_pMeshCube;	// メッシュキューブの情報
 	CLifeGauge3D *m_pLifeGauge;		// 体力の情報
-	float m_fSinRot;	// 浮遊向き
+	CShadow *m_pShadow;		// 影の情報
+	STATE m_state;			// 状態
+	float m_fSinRot;		// 浮遊向き
+	int m_nCounterState;	// 状態管理カウンター
+	int m_nCounterHeal;		// 回復管理カウンター
 };
 
 #endif	// _TARGET_H_

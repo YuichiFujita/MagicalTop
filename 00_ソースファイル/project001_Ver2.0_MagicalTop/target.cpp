@@ -13,11 +13,16 @@
 #include "model.h"
 #include "objectMeshCube.h"
 #include "lifeGauge3D.h"
+#include "shadow.h"
+#include "flower.h"
 #include "particle3D.h"
+#include "debugproc.h"
 
 //************************************************************
 //	マクロ定義
 //************************************************************
+#define TARG_SHADOW_SIZE	(D3DXVECTOR3(200.0f, 0.0f, 200.0f))	// 影の大きさ
+
 #define CUBE_SIZE	(D3DXVECTOR3(25.0f, 25.0f, 25.0f))	// キューブの大きさ
 #define CUBE_BORD	(2.5f)		// キューブの縁取りの太さ
 
@@ -31,6 +36,10 @@
 #define TARG_LIFE	(1000)		// ターゲットの体力
 #define TARG_POSUP	(160.0f)	// ターゲットのY位置の加算量
 #define TARG_DMG_FRAME	(20)	// ターゲットのダメージ状態フレーム
+
+#define STATE_HEAL_CNT	(240)	// 回復状態に移行するまでのカウンター
+#define NORMAL_CNT		(60)	// 通常状態に移行するまでのカウンター
+#define WAIT_HEAL_CNT	(60)	// 回復までのカウンター
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -49,9 +58,13 @@ const char *CTarget::mc_apModelFile[] =	// モデル定数
 CTarget::CTarget() : CObjectModel(CObject::LABEL_TARGET)
 {
 	// メンバ変数をクリア
-	m_pMeshCube = NULL;		// メッシュキューブの情報
-	m_pLifeGauge = NULL;	// 体力の情報
-	m_fSinRot = 0.0f;		// 浮遊向き
+	m_pMeshCube		= NULL;			// メッシュキューブの情報
+	m_pLifeGauge	= NULL;			// 体力の情報
+	m_pShadow		= NULL;			// 影の情報
+	m_state			= STATE_NORMAL;	// 状態
+	m_fSinRot		= 0.0f;			// 浮遊向き
+	m_nCounterState	= 0;			// 状態管理カウンター
+	m_nCounterHeal	= 0;			// 回復管理カウンター
 }
 
 //============================================================
@@ -68,9 +81,13 @@ CTarget::~CTarget()
 HRESULT CTarget::Init(void)
 {
 	// メンバ変数を初期化
-	m_pMeshCube = NULL;		// メッシュキューブの情報
-	m_pLifeGauge = NULL;	// 体力の情報
-	m_fSinRot = 0.0f;		// 浮遊向き
+	m_pMeshCube		= NULL;			// メッシュキューブの情報
+	m_pLifeGauge	= NULL;			// 体力の情報
+	m_pShadow		= NULL;			// 影の情報
+	m_state			= STATE_NORMAL;	// 状態
+	m_fSinRot		= 0.0f;			// 浮遊向き
+	m_nCounterState	= 0;			// 状態管理カウンター
+	m_nCounterHeal	= 0;			// 回復管理カウンター
 
 	// オブジェクトモデルの初期化
 	if (FAILED(CObjectModel::Init()))
@@ -117,6 +134,16 @@ HRESULT CTarget::Init(void)
 		return E_FAIL;
 	}
 
+	// 影の生成
+	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, TARG_SHADOW_SIZE, this);
+	if (UNUSED(m_pShadow))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// 成功を返す
 	return S_OK;
 }
@@ -141,6 +168,89 @@ void CTarget::Update(void)
 	// 変数を宣言
 	D3DXVECTOR3 pos = GetPosition();				// 台座位置
 	D3DXVECTOR3 rot = m_pMeshCube->GetRotation();	// キューブ向き
+	int nNumFlower = CFlower::GetNumAll();			// マナフラワーの総数
+
+	// 状態管理
+	switch (m_state)
+	{ // 状態ごとの処理
+	case STATE_NORMAL:	// 通常状態
+
+		if (m_pLifeGauge->GetLife() < TARG_LIFE && nNumFlower > 0)
+		{ // 体力が減少している且つ、マナフラワーが一本でも生えている場合
+
+			if (m_nCounterState < STATE_HEAL_CNT)
+			{ // カウンターが一定値より小さい場合
+
+				// カウンターを加算
+				m_nCounterState++;
+			}
+			else
+			{ // カウンターが一定値以上の場合
+
+				// カウンターを初期化
+				m_nCounterState = 0;
+
+				// 状態を変更
+				m_state = STATE_HEAL;	// 回復状態
+			}
+		}
+
+		break;
+
+	case STATE_DAMAGE:	// ダメージ状態
+
+		if (m_nCounterState < NORMAL_CNT)
+		{ // カウンターが一定値より小さい場合
+
+			// カウンターを加算
+			m_nCounterState++;
+		}
+		else
+		{ // カウンターが一定値以上の場合
+
+			// カウンターを初期化
+			m_nCounterState = 0;
+
+			// 状態を変更
+			m_state = STATE_NORMAL;	// 通常状態
+		}
+
+		break;
+
+	case STATE_HEAL:	// 回復状態
+
+		if (m_pLifeGauge->GetLife() < TARG_LIFE)
+		{ // 体力が最大値より少ない場合
+
+			if (m_nCounterHeal < WAIT_HEAL_CNT)
+			{ // カウンターが一定値より小さい場合
+
+				// カウンターを加算
+				m_nCounterHeal++;
+			}
+			else
+			{ // カウンターが一定値以上の場合
+
+				// カウンターを初期化
+				m_nCounterHeal = 0;
+
+				// 体力を回復
+				m_pLifeGauge->AddLife(nNumFlower);	// マナフラワー量に応じて回復量増加
+			}
+		}
+		else
+		{ // 体力が全回復した場合
+
+			// 状態を変更
+			m_state = STATE_NORMAL;	// 通常状態
+		}
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
 
 	// キューブの縦位置を変更
 	pos.y += ADD_POS_Y + sinf(m_fSinRot) * MUL_SIN_POS;
@@ -188,6 +298,12 @@ void CTarget::Hit(const int nDmg)
 
 		// パーティクル3Dオブジェクトを生成
 		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition());
+
+		// カウンターを初期化
+		m_nCounterState = 0;
+
+		// 状態を変更
+		m_state = STATE_DAMAGE;	// ダメージ状態
 	}
 	else
 	{ // 死んでいる場合
