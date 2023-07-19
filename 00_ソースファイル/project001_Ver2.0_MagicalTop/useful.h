@@ -21,12 +21,12 @@
 // D3DXVECTOR2関係
 #define VEC2_ZERO	(D3DXVECTOR2(0.0f, 0.0f))	// 0クリア
 #define VEC2_ONE	(D3DXVECTOR2(1.0f, 1.0f))	// 1クリア
-#define VEC2_ALL(f)	(D3DXVECTOR2(f, f))	// 同値クリア
+#define VEC2_ALL(f)	(D3DXVECTOR2((f), (f))		// 同値クリア
 
 // D3DXVECTOR3関係
 #define VEC3_ZERO	(D3DXVECTOR3(0.0f, 0.0f, 0.0f))	// 0クリア
 #define VEC3_ONE	(D3DXVECTOR3(1.0f, 1.0f, 1.0f))	// 1クリア
-#define VEC3_ALL(f)	(D3DXVECTOR3(f, f, f))	// 同値クリア
+#define VEC3_ALL(f)	(D3DXVECTOR3((f), (f), (f)))	// 同値クリア
 
 // POSGRID2関係
 #define GRID2_ZERO	(POSGRID2(0, 0))	// 0クリア
@@ -114,7 +114,7 @@ namespace useful
 		const D3DXVECTOR3& rPosRight,	// 右位置
 		D3DXVECTOR3& rNor				// 法線
 	);
-	void NormalizeRot(float& rRot);				// 向きの正規化
+	void NormalizeRot(float& rRot);	// 向きの正規化
 
 	// テンプレート関数
 	template<class T> bool LimitNum	// 値の範囲内制限

@@ -491,7 +491,7 @@ void CCamera::Move(void)
 	D3DXVECTOR3 mouseMove = pMouse->GetMove();	// マウスの移動量
 
 	// マウス操作の更新
-	if (pMouse->GetPress(CInputMouse::KEY_LEFT) == true && pMouse->GetPress(CInputMouse::KEY_RIGHT) == true)
+	if (pMouse->GetPress(CInputMouse::KEY_LEFT) && pMouse->GetPress(CInputMouse::KEY_RIGHT))
 	{ // 右クリックと左クリックが押されている場合
 
 		// 視点を移動
@@ -543,7 +543,7 @@ void CCamera::Rotation(void)
 	D3DXVECTOR3 mouseMove = pMouse->GetMove();	// マウスの移動量
 
 	// マウス操作の更新
-	if (pMouse->GetPress(CInputMouse::KEY_LEFT) == true && pMouse->GetPress(CInputMouse::KEY_RIGHT) == false)
+	if (pMouse->GetPress(CInputMouse::KEY_LEFT) && !pMouse->GetPress(CInputMouse::KEY_RIGHT))
 	{ // 左クリックだけが押されている場合
 
 		// カメラの y軸を回転
@@ -563,7 +563,7 @@ void CCamera::Rotation(void)
 	m_camera.posV.z = m_camera.posR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));
 
 	// マウス操作の更新
-	if (pMouse->GetPress(CInputMouse::KEY_RIGHT) == true && pMouse->GetPress(CInputMouse::KEY_LEFT) == false)
+	if (pMouse->GetPress(CInputMouse::KEY_RIGHT) && !pMouse->GetPress(CInputMouse::KEY_LEFT))
 	{ // 右クリックだけが押されている場合
 
 		// カメラの y軸を回転

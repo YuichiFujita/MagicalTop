@@ -664,8 +664,8 @@ void CInputPad::UpdateVibration(VIBRATION *pVibration, int nID)
 			pVibration->nTime--;
 
 			// 振動レベルの設定
-			pVibration->vibration.wLeftMotorSpeed  -= (short)(USHRT_MAX / VIB_TIME_DEATH);	// 左
-			pVibration->vibration.wRightMotorSpeed -= (short)(USHRT_MAX / VIB_TIME_DEATH);	// 右
+			pVibration->vibration.wLeftMotorSpeed  -= (WORD)(USHRT_MAX / VIB_TIME_DEATH);	// 左
+			pVibration->vibration.wRightMotorSpeed -= (WORD)(USHRT_MAX / VIB_TIME_DEATH);	// 右
 		}
 		else
 		{ // カウンターが 0以下になった場合
@@ -849,7 +849,7 @@ bool CInputPad::GetTrigger(KEY nJoyKey, int nPlayer)
 bool CInputPad::GetTriggerL2(int nPlayer)
 {
 	// 入力情報を返す
-	return (m_aJoyKeyStateTrigger[nPlayer].Gamepad.bLeftTrigger & 'l') ? true : false;
+	return (m_aJoyKeyStateTrigger[nPlayer].Gamepad.bLeftTrigger & 'l') ? true : false;	// TODO：ビット演算違うらしい
 }
 
 //============================================================

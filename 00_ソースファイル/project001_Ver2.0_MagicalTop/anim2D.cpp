@@ -279,9 +279,6 @@ void CAnim2D::SetColor(const D3DXCOLOR& rCol)
 {
 	// 色の設定
 	CObject2D::SetColor(rCol);
-
-	// アニメーションのテクスチャ座標の設定
-	CObject2D::SetAnimTex(m_nPattern, m_nWidthPtrn, m_nHeightPtrn);
 }
 
 //============================================================
@@ -303,9 +300,6 @@ void CAnim2D::SetMaxPattern(const int nMaxPtrn)
 {
 	// 引数のパターンの総数を代入
 	m_nMaxPtrn = nMaxPtrn;
-
-	// アニメーションのテクスチャ座標の設定
-	CObject2D::SetAnimTex(m_nPattern, m_nWidthPtrn, m_nHeightPtrn);
 }
 
 //============================================================
@@ -315,9 +309,6 @@ void CAnim2D::SetCounter(const int nCntChange)
 {
 	// 引数のパターン変更カウントを代入
 	m_nCntChange = nCntChange;
-
-	// アニメーションのテクスチャ座標の設定
-	CObject2D::SetAnimTex(m_nPattern, m_nWidthPtrn, m_nHeightPtrn);
 }
 
 //============================================================
@@ -327,9 +318,6 @@ void CAnim2D::SetEnableStop(const bool bStop)
 {
 	// 引数の停止状況を代入
 	m_bStop = bStop;
-
-	// アニメーションのテクスチャ座標の設定
-	CObject2D::SetAnimTex(m_nPattern, m_nWidthPtrn, m_nHeightPtrn);
 }
 
 //============================================================
@@ -339,9 +327,6 @@ void CAnim2D::SetEnablePlayBack(const bool bPlayBack)
 {
 	// 引数の逆再生状況を代入
 	m_bPlayBack = bPlayBack;
-
-	// アニメーションのテクスチャ座標の設定
-	CObject2D::SetAnimTex(m_nPattern, m_nWidthPtrn, m_nHeightPtrn);
 }
 
 //============================================================
