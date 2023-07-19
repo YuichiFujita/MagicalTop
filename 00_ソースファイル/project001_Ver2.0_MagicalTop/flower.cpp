@@ -21,6 +21,8 @@
 //	マクロ定義
 //************************************************************
 #define FLOWER_PRIO	(4)	// マナフラワーの優先順位
+
+#define SHADOW_ALPHA	(0.2f)	// 影のα値
 #define FLOWER_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 
 //************************************************************
@@ -30,6 +32,7 @@ const char *CFlower::mc_apTextureFile[] =	// テクスチャ定数
 {
 	"data\\TEXTURE\\magicFlower000.png",	// マナフラワーテクスチャ
 };
+int CFlower::m_nNumAll = 0;	// マナフラワーの総数
 
 //************************************************************
 //	子クラス [CFlower] のメンバ関数
@@ -43,6 +46,9 @@ CFlower::CFlower(void) : CObjectBillboard(CObject::LABEL_FLOWER, FLOWER_PRIO)
 	m_pShadow = NULL;		// 影の情報
 	m_type = TYPE_NORMAL;	// 種類
 	m_nLife = 0;			// 寿命
+
+	// マナフラワーの総数を加算
+	m_nNumAll++;
 }
 
 //============================================================
@@ -50,7 +56,8 @@ CFlower::CFlower(void) : CObjectBillboard(CObject::LABEL_FLOWER, FLOWER_PRIO)
 //============================================================
 CFlower::~CFlower()
 {
-
+	// マナフラワーの総数を減算
+	m_nNumAll--;
 }
 
 //============================================================
@@ -63,7 +70,7 @@ HRESULT CFlower::Init(void)
 	m_nLife = 0;			// 寿命
 
 	// 影の生成
-	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, FLOWER_SHADOW_SIZE, this);
+	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, FLOWER_SHADOW_SIZE, this, SHADOW_ALPHA, SHADOW_ALPHA);
 	if (UNUSED(m_pShadow))
 	{ // 非使用中の場合
 
@@ -159,6 +166,7 @@ CFlower *CFlower::Create
 )
 {
 	// 変数を宣言
+	D3DXVECTOR3 pos = rPos;	// 座標設定用
 	int nTextureID;	// テクスチャインデックス
 
 	// ポインタを宣言
@@ -198,7 +206,8 @@ CFlower *CFlower::Create
 		pFlower->SetOrigin(ORIGIN_DOWN);
 
 		// 位置を設定
-		pFlower->SetPosition(rPos);
+		pos.y = CManager::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
+		pFlower->SetPosition(pos);
 
 		// 大きさを設定
 		pFlower->SetScaling(rSize);
@@ -219,6 +228,15 @@ CFlower *CFlower::Create
 		return pFlower;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	総数取得処理
+//============================================================
+int CFlower::GetNumAll(void)
+{
+	// 現在のマナフラワーの総数を返す
+	return m_nNumAll;
 }
 
 //============================================================

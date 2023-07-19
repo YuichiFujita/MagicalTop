@@ -95,7 +95,7 @@ HRESULT CEnemy::Init(void)
 	}
 
 	// 影の生成
-	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, D3DXVECTOR3(300.0f, 0.0f, 300.0f), this);
+	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, D3DXVECTOR3(m_status.fShadowRadius, 0.0f, m_status.fShadowRadius), this);
 	if (UNUSED(m_pShadow))
 	{ // 非使用中の場合
 
@@ -1000,6 +1000,12 @@ void CEnemy::LoadSetup(void)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].bullPos.x);	// 弾の発射位置Xを読み込む
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].bullPos.y);	// 弾の発射位置Yを読み込む
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].bullPos.z);	// 弾の発射位置Zを読み込む
+							}
+							else if (strcmp(&aString[0], "SHADOW_RADIUS") == 0)
+							{ // 読み込んだ文字列が SHADOW_RADIUS の場合
+
+								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fShadowRadius);	// 影の半径を読み込む
 							}
 							else if (strcmp(&aString[0], "ATTACK_CNT") == 0)
 							{ // 読み込んだ文字列が ATTACK_CNT の場合

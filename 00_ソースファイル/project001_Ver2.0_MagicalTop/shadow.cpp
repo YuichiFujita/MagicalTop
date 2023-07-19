@@ -16,13 +16,10 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define SHADOW_PRIO	(2)	// 影の優先順位
+#define SHADOW_PRIO	(2)		// 影の優先順位
 
 #define MAX_DIS_HEIGHT	(200.0f)	// 影と親の縦の距離の最大値
 #define MAX_PLUS_SIZE	(120.0f)	// 影の大きさ加算量の最大値
-
-#define MIN_ALPHA	(0.25f)	// α値の最小値
-#define MAX_ALPHA	(0.65f)	// α値の最大値
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -38,7 +35,7 @@ const char *CShadow::mc_apTextureFile[] =	// テクスチャ定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CShadow::CShadow(const D3DXVECTOR3& rSize) : CObject3D(CObject::LABEL_SHADOW, SHADOW_PRIO), m_sizeOrigin(rSize)
+CShadow::CShadow(const D3DXVECTOR3& rSize, const float fMinAlpha, const float fMaxAlpha) : CObject3D(CObject::LABEL_SHADOW, SHADOW_PRIO), m_sizeOrigin(rSize), m_fMinAlpha(fMinAlpha), m_fMaxAlpha(fMaxAlpha)
 {
 	// メンバ変数をクリア
 	m_pParentObject = NULL;	// 親オブジェクト
@@ -141,7 +138,9 @@ CShadow *CShadow::Create
 (
 	const TEXTURE texture,		// 種類
 	const D3DXVECTOR3& rSize,	// 大きさ
-	CObject *pObject			// 親オブジェクト
+	CObject *pObject,			// 親オブジェクト
+	const float fMinAlpha,		// 透明度の最小値
+	const float fMaxAlpha		// 透明度の最大値
 )
 {
 	// 変数を宣言
@@ -155,7 +154,7 @@ CShadow *CShadow::Create
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pShadow = new CShadow(rSize);	// 影
+		pShadow = new CShadow(rSize, fMinAlpha, fMaxAlpha);	// 影
 	}
 	else { assert(false); return NULL; }	// 使用中
 
@@ -229,7 +228,7 @@ HRESULT CShadow::SetDrawInfo(void)
 
 		// α値を求める
 		fAlpha = fabsf(fDis - 1.0f);	// α値を設定
-		useful::LimitNum(fAlpha, MIN_ALPHA, MAX_ALPHA);	// α値を制限
+		useful::LimitNum(fAlpha, m_fMinAlpha, m_fMaxAlpha);	// α値を制限
 
 		// 影の描画情報を設定
 		SetPosition(posShadow);	// 位置

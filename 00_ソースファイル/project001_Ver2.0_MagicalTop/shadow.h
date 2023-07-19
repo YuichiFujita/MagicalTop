@@ -17,6 +17,12 @@
 #include "object3D.h"
 
 //************************************************************
+//	マクロ定義
+//************************************************************
+#define MIN_ALPHA	(0.25f)	// α値の最小値
+#define MAX_ALPHA	(0.65f)	// α値の最大値
+
+//************************************************************
 //	クラス定義
 //************************************************************
 // 影クラス
@@ -31,7 +37,7 @@ public:
 	}TEXTURE;
 
 	// コンストラクタ
-	CShadow(const D3DXVECTOR3& rSize);
+	CShadow(const D3DXVECTOR3& rSize, const float fMinAlpha, const float fMaxAlpha);
 
 	// デストラクタ
 	~CShadow();
@@ -45,9 +51,11 @@ public:
 	// 静的メンバ関数
 	static CShadow *Create	// 生成
 	( // 引数
-		const TEXTURE texture,		// 種類
-		const D3DXVECTOR3& rSize,	// 大きさ
-		CObject *pObject			// 親オブジェクト
+		const TEXTURE texture,				// 種類
+		const D3DXVECTOR3& rSize,			// 大きさ
+		CObject *pObject,					// 親オブジェクト
+		const float fMinAlpha = MIN_ALPHA,	// 透明度の最小値
+		const float fMaxAlpha = MAX_ALPHA	// 透明度の最大値
 	);
 
 	// メンバ関数
@@ -63,6 +71,8 @@ private:
 	// メンバ変数
 	CObject *m_pParentObject;		// 親オブジェクト
 	const D3DXVECTOR3 m_sizeOrigin;	// 大きさ定数
+	const float m_fMinAlpha;		// 透明度の最小値定数
+	const float m_fMaxAlpha;		// 透明度の最大値定数
 };
 
 #endif	// _SHADOW_H_

@@ -55,6 +55,7 @@ public:
 		const D3DXVECTOR3& rSize,	// 大きさ
 		const int nLife				// 体力
 	);
+	static int GetNumAll(void);		// 総数取得
 
 	// メンバ関数
 	void SetLife(const int nLife);	// 体力設定
@@ -65,6 +66,7 @@ private:
 
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];	// テクスチャ定数
+	static int m_nNumAll;					// マナフラワーの総数
 
 	// メンバ変数
 	CShadow *m_pShadow;	// 影の情報

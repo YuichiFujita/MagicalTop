@@ -71,6 +71,7 @@ public:
 		int		nBullDamage;		// ’e‚ÌUŒ‚—Í
 		float	fBullRadius;		// ’e‚Ì”¼Œa
 		float	fBullMove;			// ’e‚ÌˆÚ“®—Ê
+		float	fShadowRadius;		// ‰e‚Ì”¼Œa
 		float	fRadius;			// ”¼Œa
 		float	fHeight;			// c•
 		float	fForwardMove;		// ‘Oi‚ÌˆÚ“®—Ê
