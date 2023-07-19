@@ -300,6 +300,78 @@ bool collision::CirclePillar
 }
 
 //============================================================
+//	角柱の内側制限
+//============================================================
+bool collision::InBoxPillar
+(
+	D3DXVECTOR3& rCenterPos,	// 判定位置
+	D3DXVECTOR3 originPos,		// 判定原点位置
+	D3DXVECTOR3 centerSizeUp,	// 判定サイズ(右・上・後)
+	D3DXVECTOR3 centerSizeDown,	// 判定サイズ(左・下・前)
+	D3DXVECTOR3 originSizeUp,	// 判定原点サイズ(右・上・後)
+	D3DXVECTOR3 originSizeDown	// 判定原点サイズ(左・下・前)
+)
+{
+	// 変数を宣言
+	bool bHit = false;	// 判定結果
+
+	// 左右の補正
+	if (useful::LimitNum(rCenterPos.x, originPos.x - originSizeDown.x + centerSizeUp.x, originPos.x + originSizeUp.x - centerSizeDown.x))
+	{ // 補正が行われた場合
+
+		// 判定した状態にする
+		bHit = true;
+	}
+
+	// 前後の補正
+	if (useful::LimitNum(rCenterPos.z, originPos.z - originSizeDown.z + centerSizeUp.z, originPos.z + originSizeUp.z - centerSizeDown.z))
+	{ // 補正が行われた場合
+
+		// 判定した状態にする
+		bHit = true;
+	}
+
+	// 判定結果を返す
+	return bHit;
+}
+
+//============================================================
+//	円柱の内側制限
+//============================================================
+bool collision::InCirclePillar
+(
+	D3DXVECTOR3& rCenterPos,	// 判定位置
+	D3DXVECTOR3 originPos,		// 判定原点位置
+	float fCenterRadius,		// 判定半径
+	float fOriginRadius			// 判定原点半径
+)
+{
+	// 変数を宣言
+	float fLength = 0.0f;	// 判定位置と判定目標位置の間の距離
+
+	// 判定位置と判定目標位置の距離を求める
+	fLength = (rCenterPos.x - originPos.x) * (rCenterPos.x - originPos.x)
+			+ (rCenterPos.z - originPos.z) * (rCenterPos.z - originPos.z);
+
+	if (fLength > (fOriginRadius - fCenterRadius) * (fOriginRadius - fCenterRadius))
+	{ // 判定外の場合
+
+		// 変数を宣言
+		float fCenterRot = atan2f(rCenterPos.x - originPos.x, rCenterPos.z - originPos.z);	// 判定目標から見た判定向き
+
+		// 位置を補正
+		rCenterPos.x = originPos.x + sinf(fCenterRot) * (fOriginRadius - fCenterRadius);
+		rCenterPos.z = originPos.z + cosf(fCenterRot) * (fOriginRadius - fCenterRadius);
+
+		// 真を返す
+		return true;
+	}
+
+	// 偽を返す
+	return false;
+}
+
+//============================================================
 //	外積の左右判定
 //============================================================
 //	境界線から見て左右どちらにいるかの判定に使用

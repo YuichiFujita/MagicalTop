@@ -271,12 +271,6 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		return E_FAIL;
 	}
 
-	// TODO
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(200.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(300.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(400.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(1500.0f, 1500.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-
 	//--------------------------------------------------------
 	//	初期設定
 	//--------------------------------------------------------
@@ -285,6 +279,14 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 
 	// 魔法セットアップの読込
 	CMagic::LoadSetup();
+
+	// TODO
+#if 0
+	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(200.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
+	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(300.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
+	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(400.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
+	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(1500.0f, 1500.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
+#endif
 
 #if 1
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);

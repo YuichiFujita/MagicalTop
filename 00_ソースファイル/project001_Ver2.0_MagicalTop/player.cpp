@@ -368,9 +368,8 @@ float CPlayer::GetRadius(void) const
 CPlayer::MOTION CPlayer::Move(MOTION motion)
 {
 	// 変数を宣言
-	D3DXVECTOR3			rot				= CManager::GetCamera()->GetRotation();		// カメラの向き
-	CStage::StageLimit	limit			= CManager::GetStage()->GetStageLimit();	// ステージの範囲
-	float				fAverageLimit	= (fabsf(limit.fLeft) + fabsf(limit.fRight) + fabsf(limit.fNear) + fabsf(limit.fFar)) * 0.25f;	// 範囲の平均
+	D3DXVECTOR3 rot = CManager::GetCamera()->GetRotation();			// カメラの向き
+	float fLimit = CManager::GetStage()->GetStageLimit().fRadius;	// 範囲の平均
 
 	MOTION	currentMotion = motion;	// 現在のモーション
 	int		nRotation;				// 回転方向
@@ -378,6 +377,9 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 	// ポインタを宣言
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad		= CManager::GetPad();		// パッド
+
+	// 例外処理
+	assert(CManager::GetStage()->GetStageLimit().mode == CStage::LIMIT_CIRCLE);	// 範囲制限エラー
 
 	// 移動モーションを設定
 	currentMotion = MOTION_MOVE;
@@ -388,8 +390,8 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 	case ROTATION_LEFT:
 
 		// 移動量を更新
-		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fAverageLimit));
-		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fAverageLimit));
+		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fLimit));
+		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fLimit));
 
 		// 目標向きを更新
 		m_destRot.y = D3DXToRadian(90) + rot.y;
@@ -402,8 +404,8 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 	case ROTATION_RIGHT:
 
 		// 移動量を更新
-		m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fAverageLimit));
-		m_move.z -= cosf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fAverageLimit));
+		m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fLimit));
+		m_move.z -= cosf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fLimit));
 
 		// 目標向きを更新
 		m_destRot.y = D3DXToRadian(270) + rot.y;

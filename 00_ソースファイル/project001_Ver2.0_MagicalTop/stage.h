@@ -22,6 +22,14 @@
 class CStage
 {
 public:
+	// 制限列挙
+	typedef enum
+	{
+		LIMIT_BOX = 0,	// 矩形範囲
+		LIMIT_CIRCLE,	// 円範囲
+		LIMIT_MAX		// この列挙型の総数
+	}LIMIT;
+
 	// コンストラクタ
 	CStage();
 
@@ -31,10 +39,12 @@ public:
 	// ステージ範囲構造体
 	typedef struct
 	{
+		LIMIT mode;		// 制限モード
 		float fNear;	// 制限位置 (前)
 		float fFar;		// 制限位置 (後)
 		float fRight;	// 制限位置 (右)
 		float fLeft;	// 制限位置 (左)
+		float fRadius;	// 制限位置 (半径)
 		float fField;	// 制限位置 (地面)
 	}StageLimit;
 

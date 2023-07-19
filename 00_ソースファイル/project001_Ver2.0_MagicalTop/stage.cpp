@@ -8,6 +8,7 @@
 //	インクルードファイル
 //************************************************************
 #include "stage.h"
+#include "collision.h"
 
 //************************************************************
 //	マクロ定義
@@ -59,9 +60,40 @@ void CStage::Uninit(void)
 //============================================================
 void CStage::LimitPosition(D3DXVECTOR3& rPos, const float fRadius)
 {
-	// 位置を補正
-	useful::LimitNum(rPos.x, m_stageLimit.fLeft + fRadius, m_stageLimit.fRight - fRadius);	// 左右の補正
-	useful::LimitNum(rPos.z, m_stageLimit.fFar + fRadius, m_stageLimit.fNear - fRadius);	// 前後の補正
+	switch (m_stageLimit.mode)
+	{ // 制限モードごとの処理
+	case LIMIT_BOX:		// 矩形範囲
+
+		// 角柱の内側制限
+		collision::InBoxPillar
+		( // 引数
+			rPos,				// 判定位置
+			VEC3_ZERO,			// 判定原点位置
+			VEC3_ALL(fRadius),	// 判定サイズ(右・上・後)
+			VEC3_ALL(fRadius),	// 判定サイズ(左・下・前)
+			D3DXVECTOR3(fabsf(m_stageLimit.fRight), 0.0f, fabsf(m_stageLimit.fFar)),	// 判定原点サイズ(右・上・後)
+			D3DXVECTOR3(fabsf(m_stageLimit.fLeft),  0.0f, fabsf(m_stageLimit.fNear))	// 判定原点サイズ(左・下・前)
+		);
+
+		break;
+
+	case LIMIT_CIRCLE:	// 円範囲
+
+		// 円柱の内側制限
+		collision::InCirclePillar
+		( // 引数
+			rPos,					// 判定位置
+			VEC3_ZERO,				// 判定原点位置
+			fRadius,				// 判定半径
+			m_stageLimit.fRadius	// 判定原点半径
+		);
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
 }
 
 //============================================================
@@ -203,24 +235,45 @@ void CStage::LoadSetup(CStage *pStage)
 
 						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
 						fscanf(pFile, "%f", &stageLimit.fNear);		// 前位置を読み込む
+
+						// 制限モードを矩形範囲に設定
+						stageLimit.mode = LIMIT_BOX;
 					}
 					else if (strcmp(&aString[0], "FAR") == 0)
 					{ // 読み込んだ文字列が FAR の場合
 
 						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
 						fscanf(pFile, "%f", &stageLimit.fFar);		// 後位置を読み込む
+
+						// 制限モードを矩形範囲に設定
+						stageLimit.mode = LIMIT_BOX;
 					}
 					else if (strcmp(&aString[0], "RIGHT") == 0)
 					{ // 読み込んだ文字列が RIGHT の場合
 
 						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
 						fscanf(pFile, "%f", &stageLimit.fRight);	// 右位置を読み込む
+
+						// 制限モードを矩形範囲に設定
+						stageLimit.mode = LIMIT_BOX;
 					}
 					else if (strcmp(&aString[0], "LEFT") == 0)
 					{ // 読み込んだ文字列が LEFT の場合
 
 						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
 						fscanf(pFile, "%f", &stageLimit.fLeft);		// 左位置を読み込む
+
+						// 制限モードを矩形範囲に設定
+						stageLimit.mode = LIMIT_BOX;
+					}
+					else if (strcmp(&aString[0], "RADIUS") == 0)
+					{ // 読み込んだ文字列が RADIUS の場合
+
+						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+						fscanf(pFile, "%f", &stageLimit.fRadius);	// 半径を読み込む
+
+						// 制限モードを円範囲に設定
+						stageLimit.mode = LIMIT_CIRCLE;
 					}
 					else if (strcmp(&aString[0], "FIELD") == 0)
 					{ // 読み込んだ文字列が FIELD の場合

@@ -73,6 +73,23 @@ namespace collision
 		float fTargetRadius			// 判定目標半径
 	);
 
+	bool InBoxPillar	// 角柱の内側制限
+	( // 引数
+		D3DXVECTOR3& rCenterPos,	// 判定位置
+		D3DXVECTOR3 originPos,		// 判定原点位置
+		D3DXVECTOR3 centerSizeUp,	// 判定サイズ(右・上・後)
+		D3DXVECTOR3 centerSizeDown,	// 判定サイズ(左・下・前)
+		D3DXVECTOR3 originSizeUp,	// 判定原点サイズ(右・上・後)
+		D3DXVECTOR3 originSizeDown	// 判定原点サイズ(左・下・前)
+	);
+	bool InCirclePillar	// 円柱の内側制限
+	( // 引数
+		D3DXVECTOR3& rCenterPos,	// 判定位置
+		D3DXVECTOR3 originPos,		// 判定原点位置
+		float fCenterRadius,		// 判定半径
+		float fOriginRadius			// 判定原点半径
+	);
+
 	float LineOuterProduct	// 外積の左右判定
 	( // 引数
 		D3DXVECTOR3 posLeft,	// 境界線左座標
