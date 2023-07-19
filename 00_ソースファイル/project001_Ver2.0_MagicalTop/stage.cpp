@@ -285,6 +285,9 @@ void CStage::LoadSetup(CStage *pStage)
 
 				// ステージ範囲の設定
 				pStage->SetStageLimit(stageLimit);
+
+				// 例外処理
+				//assert(stageLimit.mode == CStage::LIMIT_CIRCLE);	// 範囲制限エラー
 			}
 		} while (nEnd != EOF);	// 読み込んだ文字列が EOF ではない場合ループ
 		

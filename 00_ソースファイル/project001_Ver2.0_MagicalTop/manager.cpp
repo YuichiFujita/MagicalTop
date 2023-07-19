@@ -205,7 +205,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	CSea::Create();
 
 	// 地面オブジェクトの生成
-	m_pField = CField::Create(CField::TEXTURE_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(4000.0f, 4000.0f), XCOL_WHITE, POSGRID2(80, 80));
+	m_pField = CField::Create(CField::TEXTURE_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(4000.0f, 4000.0f), XCOL_WHITE, POSGRID2(5, 5));
 	if (UNUSED(m_pField))
 	{ // 非使用中の場合
 
@@ -215,7 +215,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	}
 
 	// 地形を設定
-	m_pField->SetTerrain(CField::TERRAIN_80x80);
+	//m_pField->SetTerrain(CField::TERRAIN_80x80);
 
 	// 壁オブジェクトの生成
 	CWall::Create(CWall::TEXTURE_NORMAL, D3DXVECTOR3( 0.0f,    0.0f, -2000.0f), D3DXToRadian(D3DXVECTOR3(0.0f, 0.0f, 0.0f)),   D3DXVECTOR2(4000.0f, 400.0f), XCOL_WHITE, POSGRID2(12, 1));
@@ -286,9 +286,12 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(300.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
 	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(400.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
 	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(1500.0f, 1500.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
+#else
+	// マナフラワーランダム生成
+	//CFlower::RandomGrow(15, CFlower::TYPE_NORMAL, D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
 #endif
 
-#if 1
+#if 0
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, -2000.0f), VEC3_ZERO);

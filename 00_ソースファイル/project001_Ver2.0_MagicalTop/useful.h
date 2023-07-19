@@ -114,7 +114,7 @@ namespace useful
 		const D3DXVECTOR3& rPosRight,	// 右位置
 		D3DXVECTOR3& rNor				// 法線
 	);
-	void NormalizeRot(float& rRot);	// 向きの正規化
+	void NormalizeRot(float& rRot);				// 向きの正規化
 
 	// テンプレート関数
 	template<class T> bool LimitNum	// 値の範囲内制限

@@ -13,6 +13,10 @@
 #include "texture.h"
 #include "collision.h"
 
+// TODO
+#include "debugproc.h"
+#include "input.h"
+
 //************************************************************
 //	マクロ定義
 //************************************************************
@@ -998,6 +1002,7 @@ D3DXVECTOR3 CObjectMeshField::GetMeshVertexPosition(const int nID)
 //============================================================
 float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3& rPos)
 {
+#if 0
 	// 変数を宣言
 	int nNumCul;		// 法線ベクトル用の頂点計算用
 	int nNumVtx;		// 法線を求める頂点番号
@@ -1034,7 +1039,6 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3& rPos)
 					aVtxPos[1] = GetMeshVertexPosition(nNumVtx - (1 * nNumCul));
 					aVtxPos[2] = GetMeshVertexPosition(nNumVtx + ((m_part.x + 1) * nNumCul));
 
-#if 0	// 回転を考慮した頂点計算
 					for (int nCntVtx = 0; nCntVtx < NUM_VTX_TRIANGLE; nCntVtx++)
 					{ // 三角形ポリゴンの頂点数分繰り返す
 
@@ -1058,15 +1062,7 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3& rPos)
 
 						// 計算したマトリックスから座標を設定
 						aVtxMtxPos[nCntVtx] = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
-				}
-#else	// 回転を考慮しない頂点計算
-					for (int nCntVtx = 0; nCntVtx < NUM_VTX_TRIANGLE; nCntVtx++)
-					{ // 三角形ポリゴンの頂点数分繰り返す
-
-						// 座標を設定
-						aVtxMtxPos[nCntVtx] = m_meshField.pos + aVtxPos[nCntVtx];
 					}
-#endif
 
 					if (collision::TrianglePillar(aVtxMtxPos[0], aVtxMtxPos[1], aVtxMtxPos[2], rPos))
 					{ // ポリゴンの範囲内にいる場合
@@ -1088,6 +1084,52 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3& rPos)
 
 	// 着地範囲外の場合現在のy座標を返す
 	return rPos.y;
+#else
+	// 変数を宣言
+	int nWidth  = (int)(rPos.x / (float)(m_meshField.size.x / m_part.x))/* + (int)(m_part.x * 0.5f)*/;
+	int nHeight = (int)(rPos.z / (float)(m_meshField.size.y / m_part.y))/* + (int)(m_part.y * 0.5f)*/;
+
+	if (CManager::GetKeyboard()->GetPress(DIK_2))
+	{
+		CManager::GetDebugProc()->Print("%d %d\n", nWidth, nHeight);
+	}
+
+	// 着地範囲外の場合現在のy座標を返す
+	return rPos.y;
+
+#if 0
+	int nNumVtx = ((nWidth + 1) + (nHeight * (m_part.x + 1)));
+
+	// ポリゴンの頂点位置を取得
+	aVtxPos[0] = GetMeshVertexPosition(nNumVtx);
+	aVtxPos[1] = GetMeshVertexPosition(nNumVtx - (1 * nNumCul));
+	aVtxPos[2] = GetMeshVertexPosition(nNumVtx + ((m_part.x + 1) * nNumCul));
+
+	for (int nCntVtx = 0; nCntVtx < NUM_VTX_TRIANGLE; nCntVtx++)
+	{ // 三角形ポリゴンの頂点数分繰り返す
+
+		// 座標を設定
+		aVtxMtxPos[nCntVtx] = m_meshField.pos + aVtxPos[nCntVtx];
+	}
+
+	if (collision::TrianglePillar(aVtxMtxPos[0], aVtxMtxPos[1], aVtxMtxPos[2], rPos))
+	{ // ポリゴンの範囲内にいる場合
+
+		// 法線を求める
+		useful::NormalizeNormal(aVtxMtxPos[1], aVtxMtxPos[0], aVtxMtxPos[2], nor);
+
+		if (nor.y != 0.0f)
+		{ // 法線が設定されている場合
+
+			// プレイヤーの着地点を返す
+			return (((rPos.x - aVtxMtxPos[0].x) * nor.x + (-aVtxMtxPos[0].y) * nor.y + (rPos.z - aVtxMtxPos[0].z) * nor.z) * -1.0f) / nor.y;
+		}
+	}
+
+	// 着地範囲外の場合現在のy座標を返す
+	return rPos.y;
+#endif
+#endif
 }
 
 //============================================================
