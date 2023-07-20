@@ -200,6 +200,18 @@ D3DXVECTOR3 CObject::GetScaling(void) const
 }
 
 //============================================================
+//	状態取得処理
+//============================================================
+int CObject::GetState(void) const
+{
+	// 例外処理
+	assert(false);
+
+	// 初期値を返す
+	return 1;
+}
+
+//============================================================
 //	半径取得処理
 //============================================================
 float CObject::GetRadius(void) const
@@ -352,31 +364,8 @@ void CObject::DrawAll(void)
 				// ポインタを宣言
 				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
 
-				// TODO：オブジェクトの他者管理これで本当に大丈夫？
-				if (USED(pObjectNext))
-				{ // 次のオブジェクトが存在する場合
-
-					while (pObjectNext->m_label == LABEL_NONE)
-					{ // 次のオブジェクトのラベルが設定されていない場合繰り返す
-
-						// さらに次のオブジェクトへのポインタを指定
-						pObjectNext = pObjectNext->m_pNext;
-
-						if (UNUSED(pObjectNext))
-						{ // さらに次のオブジェクトが存在しない場合
-
-							// 処理を抜ける
-							break;
-						}
-					}
-				}
-
-				if (pObject->m_label != LABEL_NONE)
-				{ // オブジェクトラベルが設定されている場合
-
-					// オブジェクトの描画
-					pObject->Draw();
-				}
+				// オブジェクトの描画
+				pObject->Draw();
 
 				// 次のオブジェクトへのポインタを代入
 				pObject = pObjectNext;

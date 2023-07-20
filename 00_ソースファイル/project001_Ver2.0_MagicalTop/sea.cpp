@@ -150,14 +150,6 @@ void CSea::Update(void)
 	int nLine;			// 頂点の行
 	float fSinRot;		// サインカーブに使用する角度
 
-	// スクロールの更新
-	for (int nCntSea = 0; nCntSea < TEXTURE_MAX; nCntSea++)
-	{ // テクスチャの最大数分繰り返す
-
-		// スクロールメッシュフィールドの更新
-		m_apScrollMeshField[nCntSea]->Update();
-	}
-
 	// メッシュの頂点座標の更新
 	for (int nCntVtx = 0; nCntVtx < (part.x + 1) * (part.y + 1); nCntVtx++)
 	{ // 使用頂点数分繰り返す
@@ -185,6 +177,14 @@ void CSea::Update(void)
 
 	// 向きを補正
 	useful::NormalizeRot(m_fSinRot);
+
+	// スクロールの更新
+	for (int nCntSea = 0; nCntSea < TEXTURE_MAX; nCntSea++)
+	{ // テクスチャの最大数分繰り返す
+
+		// スクロールメッシュフィールドの更新
+		m_apScrollMeshField[nCntSea]->Update();
+	}
 }
 
 //============================================================

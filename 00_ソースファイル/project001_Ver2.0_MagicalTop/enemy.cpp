@@ -136,6 +136,12 @@ HRESULT CEnemy::Init(void)
 //============================================================
 void CEnemy::Uninit(void)
 {
+	// 体力ゲージ3Dを破棄
+	m_pLifeGauge->Uninit();
+
+	// 影を破棄
+	m_pShadow->Uninit();
+
 	// オブジェクトキャラクターの終了
 	CObjectChara::Uninit();
 }
@@ -148,8 +154,16 @@ void CEnemy::Update(void)
 	// 過去位置を更新
 	m_oldPos = GetPosition();
 
+	// 体力ゲージ3Dの更新
+	m_pLifeGauge->Update();
+
+	// 影の更新
+	m_pShadow->Update();
+
 	// オブジェクトキャラクターの更新
 	CObjectChara::Update();
+
+	// TODO：過去位置の更新関数化
 }
 
 //============================================================
@@ -157,6 +171,12 @@ void CEnemy::Update(void)
 //============================================================
 void CEnemy::Draw(void)
 {
+	// 体力ゲージ3Dの描画
+	m_pLifeGauge->Draw();
+
+	// 影の描画
+	m_pShadow->Draw();
+
 	// オブジェクトキャラクターの描画
 	CObjectChara::Draw();
 }

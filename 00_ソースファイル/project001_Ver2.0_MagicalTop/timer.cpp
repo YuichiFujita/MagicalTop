@@ -35,7 +35,7 @@
 //============================================================
 //	コンストラクタ
 //============================================================
-CTimer::CTimer() : CObject(CObject::LABEL_TIMER, TIMER_PRIO)
+CTimer::CTimer() : CObject(CObject::LABEL_TIMER, DEFAULT_PRIO)
 {
 	// メンバ変数をクリア
 	memset(&m_apValue[0], 0, sizeof(m_apValue));	// 数値の情報
@@ -193,12 +193,7 @@ void CTimer::Update(void)
 //============================================================
 void CTimer::Draw(void)
 {
-	for (int nCntTimer = 0; nCntTimer < MAX_TIMER; nCntTimer++)
-	{ // タイマーの桁数分繰り返す
 
-		// 数字の描画
-		m_apValue[nCntTimer]->Draw();
-	}
 }
 
 //============================================================

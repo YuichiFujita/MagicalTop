@@ -162,6 +162,9 @@ void CPlayer::Uninit(void)
 		assert(false);
 	}
 
+	// 影を破棄
+	m_pShadow->Uninit();
+
 	// オブジェクトキャラクターの終了
 	CObjectChara::Uninit();
 }
@@ -175,7 +178,7 @@ void CPlayer::Update(void)
 	MOTION currentMotion  = MOTION_NEUTRAL;	// 現在のモーション
 	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 rotPlayer = GetRotation();	// プレイヤー向き
-	D3DXVECTOR3 posTarget = CManager::GetTarget()->GetPosition();	// ターゲット位置
+	D3DXVECTOR3 posTarget = VEC3_ZERO/*CManager::GetTarget()->GetPosition()*/;	// ターゲット位置
 
 	// 過去位置を更新
 	m_oldPos = posPlayer;
@@ -217,22 +220,17 @@ void CPlayer::Update(void)
 	// 射撃操作
 	currentMotion = Magic(currentMotion, posPlayer);
 
-	// モーション・オブジェクトキャラクター更新
-	Motion(currentMotion);
-
 	// 位置を更新
 	SetPosition(posPlayer);
 
 	// 向きを更新
 	SetRotation(rotPlayer);
 
-	// 影の描画情報を設定
-	if (FAILED(m_pShadow->SetDrawInfo()))
-	{ // 描画情報の設定に失敗した場合
+	// 影の更新
+	m_pShadow->Update();
 
-		// 影オブジェクトの終了
-		m_pShadow->Uninit();
-	}
+	// モーション・オブジェクトキャラクターの更新
+	Motion(currentMotion);
 }
 
 //============================================================

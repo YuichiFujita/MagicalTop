@@ -53,13 +53,11 @@ public:
 		LABEL_LOCK,			// ロックオン
 		LABEL_BULLET,		// 弾
 		LABEL_FLOWER,		// マナフラワー
-		LABEL_SHADOW,		// 影
 		LABEL_FIELD,		// 地面
 		LABEL_WALL,			// 壁
 		LABEL_SCENERY,		// 景色
 		LABEL_SKY,			// 空
 		LABEL_SEA,			// 海
-		LABEL_LIFE,			// 体力ゲージ
 		LABEL_SCORE,		// スコア
 		LABEL_TIMER,		// タイマー
 		LABEL_EFFECT2D,		// エフェクト
@@ -90,6 +88,7 @@ public:
 	virtual D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	virtual D3DXVECTOR3 GetRotation(void) const;		// 向き取得
 	virtual D3DXVECTOR3 GetScaling(void) const;			// 大きさ取得
+	virtual int GetState(void) const;					// 状態取得
 	virtual float GetRadius(void) const;				// 半径取得
 
 	// 静的メンバ関数

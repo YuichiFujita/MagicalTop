@@ -757,8 +757,18 @@ CPlayer *CManager::GetPlayer(void)
 //============================================================
 CTarget *CManager::GetTarget(void)
 {
-	// ターゲットのポインタを返す
-	return m_pTarget;
+	if (m_pTarget->GetState() != CTarget::STATE_DESTROY)
+	{ // 破壊状態ではない場合
+
+		// ターゲットのポインタを返す
+		return m_pTarget;
+	}
+	else
+	{ // 破壊状態の場合
+
+		// NULLを返す
+		return NULL;
+	}
 }
 
 //============================================================

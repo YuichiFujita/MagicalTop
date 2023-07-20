@@ -28,7 +28,7 @@
 //============================================================
 //	コンストラクタ
 //============================================================
-CScore::CScore() : CObject(CObject::LABEL_SCORE, SCORE_PRIO)
+CScore::CScore() : CObject(CObject::LABEL_SCORE, DEFAULT_PRIO)
 {
 	// メンバ変数をクリア
 	memset(&m_apValue[0], 0, sizeof(m_apValue));	// 数値の情報
@@ -105,12 +105,7 @@ void CScore::Update(void)
 //============================================================
 void CScore::Draw(void)
 {
-	for (int nCntScore = 0; nCntScore < MAX_SCORE; nCntScore++)
-	{ // スコアの桁数分繰り返す
 
-		// 数字の描画
-		m_apValue[nCntScore]->Draw();
-	}
 }
 
 //============================================================

@@ -35,7 +35,7 @@ const char *CShadow::mc_apTextureFile[] =	// テクスチャ定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CShadow::CShadow(const D3DXVECTOR3& rSize, const float fMinAlpha, const float fMaxAlpha) : CObject3D(CObject::LABEL_SHADOW, SHADOW_PRIO), m_sizeOrigin(rSize), m_fMinAlpha(fMinAlpha), m_fMaxAlpha(fMaxAlpha)
+CShadow::CShadow(const D3DXVECTOR3& rSize, const float fMinAlpha, const float fMaxAlpha) : CObject3D(CObject::LABEL_NONE, SHADOW_PRIO), m_sizeOrigin(rSize), m_fMinAlpha(fMinAlpha), m_fMaxAlpha(fMaxAlpha)
 {
 	// メンバ変数をクリア
 	m_pParentObject = NULL;	// 親オブジェクト
@@ -84,8 +84,6 @@ void CShadow::Uninit(void)
 //============================================================
 void CShadow::Update(void)
 {
-	// TODO：親オブジェクトの終了判定どうするか
-
 	// 描画情報を設定
 	if (FAILED(SetDrawInfo()))
 	{ // 描画情報の設定に失敗した場合

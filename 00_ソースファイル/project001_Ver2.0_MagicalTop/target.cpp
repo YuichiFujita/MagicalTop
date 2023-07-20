@@ -137,7 +137,7 @@ HRESULT CTarget::Init(void)
 	// 影の生成
 	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, TARG_SHADOW_SIZE, this);
 	if (UNUSED(m_pShadow))
-	{ // 非使用中の場合
+	{ // 生成に失敗した場合
 
 		// 失敗を返す
 		assert(false);
@@ -156,6 +156,12 @@ void CTarget::Uninit(void)
 	// オブジェクトメッシュキューブを破棄
 	m_pMeshCube->Uninit();
 
+	// 体力ゲージ3Dを破棄
+	m_pLifeGauge->Uninit();
+
+	// 影を破棄
+	m_pShadow->Uninit();
+
 	// オブジェクトモデルの終了
 	CObjectModel::Uninit();
 }
@@ -169,6 +175,13 @@ void CTarget::Update(void)
 	D3DXVECTOR3 pos = GetPosition();				// 台座位置
 	D3DXVECTOR3 rot = m_pMeshCube->GetRotation();	// キューブ向き
 	int nNumFlower = CFlower::GetNumAll();			// マナフラワーの総数
+
+	if (m_state == STATE_DESTROY)
+	{ // 破壊されていない場合
+
+		// 処理を抜ける
+		return;
+	}
 
 	// 状態管理
 	switch (m_state)
@@ -269,6 +282,12 @@ void CTarget::Update(void)
 	// メッシュキューブの更新
 	m_pMeshCube->Update();
 
+	// 体力ゲージ3Dの更新
+	m_pLifeGauge->Update();
+
+	// 影の更新
+	m_pShadow->Update();
+
 	// オブジェクトモデルの更新
 	CObjectModel::Update();
 }
@@ -278,11 +297,12 @@ void CTarget::Update(void)
 //============================================================
 void CTarget::Draw(void)
 {
-	// メッシュキューブの描画
-	m_pMeshCube->Draw();
+	if (m_state != STATE_DESTROY)
+	{ // 破壊されていない場合
 
-	// オブジェクトモデルの描画
-	CObjectModel::Draw();
+		// オブジェクトモデルの描画
+		CObjectModel::Draw();
+	}
 }
 
 //============================================================
@@ -303,7 +323,7 @@ void CTarget::Hit(const int nDmg)
 		m_nCounterState = 0;
 
 		// 状態を変更
-		m_state = STATE_DAMAGE;	// ダメージ状態
+		m_state = STATE_DAMAGE;		// ダメージ状態
 	}
 	else
 	{ // 死んでいる場合
@@ -312,11 +332,11 @@ void CTarget::Hit(const int nDmg)
 		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
 		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
-		// TODO：TargetのUninitどうするのこれ
-#if 0
-		// ターゲットオブジェクトの終了
-		Uninit();
-#endif
+		// カウンターを初期化
+		m_nCounterState = 0;
+
+		// 状態を変更
+		m_state = STATE_DESTROY;	// 破壊状態
 	}
 }
 
@@ -377,6 +397,15 @@ CTarget *CTarget::Create(const MODEL model, const D3DXVECTOR3& rPos, const D3DXV
 		return pTarget;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	状態取得処理
+//============================================================
+int CTarget::GetState(void) const
+{
+	// 状態を返す
+	return m_state;
 }
 
 //============================================================

@@ -44,6 +44,7 @@ public:
 		STATE_NORMAL = 0,	// 通常状態
 		STATE_DAMAGE,		// ダメージ状態
 		STATE_HEAL,			// 回復状態
+		STATE_DESTROY,		// 破壊状態
 		STATE_MAX			// この列挙型の総数
 	}STATE;
 
@@ -70,6 +71,7 @@ public:
 	);
 
 	// メンバ関数
+	int GetState(void) const;		// 状態取得
 	float GetRadius(void) const;	// 半径取得
 
 private:

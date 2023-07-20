@@ -99,6 +99,9 @@ HRESULT CFlower::Init(void)
 //============================================================
 void CFlower::Uninit(void)
 {
+	// 影を破棄
+	m_pShadow->Uninit();
+
 	// オブジェクトビルボードの終了
 	CObjectBillboard::Uninit();
 }
@@ -130,6 +133,9 @@ void CFlower::Update(void)
 	// 位置を更新
 	SetPosition(pos);
 
+	// 影の更新
+	m_pShadow->Update();
+
 	// オブジェクトビルボードの更新
 	CObjectBillboard::Update();
 }
@@ -141,6 +147,9 @@ void CFlower::Draw(void)
 {
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
+
+	// 影の描画
+	m_pShadow->Draw();
 
 	// αテストを有効にする
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);		// αテストの有効 / 無効の設定
