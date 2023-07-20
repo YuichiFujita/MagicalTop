@@ -220,12 +220,7 @@ void CLifeGauge3D::Update(void)
 //============================================================
 void CLifeGauge3D::Draw(void)
 {
-	for (int nCntLife = 0; nCntLife < TEXTURE_MAX; nCntLife++)
-	{ // テクスチャの最大数分繰り返す
 
-		// ビルボードの描画
-		m_apBilboard[nCntLife]->Draw();
-	}
 }
 
 //============================================================

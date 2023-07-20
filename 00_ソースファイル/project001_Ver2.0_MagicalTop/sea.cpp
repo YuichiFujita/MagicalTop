@@ -192,12 +192,7 @@ void CSea::Update(void)
 //============================================================
 void CSea::Draw(void)
 {
-	for (int nCntSea = 0; nCntSea < TEXTURE_MAX; nCntSea++)
-	{ // テクスチャの最大数分繰り返す
 
-		// スクロールメッシュフィールドの描画
-		m_apScrollMeshField[nCntSea]->Draw();
-	}
 }
 
 //============================================================

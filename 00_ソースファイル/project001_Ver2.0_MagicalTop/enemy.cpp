@@ -171,12 +171,6 @@ void CEnemy::Update(void)
 //============================================================
 void CEnemy::Draw(void)
 {
-	// 体力ゲージ3Dの描画
-	m_pLifeGauge->Draw();
-
-	// 影の描画
-	m_pShadow->Draw();
-
 	// オブジェクトキャラクターの描画
 	CObjectChara::Draw();
 }
