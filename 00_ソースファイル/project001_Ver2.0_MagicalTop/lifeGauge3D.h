@@ -69,6 +69,8 @@ public:
 
 	// メンバ関数
 	void AddLife(const int nAdd);				// 体力加算
+	void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
+	void SetEnableDraw(const bool bDraw);		// 描画状況設定
 	void SetLifeObject(CObject *pObject);		// 体力表示設定
 	void SetLife(const int nLife);				// 体力設定
 	void SetPositionUp(const float fUp);		// Y位置加算量設定

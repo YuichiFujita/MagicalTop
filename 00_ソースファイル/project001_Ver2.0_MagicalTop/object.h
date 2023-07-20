@@ -84,6 +84,8 @@ public:
 	virtual void Hit(const int nDmg);	// ヒット
 	virtual void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
 	virtual void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
+	virtual void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
+	virtual void SetEnableDraw(const bool bDraw);		// 描画状況設定
 	virtual D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
 	virtual D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	virtual D3DXVECTOR3 GetRotation(void) const;		// 向き取得
@@ -103,6 +105,8 @@ public:
 	void	SetLabel(const LABEL label);	// ラベル設定
 	LABEL	GetLabel(void) const;			// ラベル取得
 	int		GetPriority(void) const;		// 優先順位取得
+	bool	IsUpdate(void) const;			// 更新状況取得
+	bool	IsDraw(void) const;				// 描画状況取得
 	CObject	*GetObject(void);				// オブジェクト取得
 	CObject	*GetPrev(void) const;			// 前オブジェクト取得
 	CObject	*GetNext(void) const;			// 次オブジェクト取得
@@ -120,6 +124,8 @@ private:
 	// メンバ変数
 	LABEL m_label;		// 自身のオブジェクトラベル
 	int m_nPriority;	// 自身の優先順位
+	bool m_bUpdate;		// 自身の更新状況
+	bool m_bDraw;		// 自身の描画状況
 	CObject *m_pPrev;	// 前のオブジェクトへのポインタ
 	CObject *m_pNext;	// 次のオブジェクトへのポインタ
 };

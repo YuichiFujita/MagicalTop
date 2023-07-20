@@ -295,6 +295,38 @@ void CLifeGauge3D::AddLife(const int nAdd)
 }
 
 //============================================================
+//	更新状況の設定処理
+//============================================================
+void CLifeGauge3D::SetEnableUpdate(const bool bUpdate)
+{
+	// 引数の更新状況を設定
+	CObject::SetEnableUpdate(false);	// 自身
+
+	for (int nCntLife = 0; nCntLife < TEXTURE_MAX; nCntLife++)
+	{ // テクスチャの最大数分繰り返す
+
+		// 引数の更新状況を設定
+		m_apBilboard[nCntLife]->SetEnableUpdate(false);
+	}
+}
+
+//============================================================
+//	描画状況の設定処理
+//============================================================
+void CLifeGauge3D::SetEnableDraw(const bool bDraw)
+{
+	// 引数の描画状況を設定
+	CObject::SetEnableDraw(false);		// 自身
+
+	for (int nCntLife = 0; nCntLife < TEXTURE_MAX; nCntLife++)
+	{ // テクスチャの最大数分繰り返す
+
+		// 引数の描画状況を設定
+		m_apBilboard[nCntLife]->SetEnableDraw(false);
+	}
+}
+
+//============================================================
 //	体力表示の設定処理
 //============================================================
 void CLifeGauge3D::SetLifeObject(CObject *pObject)

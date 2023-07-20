@@ -60,6 +60,8 @@ CObject::CObject()
 	// 自身の情報をクリア
 	m_label		= LABEL_NONE;	// オブジェクトラベル
 	m_nPriority	= DEFAULT_PRIO;	// 優先順位
+	m_bUpdate	= true;			// 自身の更新状況
+	m_bDraw		= true;			// 自身の描画状況
 
 	// オブジェクトの総数を加算
 	m_nNumAll++;
@@ -104,6 +106,8 @@ CObject::CObject(const LABEL label, const int nPriority)
 	// 自身の情報を設定
 	m_label		= label;		// オブジェクトラベル
 	m_nPriority	= nPriority;	// 優先順位
+	m_bUpdate	= true;			// 自身の更新状況
+	m_bDraw		= true;			// 自身の描画状況
 
 	// オブジェクトの総数を加算
 	m_nNumAll++;
@@ -144,6 +148,25 @@ void CObject::SetRotation(const D3DXVECTOR3& rRot)
 	// 例外処理
 	assert(false);
 }
+
+//============================================================
+//	更新状況の設定処理
+//============================================================
+void CObject::SetEnableUpdate(const bool bUpdate)
+{
+	// 引数の更新状況を設定
+	m_bUpdate = bUpdate;
+}
+
+//============================================================
+//	描画状況の設定処理
+//============================================================
+void CObject::SetEnableDraw(const bool bDraw)
+{
+	// 引数の描画状況を設定
+	m_bDraw = bDraw;
+}
+
 
 //============================================================
 //	マトリックス取得処理
@@ -265,6 +288,7 @@ void CObject::ReleaseAll(void)
 					}
 				}
 
+				// TODO：Playerの終了でおかしくなるけどそれ自体がおかしくね？
 				if (pObject->m_label != LABEL_NONE)
 				{ // オブジェクトラベルが設定されている場合
 
@@ -330,8 +354,12 @@ void CObject::UpdateAll(void)
 				if (pObject->m_label != LABEL_NONE)
 				{ // オブジェクトラベルが設定されている場合
 
-					// オブジェクトの更新
-					pObject->Update();
+					if (pObject->m_bUpdate)
+					{ // 更新する場合
+
+						// オブジェクトの更新
+						pObject->Update();
+					}
 				}
 
 				// 次のオブジェクトへのポインタを代入
@@ -364,8 +392,12 @@ void CObject::DrawAll(void)
 				// ポインタを宣言
 				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
 
-				// オブジェクトの描画
-				pObject->Draw();
+				if (pObject->m_bDraw)
+				{ // 描画する場合
+
+					// オブジェクトの描画
+					pObject->Draw();
+				}
 
 				// 次のオブジェクトへのポインタを代入
 				pObject = pObjectNext;
@@ -472,6 +504,24 @@ int CObject::GetPriority(void) const
 {
 	// 優先順位を返す
 	return m_nPriority;
+}
+
+//============================================================
+//	更新状況の取得処理
+//============================================================
+bool CObject::IsUpdate(void) const
+{
+	// 更新状況を返す
+	return m_bUpdate;
+}
+
+//============================================================
+//	描画状況の取得処理
+//============================================================
+bool CObject::IsDraw(void) const
+{
+	// 描画状況を返す
+	return m_bDraw;
 }
 
 //============================================================

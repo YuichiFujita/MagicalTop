@@ -176,13 +176,6 @@ void CTarget::Update(void)
 	D3DXVECTOR3 rot = m_pMeshCube->GetRotation();	// キューブ向き
 	int nNumFlower = CFlower::GetNumAll();			// マナフラワーの総数
 
-	if (m_state == STATE_DESTROY)
-	{ // 破壊されていない場合
-
-		// 処理を抜ける
-		return;
-	}
-
 	// 状態管理
 	switch (m_state)
 	{ // 状態ごとの処理
@@ -297,12 +290,8 @@ void CTarget::Update(void)
 //============================================================
 void CTarget::Draw(void)
 {
-	if (m_state != STATE_DESTROY)
-	{ // 破壊されていない場合
-
-		// オブジェクトモデルの描画
-		CObjectModel::Draw();
-	}
+	// オブジェクトモデルの描画
+	CObjectModel::Draw();
 }
 
 //============================================================
@@ -331,6 +320,10 @@ void CTarget::Hit(const int nDmg)
 		// パーティクル3Dオブジェクトを生成
 		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
 		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+
+		// 更新と描画を停止
+		SetEnableUpdate(false);
+		SetEnableDraw(false);
 
 		// カウンターを初期化
 		m_nCounterState = 0;
@@ -397,6 +390,30 @@ CTarget *CTarget::Create(const MODEL model, const D3DXVECTOR3& rPos, const D3DXV
 		return pTarget;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	更新状況の設定処理
+//============================================================
+void CTarget::SetEnableUpdate(const bool bUpdate)
+{
+	// 引数の更新状況を設定
+	CObject::SetEnableUpdate(false);		// 自身
+	m_pMeshCube->SetEnableUpdate(false);	// メッシュキューブ
+	m_pLifeGauge->SetEnableUpdate(false);	// 体力ゲージ
+	m_pShadow->SetEnableUpdate(false);		// 影
+}
+
+//============================================================
+//	描画状況の設定処理
+//============================================================
+void CTarget::SetEnableDraw(const bool bDraw)
+{
+	// 引数の描画状況を設定
+	CObject::SetEnableDraw(false);			// 自身
+	m_pMeshCube->SetEnableDraw(false);		// メッシュキューブ
+	m_pLifeGauge->SetEnableDraw(false);		// 体力ゲージ
+	m_pShadow->SetEnableDraw(false);		// 影
 }
 
 //============================================================
