@@ -185,21 +185,14 @@ public:
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
-
 	void SetVibration(TYPE type, int nPlayer = 0);	// バイブ設定
 	bool GetPress(KEY nJoyKey, int nPlayer = 0);	// プレス取得 (ボタン)
-	bool GetPressL2(int nPlayer = 0);				// プレス取得 (L2)
-	bool GetPressR2(int nPlayer = 0);				// プレス取得 (R2)
 	SHORT GetPressLStickX(int nPlayer = 0);			// プレス取得 (LスティックX)
 	SHORT GetPressLStickY(int nPlayer = 0);			// プレス取得 (LスティックY)
 	SHORT GetPressRStickX(int nPlayer = 0);			// プレス取得 (RスティックX)
 	SHORT GetPressRStickY(int nPlayer = 0);			// プレス取得 (RスティックY)
 	bool GetTrigger(KEY nJoyKey, int nPlayer = 0);	// トリガー取得 (ボタン)
-	bool GetTriggerL2(int nPlayer = 0);				// トリガー取得 (L2)
-	bool GetTriggerR2(int nPlayer = 0);				// トリガー取得 (R2)
 	bool GetRelease(KEY nJoyKey, int nPlayer = 0);	// リリース取得 (ボタン)
-	bool GetReleaseL2(int nPlayer = 0);				// リリース取得 (L2)
-	bool GetReleaseR2(int nPlayer = 0);				// リリース取得 (R2)
 
 private:
 	// メンバ関数

@@ -121,7 +121,7 @@ void CCamera::Uninit(void)
 //============================================================
 void CCamera::Update(void)
 {
-#if 0
+#if 1
 #if 0
 	// カメラの更新 (追従)
 	Follow();

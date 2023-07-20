@@ -781,24 +781,6 @@ bool CInputPad::GetPress(KEY nJoyKey, int nPlayer)
 }
 
 //============================================================
-//	プレス取得処理 (L2)
-//============================================================
-bool CInputPad::GetPressL2(int nPlayer)
-{
-	// 入力情報を返す
-	return (m_aJoyKeyStatePress[nPlayer].Gamepad.bLeftTrigger & 'l') ? true : false;
-}
-
-//============================================================
-//	プレス取得処理 (R2)
-//============================================================
-bool CInputPad::GetPressR2(int nPlayer)
-{
-	// 入力情報を返す
-	return (m_aJoyKeyStatePress[nPlayer].Gamepad.bRightTrigger & 'r') ? true : false;
-}
-
-//============================================================
 //	プレス取得処理 (LスティックX)
 //============================================================
 SHORT CInputPad::GetPressLStickX(int nPlayer)
@@ -844,48 +826,12 @@ bool CInputPad::GetTrigger(KEY nJoyKey, int nPlayer)
 }
 
 //============================================================
-//	トリガー取得処理 (L2)
-//============================================================
-bool CInputPad::GetTriggerL2(int nPlayer)
-{
-	// 入力情報を返す
-	return (m_aJoyKeyStateTrigger[nPlayer].Gamepad.bLeftTrigger & 'l') ? true : false;	// TODO：ビット演算違うらしい
-}
-
-//============================================================
-//	トリガー取得処理 (R2)
-//============================================================
-bool CInputPad::GetTriggerR2(int nPlayer)
-{
-	// 入力情報を返す
-	return (m_aJoyKeyStateTrigger[nPlayer].Gamepad.bRightTrigger & 'r') ? true : false;
-}
-
-//============================================================
 //	リリース取得処理 (ボタン)
 //============================================================
 bool CInputPad::GetRelease(KEY nJoyKey, int nPlayer)
 {
 	// 入力情報を返す
 	return (m_aJoyKeyStateRelease[nPlayer].Gamepad.wButtons & (1 << nJoyKey)) ? true : false;
-}
-
-//============================================================
-//	リリース取得処理 (L2)
-//============================================================
-bool CInputPad::GetReleaseL2(int nPlayer)
-{
-	// 入力情報を返す
-	return (m_aJoyKeyStateRelease[nPlayer].Gamepad.bLeftTrigger & 'l') ? true : false;
-}
-
-//============================================================
-//	リリース取得処理 (R2)
-//============================================================
-bool CInputPad::GetReleaseR2(int nPlayer)
-{
-	// 入力情報を返す
-	return (m_aJoyKeyStateRelease[nPlayer].Gamepad.bRightTrigger & 'r') ? true : false;
 }
 
 //============================================================

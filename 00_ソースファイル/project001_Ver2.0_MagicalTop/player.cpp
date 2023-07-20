@@ -378,7 +378,7 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
-#if 0
+#if 1	// 通常歩行
 	// 移動モーションを設定
 	currentMotion = MOTION_MOVE;
 
@@ -481,7 +481,7 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 			m_rotation = ROTATION_RIGHT;
 		}
 	}
-#else
+#else	// デバッグ用歩行
 	// 移動操作
 	if (pKeyboard->GetPress(DIK_W))
 	{ // 奥移動の操作が行われた場合
