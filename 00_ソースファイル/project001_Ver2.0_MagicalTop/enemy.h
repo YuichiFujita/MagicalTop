@@ -138,12 +138,12 @@ private:
 	// メンバ変数
 	CLifeGauge3D *m_pLifeGauge;	// 体力の情報
 	CShadow *m_pShadow;			// 影の情報
-	const StatusInfo m_status;	// ステータス定数
-	const PartsInfo m_parts;	// パーツ定数
 	D3DXVECTOR3	m_oldPos;		// 過去位置
 	D3DXVECTOR3	m_movePos;		// 位置移動量
 	D3DXVECTOR3	m_moveRot;		// 向き変更量
 	int m_nCounterAtk;			// 攻撃管理カウンター
+	const StatusInfo m_status;	// ステータス定数
+	const PartsInfo m_parts;	// パーツ定数
 };
 
 // 戦車敵クラス

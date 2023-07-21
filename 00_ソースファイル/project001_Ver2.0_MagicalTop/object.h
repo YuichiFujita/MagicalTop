@@ -104,9 +104,10 @@ public:
 	// メンバ関数
 	void	SetLabel(const LABEL label);		// ラベル設定
 	LABEL	GetLabel(void) const;				// ラベル取得
-	void	SetPriority(const int nPriority);	// 優先順位取得
+	void	SetPriority(const int nPriority);	// 優先順位設定
 	int		GetPriority(void) const;			// 優先順位取得
 
+	DWORD	GetID(void) const;		// ユニークID取得
 	bool	IsUpdate(void) const;	// 更新状況取得
 	bool	IsDraw(void) const;		// 描画状況取得
 	CObject	*GetObject(void);		// オブジェクト取得
@@ -121,10 +122,12 @@ private:
 	// 静的メンバ変数
 	static CObject *m_apTop[MAX_PRIO];	// 先頭のオブジェクトへのポインタ
 	static CObject *m_apCur[MAX_PRIO];	// 最後尾のオブジェクトへのポインタ
+	static DWORD m_dwNextID;			// 次のユニークID
 	static int m_nNumAll;				// オブジェクトの総数
 
 	// メンバ変数
 	LABEL m_label;		// 自身のオブジェクトラベル
+	DWORD m_dwID;		// 自身のユニークID
 	int m_nPriority;	// 自身の優先順位
 	bool m_bUpdate;		// 自身の更新状況
 	bool m_bDraw;		// 自身の描画状況

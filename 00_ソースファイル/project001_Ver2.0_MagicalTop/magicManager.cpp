@@ -186,7 +186,7 @@ void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos)
 		if (bSame == false)
 		{ // 同一オブジェクトが存在しなかった場合
 
-			// 描画しない設定にする
+			// 表示しない設定にする
 			m_apLockCursor[nCntLock]->SetEnableDraw(false);
 		}
 	}
@@ -195,7 +195,7 @@ void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos)
 	for (int nCntLock = 0; nCntLock < nCurrentLock; nCntLock++)
 	{ // 今回のロックオン数分繰り返す
 
-		// 描画する設定にする
+		// 表示する設定にする
 		m_apLockCursor[nCntLock]->SetEnableDraw(true);
 
 		// ロックするオブジェクトを設定

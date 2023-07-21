@@ -16,6 +16,7 @@
 //************************************************************
 CObject *CObject::m_apTop[MAX_PRIO] = {};	// 先頭のオブジェクトへのポインタ
 CObject *CObject::m_apCur[MAX_PRIO] = {};	// 最後尾のオブジェクトへのポインタ
+DWORD CObject::m_dwNextID = 0;				// 次のユニークID
 int CObject::m_nNumAll = 0;					// オブジェクトの総数
 
 //************************************************************
@@ -60,8 +61,12 @@ CObject::CObject()
 	// 自身の情報をクリア
 	m_label		= LABEL_NONE;	// オブジェクトラベル
 	m_nPriority	= DEFAULT_PRIO;	// 優先順位
+	m_dwID		= m_dwNextID;	// 自身のユニークID
 	m_bUpdate	= true;			// 自身の更新状況
 	m_bDraw		= true;			// 自身の描画状況
+
+	// ユニークIDを加算
+	m_dwNextID++;
 
 	// オブジェクトの総数を加算
 	m_nNumAll++;
@@ -106,8 +111,12 @@ CObject::CObject(const LABEL label, const int nPriority)
 	// 自身の情報を設定
 	m_label		= label;		// オブジェクトラベル
 	m_nPriority	= nPriority;	// 優先順位
+	m_dwID		= m_dwNextID;	// 自身のユニークID
 	m_bUpdate	= true;			// 自身の更新状況
 	m_bDraw		= true;			// 自身の描画状況
+
+	// ユニークIDを加算
+	m_dwNextID++;
 
 	// オブジェクトの総数を加算
 	m_nNumAll++;
@@ -428,11 +437,11 @@ bool CObject::CheckUse(const CObject *pObject)
 					// ポインタを宣言
 					CObject *pObjectNext = pObjCheck->m_pNext;	// 次のオブジェクトへのポインタ
 
-					if (pObjCheck == pObject)
-					{ // 同アドレスの場合
+					if (pObjCheck->m_dwID == pObject->m_dwID)
+					{ // 同じユニークIDの場合
 
 						// 真を返す
-						return true;	// TODO：同じアドレスが確保されているだけの可能性がある
+						return true;
 					}
 
 					// 次のオブジェクトへのポインタを代入
@@ -494,7 +503,7 @@ CObject::LABEL CObject::GetLabel(void) const
 }
 
 //============================================================
-//	優先順位の取得処理
+//	優先順位の設定処理
 //============================================================
 void CObject::SetPriority(const int nPriority)
 {
@@ -579,6 +588,15 @@ int CObject::GetPriority(void) const
 {
 	// 優先順位を返す
 	return m_nPriority;
+}
+
+//============================================================
+//	ユニークIDの取得処理
+//============================================================
+DWORD CObject::GetID(void) const
+{
+	// ユニークIDを返す
+	return m_dwID;
 }
 
 //============================================================
