@@ -167,7 +167,6 @@ void CObject::SetEnableDraw(const bool bDraw)
 	m_bDraw = bDraw;
 }
 
-
 //============================================================
 //	マトリックス取得処理
 //============================================================
@@ -269,7 +268,6 @@ void CObject::ReleaseAll(void)
 				// ポインタを宣言
 				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
 
-				// TODO：オブジェクトの他者管理これで本当に大丈夫？
 				if (USED(pObjectNext))
 				{ // 次のオブジェクトが存在する場合
 
@@ -288,7 +286,6 @@ void CObject::ReleaseAll(void)
 					}
 				}
 
-				// TODO：Playerの終了でおかしくなるけどそれ自体がおかしくね？
 				if (pObject->m_label != LABEL_NONE)
 				{ // オブジェクトラベルが設定されている場合
 
@@ -332,7 +329,6 @@ void CObject::UpdateAll(void)
 				// ポインタを宣言
 				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
 
-				// TODO：オブジェクトの他者管理これで本当に大丈夫？
 				if (USED(pObjectNext))
 				{ // 次のオブジェクトが存在する場合
 
@@ -495,6 +491,85 @@ CObject::LABEL CObject::GetLabel(void) const
 {
 	// ラベルを返す
 	return m_label;
+}
+
+//============================================================
+//	優先順位の取得処理
+//============================================================
+void CObject::SetPriority(const int nPriority)
+{
+	//--------------------------------------------------------
+	//	リストの再接続
+	//--------------------------------------------------------
+	// 前のオブジェクトをつなぎなおす
+	if (USED(m_pNext))
+	{ // 次のオブジェクトが存在する場合
+
+		// 前のオブジェクトを変更
+		m_pNext->m_pPrev = m_pPrev;
+	}
+
+	// 次のオブジェクトをつなぎなおす
+	if (USED(m_pPrev))
+	{ // 前のオブジェクトが存在する場合
+
+		// 次のオブジェクトを変更
+		m_pPrev->m_pNext = m_pNext;
+	}
+
+	// 先頭オブジェクトの変更
+	if (m_apTop[m_nPriority] == this)
+	{ // 先頭オブジェクトが破棄するオブジェクトだった場合
+
+		// 次のオブジェクトを先頭に指定
+		m_apTop[m_nPriority] = m_pNext;
+	}
+
+	// 最後尾オブジェクトの変更
+	if (m_apCur[m_nPriority] == this)
+	{ // 最後尾オブジェクトが破棄するオブジェクトだった場合
+
+		// 前のオブジェクトを最後尾に指定
+		m_apCur[m_nPriority] = m_pPrev;
+	}
+
+	//--------------------------------------------------------
+	//	優先順位の設定・リストへの追加
+	//--------------------------------------------------------
+	// 引数の優先順位を設定
+	m_nPriority = nPriority;
+
+	// 自身のオブジェクトを引数の優先順位リストに変更
+	if (USED(m_apCur[nPriority]))
+	{ // 最後尾が存在する場合
+
+		// 現在の最後尾オブジェクトの次オブジェクトを自身に設定
+		m_apCur[nPriority]->m_pNext = this;
+
+		// 前オブジェクトを設定
+		m_pPrev = m_apCur[nPriority];	// 現在の最後尾オブジェクト
+
+		// 次オブジェクトをクリア
+		m_pNext = NULL;
+
+		// 自身の情報アドレスを最後尾に設定
+		m_apCur[nPriority] = this;
+	}
+	else
+	{ // 最後尾が存在しない場合
+
+		// 自身の情報アドレスを先頭に設定
+		m_apTop[nPriority] = this;
+
+		// 自身の情報アドレスを最後尾に設定
+		m_apCur[nPriority] = this;
+
+		// 前オブジェクトのクリア
+		m_pPrev = NULL;
+
+		// 次オブジェクトのクリア
+		m_pNext = NULL;
+	}
 }
 
 //============================================================

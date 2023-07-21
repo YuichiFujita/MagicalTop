@@ -102,14 +102,16 @@ public:
 	static CObject *GetCur(const int nPriority);	// 最後尾オブジェクト取得
 
 	// メンバ関数
-	void	SetLabel(const LABEL label);	// ラベル設定
-	LABEL	GetLabel(void) const;			// ラベル取得
-	int		GetPriority(void) const;		// 優先順位取得
-	bool	IsUpdate(void) const;			// 更新状況取得
-	bool	IsDraw(void) const;				// 描画状況取得
-	CObject	*GetObject(void);				// オブジェクト取得
-	CObject	*GetPrev(void) const;			// 前オブジェクト取得
-	CObject	*GetNext(void) const;			// 次オブジェクト取得
+	void	SetLabel(const LABEL label);		// ラベル設定
+	LABEL	GetLabel(void) const;				// ラベル取得
+	void	SetPriority(const int nPriority);	// 優先順位取得
+	int		GetPriority(void) const;			// 優先順位取得
+
+	bool	IsUpdate(void) const;	// 更新状況取得
+	bool	IsDraw(void) const;		// 描画状況取得
+	CObject	*GetObject(void);		// オブジェクト取得
+	CObject	*GetPrev(void) const;	// 前オブジェクト取得
+	CObject	*GetNext(void) const;	// 次オブジェクト取得
 
 protected:
 	// メンバ関数

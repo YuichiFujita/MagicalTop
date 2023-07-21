@@ -398,10 +398,10 @@ CTarget *CTarget::Create(const MODEL model, const D3DXVECTOR3& rPos, const D3DXV
 void CTarget::SetEnableUpdate(const bool bUpdate)
 {
 	// 引数の更新状況を設定
-	CObject::SetEnableUpdate(false);		// 自身
-	m_pMeshCube->SetEnableUpdate(false);	// メッシュキューブ
-	m_pLifeGauge->SetEnableUpdate(false);	// 体力ゲージ
-	m_pShadow->SetEnableUpdate(false);		// 影
+	CObject::SetEnableUpdate(bUpdate);		// 自身
+	m_pMeshCube->SetEnableUpdate(bUpdate);	// メッシュキューブ
+	m_pLifeGauge->SetEnableUpdate(bUpdate);	// 体力ゲージ
+	m_pShadow->SetEnableUpdate(bUpdate);	// 影
 }
 
 //============================================================
@@ -410,10 +410,10 @@ void CTarget::SetEnableUpdate(const bool bUpdate)
 void CTarget::SetEnableDraw(const bool bDraw)
 {
 	// 引数の描画状況を設定
-	CObject::SetEnableDraw(false);			// 自身
-	m_pMeshCube->SetEnableDraw(false);		// メッシュキューブ
-	m_pLifeGauge->SetEnableDraw(false);		// 体力ゲージ
-	m_pShadow->SetEnableDraw(false);		// 影
+	CObject::SetEnableDraw(bDraw);			// 自身
+	m_pMeshCube->SetEnableDraw(bDraw);		// メッシュキューブ
+	m_pLifeGauge->SetEnableDraw(bDraw);		// 体力ゲージ
+	m_pShadow->SetEnableDraw(bDraw);		// 影
 }
 
 //============================================================

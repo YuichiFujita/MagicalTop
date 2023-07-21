@@ -18,7 +18,6 @@
 //************************************************************
 #define LOCKCURSOR_PRIO	(4)	// ロックオン表示の優先順位
 #define LOCKCURSOR_SIZE	(D3DXVECTOR3(120.0f, 120.0f, 0.0f))	// 大きさ
-
 #define ADD_ROT_UP		(0.05f)		// 向き加算量(上四角)
 #define ADD_ROT_DOWN	(0.025f)	// 向き加算量(下四角)
 
@@ -38,12 +37,11 @@ const char *CLockCursor::mc_apTextureFile[] =	// テクスチャ定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CLockCursor::CLockCursor() : CObject(CObject::LABEL_LOCK, LOCKCURSOR_PRIO)
+CLockCursor::CLockCursor() : CObject(CObject::LABEL_LOCK, DEFAULT_PRIO)
 {
 	// メンバ変数をクリア
 	memset(&m_apBilboard[0], 0, sizeof(m_apBilboard));	// ビルボードの情報
 	m_pLock = NULL;		// ロックオンオブジェクトの情報
-	m_bDraw = false;	// 描画状況
 }
 
 //============================================================
@@ -68,7 +66,6 @@ HRESULT CLockCursor::Init(void)
 	// メンバ変数を初期化
 	memset(&m_apBilboard[0], 0, sizeof(m_apBilboard));	// ビルボードの情報
 	m_pLock = NULL;		// ロックオンオブジェクトの情報
-	m_bDraw = false;	// 描画状況
 
 	for (int nCntLock = 0; nCntLock < TEXTURE_MAX; nCntLock++)
 	{ // テクスチャの最大数分繰り返す
@@ -92,6 +89,9 @@ HRESULT CLockCursor::Init(void)
 
 		// テクスチャを割当
 		m_apBilboard[nCntLock]->BindTexture(nTextureID);
+
+		// 優先順位を設定
+		m_apBilboard[nCntLock]->SetPriority(LOCKCURSOR_PRIO);
 	}
 
 	// 成功を返す
@@ -171,17 +171,7 @@ void CLockCursor::Update(void)
 //============================================================
 void CLockCursor::Draw(void)
 {
-	// TODO：bDrawどうすっぺこれ
-	if (m_bDraw)
-	{ // 描画する場合
 
-		for (int nCntLock = 0; nCntLock < TEXTURE_MAX; nCntLock++)
-		{ // テクスチャの最大数分繰り返す
-
-			// ビルボードの描画
-			m_apBilboard[nCntLock]->Draw();
-		}
-	}
 }
 
 //============================================================
@@ -246,14 +236,14 @@ void CLockCursor::SetLockObject(CObject *pObject)
 }
 
 //============================================================
-//	描画状況の設定処理
+//	ロックオン表示の設定処理
 //============================================================
-void CLockCursor::SetEnableDraw(const bool bDraw)
+void CLockCursor::SetEnableDisp(const bool bDisp)
 {
-	// 引数の描画状況を設定
-	m_bDraw = bDraw;
+	// 引数の描画状況の設定
+	SetEnableDraw(bDisp);
 
-	if (bDraw == false)
+	if (bDisp == false)
 	{ // 描画しない設定だった場合
 
 		// ロックオンしているオブジェクトの情報を初期化
@@ -265,6 +255,38 @@ void CLockCursor::SetEnableDraw(const bool bDraw)
 			// 向きを初期化
 			m_apBilboard[nCntLock]->SetRotation(VEC3_ZERO);
 		}
+	}
+}
+
+//============================================================
+//	更新状況の設定処理
+//============================================================
+void CLockCursor::SetEnableUpdate(const bool bUpdate)
+{
+	// 引数の更新状況を設定
+	CObject::SetEnableUpdate(bUpdate);	// 自身
+
+	for (int nCntLock = 0; nCntLock < TEXTURE_MAX; nCntLock++)
+	{ // テクスチャの最大数分繰り返す
+
+		// 引数の更新状況を設定
+		m_apBilboard[nCntLock]->SetEnableUpdate(bUpdate);	// ロックオン表示
+	}
+}
+
+//============================================================
+//	描画状況の設定処理
+//============================================================
+void CLockCursor::SetEnableDraw(const bool bDraw)
+{
+	// 引数の描画状況を設定
+	CObject::SetEnableDraw(bDraw);		// 自身
+
+	for (int nCntLock = 0; nCntLock < TEXTURE_MAX; nCntLock++)
+	{ // テクスチャの最大数分繰り返す
+
+		// 引数の描画状況を設定
+		m_apBilboard[nCntLock]->SetEnableDraw(bDraw);		// ロックオン表示
 	}
 }
 
@@ -284,13 +306,4 @@ const CObject *CLockCursor::GetLockObject(void) const
 {
 	// ロックオン中のオブジェクトを返す
 	return m_pLock;
-}
-
-//============================================================
-//	描画状況取得処理
-//============================================================
-bool CLockCursor::IsDraw(void) const
-{
-	// 描画状況を返す
-	return m_bDraw;
 }
