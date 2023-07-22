@@ -96,13 +96,18 @@ void CObjectChara::Uninit(void)
 		}
 	}
 
-	// モーションを破棄
-	if (FAILED(m_pMotion->Release(m_pMotion)))
-	{ // 破棄に失敗した場合
+	if (USED(m_pMotion))
+	{ // モーションが使われている場合
 
-		// 例外処理
-		assert(false);
+		// モーションを破棄
+		if (FAILED(m_pMotion->Release(m_pMotion)))
+		{ // 破棄に失敗した場合
+
+			// 例外処理
+			assert(false);
+		}
 	}
+	else { assert(false); }	// 非使用中
 
 	// オブジェクトキャラクターを破棄
 	Release();

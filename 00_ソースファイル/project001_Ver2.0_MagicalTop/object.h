@@ -97,6 +97,7 @@ public:
 	static void ReleaseAll(void);	// 全破棄
 	static void UpdateAll(void);	// 全更新
 	static void DrawAll(void);		// 全描画
+	static void DeathAll(void);		// 全死亡
 	static bool CheckUse(const CObject *pObject);	// 使用確認
 	static CObject *GetTop(const int nPriority);	// 先頭オブジェクト取得
 	static CObject *GetCur(const int nPriority);	// 最後尾オブジェクト取得
@@ -110,6 +111,7 @@ public:
 	DWORD	GetID(void) const;		// ユニークID取得
 	bool	IsUpdate(void) const;	// 更新状況取得
 	bool	IsDraw(void) const;		// 描画状況取得
+	bool	IsDeath(void) const;	// 死亡フラグ取得
 	CObject	*GetObject(void);		// オブジェクト取得
 	CObject	*GetPrev(void) const;	// 前オブジェクト取得
 	CObject	*GetNext(void) const;	// 次オブジェクト取得
@@ -131,6 +133,7 @@ private:
 	int m_nPriority;	// 自身の優先順位
 	bool m_bUpdate;		// 自身の更新状況
 	bool m_bDraw;		// 自身の描画状況
+	bool m_bDeath;		// 自身の死亡フラグ
 	CObject *m_pPrev;	// 前のオブジェクトへのポインタ
 	CObject *m_pNext;	// 次のオブジェクトへのポインタ
 };

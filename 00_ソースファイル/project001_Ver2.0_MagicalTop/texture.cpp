@@ -24,9 +24,16 @@ int CTexture::m_nNumAll = 0;	// テクスチャの総数
 //============================================================
 CTexture::CTexture()
 {
-	// メンバ変数をクリア
-	memset(&m_apTexture[0], 0, sizeof(m_apTexture));	// テクスチャへのポインタ
-	memset(&m_pFileName[0][0], 0, sizeof(m_pFileName));	// 読み込んだテクスチャファイル名
+	// テクスチャへのポインタをクリア
+	memset(&m_apTexture[0], 0, sizeof(m_apTexture));
+
+	// 読み込んだテクスチャファイル名をクリア
+	for (int nCntTexture = 0; nCntTexture < MAX_TEXTURE; nCntTexture++)
+	{ // テクスチャの最大数分繰り返す
+
+		// NULL文字をコピー
+		strcpy(&m_pFileName[nCntTexture][0], NONE_STRING);
+	}
 }
 
 //============================================================
@@ -45,16 +52,21 @@ HRESULT CTexture::Load(void)
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
-	// メンバ変数を初期化
+	// テクスチャへのポインタを初期化
 	for (int nCntTexture = 0; nCntTexture < MAX_TEXTURE; nCntTexture++)
 	{ // テクスチャの最大数分繰り返す
 
-		// テクスチャへのポインタを初期化
+		// NULLを代入
 		m_apTexture[nCntTexture] = NULL;
 	}
 
 	// 読み込んだテクスチャファイル名を初期化
-	memset(&m_pFileName[0][0], 0, sizeof(m_pFileName));
+	for (int nCntTexture = 0; nCntTexture < MAX_TEXTURE; nCntTexture++)
+	{ // テクスチャの最大数分繰り返す
+
+		// NULL文字をコピー
+		strcpy(&m_pFileName[nCntTexture][0], NONE_STRING);
+	}
 
 	// 成功を返す
 	return S_OK;

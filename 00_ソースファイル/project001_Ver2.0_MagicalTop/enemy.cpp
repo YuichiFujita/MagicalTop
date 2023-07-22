@@ -183,27 +183,31 @@ void CEnemy::Hit(const int nDmg)
 	// 変数を宣言
 	D3DXVECTOR3 posEnemy = GetPosition();	// 敵位置
 
-	// 体力からダメージ分減算
-	m_pLifeGauge->AddLife(-nDmg);
+	if (IsDeath() != true)
+	{ // 死亡フラグが立っていない場合
 
-	if (m_pLifeGauge->GetLife() > 0)
-	{ // 生きている場合
+		// 体力からダメージ分減算
+		m_pLifeGauge->AddLife(-nDmg);
 
-		// パーティクル3Dオブジェクトを生成
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy);
-	}
-	else
-	{ // 死んでいる場合
+		if (m_pLifeGauge->GetLife() > 0)
+		{ // 生きている場合
 
-		// パーティクル3Dオブジェクトを生成
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+			// パーティクル3Dオブジェクトを生成
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy);
+		}
+		else
+		{ // 死んでいる場合
 
-		// スコアを加算
-		CManager::GetScore()->Add(m_status.nScore);
+			// パーティクル3Dオブジェクトを生成
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
-		// 敵オブジェクトの終了
-		Uninit();
+			// スコアを加算
+			CManager::GetScore()->Add(m_status.nScore);
+
+			// 敵オブジェクトの終了
+			Uninit();
+		}
 	}
 }
 

@@ -31,9 +31,16 @@ int CModel::m_nNumAll = 0;	// モデルの総数
 //============================================================
 CModel::CModel()
 {
-	// メンバ変数をクリア
-	memset(&m_aModel[0], 0, sizeof(m_aModel));			// モデルへのポインタ
-	memset(&m_pFileName[0][0], 0, sizeof(m_pFileName));	// 読み込んだモデルファイル名
+	// モデルへのポインタをクリア
+	memset(&m_aModel[0], 0, sizeof(m_aModel));
+
+	// 読み込んだモデルファイル名をクリア
+	for (int nCntModel = 0; nCntModel < MAX_MODEL; nCntModel++)
+	{ // モデルの最大数分繰り返す
+
+		// NULL文字をコピー
+		strcpy(&m_pFileName[nCntModel][0], NONE_STRING);
+	}
 }
 
 //============================================================
@@ -52,9 +59,16 @@ HRESULT CModel::Load(void)
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
-	// メンバ変数を初期化
-	memset(&m_aModel[0], 0, sizeof(m_aModel));			// モデルへのポインタ
-	memset(&m_pFileName[0][0], 0, sizeof(m_pFileName));	// 読み込んだモデルファイル名
+	// モデルへのポインタを初期化
+	memset(&m_aModel[0], 0, sizeof(m_aModel));
+
+	// 読み込んだモデルファイル名を初期化
+	for (int nCntModel = 0; nCntModel < MAX_MODEL; nCntModel++)
+	{ // モデルの最大数分繰り返す
+
+		// NULL文字をコピー
+		strcpy(&m_pFileName[nCntModel][0], NONE_STRING);
+	}
 
 	// 成功を返す
 	return S_OK;

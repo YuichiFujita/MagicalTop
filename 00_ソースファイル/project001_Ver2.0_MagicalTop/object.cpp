@@ -64,6 +64,7 @@ CObject::CObject()
 	m_dwID		= m_dwNextID;	// 自身のユニークID
 	m_bUpdate	= true;			// 自身の更新状況
 	m_bDraw		= true;			// 自身の描画状況
+	m_bDeath	= false;		// 自身の死亡フラグ
 
 	// ユニークIDを加算
 	m_dwNextID++;
@@ -114,6 +115,7 @@ CObject::CObject(const LABEL label, const int nPriority)
 	m_dwID		= m_dwNextID;	// 自身のユニークID
 	m_bUpdate	= true;			// 自身の更新状況
 	m_bDraw		= true;			// 自身の描画状況
+	m_bDeath	= false;		// 自身の死亡フラグ
 
 	// ユニークIDを加算
 	m_dwNextID++;
@@ -277,23 +279,24 @@ void CObject::ReleaseAll(void)
 				// ポインタを宣言
 				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
 
-				if (USED(pObjectNext))
-				{ // 次のオブジェクトが存在する場合
+				// TODO
+				//if (USED(pObjectNext))
+				//{ // 次のオブジェクトが存在する場合
 
-					while (pObjectNext->m_label == LABEL_NONE)
-					{ // 次のオブジェクトのラベルが設定されていない場合繰り返す
+				//	while (pObjectNext->m_label == LABEL_NONE)
+				//	{ // 次のオブジェクトのラベルが設定されていない場合繰り返す
 
-						// さらに次のオブジェクトへのポインタを指定
-						pObjectNext = pObjectNext->m_pNext;
+				//		// さらに次のオブジェクトへのポインタを指定
+				//		pObjectNext = pObjectNext->m_pNext;
 
-						if (UNUSED(pObjectNext))
-						{ // さらに次のオブジェクトが存在しない場合
+				//		if (UNUSED(pObjectNext))
+				//		{ // さらに次のオブジェクトが存在しない場合
 
-							// 処理を抜ける
-							break;
-						}
-					}
-				}
+				//			// 処理を抜ける
+				//			break;
+				//		}
+				//	}
+				//}
 
 				if (pObject->m_label != LABEL_NONE)
 				{ // オブジェクトラベルが設定されている場合
@@ -307,6 +310,9 @@ void CObject::ReleaseAll(void)
 			}
 		}
 	}
+
+	// 全死亡処理
+	DeathAll();
 
 	// 例外処理
 	if (m_nNumAll != 0) { assert(false); }	// 破棄の失敗
@@ -338,23 +344,24 @@ void CObject::UpdateAll(void)
 				// ポインタを宣言
 				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
 
-				if (USED(pObjectNext))
-				{ // 次のオブジェクトが存在する場合
+				// TODO
+				//if (USED(pObjectNext))
+				//{ // 次のオブジェクトが存在する場合
 
-					while (pObjectNext->m_label == LABEL_NONE)
-					{ // 次のオブジェクトのラベルが設定されていない場合繰り返す
+				//	while (pObjectNext->m_label == LABEL_NONE)
+				//	{ // 次のオブジェクトのラベルが設定されていない場合繰り返す
 
-						// さらに次のオブジェクトへのポインタを指定
-						pObjectNext = pObjectNext->m_pNext;
+				//		// さらに次のオブジェクトへのポインタを指定
+				//		pObjectNext = pObjectNext->m_pNext;
 
-						if (UNUSED(pObjectNext))
-						{ // さらに次のオブジェクトが存在しない場合
+				//		if (UNUSED(pObjectNext))
+				//		{ // さらに次のオブジェクトが存在しない場合
 
-							// 処理を抜ける
-							break;
-						}
-					}
-				}
+				//			// 処理を抜ける
+				//			break;
+				//		}
+				//	}
+				//}
 
 				if (pObject->m_label != LABEL_NONE)
 				{ // オブジェクトラベルが設定されている場合
@@ -372,6 +379,9 @@ void CObject::UpdateAll(void)
 			}
 		}
 	}
+
+	// 全死亡処理
+	DeathAll();
 }
 
 //============================================================
@@ -412,6 +422,79 @@ void CObject::DrawAll(void)
 }
 
 //============================================================
+//	全死亡処理
+//============================================================
+void CObject::DeathAll(void)
+{
+	// ポインタを宣言
+	CObject *pObject;	// オブジェクト代入用
+
+	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
+	{ // 優先順位の総数分繰り返す
+
+		if (USED(m_apTop[nCntPri]))
+		{ // 先頭が存在する場合
+
+			// オブジェクトの先頭を代入
+			pObject = m_apTop[nCntPri];
+
+			while (USED(pObject))
+			{ // オブジェクトが使用されている場合繰り返す
+
+				// ポインタを宣言
+				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
+
+				if (pObject->m_bDeath)
+				{ // 死亡フラグが立っている場合
+
+					if (USED(pObject))
+					{ // 使用されている場合
+
+						// 前のオブジェクトをつなぎなおす
+						if (USED(pObject->m_pNext))
+						{ // 次のオブジェクトが存在する場合
+
+							// 前のオブジェクトを変更
+							pObject->m_pNext->m_pPrev = pObject->m_pPrev;
+						}
+
+						// 次のオブジェクトをつなぎなおす
+						if (USED(pObject->m_pPrev))
+						{ // 前のオブジェクトが存在する場合
+
+							// 次のオブジェクトを変更
+							pObject->m_pPrev->m_pNext = pObject->m_pNext;
+						}
+
+						// 先頭オブジェクトの変更
+						if (m_apTop[pObject->m_nPriority] == pObject)
+						{ // 先頭オブジェクトが破棄するオブジェクトだった場合
+
+							// 次のオブジェクトを先頭に指定
+							m_apTop[pObject->m_nPriority] = pObject->m_pNext;
+						}
+
+						// 最後尾オブジェクトの変更
+						if (m_apCur[pObject->m_nPriority] == pObject)
+						{ // 最後尾オブジェクトが破棄するオブジェクトだった場合
+
+							// 前のオブジェクトを最後尾に指定
+							m_apCur[pObject->m_nPriority] = pObject->m_pPrev;
+						}
+
+						// メモリ開放
+						delete pObject;
+					}
+				}
+
+				// 次のオブジェクトへのポインタを代入
+				pObject = pObjectNext;
+			}
+		}
+	}
+}
+
+//============================================================
 //	使用確認処理
 //============================================================
 bool CObject::CheckUse(const CObject *pObject)
@@ -437,11 +520,15 @@ bool CObject::CheckUse(const CObject *pObject)
 					// ポインタを宣言
 					CObject *pObjectNext = pObjCheck->m_pNext;	// 次のオブジェクトへのポインタ
 
-					if (pObjCheck->m_dwID == pObject->m_dwID)
-					{ // 同じユニークIDの場合
+					if (pObjCheck == pObject)
+					{ // 同じアドレスの場合
 
-						// 真を返す
-						return true;
+						if (pObjCheck->m_dwID == pObject->m_dwID)
+						{ // 同じユニークIDの場合
+
+							// 真を返す
+							return true;	// TODO：ゴミが入っているメモリ内の値と一致する場合がある
+						}
 					}
 
 					// 次のオブジェクトへのポインタを代入
@@ -618,6 +705,15 @@ bool CObject::IsDraw(void) const
 }
 
 //============================================================
+//	死亡フラグ取得処理
+//============================================================
+bool CObject::IsDeath(void) const
+{
+	// 死亡フラグを返す
+	return m_bDeath;
+}
+
+//============================================================
 //	オブジェクト取得処理
 //============================================================
 CObject *CObject::GetObject(void)
@@ -649,42 +745,10 @@ CObject *CObject::GetNext(void) const
 //============================================================
 void CObject::Release(void)
 {
-	// 前のオブジェクトをつなぎなおす
-	if (USED(m_pNext))
-	{ // 次のオブジェクトが存在する場合
-
-		// 前のオブジェクトを変更
-		m_pNext->m_pPrev = m_pPrev;
-	}
-
-	// 次のオブジェクトをつなぎなおす
-	if (USED(m_pPrev))
-	{ // 前のオブジェクトが存在する場合
-
-		// 次のオブジェクトを変更
-		m_pPrev->m_pNext = m_pNext;
-	}
-
-	// 先頭オブジェクトの変更
-	if (m_apTop[m_nPriority] == this)
-	{ // 先頭オブジェクトが破棄するオブジェクトだった場合
-
-		// 次のオブジェクトを先頭に指定
-		m_apTop[m_nPriority] = m_pNext;
-	}
-
-	// 最後尾オブジェクトの変更
-	if (m_apCur[m_nPriority] == this)
-	{ // 最後尾オブジェクトが破棄するオブジェクトだった場合
-
-		// 前のオブジェクトを最後尾に指定
-		m_apCur[m_nPriority] = m_pPrev;
-	}
-
 	if (USED(this))
 	{ // 使用されている場合
 
-		// メモリ開放
-		delete this;
+		// 死亡フラグを立てる
+		m_bDeath = true;
 	}
 }
