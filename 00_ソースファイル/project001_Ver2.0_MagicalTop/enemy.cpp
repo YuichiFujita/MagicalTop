@@ -267,6 +267,51 @@ CEnemy *CEnemy::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVECTO
 }
 
 //============================================================
+//	敵ランダム生成処理
+//============================================================
+void CEnemy::RandomSpawn
+(
+	const int nNum,	// 生成数
+	const TYPE type	// 種類
+)
+{
+	// 変数を宣言
+	D3DXVECTOR3 pos, rot;	// 位置・向き設定用
+	D3DXVECTOR3 posTarget;	// ターゲット位置
+	int nLimit = (int)CManager::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
+
+	// ポインタを宣言
+	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
+
+	if (USED(CManager::GetTarget()))
+	{ // ターゲットが使用されている場合
+
+		for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
+		{ // 生成数分繰り返す
+
+			// ターゲット位置を取得
+			posTarget = pTarget->GetPosition();
+
+			// 生成位置を設定
+			pos.x = (float)(rand() % (nLimit * 2) - nLimit + 1);
+			pos.y = 3000.0f;	// TODO：定数直す
+			pos.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
+
+			// 生成向きを設定
+			rot = VEC3_ZERO;	// 向きを初期化
+			rot.y = atan2f(pos.x - posTarget.x, pos.z - posTarget.z);	// ターゲットの方向を向かせる
+
+			// 位置を補正
+			pos.x = sinf(rot.y) * (CManager::GetStage()->GetStageLimit().fRadius - m_aStatusInfo[type].fRadius);
+			pos.z = cosf(rot.y) * (CManager::GetStage()->GetStageLimit().fRadius - m_aStatusInfo[type].fRadius);
+
+			// 敵オブジェクトの生成
+			CEnemy::Create(type, pos, rot);
+		}
+	}
+}
+
+//============================================================
 //	総数取得処理
 //============================================================
 int CEnemy::GetNumAll(void)
@@ -761,17 +806,17 @@ void CEnemyCar::CollisionFind(void)
 				// 対象の逆方向に移動 (後退)
 				moveEnemy.x += sinf(rotEnemy.y) * status.fBackwardMove;
 				moveEnemy.z += cosf(rotEnemy.y) * status.fBackwardMove;
-
-				// 重力を加算
-				moveEnemy.y -= ENE_GRAVITY;
-
-				// 移動量を加算
-				posEnemy += moveEnemy;
-
-				// 移動量を減衰
-				moveEnemy.x += (0.0f - moveEnemy.x) * ENE_REV;
-				moveEnemy.z += (0.0f - moveEnemy.z) * ENE_REV;
 			}
+
+			// 重力を加算
+			moveEnemy.y -= ENE_GRAVITY;
+
+			// 移動量を加算
+			posEnemy += moveEnemy;
+
+			// 移動量を減衰
+			moveEnemy.x += (0.0f - moveEnemy.x) * ENE_REV;
+			moveEnemy.z += (0.0f - moveEnemy.z) * ENE_REV;
 
 			// ターゲットとの当たり判定
 			CollisionTarget(posEnemy);

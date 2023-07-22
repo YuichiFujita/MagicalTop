@@ -113,6 +113,8 @@ void CWaveManager::Update(void)
 
 	case STATE_PROGRESSION:		// ウェーブ進行状態
 
+
+
 #if 0
 		//if ()
 		{ // ウェーブをクリアした場合

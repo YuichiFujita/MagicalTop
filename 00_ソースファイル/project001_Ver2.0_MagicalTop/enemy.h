@@ -99,6 +99,11 @@ public:
 		const D3DXVECTOR3& rPos,	// ˆÊ’u
 		const D3DXVECTOR3& rRot		// Œü‚«
 	);
+	static void RandomSpawn	// “Gƒ‰ƒ“ƒ_ƒ€¶¬
+	( // ˆø”
+		const int nNum,	// ¶¬”
+		const TYPE type	// í—Ş
+	);
 	static int GetNumAll(void);		// ‘”æ“¾
 
 	// ƒƒ“ƒoŠÖ”

@@ -241,7 +241,7 @@ CFlower *CFlower::Create
 //============================================================
 //	マナフラワーランダム生成処理
 //============================================================
-void CFlower::RandomGrow
+void CFlower::RandomSpawn
 (
 	const int nNum,				// 生成数
 	const TYPE type,			// 種類
@@ -256,20 +256,24 @@ void CFlower::RandomGrow
 	// ポインタを宣言
 	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
 
-	for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
-	{ // 生成数分繰り返す
+	if (USED(CManager::GetTarget()))
+	{ // ターゲットが使用されている場合
 
-		// 生成位置を設定
-		pos.x = (float)(rand() % (nLimit * 2) - nLimit + 1);
-		pos.y = 0.0f;
-		pos.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
+		for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
+		{ // 生成数分繰り返す
 
-		// 生成位置を補正
-		collision::CirclePillar(pos, pTarget->GetPosition(), rSize.x, pTarget->GetRadius());	// ターゲット内部の生成防止
-		CManager::GetStage()->LimitPosition(pos, rSize.x);										// ステージ範囲外の生成防止
+			// 生成位置を設定
+			pos.x = (float)(rand() % (nLimit * 2) - nLimit + 1);
+			pos.y = 0.0f;
+			pos.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
 
-		// マナフラワーオブジェクトの生成
-		CFlower::Create(type, pos, rSize, nLife);
+			// 生成位置を補正
+			collision::CirclePillar(pos, pTarget->GetPosition(), rSize.x, pTarget->GetRadius());	// ターゲット内部の生成防止
+			CManager::GetStage()->LimitPosition(pos, rSize.x);										// ステージ範囲外の生成防止
+
+			// マナフラワーオブジェクトの生成
+			CFlower::Create(type, pos, rSize, nLife);
+		}
 	}
 }
 

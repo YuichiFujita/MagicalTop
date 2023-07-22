@@ -300,7 +300,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(1500.0f, 1500.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
 #else
 	// マナフラワーランダム生成
-	CFlower::RandomGrow(30, CFlower::TYPE_NORMAL, D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
+	CFlower::RandomSpawn(30, CFlower::TYPE_NORMAL, D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
 #endif
 
 #if 0
@@ -308,6 +308,9 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, -2000.0f), VEC3_ZERO);
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, 2000.0f), VEC3_ZERO);
+#else
+	// 敵ランダム生成
+	CEnemy::RandomSpawn(6, CEnemy::TYPE_CAR);
 #endif
 
 	// TODO：初期設定
@@ -525,10 +528,15 @@ void CManager::Update(void)
 
 	if (m_pKeyboard->GetTrigger(DIK_1))
 	{
+#if 0
 		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f, 0.0f), VEC3_ZERO);
 		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, -2000.0f), VEC3_ZERO);
 		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, 2000.0f), VEC3_ZERO);
+#else
+		// 敵ランダム生成
+		CEnemy::RandomSpawn(6, CEnemy::TYPE_CAR);
+#endif
 	}
 
 	if (USED(m_pPad))
