@@ -299,37 +299,44 @@ void CTarget::Draw(void)
 //============================================================
 void CTarget::Hit(const int nDmg)
 {
-	// 体力からダメージ分減算
-	m_pLifeGauge->AddLife(-nDmg);
+	// 変数を宣言
+	D3DXVECTOR3 pos = GetPosition();	// ターゲット位置
 
-	if (m_pLifeGauge->GetLife() > 0)
-	{ // 生きている場合
+	if (IsDeath() != true)
+	{ // 死亡フラグが立っていない場合
 
-		// パーティクル3Dオブジェクトを生成
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition());
+		// 体力からダメージ分減算
+		m_pLifeGauge->AddLife(-nDmg);
 
-		// カウンターを初期化
-		m_nCounterState = 0;
+		if (m_pLifeGauge->GetLife() > 0)
+		{ // 生きている場合
 
-		// 状態を変更
-		m_state = STATE_DAMAGE;		// ダメージ状態
-	}
-	else
-	{ // 死んでいる場合
+			// パーティクル3Dオブジェクトを生成
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
 
-		// パーティクル3Dオブジェクトを生成
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+			// カウンターを初期化
+			m_nCounterState = 0;
 
-		// 更新と描画を停止
-		SetEnableUpdate(false);
-		SetEnableDraw(false);
+			// 状態を変更
+			m_state = STATE_DAMAGE;		// ダメージ状態
+		}
+		else
+		{ // 死んでいる場合
 
-		// カウンターを初期化
-		m_nCounterState = 0;
+			// パーティクル3Dオブジェクトを生成
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
-		// 状態を変更
-		m_state = STATE_DESTROY;	// 破壊状態
+			// 更新と描画を停止
+			SetEnableUpdate(false);
+			SetEnableDraw(false);
+
+			// カウンターを初期化
+			m_nCounterState = 0;
+
+			// 状態を変更
+			m_state = STATE_DESTROY;	// 破壊状態
+		}
 	}
 }
 

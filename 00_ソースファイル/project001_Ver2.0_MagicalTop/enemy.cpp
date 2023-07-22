@@ -181,7 +181,7 @@ void CEnemy::Draw(void)
 void CEnemy::Hit(const int nDmg)
 {
 	// 変数を宣言
-	D3DXVECTOR3 posEnemy = GetPosition();	// 敵位置
+	D3DXVECTOR3 pos = GetPosition();	// 敵位置
 
 	if (IsDeath() != true)
 	{ // 死亡フラグが立っていない場合
@@ -193,14 +193,14 @@ void CEnemy::Hit(const int nDmg)
 		{ // 生きている場合
 
 			// パーティクル3Dオブジェクトを生成
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy);
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
 		}
 		else
 		{ // 死んでいる場合
 
 			// パーティクル3Dオブジェクトを生成
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posEnemy, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
 			// スコアを加算
 			CManager::GetScore()->Add(m_status.nScore);

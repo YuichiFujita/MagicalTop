@@ -247,30 +247,36 @@ void CPlayer::Draw(void)
 //============================================================
 void CPlayer::Hit(const int nDmg)
 {
+	// 変数を宣言
+	D3DXVECTOR3 pos = GetPosition();	// プレイヤー位置
+
+	if (IsDeath() != true)
+	{ // 死亡フラグが立っていない場合
 #if 0
-	// 体力からダメージ分減算
-	m_pLifeGauge->AddLife(-nDmg);
+		// 体力からダメージ分減算
+		m_pLifeGauge->AddLife(-nDmg);
 
-	if (m_pLifeGauge->GetLife() > 0)
-	{ // 生きている場合
+		if (m_pLifeGauge->GetLife() > 0)
+		{ // 生きている場合
 
-		// パーティクル3Dオブジェクトを生成
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition());
-	}
-	else
+			// パーティクル3Dオブジェクトを生成
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
+		}
+		else
 #endif
 
-	{ // 死んでいる場合
+		{ // 死んでいる場合
 
-		// パーティクル3Dオブジェクトを生成
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, GetPosition(), D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+			// パーティクル3Dオブジェクトを生成
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
-		// TODO：PlayerのUninitどうするのこれ
+			// TODO：PlayerのUninitどうするのこれ
 #if 0
-		// プレイヤーオブジェクトの終了
-		Uninit();
+			// プレイヤーオブジェクトの終了
+			Uninit();
 #endif
+		}
 	}
 }
 

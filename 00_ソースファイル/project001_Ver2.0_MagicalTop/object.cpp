@@ -279,25 +279,6 @@ void CObject::ReleaseAll(void)
 				// ポインタを宣言
 				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
 
-				// TODO
-				//if (USED(pObjectNext))
-				//{ // 次のオブジェクトが存在する場合
-
-				//	while (pObjectNext->m_label == LABEL_NONE)
-				//	{ // 次のオブジェクトのラベルが設定されていない場合繰り返す
-
-				//		// さらに次のオブジェクトへのポインタを指定
-				//		pObjectNext = pObjectNext->m_pNext;
-
-				//		if (UNUSED(pObjectNext))
-				//		{ // さらに次のオブジェクトが存在しない場合
-
-				//			// 処理を抜ける
-				//			break;
-				//		}
-				//	}
-				//}
-
 				if (pObject->m_label != LABEL_NONE)
 				{ // オブジェクトラベルが設定されている場合
 
@@ -343,25 +324,6 @@ void CObject::UpdateAll(void)
 
 				// ポインタを宣言
 				CObject *pObjectNext = pObject->m_pNext;	// 次のオブジェクトへのポインタ
-
-				// TODO
-				//if (USED(pObjectNext))
-				//{ // 次のオブジェクトが存在する場合
-
-				//	while (pObjectNext->m_label == LABEL_NONE)
-				//	{ // 次のオブジェクトのラベルが設定されていない場合繰り返す
-
-				//		// さらに次のオブジェクトへのポインタを指定
-				//		pObjectNext = pObjectNext->m_pNext;
-
-				//		if (UNUSED(pObjectNext))
-				//		{ // さらに次のオブジェクトが存在しない場合
-
-				//			// 処理を抜ける
-				//			break;
-				//		}
-				//	}
-				//}
 
 				if (pObject->m_label != LABEL_NONE)
 				{ // オブジェクトラベルが設定されている場合
