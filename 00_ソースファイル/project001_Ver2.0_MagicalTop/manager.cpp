@@ -819,3 +819,5 @@ CDebug *CManager::GetDebug(void)
 }
 
 #endif	// _DEBUG
+
+// TODOFobjectGauge, objectGauge2D, objectGauge3D‚ğì¬

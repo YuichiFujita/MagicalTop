@@ -211,6 +211,7 @@
     <ClCompile Include="useful.cpp" />
     <ClCompile Include="value.cpp" />
     <ClCompile Include="wall.cpp" />
+    <ClCompile Include="waveManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="anim2D.h" />
@@ -268,6 +269,7 @@
     <ClInclude Include="useful.h" />
     <ClInclude Include="value.h" />
     <ClInclude Include="wall.h" />
+    <ClInclude Include="waveManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

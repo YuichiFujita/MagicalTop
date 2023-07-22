@@ -101,15 +101,16 @@ public:
 	);
 
 	// メンバ関数
-	void SetMovePosition(const D3DXVECTOR3& rMove);		// 位置移動量設定
-	void SetMoveRotation(const D3DXVECTOR3& rMove);		// 向き変更量設定
-	D3DXMATRIX GetMtxWorld(void) const;					// マトリックス取得
-	D3DXVECTOR3 GetOldPosition(void) const;				// 過去位置取得
-	D3DXVECTOR3 GetMovePosition(void) const;			// 位置移動量取得
-	D3DXVECTOR3 GetMoveRotation(void) const;			// 向き変更量取得
-	float GetRadius(void) const;						// 半径取得
-	StatusInfo GetStatusInfo(void) const;				// ステータス情報取得
-	PartsInfo GetPartsInfo(void) const;					// パーツ情報取得
+	void UpdateOldPosition(void);					// 過去位置更新
+	void SetMovePosition(const D3DXVECTOR3& rMove);	// 位置移動量設定
+	void SetMoveRotation(const D3DXVECTOR3& rMove);	// 向き変更量設定
+	D3DXMATRIX GetMtxWorld(void) const;				// マトリックス取得
+	D3DXVECTOR3 GetOldPosition(void) const;			// 過去位置取得
+	D3DXVECTOR3 GetMovePosition(void) const;		// 位置移動量取得
+	D3DXVECTOR3 GetMoveRotation(void) const;		// 向き変更量取得
+	float GetRadius(void) const;					// 半径取得
+	StatusInfo GetStatusInfo(void) const;			// ステータス情報取得
+	PartsInfo GetPartsInfo(void) const;				// パーツ情報取得
 
 	// 純粋仮想関数
 	virtual const char* GetModelFileName(const int nModel) const = 0;	// モデルファイル取得

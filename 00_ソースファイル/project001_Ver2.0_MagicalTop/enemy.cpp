@@ -151,9 +151,6 @@ void CEnemy::Uninit(void)
 //============================================================
 void CEnemy::Update(void)
 {
-	// 過去位置を更新
-	m_oldPos = GetPosition();
-
 	// 体力ゲージ3Dの更新
 	m_pLifeGauge->Update();
 
@@ -162,8 +159,6 @@ void CEnemy::Update(void)
 
 	// オブジェクトキャラクターの更新
 	CObjectChara::Update();
-
-	// TODO：過去位置の更新関数化
 }
 
 //============================================================
@@ -264,6 +259,15 @@ CEnemy *CEnemy::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVECTO
 		return pEnemy;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	過去位置の更新処理
+//============================================================
+void CEnemy::UpdateOldPosition(void)
+{
+	// 過去位置を更新
+	m_oldPos = GetPosition();
 }
 
 //============================================================
@@ -633,11 +637,11 @@ void CEnemyCar::Uninit(void)
 //============================================================
 void CEnemyCar::Update(void)
 {
-	// 敵の更新
-	CEnemy::Update();
-
 	// 敵の動作の更新
 	CollisionFind();
+
+	// 敵の更新
+	CEnemy::Update();
 }
 
 //============================================================
@@ -676,6 +680,9 @@ void CEnemyCar::CollisionFind(void)
 	D3DXVECTOR3 posLook		= VEC3_ZERO;			// 視認対象位置
 	D3DXVECTOR3 rotCannon	= VEC3_ZERO;			// キャノン向き
 	float fPlayerRadius = CManager::GetPlayer()->GetRadius();	// プレイヤー半径
+
+	// 過去位置の更新
+	UpdateOldPosition();
 
 	// TODO：移動の確認・移動量、向き変更量を使う
 	if (USED(CManager::GetPlayer()) && USED(CManager::GetTarget()))

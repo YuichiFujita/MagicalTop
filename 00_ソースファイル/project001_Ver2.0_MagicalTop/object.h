@@ -97,7 +97,6 @@ public:
 	static void ReleaseAll(void);	// 全破棄
 	static void UpdateAll(void);	// 全更新
 	static void DrawAll(void);		// 全描画
-	static void DeathAll(void);		// 全死亡
 	static bool CheckUse(const CObject *pObject);	// 使用確認
 	static CObject *GetTop(const int nPriority);	// 先頭オブジェクト取得
 	static CObject *GetCur(const int nPriority);	// 最後尾オブジェクト取得
@@ -121,6 +120,9 @@ protected:
 	void Release(void);	// 破棄
 
 private:
+	// 静的メンバ関数
+	static void DeathAll(void);	// 全死亡
+
 	// 静的メンバ変数
 	static CObject *m_apTop[MAX_PRIO];	// 先頭のオブジェクトへのポインタ
 	static CObject *m_apCur[MAX_PRIO];	// 最後尾のオブジェクトへのポインタ
