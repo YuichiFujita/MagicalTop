@@ -39,6 +39,7 @@
 //************************************************************
 CEnemy::StatusInfo CEnemy::m_aStatusInfo[CEnemy::TYPE_MAX] = {};	// ステータス情報
 CEnemy::PartsInfo CEnemy::m_aPartsInfo[CEnemy::TYPE_MAX] = {};		// パーツ情報
+int CEnemy::m_nNumAll = 0;											// 敵の総数
 
 const char *CEnemyCar::mc_apModelFile[] =	// 戦車モデル定数
 {
@@ -61,6 +62,9 @@ CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_status(m
 	m_movePos = VEC3_ZERO;	// 位置移動量
 	m_moveRot = VEC3_ZERO;	// 向き変更量
 	m_nCounterAtk = 0;		// 攻撃管理カウンター
+
+	// 敵の総数を加算
+	m_nNumAll++;
 }
 
 //============================================================
@@ -68,7 +72,8 @@ CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_status(m
 //============================================================
 CEnemy::~CEnemy()
 {
-
+	// 敵の総数を減算
+	m_nNumAll--;
 }
 
 //============================================================
@@ -259,6 +264,15 @@ CEnemy *CEnemy::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVECTO
 		return pEnemy;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	総数取得処理
+//============================================================
+int CEnemy::GetNumAll(void)
+{
+	// 現在の敵の総数を返す
+	return m_nNumAll;
 }
 
 //============================================================

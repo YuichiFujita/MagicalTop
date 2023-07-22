@@ -13,6 +13,7 @@
 #include "sound.h"
 #include "camera.h"
 #include "light.h"
+#include "waveManager.h"
 #include "texture.h"
 #include "model.h"
 #include "value.h"
@@ -45,22 +46,23 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
-CRenderer		*CManager::m_pRenderer	= NULL;		// レンダラーオブジェクト
-CInputKeyboard	*CManager::m_pKeyboard	= NULL;		// キーボードオブジェクト
-CInputMouse		*CManager::m_pMouse		= NULL;		// マウスオブジェクト
-CInputPad		*CManager::m_pPad		= NULL;		// パッドオブジェクト
-CSound			*CManager::m_pSound		= NULL;		// サウンドオブジェクト
-CCamera			*CManager::m_pCamera	= NULL;		// カメラオブジェクト
-CLight			*CManager::m_pLight		= NULL;		// ライトオブジェクト
-CTexture		*CManager::m_pTexture	= NULL;		// テクスチャオブジェクト
-CModel			*CManager::m_pModel		= NULL;		// モデルオブジェクト
-CStage			*CManager::m_pStage		= NULL;		// ステージオブジェクト
-CPlayer			*CManager::m_pPlayer	= NULL;		// プレイヤーオブジェクト
-CField			*CManager::m_pField		= NULL;		// 地面オブジェクト
-CTarget			*CManager::m_pTarget	= NULL;		// ターゲットオブジェクト
-CScore			*CManager::m_pScore		= NULL;		// スコアオブジェクト
-CTimer			*CManager::m_pTimer		= NULL;		// タイマーオブジェクト
-CDebugProc		*CManager::m_pDebugProc = NULL;		// デバッグ表示オブジェクト
+CRenderer		*CManager::m_pRenderer		= NULL;		// レンダラーオブジェクト
+CInputKeyboard	*CManager::m_pKeyboard		= NULL;		// キーボードオブジェクト
+CInputMouse		*CManager::m_pMouse			= NULL;		// マウスオブジェクト
+CInputPad		*CManager::m_pPad			= NULL;		// パッドオブジェクト
+CSound			*CManager::m_pSound			= NULL;		// サウンドオブジェクト
+CCamera			*CManager::m_pCamera		= NULL;		// カメラオブジェクト
+CLight			*CManager::m_pLight			= NULL;		// ライトオブジェクト
+CWaveManager	*CManager::m_pWaveManager	= NULL;		// ウェーブマネージャーオブジェクト
+CTexture		*CManager::m_pTexture		= NULL;		// テクスチャオブジェクト
+CModel			*CManager::m_pModel			= NULL;		// モデルオブジェクト
+CStage			*CManager::m_pStage			= NULL;		// ステージオブジェクト
+CPlayer			*CManager::m_pPlayer		= NULL;		// プレイヤーオブジェクト
+CField			*CManager::m_pField			= NULL;		// 地面オブジェクト
+CTarget			*CManager::m_pTarget		= NULL;		// ターゲットオブジェクト
+CScore			*CManager::m_pScore			= NULL;		// スコアオブジェクト
+CTimer			*CManager::m_pTimer			= NULL;		// タイマーオブジェクト
+CDebugProc		*CManager::m_pDebugProc		= NULL;		// デバッグ表示オブジェクト
 
 #ifdef _DEBUG	// デバッグ処理
 
@@ -158,6 +160,16 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// ライトの生成
 	m_pLight = CLight::Create();
 	if (UNUSED(m_pLight))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// ウェーブマネージャーの生成
+	m_pWaveManager = CWaveManager::Create();
+	if (UNUSED(m_pWaveManager))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -423,6 +435,15 @@ HRESULT CManager::Uninit(void)
 	//--------------------------------------------------------
 	//	システムの破棄
 	//--------------------------------------------------------
+	// ウェーブマネージャーの破棄
+	if (FAILED(CWaveManager::Release(m_pWaveManager)))
+	{ // 破棄に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// ライトの破棄
 	if (FAILED(CLight::Release(m_pLight)))
 	{ // 破棄に失敗した場合
@@ -712,6 +733,15 @@ CLight *CManager::GetLight(void)
 {
 	// ライトのポインタを返す
 	return m_pLight;
+}
+
+//============================================================
+//	ウェーブマネージャー取得処理
+//============================================================
+CWaveManager *CManager::GetWaveManager(void)
+{
+	// ウェーブマネージャーのポインタを返す
+	return m_pWaveManager;
 }
 
 //============================================================

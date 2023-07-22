@@ -99,6 +99,7 @@ public:
 		const D3DXVECTOR3& rPos,	// 位置
 		const D3DXVECTOR3& rRot		// 向き
 	);
+	static int GetNumAll(void);		// 総数取得
 
 	// メンバ関数
 	void UpdateOldPosition(void);					// 過去位置更新
@@ -135,6 +136,7 @@ private:
 	// 静的メンバ変数
 	static StatusInfo m_aStatusInfo[TYPE_MAX];	// ステータス情報
 	static PartsInfo m_aPartsInfo[TYPE_MAX];	// パーツ情報
+	static int m_nNumAll;						// 敵の総数
 
 	// メンバ変数
 	CLifeGauge3D *m_pLifeGauge;	// 体力の情報

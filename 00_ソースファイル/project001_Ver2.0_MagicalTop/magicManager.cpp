@@ -292,7 +292,7 @@ CMagicManager *CMagicManager::Create()
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pMagicManager = new CMagicManager();	// 魔法マネージャー
+		pMagicManager = new CMagicManager;	// 魔法マネージャー
 	}
 	else { assert(false); return NULL; }	// 使用中
 

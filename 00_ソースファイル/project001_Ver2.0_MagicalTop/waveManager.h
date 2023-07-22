@@ -14,6 +14,7 @@
 //	インクルードファイル
 //************************************************************
 #include "main.h"
+#include "enemy.h"
 
 //************************************************************
 //	クラス定義
@@ -28,7 +29,7 @@ public:
 		STATE_NONE = 0,		// 何もしない状態
 		STATE_SEASON_START,	// 季節の開始状態
 		STATE_WAVE_START,	// ウェーブ開始状態
-		STATE_PROGRESSION,	// 季節の進行状態
+		STATE_PROGRESSION,	// ウェーブ進行状態
 		STATE_SEASON_END,	// 季節の終了状態
 		STATE_WAIT,			// 次季節の開始待機状態
 		STATE_MAX			// この列挙型の総数
@@ -50,6 +51,27 @@ public:
 	// デストラクタ
 	~CWaveManager();
 
+	// 出現構造体
+	typedef struct
+	{
+		int aNumSpawn[CEnemy::TYPE_MAX];	// 生成数
+		int nFrame;		// 猶予フレーム
+	}Point;
+
+	// ウェーブ構造体
+	typedef struct
+	{
+		Point *pPoint;	// 出現情報
+		int nNumPoint;	// 出現数
+	}Wave;
+
+	// 季節構造体
+	typedef struct
+	{
+		Wave *pWave;	// ウェーブ情報
+		int nNumWave;	// ウェーブ数
+	}Season;
+
 	// メンバ関数
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
@@ -57,14 +79,18 @@ public:
 	void Draw(void);	// 描画
 
 	// 静的メンバ関数
+	static void LoadSetup(void);		// セットアップ
 	static CWaveManager *Create(void);	// 生成
 	static HRESULT Release(CWaveManager *&prWaveManager);	// 破棄
 
 private:
+	// 静的メンバ変数
+	static Season m_aWaveInfo[SEASON_MAX];	// ウェーブ情報
+
 	// メンバ変数
-	STATE m_state;				// 状態
-	SEASON m_nSeasonCounter;	// 季節カウンター
-	int m_nWaveCounter;			// ウェーブカウンター
+	STATE m_state;			// 状態
+	int m_nSeasonCounter;	// 季節カウンター
+	int m_nWaveCounter;		// ウェーブカウンター
 };
 
 #endif	// _WAVEMANAGER_H_
