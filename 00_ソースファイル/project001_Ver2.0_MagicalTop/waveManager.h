@@ -76,7 +76,6 @@ public:
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
-	void Draw(void);	// 描画
 
 	// 静的メンバ関数
 	static void LoadSetup(void);		// セットアップ
@@ -89,8 +88,9 @@ private:
 
 	// メンバ変数
 	STATE m_state;			// 状態
-	int m_nSeasonCounter;	// 季節カウンター
-	int m_nWaveCounter;		// ウェーブカウンター
+	int m_nCounterSeason;	// 季節管理カウンター
+	int m_nCounterWave;		// ウェーブ管理カウンター
+	int m_nCounterState;	// 状態管理カウンター
 };
 
 #endif	// _WAVEMANAGER_H_

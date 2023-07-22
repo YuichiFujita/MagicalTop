@@ -30,8 +30,9 @@ CWaveManager::CWaveManager()
 {
 	// メンバ変数をクリア
 	m_state = STATE_NONE;				// 状態
-	m_nSeasonCounter = SEASON_SPRING;	// 季節カウンター
-	m_nWaveCounter = 0;					// ウェーブカウンター
+	m_nCounterSeason = SEASON_SPRING;	// 季節管理カウンター
+	m_nCounterWave = 0;					// ウェーブ管理カウンター
+	m_nCounterState = 0;				// 状態管理カウンター
 }
 
 //============================================================
@@ -49,8 +50,9 @@ HRESULT CWaveManager::Init(void)
 {
 	// メンバ変数を初期化
 	m_state = STATE_NONE;				// 状態
-	m_nSeasonCounter = SEASON_SPRING;	// 季節カウンター
-	m_nWaveCounter = 0;					// ウェーブカウンター
+	m_nCounterSeason = SEASON_SPRING;	// 季節管理カウンター
+	m_nCounterWave = 0;					// ウェーブ管理カウンター
+	m_nCounterState = 0;				// 状態管理カウンター
 
 	// セットアップの読み込み
 	LoadSetup();
@@ -113,16 +115,14 @@ void CWaveManager::Update(void)
 
 	case STATE_PROGRESSION:		// ウェーブ進行状態
 
-
-
 #if 0
 		//if ()
 		{ // ウェーブをクリアした場合
 
-			// ウェーブカウンターを加算
-			m_nWaveCounter++;
+			// ウェーブ管理カウンターを加算
+			m_nCounterWave++;
 
-			if (m_nWaveCounter < m_aWaveInfo[m_nSeasonCounter].nNumWave)
+			if (m_nCounterWave < m_aWaveInfo[m_nCounterSeason].nNumWave)
 			{ // ウェーブがまだある場合
 
 				// 状態を変更
@@ -131,8 +131,8 @@ void CWaveManager::Update(void)
 			else
 			{ // 全ウェーブが終了した場合
 
-				// 季節カウンターを加算
-				m_nSeasonCounter++;
+				// 季節管理カウンターを加算
+				m_nCounterSeason++;
 
 				// 状態を変更
 				m_state = STATE_SEASON_END;	// 季節の終了状態
@@ -144,8 +144,8 @@ void CWaveManager::Update(void)
 
 	case STATE_SEASON_END:		// 季節の終了状態
 
-		// ウェーブカウンターを初期化
-		m_nWaveCounter = 0;
+		// ウェーブ管理カウンターを初期化
+		m_nCounterWave = 0;
 
 		break;
 
@@ -159,14 +159,6 @@ void CWaveManager::Update(void)
 		assert(false);
 		break;
 	}
-}
-
-//============================================================
-//	描画処理
-//============================================================
-void CWaveManager::Draw(void)
-{
-
 }
 
 //============================================================

@@ -563,6 +563,14 @@ void CManager::Update(void)
 	}
 	else { assert(false); }	// 非使用中
 
+	if (USED(m_pWaveManager))
+	{ // 使用中の場合
+
+		// ウェーブマネージャーの更新
+		m_pWaveManager->Update();
+	}
+	else { assert(false); }	// 非使用中
+
 	if (USED(m_pRenderer))
 	{ // 使用中の場合
 
