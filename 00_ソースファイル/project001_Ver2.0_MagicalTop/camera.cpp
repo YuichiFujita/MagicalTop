@@ -11,8 +11,6 @@
 #include "manager.h"
 #include "renderer.h"
 #include "input.h"
-#include "debugproc.h"
-
 #include "player.h"
 #include "target.h"
 
@@ -121,7 +119,7 @@ void CCamera::Uninit(void)
 //============================================================
 void CCamera::Update(void)
 {
-#if 0
+#if 1
 #if 0
 	// カメラの更新 (追従)
 	Follow();

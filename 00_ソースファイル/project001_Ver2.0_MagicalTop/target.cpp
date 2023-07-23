@@ -16,7 +16,6 @@
 #include "shadow.h"
 #include "flower.h"
 #include "particle3D.h"
-#include "debugproc.h"
 
 //************************************************************
 //	É}ÉNÉçíËã`

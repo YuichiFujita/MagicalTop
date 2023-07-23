@@ -11,7 +11,6 @@
 #include "manager.h"
 #include "renderer.h"
 #include "value.h"
-#include "debugproc.h"
 
 #ifdef _DEBUG	// デバッグ処理
 

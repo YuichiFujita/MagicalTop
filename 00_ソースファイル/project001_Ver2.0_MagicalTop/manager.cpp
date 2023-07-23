@@ -17,7 +17,6 @@
 #include "texture.h"
 #include "model.h"
 #include "value.h"
-#include "debugproc.h"
 
 #include "stage.h"
 #include "target.h"
@@ -310,7 +309,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, 2000.0f), VEC3_ZERO);
 #else
 	// “Gƒ‰ƒ“ƒ_ƒ€¶¬
-	CEnemy::RandomSpawn(6, CEnemy::TYPE_CAR);
+	//CEnemy::RandomSpawn(6, CEnemy::TYPE_CAR);
 #endif
 
 	// TODOF‰Šúİ’è

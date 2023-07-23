@@ -14,7 +14,6 @@
 #include "multiModel.h"
 #include "lifeGauge3D.h"
 #include "shadow.h"
-#include "debugproc.h"
 #include "collision.h"
 #include "player.h"
 #include "target.h"

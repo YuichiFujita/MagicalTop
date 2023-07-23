@@ -32,6 +32,7 @@ public:
 		STATE_PROGRESSION,	// ウェーブ進行状態
 		STATE_SEASON_END,	// 季節の終了状態
 		STATE_WAIT,			// 次季節の開始待機状態
+		STATE_END,			// 終了状態
 		STATE_MAX			// この列挙型の総数
 	}STATE;
 
@@ -87,10 +88,12 @@ private:
 	static Season m_aWaveInfo[SEASON_MAX];	// ウェーブ情報
 
 	// メンバ変数
-	STATE m_state;			// 状態
-	int m_nCounterSeason;	// 季節管理カウンター
-	int m_nCounterWave;		// ウェーブ管理カウンター
+	STATE m_state;	// 状態
+	int m_nSeason;	// 季節管理カウンター
+	int m_nWave;	// ウェーブ管理カウンター
+	int m_nPoint;	// 出現管理カウンター
 	int m_nCounterState;	// 状態管理カウンター
+	int m_nCounterFrame;	// ウェーブ余韻管理カウンター
 };
 
 #endif	// _WAVEMANAGER_H_

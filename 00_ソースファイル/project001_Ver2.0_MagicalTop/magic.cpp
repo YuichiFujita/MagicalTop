@@ -11,7 +11,6 @@
 #include "manager.h"
 #include "renderer.h"
 #include "texture.h"
-#include "debugproc.h"
 #include "collision.h"
 #include "effect3D.h"
 #include "field.h"

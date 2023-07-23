@@ -11,7 +11,6 @@
 #include "object.h"
 #include "manager.h"
 #include "camera.h"
-#include "debugproc.h"
 
 //************************************************************
 //	親クラス [CRenderer] のメンバ関数

@@ -29,10 +29,12 @@ CWaveManager::Season CWaveManager::m_aWaveInfo[CWaveManager::SEASON_MAX] = {};	/
 CWaveManager::CWaveManager()
 {
 	// メンバ変数をクリア
-	m_state = STATE_NONE;				// 状態
-	m_nCounterSeason = SEASON_SPRING;	// 季節管理カウンター
-	m_nCounterWave = 0;					// ウェーブ管理カウンター
-	m_nCounterState = 0;				// 状態管理カウンター
+	m_state = STATE_NONE;		// 状態
+	m_nSeason = SEASON_SPRING;	// 季節管理カウンター
+	m_nWave = 0;				// ウェーブ管理カウンター
+	m_nPoint = 0;				// 出現管理カウンター
+	m_nCounterState = 0;		// 状態管理カウンター
+	m_nCounterFrame = 0;		// ウェーブ余韻管理カウンター
 }
 
 //============================================================
@@ -49,10 +51,12 @@ CWaveManager::~CWaveManager()
 HRESULT CWaveManager::Init(void)
 {
 	// メンバ変数を初期化
-	m_state = STATE_NONE;				// 状態
-	m_nCounterSeason = SEASON_SPRING;	// 季節管理カウンター
-	m_nCounterWave = 0;					// ウェーブ管理カウンター
-	m_nCounterState = 0;				// 状態管理カウンター
+	m_state = STATE_SEASON_START;	// 状態
+	m_nSeason = SEASON_SPRING;		// 季節管理カウンター
+	m_nWave = 0;					// ウェーブ管理カウンター
+	m_nPoint = 0;					// 出現管理カウンター
+	m_nCounterState = 0;			// 状態管理カウンター
+	m_nCounterFrame = 0;			// ウェーブ余韻管理カウンター
 
 	// セットアップの読み込み
 	LoadSetup();
@@ -92,10 +96,16 @@ void CWaveManager::Uninit(void)
 //============================================================
 void CWaveManager::Update(void)
 {
+	// TODO
+	CManager::GetDebugProc()->Print("%d\n", m_state);
+	CManager::GetDebugProc()->Print("%d\n", m_nSeason);
+	CManager::GetDebugProc()->Print("%d\n", m_nWave);
+	CManager::GetDebugProc()->Print("%d\n", m_nPoint);
+
 	// 状態の更新
 	switch (m_state)
 	{ // 状態ごとの処理
-	case STATE_NONE:			// 何もしない状態
+	case STATE_NONE:	// 何もしない状態
 
 		// 無し
 
@@ -103,27 +113,91 @@ void CWaveManager::Update(void)
 
 	case STATE_SEASON_START:	// 季節の開始状態
 
+		if (m_nCounterState <= 60)
+		{ // カウンターが一定値以下の場合
 
+			// 状態管理カウンターを加算
+			m_nCounterState++;
+		}
+		else
+		{ // カウンターが一定値より大きい場合
+
+			// 状態管理カウンターを初期化
+			m_nCounterState = 0;
+
+			// 状態を変更
+			m_state = STATE_WAVE_START;	// ウェーブ開始状態
+		}
 
 		break;
 
 	case STATE_WAVE_START:		// ウェーブ開始状態
 
+		if (m_nCounterState <= 60)
+		{ // カウンターが一定値以下の場合
 
+			// 状態管理カウンターを加算
+			m_nCounterState++;
+		}
+		else
+		{ // カウンターが一定値より大きい場合
+
+			// 状態管理カウンターを初期化
+			m_nCounterState = 0;
+
+			// 状態を変更
+			m_state = STATE_PROGRESSION;	// ウェーブ進行状態
+		}
 
 		break;
 
 	case STATE_PROGRESSION:		// ウェーブ進行状態
 
-#if 0
-		//if ()
-		{ // ウェーブをクリアした場合
+		if (m_nCounterFrame > 0)
+		{ // カウンターが 0より大きい場合
+
+			if (CEnemy::GetNumAll() <= 0)
+			{ // 敵が全滅している場合
+
+				// 余韻管理カウンターを初期化
+				m_nCounterFrame = 0;
+			}
+			else
+			{ // 敵が全滅していない場合
+
+				// 余韻管理カウンターを減算
+				m_nCounterFrame--;
+			}
+		}
+		else if (m_nPoint < m_aWaveInfo[m_nSeason].pWave[m_nWave].nNumPoint)
+		{ // カウンターが 0以下且つ、出現が残っている場合
+
+			for (int nCntType = 0; nCntType < CEnemy::TYPE_MAX; nCntType++)
+			{ // 敵の種類の総数分繰り返す
+
+				// 敵の種類ごとに敵をランダムスポーンさせる
+				CEnemy::RandomSpawn(m_aWaveInfo[m_nSeason].pWave[m_nWave].pPoint[m_nPoint].aNumSpawn[nCntType], (CEnemy::TYPE)nCntType);
+
+				// TODO：敵上空にいてもロックオンできちゃう → 敵にSPAWNSTATE作る
+			}
+
+			// 余韻管理カウンターを設定
+			m_nCounterFrame = m_aWaveInfo[m_nSeason].pWave[m_nWave].pPoint[m_nPoint].nFrame;
+
+			// 出現管理カウンターを加算
+			m_nPoint++;
+		}
+		else
+		{ // カウンターが 0以下且つ、全出現が終了した場合
 
 			// ウェーブ管理カウンターを加算
-			m_nCounterWave++;
+			m_nWave++;
 
-			if (m_nCounterWave < m_aWaveInfo[m_nCounterSeason].nNumWave)
+			if (m_nWave < m_aWaveInfo[m_nSeason].nNumWave)
 			{ // ウェーブがまだある場合
+
+				// カウンターを初期化
+				m_nPoint = 0;	// 出現管理カウンター
 
 				// 状態を変更
 				m_state = STATE_WAVE_START;	// ウェーブ開始状態
@@ -131,27 +205,73 @@ void CWaveManager::Update(void)
 			else
 			{ // 全ウェーブが終了した場合
 
-				// 季節管理カウンターを加算
-				m_nCounterSeason++;
+				// カウンターを初期化
+				m_nWave = 0;	// ウェーブ管理カウンター
+				m_nPoint = 0;	// 出現管理カウンター
 
 				// 状態を変更
 				m_state = STATE_SEASON_END;	// 季節の終了状態
 			}
 		}
-#endif
 
 		break;
 
 	case STATE_SEASON_END:		// 季節の終了状態
 
-		// ウェーブ管理カウンターを初期化
-		m_nCounterWave = 0;
+		if (m_nCounterState <= 60)
+		{ // カウンターが一定値以下の場合
+
+			// 状態管理カウンターを加算
+			m_nCounterState++;
+		}
+		else
+		{ // カウンターが一定値より大きい場合
+
+			// 状態管理カウンターを初期化
+			m_nCounterState = 0;
+
+			// 季節管理カウンターを加算
+			m_nSeason++;
+
+			if (m_nSeason < SEASON_MAX)
+			{ // 季節がまだある場合
+
+				// 状態を変更
+				m_state = STATE_WAIT;	// 次季節の開始待機状態
+			}
+			else
+			{ // 季節がもうない場合
+
+				// 状態を変更
+				m_state = STATE_END;	// 終了状態
+			}
+		}
 
 		break;
 
-	case STATE_WAIT:			// 次季節の開始待機状態
+	case STATE_WAIT:	// 次季節の開始待機状態
 
+		if (m_nCounterState <= 60)
+		{ // カウンターが一定値以下の場合
 
+			// 状態管理カウンターを加算
+			m_nCounterState++;
+		}
+		else
+		{ // カウンターが一定値より大きい場合
+
+			// 状態管理カウンターを初期化
+			m_nCounterState = 0;
+
+			// 状態を変更
+			m_state = STATE_SEASON_START;	// 季節の開始状態
+		}
+
+		break;
+
+	case STATE_END:		// 終了状態
+
+		// 無し
 
 		break;
 
@@ -342,10 +462,17 @@ void CWaveManager::LoadSetup(void)
 									}
 								} while (strcmp(&aString[0], "END_POINT") != 0);	// 読み込んだ文字列が END_POINT ではない場合ループ
 
+								// 例外処理
+								assert(nPoint < m_aWaveInfo[nSeason].pWave[nWave].nNumPoint);	// 出現オーバー
+
 								// 出現番号を加算
 								nPoint++;
 							}
 						} while (strcmp(&aString[0], "END_WAVE") != 0);	// 読み込んだ文字列が END_WAVE ではない場合ループ
+
+						// 例外処理
+						assert(nPoint == m_aWaveInfo[nSeason].pWave[nWave].nNumPoint);	// 出現未設定
+						assert(nWave < m_aWaveInfo[nSeason].nNumWave);	// ウェーブオーバー
 
 						// ウェーブ番号を加算
 						nWave++;
@@ -353,13 +480,17 @@ void CWaveManager::LoadSetup(void)
 				} while (strcmp(&aString[0], "END_SEASONSET") != 0);	// 読み込んだ文字列が END_SEASONSET ではない場合ループ
 
 				// 例外処理
+				assert(nWave == m_aWaveInfo[nSeason].nNumWave);	// ウェーブ未設定
 				assert(nSeason < SEASON_MAX);	// 季節オーバー
 
 				// 季節番号を加算
 				nSeason++;
 			}
 		} while (nEnd != EOF);	// 読み込んだ文字列が EOF ではない場合ループ
-		
+
+		// 例外処理
+		assert(nSeason == SEASON_MAX);	// 季節未設定
+
 		// ファイルを閉じる
 		fclose(pFile);
 	}
