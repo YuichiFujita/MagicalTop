@@ -9,6 +9,7 @@
 //************************************************************
 #include "bullet.h"
 #include "manager.h"
+#include "sceneGame.h"
 #include "renderer.h"
 #include "texture.h"
 
@@ -107,7 +108,7 @@ void CBullet::Update(void)
 	pos += m_move;
 
 	// 地面との当たり判定
-	if (pos.y <= CManager::GetField()->GetPositionHeight(pos))
+	if (pos.y <= CSceneGame::GetField()->GetPositionHeight(pos))
 	{ // 地面に当たっている場合
 
 		// オブジェクトの終了
@@ -288,7 +289,7 @@ bool CBullet::CollisionTarget(void)
 	bool bHit = false;	// 判定状況
 
 	// ポインタを宣言
-	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
+	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
 
 	if (USED(pTarget))
 	{ // ターゲットが使用されている場合
@@ -326,7 +327,7 @@ bool CBullet::CollisionPlayer(void)
 	bool bHit = false;	// 判定状況
 
 	// ポインタを宣言
-	CPlayer *pPlayer = CManager::GetPlayer();	// プレイヤー情報
+	CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー情報
 
 	if (USED(pPlayer))
 	{ // プレイヤーが使用されている場合

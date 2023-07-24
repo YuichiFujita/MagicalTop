@@ -9,6 +9,7 @@
 //************************************************************
 #include "enemy.h"
 #include "manager.h"
+#include "sceneGame.h"
 #include "renderer.h"
 #include "texture.h"
 #include "multiModel.h"
@@ -202,7 +203,7 @@ void CEnemy::Hit(const int nDmg)
 			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
 			// スコアを加算
-			CManager::GetScore()->Add(m_status.nScore);
+			CSceneGame::GetScore()->Add(m_status.nScore);
 
 			// 敵オブジェクトの終了
 			Uninit();
@@ -277,12 +278,12 @@ void CEnemy::RandomSpawn
 	// 変数を宣言
 	D3DXVECTOR3 pos, rot;	// 位置・向き設定用
 	D3DXVECTOR3 posTarget;	// ターゲット位置
-	int nLimit = (int)CManager::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
+	int nLimit = (int)CSceneGame::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
 
 	// ポインタを宣言
-	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
+	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
 
-	if (USED(CManager::GetTarget()))
+	if (USED(CSceneGame::GetTarget()))
 	{ // ターゲットが使用されている場合
 
 		for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
@@ -301,8 +302,8 @@ void CEnemy::RandomSpawn
 			rot.y = atan2f(pos.x - posTarget.x, pos.z - posTarget.z);	// ターゲットの方向を向かせる
 
 			// 位置を補正
-			pos.x = sinf(rot.y) * (CManager::GetStage()->GetStageLimit().fRadius - m_aStatusInfo[type].fRadius);
-			pos.z = cosf(rot.y) * (CManager::GetStage()->GetStageLimit().fRadius - m_aStatusInfo[type].fRadius);
+			pos.x = sinf(rot.y) * (CSceneGame::GetStage()->GetStageLimit().fRadius - m_aStatusInfo[type].fRadius);
+			pos.z = cosf(rot.y) * (CSceneGame::GetStage()->GetStageLimit().fRadius - m_aStatusInfo[type].fRadius);
 
 			// 敵オブジェクトの生成
 			CEnemy::Create(type, pos, rot);
@@ -439,24 +440,24 @@ void CEnemy::CollisionFind(void)
 	D3DXVECTOR3 posLook;	// 視認対象位置
 	D3DXVECTOR3 posEnemy = GetPosition();	// 敵位置
 	D3DXVECTOR3 rotEnemy = GetRotation();	// 敵向き
-	float fPlayerRadius = CManager::GetPlayer()->GetRadius();	// プレイヤー半径
+	float fPlayerRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
 
 	// TODO：プレイヤー死んだらManagerのPlayerもNULLにする
-	if (USED(CManager::GetPlayer()) && USED(CManager::GetTarget()))
+	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 視認対象の設定
-		if (collision::Circle2D(CManager::GetPlayer()->GetPosition(), posEnemy, fPlayerRadius, m_status.fFindRadius) == false)
+		if (collision::Circle2D(CSceneGame::GetPlayer()->GetPosition(), posEnemy, fPlayerRadius, m_status.fFindRadius) == false)
 		{ // 敵の検知範囲外の場合
 
 			// 視認対象位置を設定
-			posLook = CManager::GetTarget()->GetPosition();	// ターゲット位置
+			posLook = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 		}
 		else
 		{ // 敵の検知範囲内の場合
 
 			// 視認対象位置を設定
-			posLook = CManager::GetPlayer()->GetPosition();	// プレイヤー位置
+			posLook = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
 		}
 
 		// 対象の方向を向かせる
@@ -470,7 +471,7 @@ void CEnemy::CollisionFind(void)
 			posEnemy.z -= cosf(rotEnemy.y) * m_status.fForwardMove;
 
 			// ステージ範囲外の補正
-			CManager::GetStage()->LimitPosition(posEnemy, m_status.fRadius);
+			CSceneGame::GetStage()->LimitPosition(posEnemy, m_status.fRadius);
 		}
 		else
 		{ // 敵の攻撃範囲内の場合
@@ -483,7 +484,7 @@ void CEnemy::CollisionFind(void)
 				posEnemy.z += cosf(rotEnemy.y) * m_status.fBackwardMove;
 
 				// ステージ範囲外の補正
-				CManager::GetStage()->LimitPosition(posEnemy, m_status.fRadius);
+				CSceneGame::GetStage()->LimitPosition(posEnemy, m_status.fRadius);
 			}
 
 			// 攻撃
@@ -580,7 +581,7 @@ void CEnemy::Attack(const D3DXVECTOR3& rTarget)
 void CEnemy::CollisionTarget(D3DXVECTOR3& rPos)
 {
 	// ポインタを宣言
-	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
+	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
 
 	if (USED(pTarget))
 	{ // ターゲットが使用されている場合
@@ -737,27 +738,27 @@ void CEnemyCar::CollisionFind(void)
 	D3DXVECTOR3 rotEnemy	= GetRotation();		// 敵向き
 	D3DXVECTOR3 posLook		= VEC3_ZERO;			// 視認対象位置
 	D3DXVECTOR3 rotCannon	= VEC3_ZERO;			// キャノン向き
-	float fPlayerRadius = CManager::GetPlayer()->GetRadius();	// プレイヤー半径
+	float fPlayerRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
 
 	// 過去位置の更新
 	UpdateOldPosition();
 
 	// TODO：移動の確認・移動量、向き変更量を使う
-	if (USED(CManager::GetPlayer()) && USED(CManager::GetTarget()))
+	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 視認対象の検知判定
-		if (collision::Circle2D(CManager::GetPlayer()->GetPosition(), posEnemy, fPlayerRadius, status.fFindRadius) == false)
+		if (collision::Circle2D(CSceneGame::GetPlayer()->GetPosition(), posEnemy, fPlayerRadius, status.fFindRadius) == false)
 		{ // 敵の検知範囲外の場合
 
 			// 視認対象位置を設定
-			posLook = CManager::GetTarget()->GetPosition();	// ターゲット位置
+			posLook = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 		}
 		else
 		{ // 敵の検知範囲内の場合
 
 			// 視認対象位置を設定
-			posLook = CManager::GetPlayer()->GetPosition();	// プレイヤー位置
+			posLook = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
 		}
 
 		// 視認対象の攻撃判定
@@ -788,10 +789,10 @@ void CEnemyCar::CollisionFind(void)
 			CollisionEnemy(posEnemy);
 
 			// 着地判定
-			CManager::GetField()->LandPosition(posEnemy, moveEnemy);
+			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
 
 			// ステージ範囲外の補正
-			CManager::GetStage()->LimitPosition(posEnemy, status.fRadius);
+			CSceneGame::GetStage()->LimitPosition(posEnemy, status.fRadius);
 		}
 		else
 		{ // 敵の攻撃範囲内の場合
@@ -824,10 +825,10 @@ void CEnemyCar::CollisionFind(void)
 			CollisionEnemy(posEnemy);
 
 			// 着地判定
-			CManager::GetField()->LandPosition(posEnemy, moveEnemy);
+			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
 
 			// ステージ範囲外の補正
-			CManager::GetStage()->LimitPosition(posEnemy, status.fRadius);
+			CSceneGame::GetStage()->LimitPosition(posEnemy, status.fRadius);
 
 			// キャノン向きの設定
 			if (SetRotationCannon(posLook, posEnemy, rotEnemy))
@@ -912,6 +913,10 @@ void CEnemy::LoadSetup(void)
 
 	// ポインタを宣言
 	FILE *pFile;	// ファイルポインタ
+
+	// 静的メンバ変数の情報をクリア
+	memset(&m_aStatusInfo[0], 0, sizeof(m_aStatusInfo));	// ステータス情報
+	memset(&m_aPartsInfo[0], 0, sizeof(m_aPartsInfo));		// パーツ情報
 
 	// ファイルを読み込み形式で開く
 	pFile = fopen(ENEMY_SETUP_TXT, "r");

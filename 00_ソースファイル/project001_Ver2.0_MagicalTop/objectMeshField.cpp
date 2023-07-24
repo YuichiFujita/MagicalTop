@@ -1015,37 +1015,50 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3& rPos)
 		for (int nCntWidth = 0; nCntWidth < 3; nCntWidth++)
 		{ // 横の判定確認数分繰り返す
 
-			// ポリゴンの頂点位置を取得
-			aVtxPos[0] = m_meshField.pos + GetMeshVertexPosition(nColl + nNumVtx + m_part.x + 1);
-			aVtxPos[1] = m_meshField.pos + GetMeshVertexPosition(nColl + nNumVtx);
-			aVtxPos[2] = m_meshField.pos + GetMeshVertexPosition(nColl + nNumVtx + m_part.x + 2);
-			aVtxPos[3] = m_meshField.pos + GetMeshVertexPosition(nColl + nNumVtx + 1);
+			// 変数配列を宣言
+			int aVtxNum[4] =	// 頂点番号
+			{ // 初期化
+				nColl + nNumVtx + m_part.x + 1, // 左下
+				nColl + nNumVtx,			    // 左上
+				nColl + nNumVtx + m_part.x + 2, // 右下
+				nColl + nNumVtx + 1			    // 右上
+			};
 
-			if (collision::TrianglePillar(aVtxPos[0], aVtxPos[2], aVtxPos[1], rPos))
-			{ // ポリゴンの範囲内にいる場合
+			if (aVtxNum[1] >= 0 && aVtxNum[2] <= (m_part.x + 1) * (m_part.y + 1) - 1)
+			{ // 頂点番号が範囲内の場合
 
-				// 法線を求める
-				useful::NormalizeNormal(aVtxPos[1], aVtxPos[0], aVtxPos[2], nor);
+				// ポリゴンの頂点位置を取得
+				aVtxPos[0] = m_meshField.pos + GetMeshVertexPosition(aVtxNum[0]);
+				aVtxPos[1] = m_meshField.pos + GetMeshVertexPosition(aVtxNum[1]);
+				aVtxPos[2] = m_meshField.pos + GetMeshVertexPosition(aVtxNum[2]);
+				aVtxPos[3] = m_meshField.pos + GetMeshVertexPosition(aVtxNum[3]);
 
-				if (nor.y != 0.0f)
-				{ // 法線が設定されている場合
+				if (collision::TrianglePillar(aVtxPos[0], aVtxPos[2], aVtxPos[1], rPos))
+				{ // ポリゴンの範囲内にいる場合
 
-					// プレイヤーの着地点を返す
-					return (((rPos.x - aVtxPos[0].x) * nor.x + (-aVtxPos[0].y) * nor.y + (rPos.z - aVtxPos[0].z) * nor.z) * -1.0f) / nor.y;
+					// 法線を求める
+					useful::NormalizeNormal(aVtxPos[1], aVtxPos[0], aVtxPos[2], nor);
+
+					if (nor.y != 0.0f)
+					{ // 法線が設定されている場合
+
+						// プレイヤーの着地点を返す
+						return (((rPos.x - aVtxPos[0].x) * nor.x + (-aVtxPos[0].y) * nor.y + (rPos.z - aVtxPos[0].z) * nor.z) * -1.0f) / nor.y;
+					}
 				}
-			}
 
-			if (collision::TrianglePillar(aVtxPos[3], aVtxPos[1], aVtxPos[2], rPos))
-			{ // ポリゴンの範囲内にいる場合
+				if (collision::TrianglePillar(aVtxPos[3], aVtxPos[1], aVtxPos[2], rPos))
+				{ // ポリゴンの範囲内にいる場合
 
-				// 法線を求める
-				useful::NormalizeNormal(aVtxPos[2], aVtxPos[3], aVtxPos[1], nor);
+					// 法線を求める
+					useful::NormalizeNormal(aVtxPos[2], aVtxPos[3], aVtxPos[1], nor);
 
-				if (nor.y != 0.0f)
-				{ // 法線が設定されている場合
+					if (nor.y != 0.0f)
+					{ // 法線が設定されている場合
 
-					// プレイヤーの着地点を返す
-					return (((rPos.x - aVtxPos[3].x) * nor.x + (-aVtxPos[3].y) * nor.y + (rPos.z - aVtxPos[3].z) * nor.z) * -1.0f) / nor.y;
+						// プレイヤーの着地点を返す
+						return (((rPos.x - aVtxPos[3].x) * nor.x + (-aVtxPos[3].y) * nor.y + (rPos.z - aVtxPos[3].z) * nor.z) * -1.0f) / nor.y;
+					}
 				}
 			}
 

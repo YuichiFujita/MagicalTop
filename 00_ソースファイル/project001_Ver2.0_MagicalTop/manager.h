@@ -14,6 +14,7 @@
 //	インクルードファイル
 //************************************************************
 #include "main.h"
+#include "scene.h"
 
 //************************************************************
 //	前方宣言
@@ -25,15 +26,8 @@ class CInputPad;		// パッドクラス
 class CSound;			// サウンドクラス
 class CCamera;			// カメラクラス
 class CLight;			// ライトクラス
-class CWaveManager;		// ウェーブマネージャークラス
 class CTexture;			// テクスチャクラス
 class CModel;			// モデルクラス
-class CStage;			// ステージクラス
-class CPlayer;			// プレイヤークラス
-class CTarget;			// ターゲットクラス
-class CField;			// 地面クラス
-class CScore;			// スコアクラス
-class CTimer;			// タイマークラス
 class CDebugProc;		// デバッグ表示クラス
 
 #ifdef _DEBUG	// デバッグ処理
@@ -63,7 +57,9 @@ public:
 
 	// 静的メンバ関数
 	static CManager *Create(HINSTANCE hInstance, HWND hWnd);	// 生成
-	static HRESULT Release(CManager *&prManager);	// 破棄
+	static HRESULT Release(CManager *&prManager);				// 破棄
+	static HRESULT SetMode(const CScene::MODE mode);	// モード設定
+	static CScene::MODE GetMode(void);					// モード取得
 
 	static CRenderer		*GetRenderer(void);		// レンダラー取得
 	static CInputKeyboard	*GetKeyboard(void);		// キーボード取得
@@ -72,15 +68,9 @@ public:
 	static CSound			*GetSound(void);		// サウンド取得
 	static CCamera			*GetCamera(void);		// カメラ取得
 	static CLight			*GetLight(void);		// ライト取得
-	static CWaveManager		*GetWaveManager(void);	// ウェーブマネージャー取得
 	static CTexture			*GetTexture(void);		// テクスチャ取得
 	static CModel			*GetModel(void);		// モデル取得
-	static CStage			*GetStage(void);		// ステージ取得
-	static CPlayer			*GetPlayer(void);		// プレイヤー取得
-	static CTarget			*GetTarget(void);		// ターゲット取得
-	static CField			*GetField(void);		// 地面取得
-	static CScore			*GetScore(void);		// スコア取得
-	static CTimer			*GetTimer(void);		// タイマー取得
+	static CScene			*GetScene(void);		// シーン取得
 	static CDebugProc		*GetDebugProc(void);	// デバッグ表示取得
 
 #ifdef _DEBUG	// デバッグ処理
@@ -92,23 +82,17 @@ public:
 
 private:
 	// 静的メンバ変数
-	static CRenderer		*m_pRenderer;		// レンダラーオブジェクト
-	static CInputKeyboard	*m_pKeyboard;		// キーボードオブジェクト
-	static CInputMouse		*m_pMouse;			// マウスオブジェクト
-	static CInputPad		*m_pPad;			// パッドオブジェクト
-	static CSound			*m_pSound;			// サウンドオブジェクト
-	static CCamera			*m_pCamera;			// カメラオブジェクト
-	static CLight			*m_pLight;			// ライトオブジェクト
-	static CWaveManager		*m_pWaveManager;	// ウェーブマネージャーオブジェクト
-	static CTexture			*m_pTexture;		// テクスチャオブジェクト
-	static CModel			*m_pModel;			// モデルオブジェクト
-	static CStage			*m_pStage;			// ステージオブジェクト
-	static CPlayer			*m_pPlayer;			// プレイヤーオブジェクト
-	static CTarget			*m_pTarget;			// ターゲットオブジェクト
-	static CField			*m_pField;			// 地面オブジェクト
-	static CScore			*m_pScore;			// スコアオブジェクト
-	static CTimer			*m_pTimer;			// タイマーオブジェクト
-	static CDebugProc		*m_pDebugProc;		// デバッグ表示オブジェクト
+	static CRenderer		*m_pRenderer;	// レンダラーオブジェクト
+	static CInputKeyboard	*m_pKeyboard;	// キーボードオブジェクト
+	static CInputMouse		*m_pMouse;		// マウスオブジェクト
+	static CInputPad		*m_pPad;		// パッドオブジェクト
+	static CSound			*m_pSound;		// サウンドオブジェクト
+	static CCamera			*m_pCamera;		// カメラオブジェクト
+	static CLight			*m_pLight;		// ライトオブジェクト
+	static CTexture			*m_pTexture;	// テクスチャオブジェクト
+	static CModel			*m_pModel;		// モデルオブジェクト
+	static CScene			*m_pScene;		// シーンオブジェクト
+	static CDebugProc		*m_pDebugProc;	// デバッグ表示オブジェクト
 
 #ifdef _DEBUG	// デバッグ処理
 

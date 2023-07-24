@@ -196,7 +196,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="scene.cpp" />
+    <ClCompile Include="sceneGame.cpp" />
+    <ClCompile Include="sceneResult.cpp" />
     <ClCompile Include="scenery.cpp" />
+    <ClCompile Include="sceneTitle.cpp" />
     <ClCompile Include="score.cpp" />
     <ClCompile Include="scroll2D.cpp" />
     <ClCompile Include="scrollMeshField.cpp" />
@@ -254,7 +258,11 @@
     <ClInclude Include="precompile.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="scene.h" />
+    <ClInclude Include="sceneGame.h" />
+    <ClInclude Include="sceneResult.h" />
     <ClInclude Include="scenery.h" />
+    <ClInclude Include="sceneTitle.h" />
     <ClInclude Include="score.h" />
     <ClInclude Include="scroll2D.h" />
     <ClInclude Include="scrollMeshField.h" />

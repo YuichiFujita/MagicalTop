@@ -9,6 +9,7 @@
 //************************************************************
 #include "magicManager.h"
 #include "manager.h"
+#include "sceneGame.h"
 #include "object.h"
 #include "lockCursor.h"
 #include "player.h"
@@ -209,8 +210,8 @@ void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos)
 void CMagicManager::ShotMagic(void)
 {
 	// 変数を宣言
-	D3DXVECTOR3 posPlayer = CManager::GetPlayer()->GetPosition();	// プレイヤー位置
-	D3DXVECTOR3 rotPlayer = CManager::GetPlayer()->GetRotation();	// プレイヤー向き
+	D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+	D3DXVECTOR3 rotPlayer = CSceneGame::GetPlayer()->GetRotation();	// プレイヤー向き
 	bool bLock = false;	// ロックオン状況
 
 	for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)

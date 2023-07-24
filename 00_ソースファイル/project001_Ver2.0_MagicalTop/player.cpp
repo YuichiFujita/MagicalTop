@@ -9,6 +9,7 @@
 //************************************************************
 #include "player.h"
 #include "manager.h"
+#include "sceneGame.h"
 #include "renderer.h"
 #include "input.h"
 #include "sound.h"
@@ -202,7 +203,7 @@ void CPlayer::Update(void)
 	CollisionEnemy(posPlayer);	// 敵
 
 	// ステージ範囲外の補正
-	CManager::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
+	CSceneGame::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
 
 	// 着地判定
 	if (Land(currentMotion, posPlayer) == MOTION_LANDING)
@@ -372,7 +373,7 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 {
 	// 変数を宣言
 	D3DXVECTOR3 rot = CManager::GetCamera()->GetRotation();			// カメラの向き
-	float fLimit = CManager::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
+	float fLimit = CSceneGame::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
 
 	MOTION	currentMotion = motion;	// 現在のモーション
 	int		nRotation;				// 回転方向
@@ -664,8 +665,8 @@ CPlayer::MOTION CPlayer::Land(MOTION motion, D3DXVECTOR3& rPos)
 	MOTION currentMotion  = motion;			// 現在のモーション
 
 	// 着地判定
-	if (CManager::GetField()->LandPosition(rPos, m_move)
-	||  CManager::GetStage()->LandPosition(rPos, m_move, 0.0f))
+	if (CSceneGame::GetField()->LandPosition(rPos, m_move)
+	||  CSceneGame::GetStage()->LandPosition(rPos, m_move, 0.0f))
 	{ // プレイヤーが着地していた場合
 
 		// 着地モーションを設定
@@ -785,7 +786,7 @@ void CPlayer::Rot(D3DXVECTOR3& rRot)
 void CPlayer::CollisionTarget(D3DXVECTOR3& rPos)
 {
 	// ポインタを宣言
-	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
+	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
 
 	if (USED(pTarget))
 	{ // ターゲットが使用されている場合

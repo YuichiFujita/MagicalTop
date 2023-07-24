@@ -13,28 +13,9 @@
 #include "sound.h"
 #include "camera.h"
 #include "light.h"
-#include "waveManager.h"
 #include "texture.h"
 #include "model.h"
 #include "value.h"
-
-#include "stage.h"
-#include "target.h"
-#include "player.h"
-#include "score.h"
-#include "timer.h"
-
-#include "enemy.h"
-#include "magic.h"
-
-#include "sea.h"
-#include "field.h"
-#include "wall.h"
-#include "scenery.h"
-#include "sky.h"
-
-// TODO
-#include "flower.h"
 
 #ifdef _DEBUG	// デバッグ処理
 
@@ -45,23 +26,17 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
-CRenderer		*CManager::m_pRenderer		= NULL;		// レンダラーオブジェクト
-CInputKeyboard	*CManager::m_pKeyboard		= NULL;		// キーボードオブジェクト
-CInputMouse		*CManager::m_pMouse			= NULL;		// マウスオブジェクト
-CInputPad		*CManager::m_pPad			= NULL;		// パッドオブジェクト
-CSound			*CManager::m_pSound			= NULL;		// サウンドオブジェクト
-CCamera			*CManager::m_pCamera		= NULL;		// カメラオブジェクト
-CLight			*CManager::m_pLight			= NULL;		// ライトオブジェクト
-CWaveManager	*CManager::m_pWaveManager	= NULL;		// ウェーブマネージャーオブジェクト
-CTexture		*CManager::m_pTexture		= NULL;		// テクスチャオブジェクト
-CModel			*CManager::m_pModel			= NULL;		// モデルオブジェクト
-CStage			*CManager::m_pStage			= NULL;		// ステージオブジェクト
-CPlayer			*CManager::m_pPlayer		= NULL;		// プレイヤーオブジェクト
-CField			*CManager::m_pField			= NULL;		// 地面オブジェクト
-CTarget			*CManager::m_pTarget		= NULL;		// ターゲットオブジェクト
-CScore			*CManager::m_pScore			= NULL;		// スコアオブジェクト
-CTimer			*CManager::m_pTimer			= NULL;		// タイマーオブジェクト
-CDebugProc		*CManager::m_pDebugProc		= NULL;		// デバッグ表示オブジェクト
+CRenderer		*CManager::m_pRenderer	= NULL;		// レンダラーオブジェクト
+CInputKeyboard	*CManager::m_pKeyboard	= NULL;		// キーボードオブジェクト
+CInputMouse		*CManager::m_pMouse		= NULL;		// マウスオブジェクト
+CInputPad		*CManager::m_pPad		= NULL;		// パッドオブジェクト
+CSound			*CManager::m_pSound		= NULL;		// サウンドオブジェクト
+CCamera			*CManager::m_pCamera	= NULL;		// カメラオブジェクト
+CLight			*CManager::m_pLight		= NULL;		// ライトオブジェクト
+CTexture		*CManager::m_pTexture	= NULL;		// テクスチャオブジェクト
+CModel			*CManager::m_pModel		= NULL;		// モデルオブジェクト
+CScene			*CManager::m_pScene		= NULL;		// シーンオブジェクト
+CDebugProc		*CManager::m_pDebugProc	= NULL;		// デバッグ表示オブジェクト
 
 #ifdef _DEBUG	// デバッグ処理
 
@@ -167,7 +142,7 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	}
 
 	//--------------------------------------------------------
-	//	情報の読込
+	//	情報の読込・設定
 	//--------------------------------------------------------
 	// テクスチャの生成・読込
 	m_pTexture = CTexture::Create();
@@ -189,140 +164,8 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		return E_FAIL;
 	}
 
-	//--------------------------------------------------------
-	//	ゲームオブジェクトの生成
-	//--------------------------------------------------------
-	// ウェーブマネージャーの生成
-	m_pWaveManager = CWaveManager::Create();
-	if (UNUSED(m_pWaveManager))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// ステージの生成
-	m_pStage = CStage::Create();
-	if (UNUSED(m_pStage))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// 海オブジェクトの生成
-	CSea::Create();
-
-	// 地面オブジェクトの生成
-	m_pField = CField::Create(CField::TEXTURE_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(4000.0f, 4000.0f), XCOL_WHITE, POSGRID2(80, 80));
-	if (UNUSED(m_pField))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// 地形を設定
-	m_pField->SetTerrain(CField::TERRAIN_80x80);
-
-	// 壁オブジェクトの生成
-	CWall::Create(CWall::TEXTURE_NORMAL, D3DXVECTOR3( 0.0f,    0.0f, -2000.0f), D3DXToRadian(D3DXVECTOR3(0.0f, 0.0f, 0.0f)),   D3DXVECTOR2(4000.0f, 400.0f), XCOL_WHITE, POSGRID2(12, 1));
-	CWall::Create(CWall::TEXTURE_NORMAL, D3DXVECTOR3(-2000.0f, 0.0f,  0.0f),    D3DXToRadian(D3DXVECTOR3(0.0f, 90.0f, 0.0f)),  D3DXVECTOR2(4000.0f, 400.0f), XCOL_WHITE, POSGRID2(12, 1));
-	CWall::Create(CWall::TEXTURE_NORMAL, D3DXVECTOR3( 0.0f,    0.0f,  2000.0f), D3DXToRadian(D3DXVECTOR3(0.0f, 180.0f, 0.0f)), D3DXVECTOR2(4000.0f, 400.0f), XCOL_WHITE, POSGRID2(12, 1));
-	CWall::Create(CWall::TEXTURE_NORMAL, D3DXVECTOR3( 2000.0f, 0.0f,  0.0f),    D3DXToRadian(D3DXVECTOR3(0.0f, 270.0f, 0.0f)), D3DXVECTOR2(4000.0f, 400.0f), XCOL_WHITE, POSGRID2(12, 1));
-
-	// 景色オブジェクトの生成
-	CScenery::Create(CScenery::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO,                                    XCOL_WHITE,                        POSGRID2(32, 1), 12000.0f, 1000.0f, D3DCULL_CW, false);
-	CScenery::Create(CScenery::TEXTURE_NORMAL, VEC3_ZERO, D3DXToRadian(D3DXVECTOR3(0.0f, 85.0f, 0.0f)), D3DXCOLOR(0.7f, 1.0f, 1.0f, 1.0f), POSGRID2(32, 1), 14000.0f, 1600.0f, D3DCULL_CW, false);
-	CScenery::Create(CScenery::TEXTURE_NORMAL, VEC3_ZERO, D3DXToRadian(D3DXVECTOR3(0.0f, 35.0f, 0.0f)), D3DXCOLOR(0.4f, 1.0f, 0.7f, 1.0f), POSGRID2(32, 1), 16000.0f, 2200.0f, D3DCULL_CW, false);
-
-	// 空オブジェクトの生成
-	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
-
-	// プレイヤーオブジェクトの生成
-	m_pPlayer = CPlayer::Create(D3DXVECTOR3(0.0f, 0.0f, -100.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-	if (UNUSED(m_pPlayer))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// ターゲットオブジェクトの生成
-	m_pTarget = CTarget::Create(CTarget::MODEL_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO);
-	if (UNUSED(m_pTarget))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// スコアオブジェクトの生成
-	m_pScore = CScore::Create();
-	if (UNUSED(m_pScore))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// タイマーオブジェクトの生成
-	m_pTimer = CTimer::Create();
-	if (UNUSED(m_pTimer))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	//--------------------------------------------------------
-	//	初期設定
-	//--------------------------------------------------------
-	// 敵セットアップの読込
-	CEnemy::LoadSetup();
-
-	// 魔法セットアップの読込
-	CMagic::LoadSetup();
-
-	// TODO
-#if 0
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(200.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(300.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(400.0f, 0.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-	CFlower::Create(CFlower::TYPE_NORMAL, D3DXVECTOR3(1500.0f, 1500.0f, 0.0f), D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-#else
-	// マナフラワーランダム生成
-	CFlower::RandomSpawn(30, CFlower::TYPE_NORMAL, D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);
-#endif
-
-#if 0
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f, 0.0f), VEC3_ZERO);
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, -2000.0f), VEC3_ZERO);
-	CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, 2000.0f), VEC3_ZERO);
-#else
-	// 敵ランダム生成
-	//CEnemy::RandomSpawn(6, CEnemy::TYPE_CAR);
-#endif
-
-	// TODO：初期設定
-#if 0
-	// カメラの初期位置を設定
-	m_pCamera->SetDestCamera();
-
-	// タイムを計測開始
-	m_pTimer->Start();
-
-	// BGMの再生
-	m_pSound->Play(CSound::LABEL_BGM_000);
-#endif
+	// シーンの設定
+	SetMode(CScene::MODE_TITLE);	// タイトル画面
 
 	//--------------------------------------------------------
 	//	デバッグ用
@@ -386,34 +229,6 @@ HRESULT CManager::Uninit(void)
 #endif	// _DEBUG
 
 	//--------------------------------------------------------
-	//	サウンドの停止
-	//--------------------------------------------------------
-	// BGMの停止
-	m_pSound->Stop();
-
-	//--------------------------------------------------------
-	//	ゲームオブジェクトの破棄
-	//--------------------------------------------------------
-	// オブジェクトの全破棄
-	CObject::ReleaseAll();
-
-	// ステージの破棄
-	if (FAILED(CStage::Release(m_pStage)))
-	{ // 破棄に失敗した場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// 終了済みのオブジェクトポインタをNULLにする
-	m_pPlayer = NULL;		// プレイヤーオブジェクト
-	m_pTarget = NULL;		// ターゲットオブジェクト
-	m_pField = NULL;		// 地面オブジェクト
-	m_pScore = NULL;		// スコアオブジェクト
-	m_pTimer = NULL;		// タイマーオブジェクト
-
-	//--------------------------------------------------------
 	//	情報の破棄
 	//--------------------------------------------------------
 	// テクスチャの破棄
@@ -437,8 +252,8 @@ HRESULT CManager::Uninit(void)
 	//--------------------------------------------------------
 	//	システムの破棄
 	//--------------------------------------------------------
-	// ウェーブマネージャーの破棄
-	if (FAILED(CWaveManager::Release(m_pWaveManager)))
+	// シーンの破棄
+	if (FAILED(CScene::Release(m_pScene)))
 	{ // 破棄に失敗した場合
 
 		// 失敗を返す
@@ -525,19 +340,6 @@ void CManager::Update(void)
 
 #endif	// _DEBUG
 
-	if (m_pKeyboard->GetTrigger(DIK_1))
-	{
-#if 0
-		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(2000.0f, 400.0f, 0.0f), VEC3_ZERO);
-		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(-2000.0f, 400.0f, 0.0f), VEC3_ZERO);
-		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, -2000.0f), VEC3_ZERO);
-		CEnemy::Create(CEnemy::TYPE_CAR, D3DXVECTOR3(0.0f, 400.0f, 2000.0f), VEC3_ZERO);
-#else
-		// 敵ランダム生成
-		CEnemy::RandomSpawn(6, CEnemy::TYPE_CAR);
-#endif
-	}
-
 	if (USED(m_pPad))
 	{ // 使用中の場合
 
@@ -562,19 +364,11 @@ void CManager::Update(void)
 	}
 	else { assert(false); }	// 非使用中
 
-	if (USED(m_pWaveManager))
+	if (USED(m_pScene))
 	{ // 使用中の場合
 
-		// ウェーブマネージャーの更新
-		m_pWaveManager->Update();
-	}
-	else { assert(false); }	// 非使用中
-
-	if (USED(m_pRenderer))
-	{ // 使用中の場合
-
-		// レンダラーの更新
-		m_pRenderer->Update();
+		// シーンの更新
+		m_pScene->Update();
 	}
 	else { assert(false); }	// 非使用中
 
@@ -591,6 +385,14 @@ void CManager::Update(void)
 
 		// カメラの更新
 		m_pCamera->Update();
+	}
+	else { assert(false); }	// 非使用中
+
+	if (USED(m_pRenderer))
+	{ // 使用中の場合
+
+		// レンダラーの更新
+		m_pRenderer->Update();
 	}
 	else { assert(false); }	// 非使用中
 }
@@ -688,6 +490,55 @@ HRESULT CManager::Release(CManager *&prManager)
 }
 
 //============================================================
+//	モードの設定処理
+//============================================================
+HRESULT CManager::SetMode(const CScene::MODE mode)
+{
+	// サウンドを停止
+	m_pSound->Stop();
+
+	if (USED(m_pScene))
+	{ // シーンが使用中の場合
+
+		// シーンの破棄
+		if (FAILED(CScene::Release(m_pScene)))
+		{ // 破棄に失敗した場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+	}
+
+	if (UNUSED(m_pScene))
+	{ // シーンが非使用中の場合
+
+		// シーンの生成
+		m_pScene = CScene::Create(mode);
+		if (UNUSED(m_pScene))
+		{ // 非使用中の場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+	}
+	else { assert(false); return E_FAIL; }	// 使用中
+
+	// 成功を返す
+	return S_OK;
+}
+
+//============================================================
+//	モードの取得処理
+//============================================================
+CScene::MODE CManager::GetMode(void)
+{
+	// 現在のモードを返す
+	return m_pScene->GetMode();
+}
+
+//============================================================
 //	レンダラー取得処理
 //============================================================
 CRenderer *CManager::GetRenderer(void)
@@ -751,15 +602,6 @@ CLight *CManager::GetLight(void)
 }
 
 //============================================================
-//	ウェーブマネージャー取得処理
-//============================================================
-CWaveManager *CManager::GetWaveManager(void)
-{
-	// ウェーブマネージャーのポインタを返す
-	return m_pWaveManager;
-}
-
-//============================================================
 //	テクスチャ取得処理
 //============================================================
 CTexture *CManager::GetTexture(void)
@@ -778,69 +620,12 @@ CModel *CManager::GetModel(void)
 }
 
 //============================================================
-//	ステージ取得処理
+//	シーン取得処理
 //============================================================
-CStage *CManager::GetStage(void)
+CScene *CManager::GetScene(void)
 {
-	// ステージのポインタを返す
-	return m_pStage;
-}
-
-//============================================================
-//	プレイヤー取得処理
-//============================================================
-CPlayer *CManager::GetPlayer(void)
-{
-	// プレイヤーのポインタを返す
-	return m_pPlayer;
-
-	// TODO：死んでたらNULL返すとよくね！
-}
-
-//============================================================
-//	ターゲット取得処理
-//============================================================
-CTarget *CManager::GetTarget(void)
-{
-	if (m_pTarget->GetState() != CTarget::STATE_DESTROY)
-	{ // 破壊状態ではない場合
-
-		// ターゲットのポインタを返す
-		return m_pTarget;
-	}
-	else
-	{ // 破壊状態の場合
-
-		// NULLを返す
-		return NULL;
-	}
-}
-
-//============================================================
-//	地面取得処理
-//============================================================
-CField *CManager::GetField(void)
-{
-	// 地面のポインタを返す
-	return m_pField;
-}
-
-//============================================================
-//	スコア取得処理
-//============================================================
-CScore *CManager::GetScore(void)
-{
-	// スコアのポインタを返す
-	return m_pScore;
-}
-
-//============================================================
-//	タイマー取得処理
-//============================================================
-CTimer *CManager::GetTimer(void)
-{
-	// タイマーのポインタを返す
-	return m_pTimer;
+	// シーンのポインタを返す
+	return m_pScene;
 }
 
 //============================================================

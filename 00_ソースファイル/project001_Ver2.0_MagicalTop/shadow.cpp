@@ -9,6 +9,7 @@
 //************************************************************
 #include "shadow.h"
 #include "manager.h"
+#include "sceneGame.h"
 #include "renderer.h"
 #include "texture.h"
 #include "field.h"
@@ -214,7 +215,7 @@ HRESULT CShadow::SetDrawInfo(void)
 
 		// 影の位置を求める
 		posShadow = posParent;	// 親オブジェクトの座標代入
-		posShadow.y = CManager::GetField()->GetPositionHeight(posParent);	// 高さを地面に設定
+		posShadow.y = CSceneGame::GetField()->GetPositionHeight(posParent);	// 高さを地面に設定
 
 		// 影と親の縦座標の距離を求める
 		fDis = fabsf(posParent.y - posShadow.y);		// 縦の距離を求める

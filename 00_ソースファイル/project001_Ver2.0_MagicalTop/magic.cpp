@@ -9,6 +9,7 @@
 //************************************************************
 #include "magic.h"
 #include "manager.h"
+#include "sceneGame.h"
 #include "renderer.h"
 #include "texture.h"
 #include "collision.h"
@@ -418,7 +419,7 @@ void CNormalMagic::Update(void)
 	// 変数を宣言
 	D3DXVECTOR3 pos = GetPosition();	// 位置
 
-	if (pos.y <= CManager::GetField()->GetPositionHeight(pos))
+	if (pos.y <= CSceneGame::GetField()->GetPositionHeight(pos))
 	{ // 地面に当たっている場合
 
 		// オブジェクトの終了
@@ -463,6 +464,9 @@ void CMagic::LoadSetup(void)
 
 	// ポインタを宣言
 	FILE *pFile;	// ファイルポインタ
+
+	// 静的メンバ変数の情報をクリア
+	memset(&m_aStatusInfo[0], 0, sizeof(m_aStatusInfo));	// ステータス情報
 
 	// ファイルを読み込み形式で開く
 	pFile = fopen(MAGIC_SETUP_TXT, "r");

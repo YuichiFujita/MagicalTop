@@ -226,6 +226,9 @@ void CField::LoadSetup(void)
 	// ポインタを宣言
 	FILE *pFile;	// ファイルポインタ
 
+	// 静的メンバ変数の情報をクリア
+	memset(&m_aTerrainInfo[0], 0, sizeof(m_aTerrainInfo));	// 地形情報
+
 	// ファイルを読み込み形式で開く
 	pFile = fopen(FIELD_SETUP_TXT, "r");
 

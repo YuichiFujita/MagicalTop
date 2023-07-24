@@ -9,6 +9,7 @@
 //************************************************************
 #include "flower.h"
 #include "manager.h"
+#include "sceneGame.h"
 #include "renderer.h"
 #include "texture.h"
 
@@ -128,7 +129,7 @@ void CFlower::Update(void)
 #endif
 
 	// 位置を求める
-	pos.y = CManager::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
+	pos.y = CSceneGame::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
 
 	// 位置を更新
 	SetPosition(pos);
@@ -214,7 +215,7 @@ CFlower *CFlower::Create
 		pFlower->SetOrigin(ORIGIN_DOWN);
 
 		// 位置を設定
-		pos.y = CManager::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
+		pos.y = CSceneGame::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
 		pFlower->SetPosition(pos);
 
 		// 大きさを設定
@@ -251,12 +252,12 @@ void CFlower::RandomSpawn
 {
 	// 変数を宣言
 	D3DXVECTOR3 pos;	// 位置設定用
-	int nLimit = (int)CManager::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
+	int nLimit = (int)CSceneGame::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
 
 	// ポインタを宣言
-	CTarget *pTarget = CManager::GetTarget();	// ターゲット情報
+	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
 
-	if (USED(CManager::GetTarget()))
+	if (USED(CSceneGame::GetTarget()))
 	{ // ターゲットが使用されている場合
 
 		for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
@@ -269,7 +270,7 @@ void CFlower::RandomSpawn
 
 			// 生成位置を補正
 			collision::CirclePillar(pos, pTarget->GetPosition(), rSize.x, pTarget->GetRadius());	// ターゲット内部の生成防止
-			CManager::GetStage()->LimitPosition(pos, rSize.x);										// ステージ範囲外の生成防止
+			CSceneGame::GetStage()->LimitPosition(pos, rSize.x);										// ステージ範囲外の生成防止
 
 			// マナフラワーオブジェクトの生成
 			CFlower::Create(type, pos, rSize, nLife);
@@ -304,7 +305,7 @@ bool CFlower::CollisionPlayer(void)
 	bool bHit = false;	// 判定状況
 
 	// ポインタを宣言
-	CPlayer *pPlayer = CManager::GetPlayer();	// プレイヤー情報
+	CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー情報
 
 	if (USED(pPlayer))
 	{ // プレイヤーが使用されている場合

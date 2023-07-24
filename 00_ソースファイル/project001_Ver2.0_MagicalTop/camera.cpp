@@ -9,6 +9,7 @@
 //************************************************************
 #include "camera.h"
 #include "manager.h"
+#include "sceneGame.h"
 #include "renderer.h"
 #include "input.h"
 #include "player.h"
@@ -204,12 +205,12 @@ void CCamera::SetDestCamera(void)
 
 	// TODO：最初にカメラ動かないように直す
 #else
-	if (USED(CManager::GetPlayer()) && USED(CManager::GetTarget()))
+	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 変数を宣言
-		D3DXVECTOR3 posPlayer = CManager::GetPlayer()->GetPosition();	// プレイヤー位置
-		D3DXVECTOR3 posTarget = CManager::GetTarget()->GetPosition();	// ターゲット位置
+		D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+		D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 		D3DXVECTOR3 destPosR = VEC3_ZERO;	// カメラの注視点の目標位置
 		D3DXVECTOR3 diffPosR = VEC3_ZERO;	// カメラの注視点の位置差分
 		D3DXVECTOR3 diffPosV = VEC3_ZERO;	// カメラの視点の位置差分
@@ -365,8 +366,8 @@ void CCamera::Follow(void)
 	D3DXVECTOR3 diffRot  = VEC3_ZERO;	// カメラの向き差分
 	D3DXVECTOR3 diffPosV = VEC3_ZERO;	// カメラの視点の位置差分
 	D3DXVECTOR3 diffPosR = VEC3_ZERO;	// カメラの注視点の位置差分
-	D3DXVECTOR3 pos =  CManager::GetPlayer()->GetPosition();	// プレイヤー位置
-	D3DXVECTOR3 rot =  CManager::GetPlayer()->GetRotation();	// プレイヤー向き
+	D3DXVECTOR3 pos = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+	D3DXVECTOR3 rot = CSceneGame::GetPlayer()->GetRotation();	// プレイヤー向き
 
 	// 目標の向きまでの差分を計算
 	diffRot = m_camera.destRot - m_camera.rot;
@@ -406,16 +407,16 @@ void CCamera::Follow(void)
 //============================================================
 void CCamera::Bargaining(void)
 {
-	if (USED(CManager::GetPlayer()) && USED(CManager::GetTarget()))
+	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 変数を宣言
-		D3DXVECTOR3 posPlayer = CManager::GetPlayer()->GetPosition();	// プレイヤー位置
-		D3DXVECTOR3 posTarget = CManager::GetTarget()->GetPosition();	// ターゲット位置
+		D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+		D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 		D3DXVECTOR3 destPosR = VEC3_ZERO;	// カメラの注視点の目標位置
 		D3DXVECTOR3 diffPosR = VEC3_ZERO;	// カメラの注視点の位置差分
 		D3DXVECTOR3 diffPosV = VEC3_ZERO;	// カメラの視点の位置差分
-		float fDisTarget = CManager::GetPlayer()->GetDistanceTarget();	// ターゲットとプレイヤー間の距離
+		float fDisTarget = CSceneGame::GetPlayer()->GetDistanceTarget();	// ターゲットとプレイヤー間の距離
 		float fDiffRot = 0.0f;	// カメラの向き差分
 
 		// 差分向きを求める

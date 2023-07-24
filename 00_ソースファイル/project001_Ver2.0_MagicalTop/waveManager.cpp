@@ -316,7 +316,8 @@ void CWaveManager::Update(void)
 
 	case STATE_END:		// 終了状態
 
-		// 無し
+		// シーンの設定
+		CManager::SetMode(CScene::MODE_RESULT);	// リザルト画面
 
 		break;
 
@@ -401,6 +402,9 @@ void CWaveManager::LoadSetup(void)
 
 	// ポインタを宣言
 	FILE *pFile;	// ファイルポインタ
+
+	// 静的メンバ変数の情報をクリア
+	memset(&m_aWaveInfo[0], 0, sizeof(m_aWaveInfo));	// ウェーブ情報
 
 	// ファイルを読み込み形式で開く
 	pFile = fopen(WAVE_SETUP_TXT, "r");
