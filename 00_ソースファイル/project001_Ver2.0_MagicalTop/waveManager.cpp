@@ -9,6 +9,9 @@
 //************************************************************
 #include "waveManager.h"
 #include "manager.h"
+#include "texture.h"
+#include "object2D.h"
+#include "value.h"
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -29,6 +32,8 @@ CWaveManager::Season CWaveManager::m_aWaveInfo[CWaveManager::SEASON_MAX] = {};	/
 CWaveManager::CWaveManager()
 {
 	// メンバ変数をクリア
+	m_pObject2D = NULL;			// ウェーブ表示の情報
+	m_pValue = NULL;			// ウェーブ数表示の情報
 	m_state = STATE_NONE;		// 状態
 	m_nSeason = SEASON_SPRING;	// 季節管理カウンター
 	m_nWave = 0;				// ウェーブ管理カウンター
@@ -50,13 +55,53 @@ CWaveManager::~CWaveManager()
 //============================================================
 HRESULT CWaveManager::Init(void)
 {
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
 	// メンバ変数を初期化
+	m_pObject2D = NULL;				// ウェーブ表示の情報
+	m_pValue = NULL;				// ウェーブ数表示の情報
 	m_state = STATE_SEASON_START;	// 状態
 	m_nSeason = SEASON_SPRING;		// 季節管理カウンター
 	m_nWave = 0;					// ウェーブ管理カウンター
 	m_nPoint = 0;					// 出現管理カウンター
 	m_nCounterState = 0;			// 状態管理カウンター
 	m_nCounterFrame = 0;			// ウェーブ余韻管理カウンター
+
+	// TODO
+#if 0
+	// ウェーブ表示用のオブジェクト2Dの生成
+	m_pObject2D = CObject2D::Create(VEC3_ZERO, VEC3_ONE);
+	if (UNUSED(m_pObject2D))
+	{ // 生成に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// テクスチャを登録・割当
+	m_pObject2D->BindTexture(pTexture->Regist(/*mc_apTextureFile[TEXTURE_]*/NULL));	// TODO：テクスチャ読み込み
+
+	// 描画をしない設定にする
+	m_pObject2D->SetEnableDraw(false);
+
+	// ウェーブ数表示用の数字オブジェクトの生成
+	m_pValue = CValue::Create(CValue::TEXTURE_NORMAL, VEC3_ZERO);
+	if (UNUSED(m_pValue))
+	{ // 生成に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// テクスチャを登録・割当
+	m_pValue->BindTexture(pTexture->Regist(/*mc_apTextureFile[TEXTURE_]*/NULL));
+
+	// 描画をしない設定にする
+	m_pValue->SetEnableDraw(false);
+#endif
 
 	// セットアップの読み込み
 	LoadSetup();

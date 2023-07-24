@@ -166,16 +166,6 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		return E_FAIL;
 	}
 
-	// ウェーブマネージャーの生成
-	m_pWaveManager = CWaveManager::Create();
-	if (UNUSED(m_pWaveManager))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
 	//--------------------------------------------------------
 	//	情報の読込
 	//--------------------------------------------------------
@@ -202,6 +192,16 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	//--------------------------------------------------------
 	//	ゲームオブジェクトの生成
 	//--------------------------------------------------------
+	// ウェーブマネージャーの生成
+	m_pWaveManager = CWaveManager::Create();
+	if (UNUSED(m_pWaveManager))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// ステージの生成
 	m_pStage = CStage::Create();
 	if (UNUSED(m_pStage))
