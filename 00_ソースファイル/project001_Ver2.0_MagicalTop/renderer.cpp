@@ -165,7 +165,7 @@ void CRenderer::Draw(void)
 		m_pD3DDevice->GetViewport(&viewportDef);
 
 		// カメラの設定
-		CManager::GetCamera()->SetCamera();
+		CManager::GetCamera()->SetCamera(CCamera::TYPE_MAIN);
 
 		// オブジェクトの全描画
 		CObject::DrawAll();

@@ -58,7 +58,7 @@
 CCamera::CCamera()
 {
 	// メンバ変数をクリア
-	memset(&m_camera, 0, sizeof(m_camera));	// カメラの情報
+	memset(&m_aCamera[0], 0, sizeof(m_aCamera));	// カメラの情報
 }
 
 //============================================================
@@ -74,34 +74,61 @@ CCamera::~CCamera()
 //============================================================
 HRESULT CCamera::Init(void)
 {
+	//--------------------------------------------------------
+	//	メインカメラの初期化
+	//--------------------------------------------------------
 	// カメラ情報を初期化
 #if 0
-	m_camera.posV		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 現在の視点
-	m_camera.posR		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 現在の注視点
-	m_camera.destPosV	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 目標の視点
-	m_camera.destPosR	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 目標の注視点
-	m_camera.vecU		= D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// 上方向ベクトル
-	m_camera.rot		= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 現在の向き
-	m_camera.destRot	= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 目標の向き
-	m_camera.fDis		= -800.0f;							// 視点と注視点の距離
+	m_aCamera[TYPE_MAIN].posV		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 現在の視点
+	m_aCamera[TYPE_MAIN].posR		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 現在の注視点
+	m_aCamera[TYPE_MAIN].destPosV	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 目標の視点
+	m_aCamera[TYPE_MAIN].destPosR	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 目標の注視点
+	m_aCamera[TYPE_MAIN].vecU		= D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// 上方向ベクトル
+	m_aCamera[TYPE_MAIN].rot		= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 現在の向き
+	m_aCamera[TYPE_MAIN].destRot	= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 目標の向き
+	m_aCamera[TYPE_MAIN].fDis		= -800.0f;							// 視点と注視点の距離
 #else
-	m_camera.posV		= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 現在の視点
-	m_camera.posR		= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 現在の注視点
-	m_camera.destPosV	= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 目標の視点
-	m_camera.destPosR	= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 目標の注視点
-	m_camera.vecU		= D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// 上方向ベクトル
-	m_camera.rot		= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 現在の向き
-	m_camera.destRot	= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 目標の向き
-	m_camera.fDis		= -800.0f;							// 視点と注視点の距離
+	m_aCamera[TYPE_MAIN].posV		= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 現在の視点
+	m_aCamera[TYPE_MAIN].posR		= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 現在の注視点
+	m_aCamera[TYPE_MAIN].destPosV	= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 目標の視点
+	m_aCamera[TYPE_MAIN].destPosR	= D3DXVECTOR3(0.0f, 400.0f, 0.0f);	// 目標の注視点
+	m_aCamera[TYPE_MAIN].vecU		= D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// 上方向ベクトル
+	m_aCamera[TYPE_MAIN].rot		= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 現在の向き
+	m_aCamera[TYPE_MAIN].destRot	= D3DXVECTOR3(1.6f, 0.0f, 0.0f);	// 目標の向き
+	m_aCamera[TYPE_MAIN].fDis		= -800.0f;							// 視点と注視点の距離
 #endif
 
 	// ビューポート情報を初期化
-	m_camera.viewport.X			= 0;				// 左上隅のピクセル座標 (x)
-	m_camera.viewport.Y			= 0;				// 左上隅のピクセル座標 (y)
-	m_camera.viewport.Width		= SCREEN_WIDTH;		// 描画する画面の横幅
-	m_camera.viewport.Height	= SCREEN_HEIGHT;	// 描画する画面の縦幅
-	m_camera.viewport.MinZ		= 0.0f;
-	m_camera.viewport.MaxZ		= 1.0f;
+	m_aCamera[TYPE_MAIN].viewport.X			= 0;				// 左上隅のピクセル座標 (x)
+	m_aCamera[TYPE_MAIN].viewport.Y			= 0;				// 左上隅のピクセル座標 (y)
+	m_aCamera[TYPE_MAIN].viewport.Width		= SCREEN_WIDTH;		// 描画する画面の横幅
+	m_aCamera[TYPE_MAIN].viewport.Height	= SCREEN_HEIGHT;	// 描画する画面の縦幅
+	m_aCamera[TYPE_MAIN].viewport.MinZ		= 0.0f;
+	m_aCamera[TYPE_MAIN].viewport.MaxZ		= 1.0f;
+
+	//--------------------------------------------------------
+	//	フォントモデル表示カメラの初期化
+	//--------------------------------------------------------
+	// TODO
+#if 1
+	// カメラ情報を初期化
+	m_aCamera[TYPE_FONT].posV		= D3DXVECTOR3(0.0f, 0.0f, 600.0f);	// 現在の視点
+	m_aCamera[TYPE_FONT].posR		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 現在の注視点
+	m_aCamera[TYPE_FONT].destPosV	= D3DXVECTOR3(0.0f, 0.0f, 600.0f);	// 目標の視点
+	m_aCamera[TYPE_FONT].destPosR	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 目標の注視点
+	m_aCamera[TYPE_FONT].vecU		= D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// 上方向ベクトル
+	m_aCamera[TYPE_FONT].rot		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 現在の向き
+	m_aCamera[TYPE_FONT].destRot	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 目標の向き
+	m_aCamera[TYPE_FONT].fDis		= 0.0f;								// 視点と注視点の距離
+
+	// ビューポート情報を初期化
+	m_aCamera[TYPE_FONT].viewport.X			= 0;				// 左上隅のピクセル座標 (x)
+	m_aCamera[TYPE_FONT].viewport.Y			= 0;				// 左上隅のピクセル座標 (y)
+	m_aCamera[TYPE_FONT].viewport.Width		= SCREEN_WIDTH;		// 描画する画面の横幅
+	m_aCamera[TYPE_FONT].viewport.Height	= SCREEN_HEIGHT;	// 描画する画面の縦幅
+	m_aCamera[TYPE_FONT].viewport.MinZ		= 0.0f;
+	m_aCamera[TYPE_FONT].viewport.MaxZ		= 0.5f;
+#endif
 
 	// 成功を返す
 	return S_OK;
@@ -134,30 +161,30 @@ void CCamera::Update(void)
 #endif
 
 	// デバッグ表示
-	CManager::GetDebugProc()->Print(" 視点 ：%f %f %f\n", m_camera.posV.x, m_camera.posV.y, m_camera.posV.z);
-	CManager::GetDebugProc()->Print("注視点：%f %f %f\n", m_camera.posR.x, m_camera.posR.y, m_camera.posR.z);
-	CManager::GetDebugProc()->Print(" 向き ：%f %f %f\n", m_camera.rot.x, m_camera.rot.y, m_camera.rot.z);
-	CManager::GetDebugProc()->Print(" 距離 ：%f\n", m_camera.fDis);
+	CManager::GetDebugProc()->Print(" 視点 ：%f %f %f\n", m_aCamera[TYPE_MAIN].posV.x, m_aCamera[TYPE_MAIN].posV.y, m_aCamera[TYPE_MAIN].posV.z);
+	CManager::GetDebugProc()->Print("注視点：%f %f %f\n", m_aCamera[TYPE_MAIN].posR.x, m_aCamera[TYPE_MAIN].posR.y, m_aCamera[TYPE_MAIN].posR.z);
+	CManager::GetDebugProc()->Print(" 向き ：%f %f %f\n", m_aCamera[TYPE_MAIN].rot.x, m_aCamera[TYPE_MAIN].rot.y, m_aCamera[TYPE_MAIN].rot.z);
+	CManager::GetDebugProc()->Print(" 距離 ：%f\n", m_aCamera[TYPE_MAIN].fDis);
 }
 
 //============================================================
 //	カメラ設定処理
 //============================================================
-void CCamera::SetCamera(void)
+void CCamera::SetCamera(const TYPE type)
 {
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
 	// ビューポートの設定
-	pDevice->SetViewport(&m_camera.viewport);
+	pDevice->SetViewport(&m_aCamera[type].viewport);
 
 	// プロジェクションマトリックスの初期化
-	D3DXMatrixIdentity(&m_camera.mtxProjection);
+	D3DXMatrixIdentity(&m_aCamera[type].mtxProjection);
 
 	// プロジェクションマトリックスを作成
 	D3DXMatrixPerspectiveFovLH
 	( // 引数
-		&m_camera.mtxProjection,	// プロジェクションマトリックス
+		&m_aCamera[type].mtxProjection,	// プロジェクションマトリックス
 		VIEW_ANGLE,		// 視野角
 		VIEW_ASPECT,	// 画面のアスペクト比
 		VIEW_NEAR,		// Z軸の最小値
@@ -165,22 +192,22 @@ void CCamera::SetCamera(void)
 	);
 
 	// プロジェクションマトリックスの設定
-	pDevice->SetTransform(D3DTS_PROJECTION, &m_camera.mtxProjection);
+	pDevice->SetTransform(D3DTS_PROJECTION, &m_aCamera[type].mtxProjection);
 
 	// ビューマトリックスの初期化
-	D3DXMatrixIdentity(&m_camera.mtxView);
+	D3DXMatrixIdentity(&m_aCamera[type].mtxView);
 
 	// ビューマトリックスの作成
 	D3DXMatrixLookAtLH
 	( // 引数
-		&m_camera.mtxView,	// ビューマトリックス
-		&m_camera.posV,		// 視点
-		&m_camera.posR,		// 注視点
-		&m_camera.vecU		// 上方向ベクトル
+		&m_aCamera[type].mtxView,	// ビューマトリックス
+		&m_aCamera[type].posV,		// 視点
+		&m_aCamera[type].posR,		// 注視点
+		&m_aCamera[type].vecU		// 上方向ベクトル
 	);
 
 	// ビューマトリックスの設定
-	pDevice->SetTransform(D3DTS_VIEW, &m_camera.mtxView);
+	pDevice->SetTransform(D3DTS_VIEW, &m_aCamera[type].mtxView);
 }
 
 //============================================================
@@ -194,53 +221,67 @@ void CCamera::SetDestCamera(void)
 	D3DXVECTOR3 rot = CManager::GetPlayer()->GetRotation();		// プレイヤー向き
 
 	// 目標の注視点の位置を更新
-	m_camera.destPosR.x = m_camera.posR.x = pos.x + sinf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
-	m_camera.destPosR.y = m_camera.posR.y = pos.y;										// プレイヤーの位置と同じ
-	m_camera.destPosR.z = m_camera.posR.z = pos.z + cosf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
+	m_aCamera[TYPE_MAIN].destPosR.x = m_aCamera[TYPE_MAIN].posR.x = pos.x + sinf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
+	m_aCamera[TYPE_MAIN].destPosR.y = m_aCamera[TYPE_MAIN].posR.y = pos.y;										// プレイヤーの位置と同じ
+	m_aCamera[TYPE_MAIN].destPosR.z = m_aCamera[TYPE_MAIN].posR.z = pos.z + cosf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
 
 	// 目標の視点の位置を更新
-	m_camera.destPosV.x = m_camera.posV.x = m_camera.posR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));	// 目標注視点から距離分離れた位置
-	m_camera.destPosV.y = m_camera.posV.y = POS_V_Y;																			// 固定の高さ
-	m_camera.destPosV.z = m_camera.posV.z = m_camera.posR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// 目標注視点から距離分離れた位置
+	m_aCamera[TYPE_MAIN].destPosV.x = m_aCamera[TYPE_MAIN].posV.x = m_aCamera[TYPE_MAIN].posR.x + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));	// 目標注視点から距離分離れた位置
+	m_aCamera[TYPE_MAIN].destPosV.y = m_aCamera[TYPE_MAIN].posV.y = POS_V_Y;																			// 固定の高さ
+	m_aCamera[TYPE_MAIN].destPosV.z = m_aCamera[TYPE_MAIN].posV.z = m_aCamera[TYPE_MAIN].posR.z + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));	// 目標注視点から距離分離れた位置
 
 	// TODO：最初にカメラ動かないように直す
 #else
-	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
-	{ // プレイヤー・ターゲットが使用されている場合
+	// 変数を宣言
+	D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+	D3DXVECTOR3 destPosR = VEC3_ZERO;	// カメラの注視点の目標位置
+	D3DXVECTOR3 diffPosR = VEC3_ZERO;	// カメラの注視点の位置差分
+	D3DXVECTOR3 diffPosV = VEC3_ZERO;	// カメラの視点の位置差分
+	float fDisTarget = CSceneGame::GetPlayer()->GetDistanceTarget();	// ターゲットとプレイヤー間の距離
+	float fDiffRot = 0.0f;	// カメラの向き差分
 
-		// 変数を宣言
-		D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
-		D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
-		D3DXVECTOR3 destPosR = VEC3_ZERO;	// カメラの注視点の目標位置
-		D3DXVECTOR3 diffPosR = VEC3_ZERO;	// カメラの注視点の位置差分
-		D3DXVECTOR3 diffPosV = VEC3_ZERO;	// カメラの視点の位置差分
-		float fDisTarget = sqrtf((posPlayer.x - posTarget.x) * (posPlayer.x - posTarget.x) + (posPlayer.z - posTarget.z) * (posPlayer.z - posTarget.z)) * 0.5f;	// ターゲットとプレイヤー間の距離
-		float fDiffRot = 0.0f;	// カメラの向き差分
+	// 差分向きを求める
+	fDiffRot = m_aCamera[TYPE_MAIN].destRot.y - m_aCamera[TYPE_MAIN].rot.y;
+	useful::NormalizeRot(fDiffRot);		// 差分向き正規化
 
-		// 向きを求める
-		m_camera.rot.y = m_camera.destRot.y - m_camera.rot.y;
-		useful::NormalizeRot(m_camera.rot.y);	// 向き正規化
+	// 向きを更新
+	m_aCamera[TYPE_MAIN].rot.y += fDiffRot * REV_ROT;
+	useful::NormalizeRot(m_aCamera[TYPE_MAIN].rot.y);	// 向き正規化
 
-		// ターゲットとプレイヤーの中間位置を求める
-		destPosR = (posPlayer - posTarget) * REV_CENTER;	// 中間位置を設定
-		destPosR.y = 0.0f;	// y座標を初期化
+	// ターゲットとプレイヤーの中間位置を求める
+	destPosR = (posPlayer - posTarget) * REV_CENTER;	// 中間位置を設定
+	destPosR.y = 0.0f;	// y座標を初期化
 
-		// カメラの向きをターゲットに向かせる
-		m_camera.rot.y = atan2f(posTarget.x - posPlayer.x, posTarget.z - posPlayer.z);
+	// カメラの向きをターゲットに向かせる
+	m_aCamera[TYPE_MAIN].rot.y = atan2f(posTarget.x - posPlayer.x, posTarget.z - posPlayer.z);
 
-		// カメラの距離を設定
-		m_camera.fDis = FIRST_DIS - (fDisTarget * REV_PULS_DIS);
+	// カメラの距離を設定
+	m_aCamera[TYPE_MAIN].fDis = FIRST_DIS - (fDisTarget * REV_PULS_DIS);
 
-		// 目標の注視点の位置を更新
-		m_camera.posV.x = destPosR.x;
-		m_camera.posV.y = POSR_Y;
-		m_camera.posV.z = destPosR.z;
+	// 目標の注視点の位置を更新
+	m_aCamera[TYPE_MAIN].posV.x = m_aCamera[TYPE_MAIN].destPosR.x = destPosR.x;
+	m_aCamera[TYPE_MAIN].posV.y = m_aCamera[TYPE_MAIN].destPosR.y = POSR_Y;
+	m_aCamera[TYPE_MAIN].posV.z = m_aCamera[TYPE_MAIN].destPosR.z = destPosR.z;
 
-		// 目標の視点の位置を更新
-		m_camera.posR.x = m_camera.destPosR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));
-		m_camera.posR.y = MIN_POSV_Y + (fDisTarget * REV_PLUS_POSV_Y);
-		m_camera.posR.z = m_camera.destPosR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));
-	}
+	// 目標の視点の位置を更新
+	m_aCamera[TYPE_MAIN].posR.x = m_aCamera[TYPE_MAIN].destPosV.x = m_aCamera[TYPE_MAIN].destPosR.x + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));
+	m_aCamera[TYPE_MAIN].posR.y = m_aCamera[TYPE_MAIN].destPosV.y = MIN_POSV_Y + (fDisTarget * REV_PLUS_POSV_Y);
+	m_aCamera[TYPE_MAIN].posR.z = m_aCamera[TYPE_MAIN].destPosV.z = m_aCamera[TYPE_MAIN].destPosR.z + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));
+
+	//// 目標の位置までの差分を計算
+	//diffPosV = m_aCamera[TYPE_MAIN].destPosV - m_aCamera[TYPE_MAIN].posV;	// 視点
+	//diffPosR = m_aCamera[TYPE_MAIN].destPosR - m_aCamera[TYPE_MAIN].posR;	// 注視点
+
+	//// 視点の位置を更新
+	//m_aCamera[TYPE_MAIN].posV.x += diffPosV.x * REV_POS_V.x;
+	//m_aCamera[TYPE_MAIN].posV.y += diffPosV.y * REV_POS_V.y;
+	//m_aCamera[TYPE_MAIN].posV.z += diffPosV.z * REV_POS_V.x;
+
+	//// 注視点の位置を更新
+	//m_aCamera[TYPE_MAIN].posR.x += diffPosR.x * REV_POS_R.x;
+	//m_aCamera[TYPE_MAIN].posR.y += diffPosR.y * REV_POS_R.y;
+	//m_aCamera[TYPE_MAIN].posR.z += diffPosR.z * REV_POS_R.x;
 #endif
 }
 
@@ -250,12 +291,12 @@ void CCamera::SetDestCamera(void)
 void CCamera::SetRotation(const D3DXVECTOR3& rRot)
 {
 	// 引数のカメラの向きを設定
-	m_camera.rot = rRot;
+	m_aCamera[TYPE_MAIN].rot = rRot;
 
 	// 向きを正規化
-	useful::NormalizeRot(m_camera.rot.x);
-	useful::NormalizeRot(m_camera.rot.y);
-	useful::NormalizeRot(m_camera.rot.z);
+	useful::NormalizeRot(m_aCamera[TYPE_MAIN].rot.x);
+	useful::NormalizeRot(m_aCamera[TYPE_MAIN].rot.y);
+	useful::NormalizeRot(m_aCamera[TYPE_MAIN].rot.z);
 }
 
 //============================================================
@@ -264,21 +305,21 @@ void CCamera::SetRotation(const D3DXVECTOR3& rRot)
 void CCamera::SetDestRotation(const D3DXVECTOR3& rRot)
 {
 	// 引数のカメラの目標向きを設定
-	m_camera.destRot = rRot;
+	m_aCamera[TYPE_MAIN].destRot = rRot;
 
 	// 向きを正規化
-	useful::NormalizeRot(m_camera.destRot.x);
-	useful::NormalizeRot(m_camera.destRot.y);
-	useful::NormalizeRot(m_camera.destRot.z);
+	useful::NormalizeRot(m_aCamera[TYPE_MAIN].destRot.x);
+	useful::NormalizeRot(m_aCamera[TYPE_MAIN].destRot.y);
+	useful::NormalizeRot(m_aCamera[TYPE_MAIN].destRot.z);
 }
 
 //============================================================
 //	カメラ取得処理
 //============================================================
-CCamera::Camera CCamera::GetCamera(void)
+CCamera::Camera CCamera::GetCamera(const TYPE type)
 {
 	// カメラの情報を返す
-	return m_camera;
+	return m_aCamera[type];
 }
 
 //============================================================
@@ -287,7 +328,7 @@ CCamera::Camera CCamera::GetCamera(void)
 D3DXVECTOR3 CCamera::GetRotation(void) const
 {
 	// カメラの向きを返す
-	return m_camera.rot;
+	return m_aCamera[TYPE_MAIN].rot;
 }
 
 //============================================================
@@ -296,7 +337,7 @@ D3DXVECTOR3 CCamera::GetRotation(void) const
 D3DXVECTOR3 CCamera::GetDestRotation(void) const
 {
 	// カメラの目標向きを返す
-	return m_camera.destRot;
+	return m_aCamera[TYPE_MAIN].destRot;
 }
 
 //============================================================
@@ -370,36 +411,36 @@ void CCamera::Follow(void)
 	D3DXVECTOR3 rot = CSceneGame::GetPlayer()->GetRotation();	// プレイヤー向き
 
 	// 目標の向きまでの差分を計算
-	diffRot = m_camera.destRot - m_camera.rot;
-	useful::NormalizeRot(diffRot.y);		// 差分向き正規化
+	diffRot = m_aCamera[TYPE_MAIN].destRot - m_aCamera[TYPE_MAIN].rot;
+	useful::NormalizeRot(diffRot.y);	// 差分向き正規化
 
 	// 向きを更新
-	m_camera.rot.y += diffRot.y * REV_ROT;
-	useful::NormalizeRot(m_camera.rot.y);	// 向き正規化
+	m_aCamera[TYPE_MAIN].rot.y += diffRot.y * REV_ROT;
+	useful::NormalizeRot(m_aCamera[TYPE_MAIN].rot.y);	// 向き正規化
 
 	// 目標の注視点の位置を更新
-	m_camera.destPosR.x = pos.x + sinf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
-	m_camera.destPosR.y = pos.y;										// プレイヤーの位置と同じ
-	m_camera.destPosR.z = pos.z + cosf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
+	m_aCamera[TYPE_MAIN].destPosR.x = pos.x + sinf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
+	m_aCamera[TYPE_MAIN].destPosR.y = pos.y;										// プレイヤーの位置と同じ
+	m_aCamera[TYPE_MAIN].destPosR.z = pos.z + cosf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
 
 	// 目標の視点の位置を更新
-	m_camera.destPosV.x = m_camera.destPosR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));	// 目標注視点から距離分離れた位置
-	m_camera.destPosV.y = POS_V_Y;																					// 固定の高さ
-	m_camera.destPosV.z = m_camera.destPosR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));	// 目標注視点から距離分離れた位置
+	m_aCamera[TYPE_MAIN].destPosV.x = m_aCamera[TYPE_MAIN].destPosR.x + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));	// 目標注視点から距離分離れた位置
+	m_aCamera[TYPE_MAIN].destPosV.y = POS_V_Y;																																	// 固定の高さ
+	m_aCamera[TYPE_MAIN].destPosV.z = m_aCamera[TYPE_MAIN].destPosR.z + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));	// 目標注視点から距離分離れた位置
 
 	// 目標の位置までの差分を計算
-	diffPosV = m_camera.destPosV - m_camera.posV;	// 視点
-	diffPosR = m_camera.destPosR - m_camera.posR;	// 注視点
+	diffPosV = m_aCamera[TYPE_MAIN].destPosV - m_aCamera[TYPE_MAIN].posV;	// 視点
+	diffPosR = m_aCamera[TYPE_MAIN].destPosR - m_aCamera[TYPE_MAIN].posR;	// 注視点
 
 	// 視点の位置を更新
-	m_camera.posV.x += diffPosV.x * REV_POS_V.x;
-	m_camera.posV.y += diffPosV.y * REV_POS_V.y;
-	m_camera.posV.z += diffPosV.z * REV_POS_V.x;
+	m_aCamera[TYPE_MAIN].posV.x += diffPosV.x * REV_POS_V.x;
+	m_aCamera[TYPE_MAIN].posV.y += diffPosV.y * REV_POS_V.y;
+	m_aCamera[TYPE_MAIN].posV.z += diffPosV.z * REV_POS_V.x;
 
 	// 注視点の位置を更新
-	m_camera.posR.x += diffPosR.x * REV_POS_R.x;
-	m_camera.posR.y += diffPosR.y * REV_POS_R.y;
-	m_camera.posR.z += diffPosR.z * REV_POS_R.x;
+	m_aCamera[TYPE_MAIN].posR.x += diffPosR.x * REV_POS_R.x;
+	m_aCamera[TYPE_MAIN].posR.y += diffPosR.y * REV_POS_R.y;
+	m_aCamera[TYPE_MAIN].posR.z += diffPosR.z * REV_POS_R.x;
 }
 
 //============================================================
@@ -420,46 +461,46 @@ void CCamera::Bargaining(void)
 		float fDiffRot = 0.0f;	// カメラの向き差分
 
 		// 差分向きを求める
-		fDiffRot = m_camera.destRot.y - m_camera.rot.y;
-		useful::NormalizeRot(fDiffRot);			// 差分向き正規化
+		fDiffRot = m_aCamera[TYPE_MAIN].destRot.y - m_aCamera[TYPE_MAIN].rot.y;
+		useful::NormalizeRot(fDiffRot);		// 差分向き正規化
 
 		// 向きを更新
-		m_camera.rot.y += fDiffRot * REV_ROT;
-		useful::NormalizeRot(m_camera.rot.y);	// 向き正規化
+		m_aCamera[TYPE_MAIN].rot.y += fDiffRot * REV_ROT;
+		useful::NormalizeRot(m_aCamera[TYPE_MAIN].rot.y);	// 向き正規化
 
 		// ターゲットとプレイヤーの中間位置を求める
 		destPosR = (posPlayer - posTarget) * REV_CENTER;	// 中間位置を設定
 		destPosR.y = 0.0f;	// y座標を初期化
 
 		// カメラの向きをターゲットに向かせる
-		m_camera.rot.y = atan2f(posTarget.x - posPlayer.x, posTarget.z - posPlayer.z);
+		m_aCamera[TYPE_MAIN].rot.y = atan2f(posTarget.x - posPlayer.x, posTarget.z - posPlayer.z);
 
 		// カメラの距離を設定
-		m_camera.fDis = FIRST_DIS - (fDisTarget * REV_PULS_DIS);
+		m_aCamera[TYPE_MAIN].fDis = FIRST_DIS - (fDisTarget * REV_PULS_DIS);
 
 		// 目標の注視点の位置を更新
-		m_camera.destPosR.x = destPosR.x;
-		m_camera.destPosR.y = POSR_Y;
-		m_camera.destPosR.z = destPosR.z;
+		m_aCamera[TYPE_MAIN].destPosR.x = destPosR.x;
+		m_aCamera[TYPE_MAIN].destPosR.y = POSR_Y;
+		m_aCamera[TYPE_MAIN].destPosR.z = destPosR.z;
 
 		// 目標の視点の位置を更新
-		m_camera.destPosV.x = m_camera.destPosR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));
-		m_camera.destPosV.y = MIN_POSV_Y + (fDisTarget * REV_PLUS_POSV_Y);
-		m_camera.destPosV.z = m_camera.destPosR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));
+		m_aCamera[TYPE_MAIN].destPosV.x = m_aCamera[TYPE_MAIN].destPosR.x + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));
+		m_aCamera[TYPE_MAIN].destPosV.y = MIN_POSV_Y + (fDisTarget * REV_PLUS_POSV_Y);
+		m_aCamera[TYPE_MAIN].destPosV.z = m_aCamera[TYPE_MAIN].destPosR.z + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));
 
 		// 目標の位置までの差分を計算
-		diffPosV = m_camera.destPosV - m_camera.posV;	// 視点
-		diffPosR = m_camera.destPosR - m_camera.posR;	// 注視点
+		diffPosV = m_aCamera[TYPE_MAIN].destPosV - m_aCamera[TYPE_MAIN].posV;	// 視点
+		diffPosR = m_aCamera[TYPE_MAIN].destPosR - m_aCamera[TYPE_MAIN].posR;	// 注視点
 
 		// 視点の位置を更新
-		m_camera.posV.x += diffPosV.x * REV_POS_V.x;
-		m_camera.posV.y += diffPosV.y * REV_POS_V.y;
-		m_camera.posV.z += diffPosV.z * REV_POS_V.x;
+		m_aCamera[TYPE_MAIN].posV.x += diffPosV.x * REV_POS_V.x;
+		m_aCamera[TYPE_MAIN].posV.y += diffPosV.y * REV_POS_V.y;
+		m_aCamera[TYPE_MAIN].posV.z += diffPosV.z * REV_POS_V.x;
 
 		// 注視点の位置を更新
-		m_camera.posR.x += diffPosR.x * REV_POS_R.x;
-		m_camera.posR.y += diffPosR.y * REV_POS_R.y;
-		m_camera.posR.z += diffPosR.z * REV_POS_R.x;
+		m_aCamera[TYPE_MAIN].posR.x += diffPosR.x * REV_POS_R.x;
+		m_aCamera[TYPE_MAIN].posR.y += diffPosR.y * REV_POS_R.y;
+		m_aCamera[TYPE_MAIN].posR.z += diffPosR.z * REV_POS_R.x;
 	}
 }
 
@@ -494,16 +535,16 @@ void CCamera::Move(void)
 	{ // 右クリックと左クリックが押されている場合
 
 		// 視点を移動
-		m_camera.posV.x -= sinf(m_camera.rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
-		m_camera.posV.z -= cosf(m_camera.rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
-		m_camera.posV.x += sinf(m_camera.rot.y) * mouseMove.y * REV_MOVE_MOUSE;
-		m_camera.posV.z += cosf(m_camera.rot.y) * mouseMove.y * REV_MOVE_MOUSE;
+		m_aCamera[TYPE_MAIN].posV.x -= sinf(m_aCamera[TYPE_MAIN].rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
+		m_aCamera[TYPE_MAIN].posV.z -= cosf(m_aCamera[TYPE_MAIN].rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
+		m_aCamera[TYPE_MAIN].posV.x += sinf(m_aCamera[TYPE_MAIN].rot.y) * mouseMove.y * REV_MOVE_MOUSE;
+		m_aCamera[TYPE_MAIN].posV.z += cosf(m_aCamera[TYPE_MAIN].rot.y) * mouseMove.y * REV_MOVE_MOUSE;
 
 		// 注視点を移動
-		m_camera.posR.x -= sinf(m_camera.rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
-		m_camera.posR.z -= cosf(m_camera.rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
-		m_camera.posR.x += sinf(m_camera.rot.y) * mouseMove.y * REV_MOVE_MOUSE;
-		m_camera.posR.z += cosf(m_camera.rot.y) * mouseMove.y * REV_MOVE_MOUSE;
+		m_aCamera[TYPE_MAIN].posR.x -= sinf(m_aCamera[TYPE_MAIN].rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
+		m_aCamera[TYPE_MAIN].posR.z -= cosf(m_aCamera[TYPE_MAIN].rot.y + (D3DX_PI * 0.5f)) * mouseMove.x * REV_MOVE_MOUSE;
+		m_aCamera[TYPE_MAIN].posR.x += sinf(m_aCamera[TYPE_MAIN].rot.y) * mouseMove.y * REV_MOVE_MOUSE;
+		m_aCamera[TYPE_MAIN].posR.z += cosf(m_aCamera[TYPE_MAIN].rot.y) * mouseMove.y * REV_MOVE_MOUSE;
 	}
 }
 
@@ -523,11 +564,11 @@ void CCamera::Distance(void)
 	{ // マウスホイールが操作された場合
 
 		// 距離を加算
-		m_camera.fDis += mouseMove.z * REV_DIS_MOUSE;
+		m_aCamera[TYPE_MAIN].fDis += mouseMove.z * REV_DIS_MOUSE;
 	}
 
 	// 距離の補正
-	useful::LimitNum(m_camera.fDis, MIN_DIS, MAX_DIS);
+	useful::LimitNum(m_aCamera[TYPE_MAIN].fDis, MIN_DIS, MAX_DIS);
 }
 
 //============================================================
@@ -546,38 +587,38 @@ void CCamera::Rotation(void)
 	{ // 左クリックだけが押されている場合
 
 		// カメラの y軸を回転
-		m_camera.rot.y += mouseMove.x * REV_ROT_MOUSE;
+		m_aCamera[TYPE_MAIN].rot.y += mouseMove.x * REV_ROT_MOUSE;
 
 		// カメラの x軸を回転
-		m_camera.rot.x += mouseMove.y * REV_ROT_MOUSE;
+		m_aCamera[TYPE_MAIN].rot.x += mouseMove.y * REV_ROT_MOUSE;
 	}
 
 	// 向きの補正
-	useful::LimitNum(m_camera.rot.x, LIMIT_ROT_LOW, LIMIT_ROT_HIGH);
-	useful::NormalizeRot(m_camera.rot.y);
+	useful::LimitNum(m_aCamera[TYPE_MAIN].rot.x, LIMIT_ROT_LOW, LIMIT_ROT_HIGH);
+	useful::NormalizeRot(m_aCamera[TYPE_MAIN].rot.y);
 
 	// 視点の更新
-	m_camera.posV.x = m_camera.posR.x + ((m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));
-	m_camera.posV.y = m_camera.posR.y + ((m_camera.fDis * cosf(m_camera.rot.x)));
-	m_camera.posV.z = m_camera.posR.z + ((m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));
+	m_aCamera[TYPE_MAIN].posV.x = m_aCamera[TYPE_MAIN].posR.x + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));
+	m_aCamera[TYPE_MAIN].posV.y = m_aCamera[TYPE_MAIN].posR.y + ((m_aCamera[TYPE_MAIN].fDis * cosf(m_aCamera[TYPE_MAIN].rot.x)));
+	m_aCamera[TYPE_MAIN].posV.z = m_aCamera[TYPE_MAIN].posR.z + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));
 
 	// マウス操作の更新
 	if (pMouse->GetPress(CInputMouse::KEY_RIGHT) && !pMouse->GetPress(CInputMouse::KEY_LEFT))
 	{ // 右クリックだけが押されている場合
 
 		// カメラの y軸を回転
-		m_camera.rot.y += mouseMove.x * REV_ROT_MOUSE;
+		m_aCamera[TYPE_MAIN].rot.y += mouseMove.x * REV_ROT_MOUSE;
 
 		// カメラの x軸を回転
-		m_camera.rot.x += mouseMove.y * REV_ROT_MOUSE;
+		m_aCamera[TYPE_MAIN].rot.x += mouseMove.y * REV_ROT_MOUSE;
 	}
 
 	// 向きの補正
-	useful::LimitNum(m_camera.rot.x, LIMIT_ROT_LOW, LIMIT_ROT_HIGH);
-	useful::NormalizeRot(m_camera.rot.y);
+	useful::LimitNum(m_aCamera[TYPE_MAIN].rot.x, LIMIT_ROT_LOW, LIMIT_ROT_HIGH);
+	useful::NormalizeRot(m_aCamera[TYPE_MAIN].rot.y);
 
 	// 注視点の更新
-	m_camera.posR.x = m_camera.posV.x + ((-m_camera.fDis * sinf(m_camera.rot.x)) * sinf(m_camera.rot.y));
-	m_camera.posR.y = m_camera.posV.y + ((-m_camera.fDis * cosf(m_camera.rot.x)));
-	m_camera.posR.z = m_camera.posV.z + ((-m_camera.fDis * sinf(m_camera.rot.x)) * cosf(m_camera.rot.y));
+	m_aCamera[TYPE_MAIN].posR.x = m_aCamera[TYPE_MAIN].posV.x + ((-m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));
+	m_aCamera[TYPE_MAIN].posR.y = m_aCamera[TYPE_MAIN].posV.y + ((-m_aCamera[TYPE_MAIN].fDis * cosf(m_aCamera[TYPE_MAIN].rot.x)));
+	m_aCamera[TYPE_MAIN].posR.z = m_aCamera[TYPE_MAIN].posV.z + ((-m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));
 }

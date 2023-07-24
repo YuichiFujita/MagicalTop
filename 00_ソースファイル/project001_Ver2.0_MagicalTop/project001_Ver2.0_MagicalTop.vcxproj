@@ -205,6 +205,7 @@
     <ClCompile Include="scroll2D.cpp" />
     <ClCompile Include="scrollMeshField.cpp" />
     <ClCompile Include="sea.cpp" />
+    <ClCompile Include="season.cpp" />
     <ClCompile Include="shadow.cpp" />
     <ClCompile Include="sky.cpp" />
     <ClCompile Include="sound.cpp" />
@@ -267,6 +268,7 @@
     <ClInclude Include="scroll2D.h" />
     <ClInclude Include="scrollMeshField.h" />
     <ClInclude Include="sea.h" />
+    <ClInclude Include="season.h" />
     <ClInclude Include="shadow.h" />
     <ClInclude Include="sky.h" />
     <ClInclude Include="sound.h" />

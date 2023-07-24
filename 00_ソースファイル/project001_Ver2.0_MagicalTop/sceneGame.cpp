@@ -166,7 +166,7 @@ HRESULT CSceneGame::Init(void)
 	CFlower::RandomSpawn(30, CFlower::TYPE_NORMAL, D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);	// TODO：定数変更
 
 	// TODO：初期設定
-#if 1
+#if 0
 	// カメラの初期位置を設定
 	CManager::GetCamera()->SetDestCamera();
 
