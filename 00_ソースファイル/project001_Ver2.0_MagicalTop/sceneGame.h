@@ -57,8 +57,8 @@ public:
 
 private:
 	// 静的メンバ変数
-	static CWaveManager	*m_pWaveManager;	// ウェーブマネージャーオブジェクト
-	static CStage		*m_pStage;			// ステージオブジェクト
+	static CWaveManager	*m_pWaveManager;	// ウェーブマネージャー
+	static CStage		*m_pStage;			// ステージ
 	static CPlayer		*m_pPlayer;			// プレイヤーオブジェクト
 	static CTarget		*m_pTarget;			// ターゲットオブジェクト
 	static CField		*m_pField;			// 地面オブジェクト

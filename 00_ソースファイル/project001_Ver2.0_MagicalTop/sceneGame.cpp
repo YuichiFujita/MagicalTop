@@ -31,8 +31,8 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
-CWaveManager *CSceneGame::m_pWaveManager = NULL;	// ウェーブマネージャーオブジェクト
-CStage	*CSceneGame::m_pStage	= NULL;				// ステージオブジェクト
+CWaveManager *CSceneGame::m_pWaveManager = NULL;	// ウェーブマネージャー
+CStage	*CSceneGame::m_pStage	= NULL;				// ステージ
 CPlayer	*CSceneGame::m_pPlayer	= NULL;				// プレイヤーオブジェクト
 CField	*CSceneGame::m_pField	= NULL;				// 地面オブジェクト
 CTarget	*CSceneGame::m_pTarget	= NULL;				// ターゲットオブジェクト

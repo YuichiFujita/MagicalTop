@@ -16,12 +16,23 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
+const char *CWaveManager::mc_apTextureFile[] =	// テクスチャ定数
+{
+	"data\\TEXTURE\\wave000.png",	// ウェーブ表示テクスチャ
+};
 CWaveManager::Season CWaveManager::m_aWaveInfo[CWaveManager::SEASON_MAX] = {};	// ウェーブ情報
 
 //************************************************************
 //	マクロ定義
 //************************************************************
 #define WAVE_SETUP_TXT	"data\\TXT\\wave.txt"	// セットアップテキスト相対パス
+
+#define SIZE_WAVE	(D3DXVECTOR3(740.0f, 280.0f, 0.0f))	// ウェーブの大きさ
+#define SIZE_NUM	(D3DXVECTOR3(210.0f, 250.0f, 0.0f))	// 数字の大きさ
+#define WAVE_PRIO	(6)			// ウェーブの優先順位
+#define SPACE_EDGE	(155.0f)	// 端から見たウェーブ表示のずれ量
+#define MUL_SIZEUP		(12.0f)	// ウェーブ・数字の大きさ上昇乗算量
+#define MUL_SIZEDOWN	(0.85f)	// ウェーブ・数字の大きさ下降乗算量
 
 //************************************************************
 //	親クラス [CWaveManager] のメンバ関数
@@ -68,10 +79,23 @@ HRESULT CWaveManager::Init(void)
 	m_nCounterState = 0;			// 状態管理カウンター
 	m_nCounterFrame = 0;			// ウェーブ余韻管理カウンター
 
-	// TODO
-#if 0
+	// セットアップの読み込み
+	LoadSetup();
+
+	//--------------------------------------------------------
+	//	オブジェクト2Dの生成・設定
+	//--------------------------------------------------------
 	// ウェーブ表示用のオブジェクト2Dの生成
-	m_pObject2D = CObject2D::Create(VEC3_ZERO, VEC3_ONE);
+	m_pObject2D = CObject2D::Create
+	( // 引数
+		D3DXVECTOR3	// 位置
+		( // 引数
+			0.0f + SPACE_EDGE + (SIZE_WAVE.x * 0.5f),
+			SCREEN_HEIGHT * 0.5f,
+			0.0
+		),
+		SIZE_WAVE	// 大きさ
+	);
 	if (UNUSED(m_pObject2D))
 	{ // 生成に失敗した場合
 
@@ -81,13 +105,29 @@ HRESULT CWaveManager::Init(void)
 	}
 
 	// テクスチャを登録・割当
-	m_pObject2D->BindTexture(pTexture->Regist(/*mc_apTextureFile[TEXTURE_]*/NULL));	// TODO：テクスチャ読み込み
+	m_pObject2D->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_NORMAL]));
+
+	// 優先順位を設定
+	m_pObject2D->SetPriority(WAVE_PRIO);
 
 	// 描画をしない設定にする
 	m_pObject2D->SetEnableDraw(false);
 
+	//--------------------------------------------------------
+	//	数字オブジェクトの生成・設定
+	//--------------------------------------------------------
 	// ウェーブ数表示用の数字オブジェクトの生成
-	m_pValue = CValue::Create(CValue::TEXTURE_NORMAL, VEC3_ZERO);
+	m_pValue = CValue::Create
+	( // 引数
+		CValue::TEXTURE_NORMAL,	// テクスチャ
+		D3DXVECTOR3				// 位置
+		( // 引数
+			(float)SCREEN_WIDTH - SPACE_EDGE - (SIZE_NUM.x * 0.5f),
+			SCREEN_HEIGHT * 0.5f,
+			0.0f
+		),
+		SIZE_NUM	// 大きさ
+	);
 	if (UNUSED(m_pValue))
 	{ // 生成に失敗した場合
 
@@ -96,15 +136,11 @@ HRESULT CWaveManager::Init(void)
 		return E_FAIL;
 	}
 
-	// テクスチャを登録・割当
-	m_pValue->BindTexture(pTexture->Regist(/*mc_apTextureFile[TEXTURE_]*/NULL));
+	// 数字を設定
+	m_pValue->SetNumber(0);
 
 	// 描画をしない設定にする
 	m_pValue->SetEnableDraw(false);
-#endif
-
-	// セットアップの読み込み
-	LoadSetup();
 
 	// 成功を返す
 	return S_OK;
@@ -115,6 +151,12 @@ HRESULT CWaveManager::Init(void)
 //============================================================
 void CWaveManager::Uninit(void)
 {
+	// ウェーブ表示用のオブジェクト2Dを破棄
+	m_pObject2D->Uninit();
+
+	// ウェーブ数表示用の数字オブジェクトを破棄
+	m_pValue->Uninit();
+
 	for (int nCntSeason = 0; nCntSeason < SEASON_MAX; nCntSeason++)
 	{ // 季節数分繰り返す
 
@@ -141,11 +183,9 @@ void CWaveManager::Uninit(void)
 //============================================================
 void CWaveManager::Update(void)
 {
-	// TODO
-	CManager::GetDebugProc()->Print("%d\n", m_state);
-	CManager::GetDebugProc()->Print("%d\n", m_nSeason);
-	CManager::GetDebugProc()->Print("%d\n", m_nWave);
-	CManager::GetDebugProc()->Print("%d\n", m_nPoint);
+	// 変数を宣言
+	D3DXVECTOR3 sizeWave = m_pObject2D->GetScaling();	// ウェーブ文字大きさ
+	D3DXVECTOR3 sizeNum = m_pValue->GetScaling();		// ウェーブ数字大きさ
 
 	// 状態の更新
 	switch (m_state)
@@ -171,24 +211,68 @@ void CWaveManager::Update(void)
 			m_nCounterState = 0;
 
 			// 状態を変更
-			m_state = STATE_WAVE_START;	// ウェーブ開始状態
+			m_state = STATE_WAVE_START_INIT;	// ウェーブ開始初期化状態
 		}
 
 		break;
 
+	case STATE_WAVE_START_INIT:	// ウェーブ開始初期化状態
+
+		// 数字を設定
+		m_pValue->SetNumber(m_nWave + 1);
+
+		// オブジェクトのサイズを大きくする
+		sizeWave *= MUL_SIZEUP;	// ウェーブ文字
+		sizeNum *= MUL_SIZEUP;	// ウェーブ数字
+
+		// 描画をする設定にする
+		m_pObject2D->SetEnableDraw(true);
+		m_pValue->SetEnableDraw(true);
+
+		// 状態を変更
+		m_state = STATE_WAVE_START;	// ウェーブ開始状態
+
 	case STATE_WAVE_START:		// ウェーブ開始状態
 
-		if (m_nCounterState <= 60)
+		if (m_nCounterState <= 90)
 		{ // カウンターが一定値以下の場合
 
 			// 状態管理カウンターを加算
 			m_nCounterState++;
+
+			// オブジェクトのサイズを小さくする
+			sizeWave *= MUL_SIZEDOWN;	// ウェーブ文字
+			sizeNum *= MUL_SIZEDOWN;	// ウェーブ数字
+
+			// ウェーブ文字のサイズを補正
+			if (sizeWave.x < SIZE_WAVE.x
+			||  sizeWave.y < SIZE_WAVE.y)
+			{ // 大きさが下回った場合
+
+				// 大きさを補正
+				sizeWave.x = SIZE_WAVE.x;
+				sizeWave.y = SIZE_WAVE.y;
+			}
+
+			// ウェーブ数字のサイズを補正
+			if (sizeNum.x < SIZE_NUM.x
+			||  sizeNum.y < SIZE_NUM.y)
+			{ // 大きさが下回った場合
+
+				// 大きさを補正
+				sizeNum.x = SIZE_NUM.x;
+				sizeNum.y = SIZE_NUM.y;
+			}
 		}
 		else
 		{ // カウンターが一定値より大きい場合
 
 			// 状態管理カウンターを初期化
 			m_nCounterState = 0;
+
+			// 描画をしない設定にする
+			m_pObject2D->SetEnableDraw(false);
+			m_pValue->SetEnableDraw(false);
 
 			// 状態を変更
 			m_state = STATE_PROGRESSION;	// ウェーブ進行状態
@@ -235,27 +319,40 @@ void CWaveManager::Update(void)
 		else
 		{ // カウンターが 0以下且つ、全出現が終了した場合
 
-			// ウェーブ管理カウンターを加算
-			m_nWave++;
+			if (m_nCounterState <= 30)
+			{ // カウンターが一定値以下の場合
 
-			if (m_nWave < m_aWaveInfo[m_nSeason].nNumWave)
-			{ // ウェーブがまだある場合
-
-				// カウンターを初期化
-				m_nPoint = 0;	// 出現管理カウンター
-
-				// 状態を変更
-				m_state = STATE_WAVE_START;	// ウェーブ開始状態
+				// 状態管理カウンターを加算
+				m_nCounterState++;
 			}
 			else
-			{ // 全ウェーブが終了した場合
+			{ // カウンターが一定値より大きい場合
 
-				// カウンターを初期化
-				m_nWave = 0;	// ウェーブ管理カウンター
-				m_nPoint = 0;	// 出現管理カウンター
+				// 状態管理カウンターを初期化
+				m_nCounterState = 0;
 
-				// 状態を変更
-				m_state = STATE_SEASON_END;	// 季節の終了状態
+				// ウェーブ管理カウンターを加算
+				m_nWave++;
+
+				if (m_nWave < m_aWaveInfo[m_nSeason].nNumWave)
+				{ // ウェーブがまだある場合
+
+					// カウンターを初期化
+					m_nPoint = 0;	// 出現管理カウンター
+
+					// 状態を変更
+					m_state = STATE_WAVE_START_INIT;	// ウェーブ開始初期化状態
+				}
+				else
+				{ // 全ウェーブが終了した場合
+
+					// カウンターを初期化
+					m_nWave = 0;	// ウェーブ管理カウンター
+					m_nPoint = 0;	// 出現管理カウンター
+
+					// 状態を変更
+					m_state = STATE_SEASON_END;	// 季節の終了状態
+				}
 			}
 		}
 
@@ -319,18 +416,29 @@ void CWaveManager::Update(void)
 		// シーンの設定
 		CManager::SetMode(CScene::MODE_RESULT);	// リザルト画面
 
+		// 処理を抜ける
+		return;
+
 		break;
 
 	default:	// 例外処理
 		assert(false);
 		break;
 	}
+
+	// 大きさを設定
+	m_pObject2D->SetScaling(sizeWave);	// ウェーブ文字
+	m_pValue->SetScaling(sizeNum);		// ウェーブ数字
+
+	// オブジェクトの更新
+	m_pObject2D->Update();	// ウェーブ文字
+	m_pValue->Update();		// ウェーブ数字
 }
 
 //============================================================
 //	生成処理
 //============================================================
-CWaveManager *CWaveManager::Create()
+CWaveManager *CWaveManager::Create(void)
 {
 	// ポインタを宣言
 	CWaveManager *pWaveManager = NULL;	// ウェーブマネージャー生成用

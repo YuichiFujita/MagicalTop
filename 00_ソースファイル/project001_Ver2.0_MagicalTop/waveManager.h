@@ -29,17 +29,25 @@ class CValue;		// 数字クラス
 class CWaveManager
 {
 public:
+	// テクスチャ列挙
+	typedef enum
+	{
+		TEXTURE_NORMAL = 0,	// ウェーブ
+		TEXTURE_MAX			// この列挙型の総数
+	}TEXTURE;
+
 	// 状態列挙
 	typedef enum
 	{
-		STATE_NONE = 0,		// 何もしない状態
-		STATE_SEASON_START,	// 季節の開始状態
-		STATE_WAVE_START,	// ウェーブ開始状態
-		STATE_PROGRESSION,	// ウェーブ進行状態
-		STATE_SEASON_END,	// 季節の終了状態
-		STATE_WAIT,			// 次季節の開始待機状態
-		STATE_END,			// 終了状態
-		STATE_MAX			// この列挙型の総数
+		STATE_NONE = 0,			// 何もしない状態
+		STATE_SEASON_START,		// 季節の開始状態
+		STATE_WAVE_START_INIT,	// ウェーブ開始初期化状態
+		STATE_WAVE_START,		// ウェーブ開始状態
+		STATE_PROGRESSION,		// ウェーブ進行状態
+		STATE_SEASON_END,		// 季節の終了状態
+		STATE_WAIT,				// 次季節の開始待機状態
+		STATE_END,				// 終了状態
+		STATE_MAX				// この列挙型の総数
 	}STATE;
 
 	// 季節列挙
@@ -91,6 +99,7 @@ public:
 
 private:
 	// 静的メンバ変数
+	static const char *mc_apTextureFile[];	// テクスチャ定数
 	static Season m_aWaveInfo[SEASON_MAX];	// ウェーブ情報
 
 	// メンバ変数
