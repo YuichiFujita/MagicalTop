@@ -112,9 +112,9 @@ HRESULT CCamera::Init(void)
 	// TODO
 #if 1
 	// カメラ情報を初期化
-	m_aCamera[TYPE_FONT].posV		= D3DXVECTOR3(0.0f, 0.0f, 600.0f);	// 現在の視点
+	m_aCamera[TYPE_FONT].posV		= D3DXVECTOR3(0.0f, 0.0f, -600.0f);	// 現在の視点
 	m_aCamera[TYPE_FONT].posR		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 現在の注視点
-	m_aCamera[TYPE_FONT].destPosV	= D3DXVECTOR3(0.0f, 0.0f, 600.0f);	// 目標の視点
+	m_aCamera[TYPE_FONT].destPosV	= D3DXVECTOR3(0.0f, 0.0f, -600.0f);	// 目標の視点
 	m_aCamera[TYPE_FONT].destPosR	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 目標の注視点
 	m_aCamera[TYPE_FONT].vecU		= D3DXVECTOR3(0.0f, 1.0f, 0.0f);	// 上方向ベクトル
 	m_aCamera[TYPE_FONT].rot		= D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 現在の向き

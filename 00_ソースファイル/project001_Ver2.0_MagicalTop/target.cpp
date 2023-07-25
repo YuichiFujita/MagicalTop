@@ -342,7 +342,13 @@ void CTarget::Hit(const int nDmg)
 //============================================================
 //	生成処理
 //============================================================
-CTarget *CTarget::Create(const MODEL model, const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot, const D3DXVECTOR3& rScale)
+CTarget *CTarget::Create
+(
+	const MODEL model,			// モデル
+	const D3DXVECTOR3& rPos,	// 位置
+	const D3DXVECTOR3& rRot,	// 向き
+	const D3DXVECTOR3& rScale	// 大きさ
+)
 {
 	// 変数を宣言
 	int nModelID;	// モデルインデックス

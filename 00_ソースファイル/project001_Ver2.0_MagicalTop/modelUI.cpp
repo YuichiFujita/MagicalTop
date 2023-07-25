@@ -1,13 +1,13 @@
 //============================================================
 //
-//	シーズン処理 [season.cpp]
+//	モデルUI処理 [modelUI.cpp]
 //	Author：藤田勇一
 //
 //============================================================
 //************************************************************
 //	インクルードファイル
 //************************************************************
-#include "season.h"
+#include "modelUI.h"
 #include "manager.h"
 #include "renderer.h"
 #include "camera.h"
@@ -16,23 +16,15 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define SEASON_PRIO	(5)	// シーズン表示の優先順位
+#define MODEL_UI_PRIO	(5)	// モデルUI表示の優先順位
 
 //************************************************************
-//	静的メンバ変数宣言
-//************************************************************
-const char *CSeason::mc_apModelFile[] =	// モデル定数
-{
-	"data\\MODEL\\FONT\\shot000.x",	// モデル
-};
-
-//************************************************************
-//	子クラス [CSeason] のメンバ関数
+//	子クラス [CModelUI] のメンバ関数
 //************************************************************
 //============================================================
 //	コンストラクタ
 //============================================================
-CSeason::CSeason() : CObjectModel(CObject::LABEL_NONE, SEASON_PRIO)
+CModelUI::CModelUI() : CObjectModel(CObject::LABEL_NONE, MODEL_UI_PRIO)
 {
 
 }
@@ -40,7 +32,7 @@ CSeason::CSeason() : CObjectModel(CObject::LABEL_NONE, SEASON_PRIO)
 //============================================================
 //	デストラクタ
 //============================================================
-CSeason::~CSeason()
+CModelUI::~CModelUI()
 {
 
 }
@@ -48,7 +40,7 @@ CSeason::~CSeason()
 //============================================================
 //	初期化処理
 //============================================================
-HRESULT CSeason::Init(void)
+HRESULT CModelUI::Init(void)
 {
 	// オブジェクトモデルの初期化
 	if (FAILED(CObjectModel::Init()))
@@ -66,7 +58,7 @@ HRESULT CSeason::Init(void)
 //============================================================
 //	終了処理
 //============================================================
-void CSeason::Uninit(void)
+void CModelUI::Uninit(void)
 {
 	// オブジェクトモデルの終了
 	CObjectModel::Uninit();
@@ -75,7 +67,7 @@ void CSeason::Uninit(void)
 //============================================================
 //	更新処理
 //============================================================
-void CSeason::Update(void)
+void CModelUI::Update(void)
 {
 	// オブジェクトモデルの更新
 	CObjectModel::Update();
@@ -84,7 +76,7 @@ void CSeason::Update(void)
 //============================================================
 //	描画処理
 //============================================================
-void CSeason::Draw(void)
+void CModelUI::Draw(void)
 {
 	// 変数を宣言
 	D3DVIEWPORT9 viewportDef;	// カメラのビューポート保存用
@@ -111,55 +103,50 @@ void CSeason::Draw(void)
 //============================================================
 //	生成処理
 //============================================================
-CSeason *CSeason::Create(const MODEL model)
+CModelUI *CModelUI::Create
+( // 引数
+	const D3DXVECTOR3& rPos,	// 位置
+	const D3DXVECTOR3& rRot,	// 向き
+	const D3DXVECTOR3& rScale	// 大きさ
+)
 {
-	// 変数を宣言
-	int nModelID;	// モデルインデックス
-
 	// ポインタを宣言
-	CModel *pModel = CManager::GetModel();	// モデルへのポインタ
-	CSeason *pSeason = NULL;	// シーズン生成用
+	CModelUI *pModelUI = NULL;	// モデルUI生成用
 
-	if (UNUSED(pSeason))
+	if (UNUSED(pModelUI))
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pSeason = new CSeason;	// シーズン
+		pModelUI = new CModelUI;	// モデルUI
 	}
 	else { assert(false); return NULL; }	// 使用中
 
-	if (USED(pSeason))
+	if (USED(pModelUI))
 	{ // 使用されている場合
 		
-		// シーズンの初期化
-		if (FAILED(pSeason->Init()))
+		// モデルUIの初期化
+		if (FAILED(pModelUI->Init()))
 		{ // 初期化に失敗した場合
 
 			// メモリ開放
-			delete pSeason;
-			pSeason = NULL;
+			delete pModelUI;
+			pModelUI = NULL;
 
 			// 失敗を返す
 			return NULL;
 		}
 
-		// モデルを登録
-		nModelID = pModel->Regist(mc_apModelFile[model]);
-
-		// モデルを割当
-		pSeason->BindModel(pModel->GetModel(nModelID));
-
 		// 位置を設定
-		pSeason->SetPosition(VEC3_ZERO);
+		pModelUI->SetPosition(rPos);
 
 		// 向きを設定
-		pSeason->SetRotation(VEC3_ZERO);
+		pModelUI->SetRotation(rRot);
 
 		// 大きさを設定
-		pSeason->SetScaling(VEC3_ONE);
+		pModelUI->SetScaling(rScale);
 
 		// 確保したアドレスを返す
-		return pSeason;
+		return pModelUI;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }

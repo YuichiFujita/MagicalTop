@@ -10,6 +10,8 @@
 #include "waveManager.h"
 #include "manager.h"
 #include "texture.h"
+#include "model.h"
+#include "modelUI.h"
 #include "object2D.h"
 #include "value.h"
 
@@ -20,6 +22,21 @@ const char *CWaveManager::mc_apTextureFile[] =	// テクスチャ定数
 {
 	"data\\TEXTURE\\wave000.png",	// ウェーブ表示テクスチャ
 };
+
+const char *CWaveManager::mc_apModelFile[] =	// モデル定数
+{
+	"data\\MODEL\\FONT\\wave.x",	// WAVEフォントモデル
+	"data\\MODEL\\FONT\\end.x",		// ENDフォントモデル
+};
+
+const char *CWaveManager::mc_apSeasonModelFile[] =	// シーズン表記モデル定数
+{
+	"data\\MODEL\\FONT\\spring.x",	// SPRINGフォントモデル
+	"data\\MODEL\\FONT\\summer.x",	// SUMMERフォントモデル
+	"data\\MODEL\\FONT\\autumn.x",	// AUTUMNフォントモデル
+	"data\\MODEL\\FONT\\winter.x",	// WINTERフォントモデル
+};
+
 CWaveManager::Season CWaveManager::m_aWaveInfo[CWaveManager::SEASON_MAX] = {};	// ウェーブ情報
 
 //************************************************************
@@ -27,12 +44,26 @@ CWaveManager::Season CWaveManager::m_aWaveInfo[CWaveManager::SEASON_MAX] = {};	/
 //************************************************************
 #define WAVE_SETUP_TXT	"data\\TXT\\wave.txt"	// セットアップテキスト相対パス
 
+#define POS_SEASON_LEFT		(D3DXVECTOR3(-160.0f, 75.0f, -0.0f))	// シーズン左表示の位置
+#define POS_SEASON_RIGHT	(D3DXVECTOR3(160.0f, -75.0f, -0.0f))	// シーズン右表示の位置
+
+#define SIZE_SEASON	(D3DXVECTOR3(0.25f, 0.25f, 0.25f))	// シーズンの拡大率
 #define SIZE_WAVE	(D3DXVECTOR3(740.0f, 280.0f, 0.0f))	// ウェーブの大きさ
 #define SIZE_NUM	(D3DXVECTOR3(210.0f, 250.0f, 0.0f))	// 数字の大きさ
+
 #define WAVE_PRIO	(6)			// ウェーブの優先順位
 #define SPACE_EDGE	(155.0f)	// 端から見たウェーブ表示のずれ量
 #define MUL_SIZEUP		(12.0f)	// ウェーブ・数字の大きさ上昇乗算量
 #define MUL_SIZEDOWN	(0.85f)	// ウェーブ・数字の大きさ下降乗算量
+
+#define SEASON_STARTCNT	(90)	// 季節の開始処理の移行までの余韻カウンター
+#define WAVE_STARTCNT	(90)	// ウェーブ開始処理の移行までの余韻カウンター
+#define NEXT_WAITCNT	(30)	// 敵全滅時の移行までの余韻カウンター
+#define SEASON_MOVECNT	(30)	// シーズン表示の動き停止までの余韻カウンター
+
+#define SEASON_ADD_ROT	(0.2f)		// シーズン表示のX向き加算量
+#define SEASON_SUB_ROT	(0.012f)	// シーズン表示のY向き加算量
+#define SEASON_MUL_SIZE	(1.05f)		// シーズン表示の拡大率乗算量
 
 //************************************************************
 //	親クラス [CWaveManager] のメンバ関数
@@ -43,6 +74,7 @@ CWaveManager::Season CWaveManager::m_aWaveInfo[CWaveManager::SEASON_MAX] = {};	/
 CWaveManager::CWaveManager()
 {
 	// メンバ変数をクリア
+	memset(&m_apModelUI[0], 0, sizeof(m_apModelUI));	// シーズン表示の情報
 	m_pObject2D = NULL;			// ウェーブ表示の情報
 	m_pValue = NULL;			// ウェーブ数表示の情報
 	m_state = STATE_NONE;		// 状態
@@ -66,21 +98,58 @@ CWaveManager::~CWaveManager()
 //============================================================
 HRESULT CWaveManager::Init(void)
 {
+	// 変数配列を宣言
+	D3DXVECTOR3 aPos[NUM_MODEL_UI] =	// 位置配列
+	{ // 初期値
+		POS_SEASON_LEFT,	// 左位置
+		POS_SEASON_RIGHT	// 右位置
+	};
+
 	// ポインタを宣言
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+	CModel *pModel = CManager::GetModel();			// モデルへのポインタ
 
 	// メンバ変数を初期化
-	m_pObject2D = NULL;				// ウェーブ表示の情報
-	m_pValue = NULL;				// ウェーブ数表示の情報
-	m_state = STATE_SEASON_START;	// 状態
-	m_nSeason = SEASON_SPRING;		// 季節管理カウンター
-	m_nWave = 0;					// ウェーブ管理カウンター
-	m_nPoint = 0;					// 出現管理カウンター
-	m_nCounterState = 0;			// 状態管理カウンター
-	m_nCounterFrame = 0;			// ウェーブ余韻管理カウンター
+	memset(&m_apModelUI[0], 0, sizeof(m_apModelUI));	// シーズン表示の情報
+	m_pObject2D = NULL;					// ウェーブ表示の情報
+	m_pValue = NULL;					// ウェーブ数表示の情報
+	m_state = STATE_SEASON_START_INIT;	// 状態
+	m_nSeason = SEASON_SPRING;			// 季節管理カウンター
+	m_nWave = 0;						// ウェーブ管理カウンター
+	m_nPoint = 0;						// 出現管理カウンター
+	m_nCounterState = 0;				// 状態管理カウンター
+	m_nCounterFrame = 0;				// ウェーブ余韻管理カウンター
 
 	// セットアップの読み込み
 	LoadSetup();
+
+	//--------------------------------------------------------
+	//	モデルUIの生成・設定
+	//--------------------------------------------------------
+	for (int nCntWave = 0; nCntWave < NUM_MODEL_UI; nCntWave++)
+	{ // モデルUIの使用数分繰り返す
+
+		// シーズン表示用のモデルUIの生成
+		m_apModelUI[nCntWave] = CModelUI::Create
+		( // 引数
+			aPos[nCntWave],			// 位置
+			VEC3_ZERO,				// 向き
+			SIZE_SEASON				// 拡大率
+		);
+		if (UNUSED(m_apModelUI[nCntWave]))
+		{ // 生成に失敗した場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// モデルを登録・割当
+		m_apModelUI[nCntWave]->BindModel(pModel->GetModel(pModel->Regist(mc_apModelFile[0])));
+
+		// 描画をしない設定にする
+		m_apModelUI[nCntWave]->SetEnableDraw(false);
+	}
 
 	//--------------------------------------------------------
 	//	オブジェクト2Dの生成・設定
@@ -151,6 +220,13 @@ HRESULT CWaveManager::Init(void)
 //============================================================
 void CWaveManager::Uninit(void)
 {
+	for (int nCntWave = 0; nCntWave < NUM_MODEL_UI; nCntWave++)
+	{ // モデルUIの使用数分繰り返す
+
+		// シーズン表示用のモデルUIを破棄
+		m_apModelUI[nCntWave]->Uninit();
+	}
+
 	// ウェーブ表示用のオブジェクト2Dを破棄
 	m_pObject2D->Uninit();
 
@@ -183,10 +259,6 @@ void CWaveManager::Uninit(void)
 //============================================================
 void CWaveManager::Update(void)
 {
-	// 変数を宣言
-	D3DXVECTOR3 sizeWave = m_pObject2D->GetScaling();	// ウェーブ文字大きさ
-	D3DXVECTOR3 sizeNum = m_pValue->GetScaling();		// ウェーブ数字大きさ
-
 	// 状態の更新
 	switch (m_state)
 	{ // 状態ごとの処理
@@ -196,218 +268,59 @@ void CWaveManager::Update(void)
 
 		break;
 
-	case STATE_SEASON_START:	// 季節の開始状態
+	case STATE_SEASON_START_INIT:	// 季節の開始初期化状態
 
-		if (m_nCounterState <= 60)
-		{ // カウンターが一定値以下の場合
+		// 季節の開始初期化
+		InitSeasonStart();
 
-			// 状態管理カウンターを加算
-			m_nCounterState++;
-		}
-		else
-		{ // カウンターが一定値より大きい場合
+		// 季節の開始処理に続く
 
-			// 状態管理カウンターを初期化
-			m_nCounterState = 0;
+	case STATE_SEASON_START:		// 季節の開始状態
 
-			// 状態を変更
-			m_state = STATE_WAVE_START_INIT;	// ウェーブ開始初期化状態
-		}
+		// 季節の開始
+		UpdateSeasonStart();
 
 		break;
 
 	case STATE_WAVE_START_INIT:	// ウェーブ開始初期化状態
 
-		// 数字を設定
-		m_pValue->SetNumber(m_nWave + 1);
+		// ウェーブ開始初期化
+		InitWaveStart();
 
-		// オブジェクトのサイズを大きくする
-		sizeWave *= MUL_SIZEUP;	// ウェーブ文字
-		sizeNum *= MUL_SIZEUP;	// ウェーブ数字
-
-		// 描画をする設定にする
-		m_pObject2D->SetEnableDraw(true);
-		m_pValue->SetEnableDraw(true);
-
-		// 状態を変更
-		m_state = STATE_WAVE_START;	// ウェーブ開始状態
+		// ウェーブ開始処理に続く
 
 	case STATE_WAVE_START:		// ウェーブ開始状態
 
-		if (m_nCounterState <= 90)
-		{ // カウンターが一定値以下の場合
-
-			// 状態管理カウンターを加算
-			m_nCounterState++;
-
-			// オブジェクトのサイズを小さくする
-			sizeWave *= MUL_SIZEDOWN;	// ウェーブ文字
-			sizeNum *= MUL_SIZEDOWN;	// ウェーブ数字
-
-			// ウェーブ文字のサイズを補正
-			if (sizeWave.x < SIZE_WAVE.x
-			||  sizeWave.y < SIZE_WAVE.y)
-			{ // 大きさが下回った場合
-
-				// 大きさを補正
-				sizeWave.x = SIZE_WAVE.x;
-				sizeWave.y = SIZE_WAVE.y;
-			}
-
-			// ウェーブ数字のサイズを補正
-			if (sizeNum.x < SIZE_NUM.x
-			||  sizeNum.y < SIZE_NUM.y)
-			{ // 大きさが下回った場合
-
-				// 大きさを補正
-				sizeNum.x = SIZE_NUM.x;
-				sizeNum.y = SIZE_NUM.y;
-			}
-		}
-		else
-		{ // カウンターが一定値より大きい場合
-
-			// 状態管理カウンターを初期化
-			m_nCounterState = 0;
-
-			// 描画をしない設定にする
-			m_pObject2D->SetEnableDraw(false);
-			m_pValue->SetEnableDraw(false);
-
-			// 状態を変更
-			m_state = STATE_PROGRESSION;	// ウェーブ進行状態
-		}
+		// ウェーブ開始
+		UpdateWaveStart();
 
 		break;
 
 	case STATE_PROGRESSION:		// ウェーブ進行状態
 
-		if (m_nCounterFrame > 0)
-		{ // カウンターが 0より大きい場合
-
-			if (CEnemy::GetNumAll() <= 0)
-			{ // 敵が全滅している場合
-
-				// 余韻管理カウンターを初期化
-				m_nCounterFrame = 0;
-			}
-			else
-			{ // 敵が全滅していない場合
-
-				// 余韻管理カウンターを減算
-				m_nCounterFrame--;
-			}
-		}
-		else if (m_nPoint < m_aWaveInfo[m_nSeason].pWave[m_nWave].nNumPoint)
-		{ // カウンターが 0以下且つ、出現が残っている場合
-
-			for (int nCntType = 0; nCntType < CEnemy::TYPE_MAX; nCntType++)
-			{ // 敵の種類の総数分繰り返す
-
-				// 敵の種類ごとに敵をランダムスポーンさせる
-				CEnemy::RandomSpawn(m_aWaveInfo[m_nSeason].pWave[m_nWave].pPoint[m_nPoint].aNumSpawn[nCntType], (CEnemy::TYPE)nCntType);
-
-				// TODO：敵上空にいてもロックオンできちゃう → 敵にSPAWNSTATE作る
-			}
-
-			// 余韻管理カウンターを設定
-			m_nCounterFrame = m_aWaveInfo[m_nSeason].pWave[m_nWave].pPoint[m_nPoint].nFrame;
-
-			// 出現管理カウンターを加算
-			m_nPoint++;
-		}
-		else
-		{ // カウンターが 0以下且つ、全出現が終了した場合
-
-			if (m_nCounterState <= 30)
-			{ // カウンターが一定値以下の場合
-
-				// 状態管理カウンターを加算
-				m_nCounterState++;
-			}
-			else
-			{ // カウンターが一定値より大きい場合
-
-				// 状態管理カウンターを初期化
-				m_nCounterState = 0;
-
-				// ウェーブ管理カウンターを加算
-				m_nWave++;
-
-				if (m_nWave < m_aWaveInfo[m_nSeason].nNumWave)
-				{ // ウェーブがまだある場合
-
-					// カウンターを初期化
-					m_nPoint = 0;	// 出現管理カウンター
-
-					// 状態を変更
-					m_state = STATE_WAVE_START_INIT;	// ウェーブ開始初期化状態
-				}
-				else
-				{ // 全ウェーブが終了した場合
-
-					// カウンターを初期化
-					m_nWave = 0;	// ウェーブ管理カウンター
-					m_nPoint = 0;	// 出現管理カウンター
-
-					// 状態を変更
-					m_state = STATE_SEASON_END;	// 季節の終了状態
-				}
-			}
-		}
+		// ウェーブ進行
+		UpdateProgression();
 
 		break;
 
+	case STATE_SEASON_END_INIT:	// 季節の終了初期化状態
+
+		// 季節の終了初期化
+		InitWaveEnd();
+
+		// 季節の終了処理に続く
+
 	case STATE_SEASON_END:		// 季節の終了状態
 
-		if (m_nCounterState <= 60)
-		{ // カウンターが一定値以下の場合
-
-			// 状態管理カウンターを加算
-			m_nCounterState++;
-		}
-		else
-		{ // カウンターが一定値より大きい場合
-
-			// 状態管理カウンターを初期化
-			m_nCounterState = 0;
-
-			// 季節管理カウンターを加算
-			m_nSeason++;
-
-			if (m_nSeason < SEASON_MAX)
-			{ // 季節がまだある場合
-
-				// 状態を変更
-				m_state = STATE_WAIT;	// 次季節の開始待機状態
-			}
-			else
-			{ // 季節がもうない場合
-
-				// 状態を変更
-				m_state = STATE_END;	// 終了状態
-			}
-		}
+		// 季節の終了
+		UpdateWaveEnd();
 
 		break;
 
 	case STATE_WAIT:	// 次季節の開始待機状態
 
-		if (m_nCounterState <= 60)
-		{ // カウンターが一定値以下の場合
-
-			// 状態管理カウンターを加算
-			m_nCounterState++;
-		}
-		else
-		{ // カウンターが一定値より大きい場合
-
-			// 状態管理カウンターを初期化
-			m_nCounterState = 0;
-
-			// 状態を変更
-			m_state = STATE_SEASON_START;	// 季節の開始状態
-		}
+		// 次季節の開始待機
+		UpdateWait();
 
 		break;
 
@@ -419,20 +332,23 @@ void CWaveManager::Update(void)
 		// 処理を抜ける
 		return;
 
-		break;
-
 	default:	// 例外処理
 		assert(false);
 		break;
 	}
 
-	// 大きさを設定
-	m_pObject2D->SetScaling(sizeWave);	// ウェーブ文字
-	m_pValue->SetScaling(sizeNum);		// ウェーブ数字
+	for (int nCntWave = 0; nCntWave < NUM_MODEL_UI; nCntWave++)
+	{ // モデルUIの使用数分繰り返す
 
-	// オブジェクトの更新
-	m_pObject2D->Update();	// ウェーブ文字
-	m_pValue->Update();		// ウェーブ数字
+		// シーズン表示用のモデルUIの更新
+		m_apModelUI[nCntWave]->Update();
+	}
+
+	// ウェーブ表示用のオブジェクト2Dの更新
+	m_pObject2D->Update();
+
+	// ウェーブ数表示用の数字オブジェクトの更新
+	m_pValue->Update();
 }
 
 //============================================================
@@ -491,6 +407,399 @@ HRESULT CWaveManager::Release(CWaveManager *&prWaveManager)
 		return S_OK;
 	}
 	else { assert(false); return E_FAIL; }	// 非使用中
+}
+
+//============================================================
+//	季節の開始初期化処理
+//============================================================
+void CWaveManager::InitSeasonStart(void)
+{
+	// ポインタを宣言
+	CModel *pModel = CManager::GetModel();	// モデルへのポインタ
+
+	for (int nCntWave = 0; nCntWave < NUM_MODEL_UI; nCntWave++)
+	{ // モデルUIの使用数分繰り返す
+
+		// 向きを初期化
+		m_apModelUI[nCntWave]->SetRotation(VEC3_ZERO);
+
+		// 拡大率を初期化
+		m_apModelUI[nCntWave]->SetScaling(SIZE_SEASON);
+
+		// 描画をする設定にする
+		m_apModelUI[nCntWave]->SetEnableDraw(true);
+	}
+
+	// モデルを登録・割当
+	m_apModelUI[0]->BindModel(pModel->GetModel(pModel->Regist(mc_apModelFile[MODEL_SEASON])));
+
+	// モデルを登録・割当
+	m_apModelUI[1]->BindModel(pModel->GetModel(pModel->Regist(mc_apSeasonModelFile[m_nSeason])));
+
+	// 状態を変更
+	m_state = STATE_SEASON_START;	// 季節の開始状態
+}
+
+//============================================================
+//	季節の開始処理
+//============================================================
+void CWaveManager::UpdateSeasonStart(void)
+{
+	if (m_nCounterState <= SEASON_STARTCNT)
+	{ // カウンターが一定値以下の場合
+
+		if (m_nCounterState <= SEASON_MOVECNT)
+		{ // カウンターが一定値以下の場合
+
+			for (int nCntWave = 0; nCntWave < NUM_MODEL_UI; nCntWave++)
+			{ // モデルUIの使用数分繰り返す
+
+				// 変数を宣言
+				D3DXVECTOR3 rotSeason = m_apModelUI[nCntWave]->GetRotation();	// シーズン向き
+				D3DXVECTOR3 scaleSeason = m_apModelUI[nCntWave]->GetScaling();	// シーズン拡大率
+				float fMul = (nCntWave == 0) ? 1.0f : -1.0f;					// 向き加算量の計算用値
+
+				// 向きを加算
+				rotSeason.x += SEASON_ADD_ROT * fMul;
+				rotSeason.y -= SEASON_SUB_ROT * fMul;
+
+				// 向きを正規化
+				useful::NormalizeRot(rotSeason.x);
+				useful::NormalizeRot(rotSeason.y);
+
+				// 拡大率を大きくする
+				scaleSeason *= SEASON_MUL_SIZE;
+
+				if (scaleSeason.x > 1.0f)
+				{ // 拡大率が 1.0fを超えた場合
+
+					// 拡大率を補正
+					scaleSeason = VEC3_ONE;
+				}
+
+				// 向きと拡大率の更新
+				m_apModelUI[nCntWave]->SetRotation(rotSeason);
+				m_apModelUI[nCntWave]->SetScaling(scaleSeason);
+			}
+		}
+
+		// 状態管理カウンターを加算
+		m_nCounterState++;
+	}
+	else
+	{ // カウンターが一定値より大きい場合
+
+		for (int nCntWave = 0; nCntWave < NUM_MODEL_UI; nCntWave++)
+		{ // モデルUIの使用数分繰り返す
+
+			// 描画をしない設定にする
+			m_apModelUI[nCntWave]->SetEnableDraw(false);
+		}
+
+		// 状態管理カウンターを初期化
+		m_nCounterState = 0;
+
+		// 状態を変更
+		m_state = STATE_WAVE_START_INIT;	// ウェーブ開始初期化状態
+	}
+}
+
+//============================================================
+//	ウェーブ開始初期化処理
+//============================================================
+void CWaveManager::InitWaveStart(void)
+{
+	// 変数を宣言
+	D3DXVECTOR3 sizeWave = m_pObject2D->GetScaling();	// ウェーブ文字大きさ
+	D3DXVECTOR3 sizeNum = m_pValue->GetScaling();		// ウェーブ数字大きさ
+
+	// 数字を設定
+	m_pValue->SetNumber(m_nWave + 1);
+
+	// オブジェクトのサイズを大きくする
+	sizeWave *= MUL_SIZEUP;
+	sizeNum *= MUL_SIZEUP;
+
+	// 描画をする設定にする
+	m_pObject2D->SetEnableDraw(true);
+	m_pValue->SetEnableDraw(true);
+
+	// 状態を変更
+	m_state = STATE_WAVE_START;	// ウェーブ開始状態
+
+	// 大きさを設定
+	m_pObject2D->SetScaling(sizeWave);
+	m_pValue->SetScaling(sizeNum);
+}
+
+//============================================================
+//	ウェーブ開始処理
+//============================================================
+void CWaveManager::UpdateWaveStart(void)
+{	
+	// 変数を宣言
+	D3DXVECTOR3 sizeWave = m_pObject2D->GetScaling();	// ウェーブ文字大きさ
+	D3DXVECTOR3 sizeNum = m_pValue->GetScaling();		// ウェーブ数字大きさ
+
+	if (m_nCounterState <= WAVE_STARTCNT)
+	{ // カウンターが一定値以下の場合
+
+		// 状態管理カウンターを加算
+		m_nCounterState++;
+
+		// オブジェクトのサイズを小さくする
+		sizeWave *= MUL_SIZEDOWN;
+		sizeNum *= MUL_SIZEDOWN;
+
+		// ウェーブ文字のサイズを補正
+		if (sizeWave.x < SIZE_WAVE.x
+		||  sizeWave.y < SIZE_WAVE.y)
+		{ // 大きさが下回った場合
+
+			// 大きさを補正
+			sizeWave.x = SIZE_WAVE.x;
+			sizeWave.y = SIZE_WAVE.y;
+		}
+
+		// ウェーブ数字のサイズを補正
+		if (sizeNum.x < SIZE_NUM.x
+		||  sizeNum.y < SIZE_NUM.y)
+		{ // 大きさが下回った場合
+
+			// 大きさを補正
+			sizeNum.x = SIZE_NUM.x;
+			sizeNum.y = SIZE_NUM.y;
+		}
+	}
+	else
+	{ // カウンターが一定値より大きい場合
+
+		// 状態管理カウンターを初期化
+		m_nCounterState = 0;
+
+		// 描画をしない設定にする
+		m_pObject2D->SetEnableDraw(false);
+		m_pValue->SetEnableDraw(false);
+
+		// 状態を変更
+		m_state = STATE_PROGRESSION;	// ウェーブ進行状態
+	}
+
+	// 大きさを設定
+	m_pObject2D->SetScaling(sizeWave);
+	m_pValue->SetScaling(sizeNum);
+}
+
+//============================================================
+//	ウェーブ進行処理
+//============================================================
+void CWaveManager::UpdateProgression(void)
+{
+	if (m_nCounterFrame > 0)
+	{ // カウンターが 0より大きい場合
+
+		if (CEnemy::GetNumAll() <= 0)
+		{ // 敵が全滅している場合
+
+			// 余韻管理カウンターを初期化
+			m_nCounterFrame = 0;
+		}
+		else
+		{ // 敵が全滅していない場合
+
+			// 余韻管理カウンターを減算
+			m_nCounterFrame--;
+		}
+	}
+	else if (m_nPoint < m_aWaveInfo[m_nSeason].pWave[m_nWave].nNumPoint)
+	{ // カウンターが 0以下且つ、出現が残っている場合
+
+		for (int nCntType = 0; nCntType < CEnemy::TYPE_MAX; nCntType++)
+		{ // 敵の種類の総数分繰り返す
+
+			// 敵の種類ごとに敵をランダムスポーンさせる
+			CEnemy::RandomSpawn(m_aWaveInfo[m_nSeason].pWave[m_nWave].pPoint[m_nPoint].aNumSpawn[nCntType], (CEnemy::TYPE)nCntType);
+
+			// TODO：敵上空にいてもロックオンできちゃう → 敵にSPAWNSTATE作る
+		}
+
+		// 余韻管理カウンターを設定
+		m_nCounterFrame = m_aWaveInfo[m_nSeason].pWave[m_nWave].pPoint[m_nPoint].nFrame;
+
+		// 出現管理カウンターを加算
+		m_nPoint++;
+	}
+	else
+	{ // カウンターが 0以下且つ、全出現が終了した場合
+
+		if (m_nCounterState <= NEXT_WAITCNT)
+		{ // カウンターが一定値以下の場合
+
+			// 状態管理カウンターを加算
+			m_nCounterState++;
+		}
+		else
+		{ // カウンターが一定値より大きい場合
+
+			// 状態管理カウンターを初期化
+			m_nCounterState = 0;
+
+			// ウェーブ管理カウンターを加算
+			m_nWave++;
+
+			if (m_nWave < m_aWaveInfo[m_nSeason].nNumWave)
+			{ // ウェーブがまだある場合
+
+				// カウンターを初期化
+				m_nPoint = 0;	// 出現管理カウンター
+
+				// 状態を変更
+				m_state = STATE_WAVE_START_INIT;	// ウェーブ開始初期化状態
+			}
+			else
+			{ // 全ウェーブが終了した場合
+
+				// カウンターを初期化
+				m_nWave = 0;	// ウェーブ管理カウンター
+				m_nPoint = 0;	// 出現管理カウンター
+
+				// 状態を変更
+				m_state = STATE_SEASON_END_INIT;	// 季節の終了初期化状態
+			}
+		}
+	}
+}
+
+//============================================================
+//	季節の終了初期化処理
+//============================================================
+void CWaveManager::InitWaveEnd(void)
+{
+	// ポインタを宣言
+	CModel *pModel = CManager::GetModel();	// モデルへのポインタ
+
+	for (int nCntWave = 0; nCntWave < NUM_MODEL_UI; nCntWave++)
+	{ // モデルUIの使用数分繰り返す
+
+		// 向きを初期化
+		m_apModelUI[nCntWave]->SetRotation(VEC3_ZERO);
+
+		// 拡大率を初期化
+		m_apModelUI[nCntWave]->SetScaling(SIZE_SEASON);
+
+		// 描画をする設定にする
+		m_apModelUI[nCntWave]->SetEnableDraw(true);
+
+		// モデルを登録・割当
+		m_apModelUI[nCntWave]->BindModel(pModel->GetModel(pModel->Regist(mc_apModelFile[nCntWave])));
+	}
+
+	// 状態を変更
+	m_state = STATE_SEASON_END;	// 季節の終了状態
+}
+
+//============================================================
+//	季節の終了処理
+//============================================================
+void CWaveManager::UpdateWaveEnd(void)
+{
+	if (m_nCounterState <= SEASON_STARTCNT)
+	{ // カウンターが一定値以下の場合
+
+		if (m_nCounterState <= SEASON_MOVECNT)
+		{ // カウンターが一定値以下の場合
+
+			for (int nCntWave = 0; nCntWave < NUM_MODEL_UI; nCntWave++)
+			{ // モデルUIの使用数分繰り返す
+
+				// 変数を宣言
+				D3DXVECTOR3 rotSeason = m_apModelUI[nCntWave]->GetRotation();	// シーズン向き
+				D3DXVECTOR3 scaleSeason = m_apModelUI[nCntWave]->GetScaling();	// シーズン拡大率
+				float fMul = (nCntWave == 0) ? 1.0f : -1.0f;					// 向き加算量の計算用値
+
+				// 向きを加算
+				rotSeason.x += SEASON_ADD_ROT * fMul;
+				rotSeason.y -= SEASON_SUB_ROT * fMul;
+
+				// 向きを正規化
+				useful::NormalizeRot(rotSeason.x);
+				useful::NormalizeRot(rotSeason.y);
+
+				// 拡大率を大きくする
+				scaleSeason *= SEASON_MUL_SIZE;
+
+				if (scaleSeason.x > 1.0f)
+				{ // 拡大率が 1.0fを超えた場合
+
+					// 拡大率を補正
+					scaleSeason = VEC3_ONE;
+				}
+
+				// 向きと拡大率の更新
+				m_apModelUI[nCntWave]->SetRotation(rotSeason);
+				m_apModelUI[nCntWave]->SetScaling(scaleSeason);
+			}
+		}
+
+		// 状態管理カウンターを加算
+		m_nCounterState++;
+	}
+	else
+	{ // カウンターが一定値より大きい場合
+
+		for (int nCntWave = 0; nCntWave < NUM_MODEL_UI; nCntWave++)
+		{ // モデルUIの使用数分繰り返す
+
+			// 描画をしない設定にする
+			m_apModelUI[nCntWave]->SetEnableDraw(false);
+		}
+
+		// 状態管理カウンターを初期化
+		m_nCounterState = 0;
+
+		// 季節管理カウンターを加算
+		m_nSeason++;
+
+		if (m_nSeason < SEASON_MAX)
+		{ // 季節がまだある場合
+
+			// 状態を変更
+			m_state = STATE_WAIT;	// 次季節の開始待機状態
+		}
+		else
+		{ // 季節がもうない場合
+
+			// 状態を変更
+			m_state = STATE_END;	// 終了状態
+		}
+	}
+}
+
+//============================================================
+//	次季節の開始待機処理
+//============================================================
+void CWaveManager::UpdateWait(void)
+{
+	// TODO：仮の季節待機処理
+#if 1
+	if (m_nCounterState <= 180)
+	{ // カウンターが一定値以下の場合
+
+		// 状態管理カウンターを加算
+		m_nCounterState++;
+	}
+	else
+	{ // カウンターが一定値より大きい場合
+
+		// 状態管理カウンターを初期化
+		m_nCounterState = 0;
+
+		// 状態を変更
+		m_state = STATE_SEASON_START_INIT;	// 季節の開始状態
+	}
+#else
+
+#endif
 }
 
 //============================================================

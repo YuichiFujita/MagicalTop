@@ -1,14 +1,14 @@
 //============================================================
 //
-//	シーズンヘッダー [season.h]
+//	モデルUIヘッダー [modelUI.h]
 //	Author：藤田勇一
 //
 //============================================================
 //************************************************************
 //	二重インクルード防止
 //************************************************************
-#ifndef _SEASON_H_
-#define _SEASON_H_
+#ifndef _MODEL_UI_H_
+#define _MODEL_UI_H_
 
 //************************************************************
 //	インクルードファイル
@@ -19,22 +19,15 @@
 //************************************************************
 //	クラス定義
 //************************************************************
-// シーズンクラス
-class CSeason : public CObjectModel
+// モデルUIクラス
+class CModelUI : public CObjectModel
 {
 public:
-	// 種類列挙
-	typedef enum
-	{
-		MODEL_NORMAL = 0,	// 通常
-		MODEL_MAX			// この列挙型の総数
-	}MODEL;
-
 	// コンストラクタ
-	CSeason();
+	CModelUI();
 
 	// デストラクタ
-	~CSeason();
+	~CModelUI();
 
 	// オーバーライド関数
 	HRESULT Init(void);	// 初期化
@@ -43,11 +36,12 @@ public:
 	void Draw(void);	// 描画
 
 	// 静的メンバ関数
-	static CSeason *Create(const MODEL model);	// 生成
-
-private:
-	// 静的メンバ変数
-	static const char *mc_apModelFile[];	// モデル定数
+	static CModelUI *Create	// 生成
+	( // 引数
+		const D3DXVECTOR3& rPos,	// 位置
+		const D3DXVECTOR3& rRot = VEC3_ZERO,	// 向き
+		const D3DXVECTOR3& rScale = VEC3_ONE	// 大きさ
+	);
 };
 
-#endif	// _SEASON_H_
+#endif	// _MODEL_UI_H_

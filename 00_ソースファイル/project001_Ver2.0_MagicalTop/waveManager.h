@@ -16,9 +16,12 @@
 #include "main.h"
 #include "enemy.h"
 
+#define NUM_MODEL_UI	(2)	// モデルUIの使用数
+
 //************************************************************
 //	前方宣言
 //************************************************************
+class CModelUI;		// モデルUIクラス
 class CObject2D;	// オブジェクト2Dクラス
 class CValue;		// 数字クラス
 
@@ -39,16 +42,26 @@ public:
 	// 状態列挙
 	typedef enum
 	{
-		STATE_NONE = 0,			// 何もしない状態
-		STATE_SEASON_START,		// 季節の開始状態
-		STATE_WAVE_START_INIT,	// ウェーブ開始初期化状態
-		STATE_WAVE_START,		// ウェーブ開始状態
-		STATE_PROGRESSION,		// ウェーブ進行状態
-		STATE_SEASON_END,		// 季節の終了状態
-		STATE_WAIT,				// 次季節の開始待機状態
-		STATE_END,				// 終了状態
-		STATE_MAX				// この列挙型の総数
+		STATE_NONE = 0,				// 何もしない状態
+		STATE_SEASON_START_INIT,	// 季節の開始初期化状態
+		STATE_SEASON_START,			// 季節の開始状態
+		STATE_WAVE_START_INIT,		// ウェーブ開始初期化状態
+		STATE_WAVE_START,			// ウェーブ開始状態
+		STATE_PROGRESSION,			// ウェーブ進行状態
+		STATE_SEASON_END_INIT,		// 季節の終了初期化状態
+		STATE_SEASON_END,			// 季節の終了状態
+		STATE_WAIT,					// 次季節の開始待機状態
+		STATE_END,					// 終了状態
+		STATE_MAX					// この列挙型の総数
 	}STATE;
+
+	// モデル列挙
+	typedef enum
+	{
+		MODEL_SEASON = 0,	// SEASONフォント
+		MODEL_END,			// ENDフォント
+		MODEL_MAX,			// この列挙型の総数
+	}MODEL;
 
 	// 季節列挙
 	typedef enum
@@ -98,11 +111,24 @@ public:
 	static HRESULT Release(CWaveManager *&prWaveManager);	// 破棄
 
 private:
+	// メンバ関数
+	void InitSeasonStart(void);		// 季節の開始初期化
+	void UpdateSeasonStart(void);	// 季節の開始
+	void InitWaveStart(void);		// ウェーブ開始初期化
+	void UpdateWaveStart(void);		// ウェーブ開始
+	void UpdateProgression(void);	// ウェーブ進行
+	void InitWaveEnd(void);			// 季節の終了初期化
+	void UpdateWaveEnd(void);		// 季節の終了
+	void UpdateWait(void);			// 次季節の開始待機
+
 	// 静的メンバ変数
-	static const char *mc_apTextureFile[];	// テクスチャ定数
-	static Season m_aWaveInfo[SEASON_MAX];	// ウェーブ情報
+	static const char *mc_apTextureFile[];		// テクスチャ定数
+	static const char *mc_apModelFile[];		// モデル定数
+	static const char *mc_apSeasonModelFile[];	// シーズン表記モデル定数
+	static Season m_aWaveInfo[SEASON_MAX];		// ウェーブ情報
 
 	// メンバ変数
+	CModelUI *m_apModelUI[NUM_MODEL_UI];	// シーズン表示の情報
 	CObject2D *m_pObject2D;	// ウェーブ表示の情報
 	CValue *m_pValue;		// ウェーブ数表示の情報
 	STATE m_state;			// 状態
