@@ -25,7 +25,7 @@ const char *CWaveManager::mc_apTextureFile[] =	// テクスチャ定数
 
 const char *CWaveManager::mc_apModelFile[] =	// モデル定数
 {
-	"data\\MODEL\\FONT\\wave.x",	// WAVEフォントモデル
+	"data\\MODEL\\FONT\\season.x",	// SEASONフォントモデル
 	"data\\MODEL\\FONT\\end.x",		// ENDフォントモデル
 };
 
@@ -44,8 +44,8 @@ CWaveManager::Season CWaveManager::m_aWaveInfo[CWaveManager::SEASON_MAX] = {};	/
 //************************************************************
 #define WAVE_SETUP_TXT	"data\\TXT\\wave.txt"	// セットアップテキスト相対パス
 
-#define POS_SEASON_LEFT		(D3DXVECTOR3(-160.0f, 75.0f, -0.0f))	// シーズン左表示の位置
-#define POS_SEASON_RIGHT	(D3DXVECTOR3(160.0f, -75.0f, -0.0f))	// シーズン右表示の位置
+#define POS_SEASON_LEFT		(D3DXVECTOR3(-130.0f, 75.0f, -0.0f))	// シーズン左表示の位置
+#define POS_SEASON_RIGHT	(D3DXVECTOR3(130.0f, -75.0f, -0.0f))	// シーズン右表示の位置
 
 #define SIZE_SEASON	(D3DXVECTOR3(0.25f, 0.25f, 0.25f))	// シーズンの拡大率
 #define SIZE_WAVE	(D3DXVECTOR3(740.0f, 280.0f, 0.0f))	// ウェーブの大きさ
@@ -62,7 +62,7 @@ CWaveManager::Season CWaveManager::m_aWaveInfo[CWaveManager::SEASON_MAX] = {};	/
 #define SEASON_MOVECNT	(30)	// シーズン表示の動き停止までの余韻カウンター
 
 #define SEASON_ADD_ROT	(0.2f)		// シーズン表示のX向き加算量
-#define SEASON_SUB_ROT	(0.012f)	// シーズン表示のY向き加算量
+#define SEASON_SUB_ROT	(0.005f)	// シーズン表示のY向き加算量
 #define SEASON_MUL_SIZE	(1.05f)		// シーズン表示の拡大率乗算量
 
 //************************************************************
