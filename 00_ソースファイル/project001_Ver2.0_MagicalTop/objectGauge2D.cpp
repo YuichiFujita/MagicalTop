@@ -33,7 +33,7 @@ CObjectGauge2D::CObjectGauge2D() : m_nMaxNumGauge(0), m_nFrame(0)
 	m_colFront	= XCOL_WHITE;	// 表ゲージ色
 	m_colBack	= XCOL_WHITE;	// 裏ゲージ色
 	m_state = STATE_NONE;		// 状態
-	m_bFrame = true;			// 枠表示状況
+	m_bDrawFrame = false;		// 枠表示状況
 	m_fChange = 0.0f;			// ゲージ変動量
 	m_fCurrentNumGauge = 0.0f;	// 現在表示値
 	m_fAddRight = 0.0f;			// 横幅加算量
@@ -61,7 +61,7 @@ CObjectGauge2D::CObjectGauge2D(const int nMax, const int nFrame, const CObject::
 	m_colFront	= XCOL_WHITE;	// 表ゲージ色
 	m_colBack	= XCOL_WHITE;	// 裏ゲージ色
 	m_state = STATE_NONE;		// 状態
-	m_bFrame = true;			// 枠表示状況
+	m_bDrawFrame = false;		// 枠表示状況
 	m_fChange = 0.0f;			// ゲージ変動量
 	m_fCurrentNumGauge = 0.0f;	// 現在表示値
 	m_fAddRight = 0.0f;			// 横幅加算量
@@ -97,7 +97,7 @@ HRESULT CObjectGauge2D::Init(void)
 	m_colFront	= XCOL_WHITE;		// 表ゲージ色
 	m_colBack	= XCOL_WHITE;		// 裏ゲージ色
 	m_state = STATE_NONE;			// 状態
-	m_bFrame = true;				// 枠表示状況
+	m_bDrawFrame = false;			// 枠表示状況
 	m_fChange = 0.0f;				// ゲージ変動量
 	m_fCurrentNumGauge = 0.0f;		// 現在表示値
 	m_fAddRight = 0.0f;				// 横幅加算量
@@ -215,7 +215,7 @@ void CObjectGauge2D::Draw(void)
 		if (nCntGauge == POLYGON_FRAME)
 		{ // 描画する四角形ポリゴンが枠の場合
 
-			if (m_bFrame)
+			if (m_bDrawFrame)
 			{ // 枠を表示する場合
 
 				// テクスチャの設定
@@ -289,6 +289,9 @@ CObjectGauge2D *CObjectGauge2D::Create
 		// 色を設定
 		pObjectGauge2D->SetColorFront(rColFront);	// 表ゲージ色
 		pObjectGauge2D->SetColorBack(rColBack);		// 裏ゲージ色
+
+		// 枠の表示状況を設定
+		pObjectGauge2D->SetEnableDrawFrame(bDrawFrame);
 
 		// 確保したアドレスを返す
 		return pObjectGauge2D;
@@ -419,6 +422,15 @@ void CObjectGauge2D::SetColorBack(const D3DXCOLOR& rCol)
 }
 
 //============================================================
+//	枠表示状況設定処理
+//============================================================
+void CObjectGauge2D::SetEnableDrawFrame(const bool bDraw)
+{
+	// 引数の枠の表示状況を設定
+	m_bDrawFrame = bDraw;
+}
+
+//============================================================
 //	位置取得処理
 //============================================================
 D3DXVECTOR3 CObjectGauge2D::GetPosition(void) const
@@ -460,6 +472,15 @@ D3DXCOLOR CObjectGauge2D::GetColorBack(void) const
 {
 	// 裏ゲージ色を返す
 	return m_colBack;
+}
+
+//============================================================
+//	枠表示状況取得処理
+//============================================================
+bool CObjectGauge2D::GetEnableDrawFrame(void) const
+{
+	// 枠表示状況を返す
+	return m_bDrawFrame;
 }
 
 //============================================================
@@ -527,6 +548,10 @@ void CObjectGauge2D::SetVtx(void)
 				pVtx[2].col = XCOL_WHITE;
 				pVtx[3].col = XCOL_WHITE;
 
+				break;
+
+			default:	// 例外処理
+				assert(false);
 				break;
 			}
 

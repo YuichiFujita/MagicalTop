@@ -24,7 +24,6 @@
 
 #define CUBE_SIZE	(D3DXVECTOR3(25.0f, 25.0f, 25.0f))	// キューブの大きさ
 #define CUBE_BORD	(2.5f)		// キューブの縁取りの太さ
-
 #define TARG_RADIUS	(100.0f)	// ターゲット半径
 #define ADD_POS_Y	(92.0f)		// 台座位置からのキューブ相対位置の加算量
 #define MUL_SIN_POS	(10.0f)		// サインカーブの補正係数
@@ -34,8 +33,6 @@
 
 #define TARG_LIFE	(1000)		// ターゲットの体力
 #define TARG_POSUP	(160.0f)	// ターゲットのY位置の加算量
-#define TARG_DMG_FRAME	(20)	// ターゲットのダメージ状態フレーム
-
 #define STATE_HEAL_CNT	(240)	// 回復状態に移行するまでのカウンター
 #define NORMAL_CNT		(60)	// 通常状態に移行するまでのカウンター
 #define WAIT_HEAL_CNT	(60)	// 回復までのカウンター
@@ -124,7 +121,7 @@ HRESULT CTarget::Init(void)
 	}
 
 	// 体力ゲージ3Dの生成
-	m_pLifeGauge = CLifeGauge3D::Create(TARG_LIFE, TARG_LIFE, (int)(TARG_DMG_FRAME * 0.5f), TARG_POSUP, this);
+	m_pLifeGauge = CLifeGauge3D::Create(TARG_LIFE, TARG_LIFE, (int)(NORMAL_CNT * 0.5f), TARG_POSUP, this);
 	if (UNUSED(m_pLifeGauge))
 	{ // 生成に失敗した場合
 
@@ -304,37 +301,41 @@ void CTarget::Hit(const int nDmg)
 	if (IsDeath() != true)
 	{ // 死亡フラグが立っていない場合
 
-		// 体力からダメージ分減算
-		m_pLifeGauge->AddLife(-nDmg);
+		if (m_state == STATE_NORMAL || m_state == STATE_HEAL)
+		{ // 通常状態または回復状態の場合
 
-		if (m_pLifeGauge->GetLife() > 0)
-		{ // 生きている場合
+			// 体力からダメージ分減算
+			m_pLifeGauge->AddLife(-nDmg);
 
-			// パーティクル3Dオブジェクトを生成
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
+			if (m_pLifeGauge->GetLife() > 0)
+			{ // 生きている場合
 
-			// カウンターを初期化
-			m_nCounterState = 0;
+				// パーティクル3Dオブジェクトを生成
+				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
 
-			// 状態を変更
-			m_state = STATE_DAMAGE;		// ダメージ状態
-		}
-		else
-		{ // 死んでいる場合
+				// カウンターを初期化
+				m_nCounterState = 0;
 
-			// パーティクル3Dオブジェクトを生成
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+				// 状態を変更
+				m_state = STATE_DAMAGE;		// ダメージ状態
+			}
+			else
+			{ // 死んでいる場合
 
-			// 更新と描画を停止
-			SetEnableUpdate(false);
-			SetEnableDraw(false);
+				// パーティクル3Dオブジェクトを生成
+				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
+				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
-			// カウンターを初期化
-			m_nCounterState = 0;
+				// 更新と描画を停止
+				SetEnableUpdate(false);
+				SetEnableDraw(false);
 
-			// 状態を変更
-			m_state = STATE_DESTROY;	// 破壊状態
+				// カウンターを初期化
+				m_nCounterState = 0;
+
+				// 状態を変更
+				m_state = STATE_DESTROY;	// 破壊状態
+			}
 		}
 	}
 }

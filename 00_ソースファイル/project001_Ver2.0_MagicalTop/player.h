@@ -76,6 +76,15 @@ public:
 		ROTATION_MAX		// この列挙型の総数
 	}ROTATION;
 
+	// 状態列挙
+	typedef enum
+	{
+		STATE_NORMAL = 0,	// 通常状態
+		STATE_DAMAGE,		// ダメージ状態
+		STATE_DEATH,		// 死亡状態
+		STATE_MAX			// この列挙型の総数
+	}STATE;
+
 	// コンストラクタ
 	CPlayer();
 
@@ -112,6 +121,7 @@ private:
 	void Motion(MOTION motion);						// モーション
 	void Pos(D3DXVECTOR3& rPos);					// 位置
 	void Rot(D3DXVECTOR3& rRot);					// 向き
+	void State(void);								// 状態
 	void CollisionTarget(D3DXVECTOR3& rPos);		// ターゲットとの当たり判定
 	void CollisionEnemy(D3DXVECTOR3& rPos);			// 敵との当たり判定
 	void LoadSetup(void);							// セットアップ
@@ -127,6 +137,8 @@ private:
 	D3DXVECTOR3	m_move;			// 移動量
 	D3DXVECTOR3	m_destRot;		// 目標向き
 	ROTATION m_rotation;		// 回転方向
+	STATE m_state;				// 状態
+	int   m_nCounterState;		// 状態管理カウンター
 	int   m_nNumModel;			// パーツの総数
 	float m_fDisTarget;			// ターゲットとの距離
 	bool  m_bJump;				// ジャンプ状況

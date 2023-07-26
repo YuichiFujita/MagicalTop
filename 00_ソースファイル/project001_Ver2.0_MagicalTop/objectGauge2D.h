@@ -82,11 +82,13 @@ public:
 	void SetScalingFrame(const D3DXVECTOR3& rSize);	// 背景大きさ設定
 	void SetColorFront(const D3DXCOLOR& rCol);		// 表ゲージ色設定
 	void SetColorBack(const D3DXCOLOR& rCol);		// 裏ゲージ色設定
+	void SetEnableDrawFrame(const bool bDraw);		// 枠表示状況設定
 	D3DXVECTOR3 GetPosition(void) const;			// 位置取得
 	D3DXVECTOR3 GetScalingGauge(void) const;		// ゲージ大きさ取得
 	D3DXVECTOR3 GetScalingFrame(void) const;		// 背景大きさ取得
 	D3DXCOLOR GetColorFront(void) const;			// 表ゲージ色取得
 	D3DXCOLOR GetColorBack(void) const;				// 裏ゲージ色取得
+	bool GetEnableDrawFrame(void) const;			// 枠表示状況取得
 
 private:
 	// メンバ関数
@@ -100,7 +102,7 @@ private:
 	D3DXCOLOR	m_colFront;		// 表ゲージ色
 	D3DXCOLOR	m_colBack;		// 裏ゲージ色
 	STATE m_state;				// 状態
-	bool m_bFrame;				// 枠表示状況
+	bool m_bDrawFrame;			// 枠表示状況
 	float m_fChange;			// ゲージ変動量
 	float m_fCurrentNumGauge;	// 現在表示値
 	float m_fAddRight;			// 横幅加算量

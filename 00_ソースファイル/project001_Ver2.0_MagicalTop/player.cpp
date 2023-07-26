@@ -41,6 +41,8 @@
 #define PLAY_JUMP		(20.0f)	// プレイヤージャンプ量
 #define PLAY_GRAVITY	(1.0f)	// プレイヤー重力
 #define PLAY_RADIUS		(20.0f)	// プレイヤー半径
+#define PLAY_LIFE		(250)	// プレイヤー体力
+#define NORMAL_CNT		(180)	// 通常状態に移行するまでのカウンター
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -80,6 +82,8 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 	m_move			= VEC3_ZERO;		// 移動量
 	m_destRot		= VEC3_ZERO;		// 目標向き
 	m_rotation		= ROTATION_LEFT;	// 回転方向
+	m_state			= STATE_NORMAL;		// 状態
+	m_nCounterState	= 0;				// 状態管理カウンター
 	m_nNumModel		= 0;				// パーツの総数
 	m_fDisTarget	= 0.0f;				// ターゲットとの距離
 	m_bJump			= false;			// ジャンプ状況
@@ -106,6 +110,8 @@ HRESULT CPlayer::Init(void)
 	m_move			= VEC3_ZERO;		// 移動量
 	m_destRot		= VEC3_ZERO;		// 目標向き
 	m_rotation		= ROTATION_LEFT;	// 回転方向
+	m_state			= STATE_NORMAL;		// 状態
+	m_nCounterState	= 0;				// 状態管理カウンター
 	m_nNumModel		= 0;				// パーツの総数
 	m_fDisTarget	= 0.0f;				// ターゲットとの距離
 	m_bJump			= true;				// ジャンプ状況
@@ -121,15 +127,15 @@ HRESULT CPlayer::Init(void)
 	}
 
 	// 体力の生成
-	m_pLife = CObjectGauge2D::Create
+	m_pLife = CObjectGauge2D::Create	// TODO：定数
 	( // 引数
-		CObject::LABEL_LIFE,
-		100,
-		60,
-		D3DXVECTOR3(260.0f, 640.0f, 0.0f),
-		D3DXVECTOR3(200.0f, 30.0f, 0.0f),
-		D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f),
-		D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)
+		CObject::LABEL_LIFE,				// オブジェクトラベル
+		PLAY_LIFE,							// 最大体力
+		(int)(NORMAL_CNT * 0.25f),			// 体力変動フレーム
+		D3DXVECTOR3(260.0f, 640.0f, 0.0f),	// 位置
+		D3DXVECTOR3(200.0f, 30.0f, 0.0f),	// ゲージ大きさ
+		D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f),	// 表ゲージ色
+		D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 裏ゲージ色
 	);
 	if (UNUSED(m_pLife))
 	{ // 非使用中の場合
@@ -242,6 +248,9 @@ void CPlayer::Update(void)
 	// 射撃操作
 	currentMotion = Magic(currentMotion, posPlayer);
 
+	// 状態遷移
+	State();
+
 	// 位置を更新
 	SetPosition(posPlayer);
 
@@ -275,28 +284,44 @@ void CPlayer::Hit(const int nDmg)
 	if (IsDeath() != true)
 	{ // 死亡フラグが立っていない場合
 
-		// 体力からダメージ分減算
-		m_pLife->AddNum(-nDmg);
+		if (m_state == STATE_NORMAL)
+		{ // 通常状態の場合
 
-		if (m_pLife->GetNum() > 0)
-		{ // 生きている場合
+			// 体力からダメージ分減算
+			m_pLife->AddNum(-nDmg);
 
-			// パーティクル3Dオブジェクトを生成
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
-		}
-		else
-		{ // 死んでいる場合
+			if (m_pLife->GetNum() > 0)
+			{ // 生きている場合
 
-			// パーティクル3Dオブジェクトを生成
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+				// パーティクル3Dオブジェクトを生成
+				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
 
-			// 更新と描画を停止
-			SetEnableUpdate(false);
-			SetEnableDraw(false);
+				// カウンターを初期化
+				m_nCounterState = 0;
 
-			// 魔法ロックオン全削除
-			m_pMagic->DeleteLockOn();
+				// 状態を変更
+				m_state = STATE_DAMAGE;	// ダメージ状態
+			}
+			else
+			{ // 死んでいる場合
+
+				// パーティクル3Dオブジェクトを生成
+				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
+				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+
+				// 更新と描画を停止
+				SetEnableUpdate(false);
+				SetEnableDraw(false);
+
+				// 魔法ロックオン全削除
+				m_pMagic->DeleteLockOn();
+
+				// カウンターを初期化
+				m_nCounterState = 0;
+
+				// 状態を変更
+				m_state = STATE_DEATH;	// 破壊状態
+			}
 		}
 	}
 }
@@ -819,6 +844,45 @@ void CPlayer::Rot(D3DXVECTOR3& rRot)
 
 	// 向きの正規化
 	useful::NormalizeRot(rRot.y);
+}
+
+//============================================================
+//	状態処理
+//============================================================
+void CPlayer::State(void)
+{
+	switch (m_state)
+	{ // 状態ごとの処理
+	case STATE_NORMAL:
+
+		// 無し
+
+		break;
+
+	case STATE_DAMAGE:
+
+		if (m_nCounterState < NORMAL_CNT)
+		{ // カウンターが一定値より小さい場合
+
+			// カウンターを加算
+			m_nCounterState++;
+		}
+		else
+		{ // カウンターが一定値以上の場合
+
+			// カウンターを初期化
+			m_nCounterState = 0;
+
+			// 状態を変更
+			m_state = STATE_NORMAL;	// 通常状態
+		}
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
 }
 
 //============================================================
