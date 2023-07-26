@@ -33,8 +33,8 @@
 #define GRID2_ONE	(POSGRID2(1, 1))	// 1クリア
 
 // POSGRID3関係
-#define GRID3_ZERO	(D3DXVECTOR3(0, 0, 0))	// 0クリア
-#define GRID3_ONE	(D3DXVECTOR3(1, 1, 1))	// 1クリア
+#define GRID3_ZERO	(POSGRID3(0, 0, 0))	// 0クリア
+#define GRID3_ONE	(POSGRID3(1, 1, 1))	// 1クリア
 
 // D3DXCOLOR関係
 #define XCOL_ABLACK	(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f))	// 黒(透明)

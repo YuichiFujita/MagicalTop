@@ -442,8 +442,7 @@ void CEnemy::CollisionFind(void)
 	D3DXVECTOR3 rotEnemy = GetRotation();	// 敵向き
 	float fPlayerRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
 
-	// TODO：プレイヤー死んだらManagerのPlayerもNULLにする
-	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
+	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))	// TODO：GETPLAYER
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 視認対象の設定
@@ -743,8 +742,7 @@ void CEnemyCar::CollisionFind(void)
 	// 過去位置の更新
 	UpdateOldPosition();
 
-	// TODO：移動の確認・移動量、向き変更量を使う
-	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
+	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))	// TODO：GETPLAYER
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 視認対象の検知判定

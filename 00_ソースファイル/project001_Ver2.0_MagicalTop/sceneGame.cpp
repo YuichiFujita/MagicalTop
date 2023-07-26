@@ -186,9 +186,6 @@ HRESULT CSceneGame::Init(void)
 //============================================================
 HRESULT CSceneGame::Uninit(void)
 {
-	//--------------------------------------------------------
-	//	ゲームオブジェクトの破棄
-	//--------------------------------------------------------
 	// ウェーブマネージャーの破棄
 	if (FAILED(CWaveManager::Release(m_pWaveManager)))
 	{ // 破棄に失敗した場合
@@ -206,9 +203,6 @@ HRESULT CSceneGame::Uninit(void)
 		assert(false);
 		return E_FAIL;
 	}
-
-	// オブジェクトの全破棄
-	CObject::ReleaseAll();
 
 	// 終了済みのオブジェクトポインタをNULLにする
 	m_pPlayer	= NULL;		// プレイヤーオブジェクト
@@ -268,8 +262,6 @@ CPlayer *CSceneGame::GetPlayer(void)
 {
 	// プレイヤーのポインタを返す
 	return m_pPlayer;
-
-	// TODO：死んでたらNULL返すとよくね！
 }
 
 //============================================================
@@ -277,18 +269,8 @@ CPlayer *CSceneGame::GetPlayer(void)
 //============================================================
 CTarget *CSceneGame::GetTarget(void)
 {
-	if (m_pTarget->GetState() != CTarget::STATE_DESTROY)
-	{ // 破壊状態ではない場合
-
-		// ターゲットのポインタを返す
-		return m_pTarget;
-	}
-	else
-	{ // 破壊状態の場合
-
-		// NULLを返す
-		return NULL;
-	}
+	// ターゲットのポインタを返す
+	return m_pTarget;
 }
 
 //============================================================

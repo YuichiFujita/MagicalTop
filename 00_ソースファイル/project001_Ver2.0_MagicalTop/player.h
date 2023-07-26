@@ -110,6 +110,7 @@ public:
 	void SetEnableDraw(const bool bDraw);		// 描画状況設定
 	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
 	float GetDistanceTarget(void) const;		// ターゲットとの距離取得
+	int GetState(void) const;					// 状態取得
 	float GetRadius(void) const;				// 半径取得
 
 private:

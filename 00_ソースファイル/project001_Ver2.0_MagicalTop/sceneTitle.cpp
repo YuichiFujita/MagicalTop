@@ -9,6 +9,9 @@
 //************************************************************
 #include "sceneTitle.h"
 #include "manager.h"
+#include "input.h"
+#include "texture.h"
+#include "object2D.h"
 
 //************************************************************
 //	子クラス [CSceneTitle] のメンバ関数
@@ -18,7 +21,8 @@
 //============================================================
 CSceneTitle::CSceneTitle()
 {
-
+	// メンバ変数をクリア
+	m_pObject2D = NULL;	// タイトル表示用
 }
 
 //============================================================
@@ -34,6 +38,29 @@ CSceneTitle::~CSceneTitle()
 //============================================================
 HRESULT CSceneTitle::Init(void)
 {
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
+	// メンバ変数を初期化
+	m_pObject2D = NULL;	// タイトル表示用
+
+	// オブジェクト2Dの生成
+	m_pObject2D = CObject2D::Create
+	( // 引数
+		D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f),	// 位置
+		D3DXVECTOR3(SCREEN_WIDTH, SCREEN_HEIGHT, 0.0f)					// 大きさ
+	);
+	if (UNUSED(m_pObject2D))
+	{ // 生成に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// テクスチャを登録・割当
+	m_pObject2D->BindTexture(pTexture->Regist("data\\TEXTURE\\title000.png"));
+
 	// 成功を返す
 	return S_OK;
 }
@@ -43,6 +70,9 @@ HRESULT CSceneTitle::Init(void)
 //============================================================
 HRESULT CSceneTitle::Uninit(void)
 {
+	// オブジェクト2Dの終了
+	m_pObject2D->Uninit();
+
 	// 成功を返す
 	return S_OK;
 }
@@ -52,8 +82,11 @@ HRESULT CSceneTitle::Uninit(void)
 //============================================================
 void CSceneTitle::Update(void)
 {
-	// シーンの設定
-	CManager::SetMode(MODE_GAME);	// ゲーム画面
+	if (CManager::GetKeyboard()->GetTrigger(DIK_RETURN))
+	{
+		// シーンの設定
+		CManager::SetMode(MODE_GAME);	// ゲーム画面
+	}
 }
 
 //============================================================

@@ -206,7 +206,7 @@ void CPlayer::Update(void)
 	MOTION currentMotion  = MOTION_NEUTRAL;	// 現在のモーション
 	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 rotPlayer = GetRotation();	// プレイヤー向き
-	D3DXVECTOR3 posTarget = VEC3_ZERO/*CManager::GetTarget()->GetPosition()*/;	// ターゲット位置	// TODO：ターゲット位置の取得
+	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 
 	// 過去位置を更新
 	m_oldPos = posPlayer;
@@ -421,6 +421,15 @@ float CPlayer::GetDistanceTarget(void) const
 {
 	// ターゲットとの距離を返す
 	return m_fDisTarget;
+}
+
+//============================================================
+//	状態取得処理
+//============================================================
+int CPlayer::GetState(void) const
+{
+	// 状態を返す
+	return m_state;
 }
 
 //============================================================

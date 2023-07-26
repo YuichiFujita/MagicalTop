@@ -14,6 +14,9 @@
 #include "modelUI.h"
 #include "object2D.h"
 #include "value.h"
+#include "sceneGame.h"
+#include "target.h"
+#include "player.h"
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -335,6 +338,17 @@ void CWaveManager::Update(void)
 	default:	// 例外処理
 		assert(false);
 		break;
+	}
+
+	if (CSceneGame::GetPlayer()->GetState() == CPlayer::STATE_DEATH
+	||  CSceneGame::GetTarget()->GetState() == CTarget::STATE_DESTROY)
+	{ // プレイヤーが死亡状態、またはターゲットが破壊状態の場合
+
+		// シーンの設定
+		CManager::SetMode(CScene::MODE_RESULT);	// リザルト画面
+
+		// 処理を抜ける
+		return;
 	}
 
 	for (int nCntWave = 0; nCntWave < NUM_MODEL_UI; nCntWave++)

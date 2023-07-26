@@ -315,6 +315,9 @@ HRESULT CManager::Uninit(void)
 		return E_FAIL;
 	}
 
+	// オブジェクトの全破棄
+	CObject::ReleaseAll();
+
 	// レンダラーの破棄
 	if (FAILED(CRenderer::Release(m_pRenderer)))
 	{ // 破棄に失敗した場合
@@ -509,6 +512,9 @@ HRESULT CManager::SetMode(const CScene::MODE mode)
 			return E_FAIL;
 		}
 	}
+
+	// オブジェクトの全破棄
+	CObject::ReleaseAll();
 
 	if (UNUSED(m_pScene))
 	{ // シーンが非使用中の場合

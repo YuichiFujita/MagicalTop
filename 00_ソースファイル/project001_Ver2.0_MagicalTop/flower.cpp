@@ -115,6 +115,7 @@ void CFlower::Update(void)
 	// 変数を宣言
 	D3DXVECTOR3 pos = GetPosition();	// 位置
 
+	// TODO：花とプレイヤーの当たり判定
 #if 0
 	// プレイヤーとの当たり判定
 	if (CollisionPlayer())
@@ -307,7 +308,7 @@ bool CFlower::CollisionPlayer(void)
 	// ポインタを宣言
 	CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー情報
 
-	if (USED(pPlayer))
+	if (pPlayer->GetState() != CPlayer::STATE_DEATH)
 	{ // プレイヤーが使用されている場合
 
 		// TODO

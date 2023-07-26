@@ -329,7 +329,7 @@ bool CBullet::CollisionPlayer(void)
 	// ポインタを宣言
 	CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー情報
 
-	if (USED(pPlayer))
+	if (pPlayer->GetState() != CPlayer::STATE_DEATH)
 	{ // プレイヤーが使用されている場合
 
 		// 変数を宣言
