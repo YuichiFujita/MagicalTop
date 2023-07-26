@@ -13,6 +13,7 @@
 #include "object.h"
 #include "lockCursor.h"
 #include "player.h"
+#include "enemy.h"
 #include "collision.h"
 
 //************************************************************
@@ -107,6 +108,16 @@ void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos)
 
 				if (pObjCheck->GetLabel() != CObject::LABEL_ENEMY)
 				{ // オブジェクトラベルが敵ではない場合
+
+					// 次のオブジェクトへのポインタを代入
+					pObjCheck = pObjectNext;
+
+					// 次の繰り返しに移行
+					continue;
+				}
+
+				if (pObjCheck->GetState() == CEnemy::STATE_SPAWN)
+				{ // 敵の状態がスポーン状態の場合
 
 					// 次のオブジェクトへのポインタを代入
 					pObjCheck = pObjectNext;

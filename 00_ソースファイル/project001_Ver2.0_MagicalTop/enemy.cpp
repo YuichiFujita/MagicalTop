@@ -56,12 +56,13 @@ const char *CEnemyCar::mc_apModelFile[] =	// 戦車モデル定数
 CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_status(m_aStatusInfo[type]), m_parts(m_aPartsInfo[type])
 {
 	// メンバ変数をクリア
-	m_pLifeGauge = NULL;	// 体力の情報
-	m_pShadow = NULL;		// 影の情報
-	m_oldPos  = VEC3_ZERO;	// 過去位置
-	m_movePos = VEC3_ZERO;	// 位置移動量
-	m_moveRot = VEC3_ZERO;	// 向き変更量
-	m_nCounterAtk = 0;		// 攻撃管理カウンター
+	m_pLifeGauge = NULL;		// 体力の情報
+	m_pShadow = NULL;			// 影の情報
+	m_oldPos  = VEC3_ZERO;		// 過去位置
+	m_movePos = VEC3_ZERO;		// 位置移動量
+	m_moveRot = VEC3_ZERO;		// 向き変更量
+	m_state   = STATE_SPAWN;	// 状態
+	m_nCounterAtk = 0;			// 攻撃管理カウンター
 
 	// 敵の総数を加算
 	m_nNumAll++;
@@ -82,12 +83,13 @@ CEnemy::~CEnemy()
 HRESULT CEnemy::Init(void)
 {
 	// メンバ変数を初期化
-	m_pLifeGauge = NULL;	// 体力の情報
-	m_pShadow = NULL;		// 影の情報
-	m_oldPos  = VEC3_ZERO;	// 過去位置
-	m_movePos = VEC3_ZERO;	// 位置移動量
-	m_moveRot = VEC3_ZERO;	// 向き変更量
-	m_nCounterAtk = 0;		// 攻撃管理カウンター
+	m_pLifeGauge = NULL;		// 体力の情報
+	m_pShadow = NULL;			// 影の情報
+	m_oldPos  = VEC3_ZERO;		// 過去位置
+	m_movePos = VEC3_ZERO;		// 位置移動量
+	m_moveRot = VEC3_ZERO;		// 向き変更量
+	m_state   = STATE_SPAWN;	// 状態
+	m_nCounterAtk = 0;			// 攻撃管理カウンター
 
 	// 体力ゲージ3Dの生成
 	m_pLifeGauge = CLifeGauge3D::Create(m_status.nLife, m_status.nLife, (int)(ENE_DMG_FRAME * 0.5f), m_status.fLifeUp, this);
@@ -353,6 +355,15 @@ void CEnemy::SetMoveRotation(const D3DXVECTOR3& rMove)
 }
 
 //============================================================
+//	状態の設定処理
+//============================================================
+void CEnemy::SetState(const STATE state)
+{
+	// 引数の状態を設定
+	m_state = state;
+}
+
+//============================================================
 //	マトリックス取得処理
 //============================================================
 D3DXMATRIX CEnemy::GetMtxWorld(void) const
@@ -405,6 +416,15 @@ D3DXVECTOR3 CEnemy::GetMoveRotation(void) const
 }
 
 //============================================================
+//	状態取得処理
+//============================================================
+int CEnemy::GetState(void) const
+{
+	// 状態を返す
+	return m_state;
+}
+
+//============================================================
 //	半径取得処理
 //============================================================
 float CEnemy::GetRadius(void) const
@@ -429,6 +449,42 @@ CEnemy::PartsInfo CEnemy::GetPartsInfo(void) const
 {
 	// パーツ情報を返す
 	return m_parts;
+}
+
+//============================================================
+//	スポーン動作
+//============================================================
+void CEnemy::Spawn(void)
+{
+	// 変数を宣言
+	D3DXVECTOR3 posEnemy = GetPosition();		// 敵位置
+	D3DXVECTOR3 moveEnemy = GetMovePosition();	// 敵移動量
+
+	// 過去位置の更新
+	UpdateOldPosition();
+
+	// スポーン状態の敵との当たり判定
+	CollisionSpawnEnemy(posEnemy);
+
+	// 重力を加算
+	moveEnemy.y -= ENE_GRAVITY;
+
+	// 移動量を加算
+	posEnemy += moveEnemy;
+
+	// 着地判定
+	if (CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy))
+	{ // 着地した場合
+
+		// 状態を設定
+		m_state = STATE_NORMAL;	// 通常状態
+	}
+
+	// 位置を反映
+	SetPosition(posEnemy);
+
+	// 位置移動量を反映
+	SetMovePosition(moveEnemy);
 }
 
 //============================================================
@@ -597,9 +653,9 @@ void CEnemy::CollisionTarget(D3DXVECTOR3& rPos)
 }
 
 //============================================================
-//	敵との当たり判定
+//	スポーン時の敵との当たり判定
 //============================================================
-void CEnemy::CollisionEnemy(D3DXVECTOR3& rPos)
+void CEnemy::CollisionSpawnEnemy(D3DXVECTOR3& rPos)
 {
 	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
 	{ // 優先順位の総数分繰り返す
@@ -621,6 +677,75 @@ void CEnemy::CollisionEnemy(D3DXVECTOR3& rPos)
 
 				if (pObjCheck->GetLabel() != CObject::LABEL_ENEMY || pObjCheck == GetObject())
 				{ // オブジェクトラベルが敵ではない、またはオブジェクトが自分自身だった場合
+
+					// 次のオブジェクトへのポインタを代入
+					pObjCheck = pObjectNext;
+
+					// 次の繰り返しに移行
+					continue;
+				}
+
+				if (pObjCheck->GetState() != CEnemy::STATE_SPAWN)
+				{ // 敵の状態がスポーン状態ではない場合
+
+					// 次のオブジェクトへのポインタを代入
+					pObjCheck = pObjectNext;
+
+					// 次の繰り返しに移行
+					continue;
+				}
+
+				// ターゲットとの衝突判定
+				collision::CirclePillar
+				( // 引数
+					rPos,						// 判定位置
+					pObjCheck->GetPosition(),	// 判定目標位置
+					m_status.fRadius,			// 判定半径
+					pObjCheck->GetRadius()		// 判定目標半径
+				);
+
+				// 次のオブジェクトへのポインタを代入
+				pObjCheck = pObjectNext;
+			}
+		}
+	}
+}
+
+//============================================================
+//	通常時の敵との当たり判定
+//============================================================
+void CEnemy::CollisionNormalEnemy(D3DXVECTOR3& rPos)
+{
+	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
+	{ // 優先順位の総数分繰り返す
+
+		// ポインタを宣言
+		CObject *pObjectTop = CObject::GetTop(nCntPri);	// 先頭オブジェクト
+
+		if (USED(pObjectTop))
+		{ // 先頭が存在する場合
+
+			// ポインタを宣言
+			CObject *pObjCheck = pObjectTop;	// オブジェクト確認用
+
+			while (USED(pObjCheck))
+			{ // オブジェクトが使用されている場合繰り返す
+
+				// ポインタを宣言
+				CObject *pObjectNext = pObjCheck->GetNext();	// 次オブジェクト
+
+				if (pObjCheck->GetLabel() != CObject::LABEL_ENEMY || pObjCheck == GetObject())
+				{ // オブジェクトラベルが敵ではない、またはオブジェクトが自分自身だった場合
+
+					// 次のオブジェクトへのポインタを代入
+					pObjCheck = pObjectNext;
+
+					// 次の繰り返しに移行
+					continue;
+				}
+
+				if (pObjCheck->GetState() != CEnemy::STATE_NORMAL)
+				{ // 敵の状態が通常状態ではない場合
 
 					// 次のオブジェクトへのポインタを代入
 					pObjCheck = pObjectNext;
@@ -653,7 +778,9 @@ void CEnemy::CollisionEnemy(D3DXVECTOR3& rPos)
 //============================================================
 CEnemyCar::CEnemyCar(const TYPE type) : CEnemy(type)
 {
-
+	// メンバ変数をクリア
+	m_spawn = SPAWN_WAIT;	// スポーン状態
+	m_nCounterSpawn = 0;	// スポーン管理カウンター
 }
 
 //============================================================
@@ -669,6 +796,10 @@ CEnemyCar::~CEnemyCar()
 //============================================================
 HRESULT CEnemyCar::Init(void)
 {
+	// メンバ変数を初期化
+	m_spawn = SPAWN_WAIT;	// スポーン状態
+	m_nCounterSpawn = 0;	// スポーン管理カウンター
+
 	// 敵の初期化
 	if (FAILED(CEnemy::Init()))
 	{ // 初期化に失敗した場合
@@ -695,8 +826,26 @@ void CEnemyCar::Uninit(void)
 //============================================================
 void CEnemyCar::Update(void)
 {
-	// 敵の動作の更新
-	CollisionFind();
+	switch (GetState())
+	{ // 状態ごとの処理
+	case STATE_SPAWN:
+
+		// 敵のスポーン動作の更新
+		Spawn();
+
+		break;
+
+	case STATE_NORMAL:
+
+		// 敵の動作の更新
+		CollisionFind();
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
 
 	// 敵の更新
 	CEnemy::Update();
@@ -723,6 +872,74 @@ const char* CEnemyCar::GetModelFileName(const int nModel) const
 		return mc_apModelFile[nModel];
 	}
 	else { assert(false); return NONE_STRING; }	// 範囲外
+}
+
+//============================================================
+//	スポーン動作
+//============================================================
+void CEnemyCar::Spawn(void)
+{
+	// 変数を宣言
+	D3DXVECTOR3 posEnemy = GetPosition();		// 敵位置
+	D3DXVECTOR3 moveEnemy = GetMovePosition();	// 敵移動量
+
+	// 過去位置の更新
+	UpdateOldPosition();
+
+	// スポーン状態の敵との当たり判定
+	CollisionSpawnEnemy(posEnemy);
+
+	switch (m_spawn)
+	{ // スポーン状態ごとの処理
+	case STATE_SPAWN:
+
+		if (m_nCounterSpawn < 20)	// TODO：定数
+		{ // カウンターが一定値より小さい場合
+
+			// カウンターを加算
+			m_nCounterSpawn++;
+		}
+		else
+		{ // カウンターが一定値以上の場合
+
+			// カウンターを初期化
+			m_nCounterSpawn = 0;
+
+			// 状態を変更
+			m_spawn = SPAWN_FALL;	// 落下状態
+		}
+
+		break;
+
+	case STATE_NORMAL:
+	
+		// 重力を加算
+		moveEnemy.y -= ENE_GRAVITY;
+	
+		// 移動量を加算
+		posEnemy += moveEnemy;
+	
+		// 着地判定
+		if (CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy))
+		{ // 着地した場合
+	
+			// 状態の設定
+			SetState(STATE_NORMAL);	// 通常状態
+		}
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
+
+	// 位置を反映
+	SetPosition(posEnemy);
+
+	// 位置移動量を反映
+	SetMovePosition(moveEnemy);
+
 }
 
 //============================================================
@@ -783,8 +1000,8 @@ void CEnemyCar::CollisionFind(void)
 			// ターゲットとの当たり判定
 			CollisionTarget(posEnemy);
 
-			// 敵との当たり判定
-			CollisionEnemy(posEnemy);
+			// 通常状態の敵との当たり判定
+			CollisionNormalEnemy(posEnemy);
 
 			// 着地判定
 			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
@@ -819,8 +1036,8 @@ void CEnemyCar::CollisionFind(void)
 			// ターゲットとの当たり判定
 			CollisionTarget(posEnemy);
 
-			// 敵との当たり判定
-			CollisionEnemy(posEnemy);
+			// 通常状態の敵との当たり判定
+			CollisionNormalEnemy(posEnemy);
 
 			// 着地判定
 			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
