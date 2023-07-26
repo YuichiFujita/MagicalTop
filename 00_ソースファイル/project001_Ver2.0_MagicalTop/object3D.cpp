@@ -27,8 +27,8 @@
 CObject3D::CObject3D()
 {
 	// メンバ変数をクリア
-	m_pVtxBuff = NULL;		// 頂点バッファへのポインタ
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
+	m_pVtxBuff = NULL;		// 頂点バッファへのポインタ
 	m_pos	= VEC3_ZERO;	// 位置
 	m_rot	= VEC3_ZERO;	// 向き
 	m_size	= VEC3_ZERO;	// 大きさ
@@ -42,8 +42,8 @@ CObject3D::CObject3D()
 CObject3D::CObject3D(const CObject::LABEL label, const int nPriority) : CObject(label, nPriority)
 {
 	// メンバ変数をクリア
-	m_pVtxBuff = NULL;		// 頂点バッファへのポインタ
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
+	m_pVtxBuff = NULL;		// 頂点バッファへのポインタ
 	m_pos	= VEC3_ZERO;	// 位置
 	m_rot	= VEC3_ZERO;	// 向き
 	m_size	= VEC3_ZERO;	// 大きさ
@@ -68,13 +68,13 @@ HRESULT CObject3D::Init(void)
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
 	// メンバ変数を初期化
-	m_pVtxBuff = NULL;		// 頂点バッファへのポインタ
-	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pos	= VEC3_ZERO;	// 位置
-	m_rot	= VEC3_ZERO;	// 向き
-	m_size	= VEC3_ZERO;	// 大きさ
-	m_col	= XCOL_WHITE;	// 色
-	m_nTextureID = -1;		// テクスチャインデックス
+	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
+	m_pVtxBuff = NULL;			// 頂点バッファへのポインタ
+	m_pos	= VEC3_ZERO;		// 位置
+	m_rot	= VEC3_ZERO;		// 向き
+	m_size	= VEC3_ZERO;		// 大きさ
+	m_col	= XCOL_WHITE;		// 色
+	m_nTextureID = NONE_IDX;	// テクスチャインデックス
 
 	if (UNUSED(m_pVtxBuff))
 	{ // 非使用中の場合

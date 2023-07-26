@@ -16,9 +16,8 @@
 #include "camera.h"
 #include "collision.h"
 
-#include "multiModel.h"
-#include "motion.h"
 #include "magicManager.h"
+#include "objectGauge2D.h"
 #include "shadow.h"
 #include "target.h"
 #include "stage.h"
@@ -75,6 +74,7 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 {
 	// メンバ変数をクリア
 	m_pMagic		= NULL;				// 魔法マネージャーの情報
+	m_pLife			= NULL;				// 体力の情報
 	m_pShadow		= NULL;				// 影の情報
 	m_oldPos		= VEC3_ZERO;		// 過去位置
 	m_move			= VEC3_ZERO;		// 移動量
@@ -99,6 +99,9 @@ CPlayer::~CPlayer()
 HRESULT CPlayer::Init(void)
 {
 	// メンバ変数を初期化
+	m_pMagic		= NULL;				// 魔法マネージャーの情報
+	m_pLife			= NULL;				// 体力の情報
+	m_pShadow		= NULL;				// 影の情報
 	m_oldPos		= VEC3_ZERO;		// 過去位置
 	m_move			= VEC3_ZERO;		// 移動量
 	m_destRot		= VEC3_ZERO;		// 目標向き
@@ -110,6 +113,16 @@ HRESULT CPlayer::Init(void)
 	// 魔法マネージャーの生成
 	m_pMagic = CMagicManager::Create();
 	if (UNUSED(m_pMagic))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 体力の生成
+	m_pLife = CObjectGauge2D::Create(100, 100, D3DXVECTOR3(300.0f, 300.0f, 0.0f), D3DXVECTOR3(100.0f, 30.0f, 0.0f));
+	if (UNUSED(m_pLife))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -162,6 +175,9 @@ void CPlayer::Uninit(void)
 		assert(false);
 	}
 
+	// 体力を破棄
+	m_pLife->Uninit();
+
 	// 影を破棄
 	m_pShadow->Uninit();
 
@@ -178,7 +194,7 @@ void CPlayer::Update(void)
 	MOTION currentMotion  = MOTION_NEUTRAL;	// 現在のモーション
 	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 rotPlayer = GetRotation();	// プレイヤー向き
-	D3DXVECTOR3 posTarget = VEC3_ZERO/*CManager::GetTarget()->GetPosition()*/;	// ターゲット位置
+	D3DXVECTOR3 posTarget = VEC3_ZERO/*CManager::GetTarget()->GetPosition()*/;	// ターゲット位置	// TODO：ターゲット位置の取得
 
 	// 過去位置を更新
 	m_oldPos = posPlayer;
@@ -225,6 +241,9 @@ void CPlayer::Update(void)
 
 	// 向きを更新
 	SetRotation(rotPlayer);
+
+	// 体力を更新
+	m_pLife->Update();
 
 	// 影の更新
 	m_pShadow->Update();

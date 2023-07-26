@@ -26,14 +26,14 @@
 CObject2D::CObject2D()
 {
 	// メンバ変数をクリア
-	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
-	m_pos	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
-	m_rot	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
-	m_size	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
-	m_col	= D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
-	m_fAngle  = 0.0f;	// 対角線の角度
-	m_fLength = 0.0f;	// 対角線の長さ
-	m_nTextureID = 0;	// テクスチャインデックス
+	m_pVtxBuff = NULL;		// 頂点バッファへのポインタ
+	m_pos	= VEC3_ZERO;	// 位置
+	m_rot	= VEC3_ZERO;	// 向き
+	m_size	= VEC3_ZERO;	// 大きさ
+	m_col	= XCOL_WHITE;	// 色
+	m_fAngle  = 0.0f;		// 対角線の角度
+	m_fLength = 0.0f;		// 対角線の長さ
+	m_nTextureID = 0;		// テクスチャインデックス
 }
 
 //============================================================
@@ -42,14 +42,14 @@ CObject2D::CObject2D()
 CObject2D::CObject2D(const CObject::LABEL label, const int nPriority) : CObject(label, nPriority)
 {
 	// メンバ変数をクリア
-	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
-	m_pos	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
-	m_rot	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
-	m_size	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
-	m_col	= D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
-	m_fAngle  = 0.0f;	// 対角線の角度
-	m_fLength = 0.0f;	// 対角線の長さ
-	m_nTextureID = 0;	// テクスチャインデックス
+	m_pVtxBuff = NULL;		// 頂点バッファへのポインタ
+	m_pos	= VEC3_ZERO;	// 位置
+	m_rot	= VEC3_ZERO;	// 向き
+	m_size	= VEC3_ZERO;	// 大きさ
+	m_col	= XCOL_WHITE;	// 色
+	m_fAngle  = 0.0f;		// 対角線の角度
+	m_fLength = 0.0f;		// 対角線の長さ
+	m_nTextureID = 0;		// テクスチャインデックス
 }
 
 //============================================================
@@ -66,14 +66,14 @@ CObject2D::~CObject2D()
 HRESULT CObject2D::Init(void)
 {
 	// メンバ変数を初期化
-	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
-	m_pos	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
-	m_rot	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 向き
-	m_size	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 大きさ
-	m_col	= D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
-	m_fAngle  = 0.0f;	// 対角線の角度
-	m_fLength = 0.0f;	// 対角線の長さ
-	m_nTextureID = -1;	// テクスチャインデックス
+	m_pVtxBuff = NULL;			// 頂点バッファへのポインタ
+	m_pos	= VEC3_ZERO;		// 位置
+	m_rot	= VEC3_ZERO;		// 向き
+	m_size	= VEC3_ZERO;		// 大きさ
+	m_col	= XCOL_WHITE;		// 色
+	m_fAngle  = 0.0f;			// 対角線の角度
+	m_fLength = 0.0f;			// 対角線の長さ
+	m_nTextureID = NONE_IDX;	// テクスチャインデックス
 
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ

@@ -26,6 +26,7 @@
 //	前方宣言
 //************************************************************
 class CMagicManager;	// 魔法マネージャークラス
+class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
 class CShadow;			// 影クラス
 
 //************************************************************
@@ -118,6 +119,7 @@ private:
 
 	// メンバ変数
 	CMagicManager *m_pMagic;	// 魔法マネージャーの情報
+	CObjectGauge2D *m_pLife;	// 体力の情報
 	CShadow		*m_pShadow;		// 影の情報
 	D3DXVECTOR3	m_oldPos;		// 過去位置
 	D3DXVECTOR3	m_move;			// 移動量

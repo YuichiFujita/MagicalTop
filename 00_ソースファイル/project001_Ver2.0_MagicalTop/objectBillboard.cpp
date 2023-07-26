@@ -27,8 +27,8 @@
 CObjectBillboard::CObjectBillboard()
 {
 	// メンバ変数をクリア
-	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
-	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
+	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
+	m_pVtxBuff = NULL;			// 頂点バッファへのポインタ
 	m_pos      = VEC3_ZERO;		// 位置
 	m_rot      = VEC3_ZERO;		// 向き
 	m_size     = VEC3_ZERO;		// 大きさ
@@ -36,10 +36,10 @@ CObjectBillboard::CObjectBillboard()
 	m_origin   = ORIGIN_CENTER;	// 原点
 	m_rotate   = ROTATE_NORMAL;	// 回転
 	m_func     = D3DCMP_ALWAYS;	// Zテスト設定
-	m_bZEnable = false;	// Zバッファの使用状況
-	m_fAngle   = 0.0f;	// 対角線の角度
-	m_fLength  = 0.0f;	// 対角線の長さ
-	m_nTextureID = 0;	// テクスチャインデックス
+	m_bZEnable = false;			// Zバッファの使用状況
+	m_fAngle   = 0.0f;			// 対角線の角度
+	m_fLength  = 0.0f;			// 対角線の長さ
+	m_nTextureID = 0;			// テクスチャインデックス
 }
 
 //============================================================
@@ -48,8 +48,8 @@ CObjectBillboard::CObjectBillboard()
 CObjectBillboard::CObjectBillboard(const CObject::LABEL label, const int nPriority) : CObject(label, nPriority)
 {
 	// メンバ変数をクリア
-	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
-	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
+	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
+	m_pVtxBuff = NULL;			// 頂点バッファへのポインタ
 	m_pos      = VEC3_ZERO;		// 位置
 	m_rot      = VEC3_ZERO;		// 向き
 	m_size     = VEC3_ZERO;		// 大きさ
@@ -57,10 +57,10 @@ CObjectBillboard::CObjectBillboard(const CObject::LABEL label, const int nPriori
 	m_origin   = ORIGIN_CENTER;	// 原点
 	m_rotate   = ROTATE_NORMAL;	// 回転
 	m_func     = D3DCMP_ALWAYS;	// Zテスト設定
-	m_bZEnable = false;	// Zバッファの使用状況
-	m_fAngle   = 0.0f;	// 対角線の角度
-	m_fLength  = 0.0f;	// 対角線の長さ
-	m_nTextureID = 0;	// テクスチャインデックス
+	m_bZEnable = false;			// Zバッファの使用状況
+	m_fAngle   = 0.0f;			// 対角線の角度
+	m_fLength  = 0.0f;			// 対角線の長さ
+	m_nTextureID = 0;			// テクスチャインデックス
 }
 
 //============================================================
@@ -80,8 +80,8 @@ HRESULT CObjectBillboard::Init(void)
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
 	// メンバ変数を初期化
-	m_pVtxBuff = NULL;	// 頂点バッファへのポインタ
-	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
+	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
+	m_pVtxBuff = NULL;			// 頂点バッファへのポインタ
 	m_pos      = VEC3_ZERO;		// 位置
 	m_rot      = VEC3_ZERO;		// 向き
 	m_size     = VEC3_ZERO;		// 大きさ
@@ -89,10 +89,10 @@ HRESULT CObjectBillboard::Init(void)
 	m_origin   = ORIGIN_CENTER;	// 原点
 	m_rotate   = ROTATE_NORMAL;	// 回転
 	m_func     = D3DCMP_ALWAYS;	// Zテスト設定
-	m_bZEnable = false;	// Zバッファの使用状況
-	m_fAngle   = 0.0f;	// 対角線の角度
-	m_fLength  = 0.0f;	// 対角線の長さ
-	m_nTextureID = -1;	// テクスチャインデックス
+	m_bZEnable = false;			// Zバッファの使用状況
+	m_fAngle   = 0.0f;			// 対角線の角度
+	m_fLength  = 0.0f;			// 対角線の長さ
+	m_nTextureID = NONE_IDX;	// テクスチャインデックス
 
 	if (UNUSED(m_pVtxBuff))
 	{ // 非使用中の場合

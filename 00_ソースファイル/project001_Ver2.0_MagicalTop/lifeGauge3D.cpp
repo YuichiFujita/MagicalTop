@@ -350,7 +350,6 @@ void CLifeGauge3D::SetLife(const int nLife)
 	useful::LimitNum(m_nLife, 0, m_nMaxLife);
 
 	// ゲージを設定
-	useful::LimitNum(m_nLife, 0, m_nMaxLife);						// 体力を補正
 	size.x = (float)m_nLife * (GAUGE_WIDTH / (float)m_nMaxLife);	// ゲージの横幅を設定
 	m_apBilboard[TEXTURE_GAUGE]->SetScaling(size);					// 体力を設定
 }
