@@ -242,6 +242,7 @@ void CObjectGauge2D::Draw(void)
 //============================================================
 CObjectGauge2D *CObjectGauge2D::Create
 (
+	const CObject::LABEL label,		// オブジェクトラベル
 	const int nMax,					// 最大表示値
 	const int nFrame,				// 表示値変動フレーム
 	const D3DXVECTOR3& rPos,		// 位置
@@ -259,7 +260,7 @@ CObjectGauge2D *CObjectGauge2D::Create
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pObjectGauge2D = new CObjectGauge2D(nMax, nFrame, LABEL_NONE);	// オブジェクトゲージ2D
+		pObjectGauge2D = new CObjectGauge2D(nMax, nFrame, label);	// オブジェクトゲージ2D
 	}
 	else { assert(false); return NULL; }	// 使用中
 

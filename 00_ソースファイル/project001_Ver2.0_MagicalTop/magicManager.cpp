@@ -68,7 +68,8 @@ HRESULT CMagicManager::Init(void)
 //============================================================
 void CMagicManager::Uninit(void)
 {
-
+	// 魔法ロックオン全削除
+	DeleteLockOn();
 }
 
 //============================================================
@@ -279,6 +280,20 @@ CMagic::TYPE CMagicManager::GetMagic(void) const
 {
 	// 魔法を返す
 	return m_magic;
+}
+
+//============================================================
+//	魔法ロックオン全削除処理
+//============================================================
+void CMagicManager::DeleteLockOn(void)
+{
+	// ロックオンの削除
+	for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)
+	{ // ロックオンの最大数分繰り返す
+
+		// 表示しない設定にする
+		m_apLockCursor[nCntLock]->SetEnableDraw(false);
+	}
 }
 
 //============================================================

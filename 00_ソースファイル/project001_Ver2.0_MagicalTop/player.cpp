@@ -121,7 +121,16 @@ HRESULT CPlayer::Init(void)
 	}
 
 	// 体力の生成
-	m_pLife = CObjectGauge2D::Create(100, 100, D3DXVECTOR3(300.0f, 300.0f, 0.0f), D3DXVECTOR3(100.0f, 30.0f, 0.0f));
+	m_pLife = CObjectGauge2D::Create
+	( // 引数
+		CObject::LABEL_LIFE,
+		100,
+		60,
+		D3DXVECTOR3(260.0f, 640.0f, 0.0f),
+		D3DXVECTOR3(200.0f, 30.0f, 0.0f),
+		D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f),
+		D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)
+	);
 	if (UNUSED(m_pLife))
 	{ // 非使用中の場合
 
@@ -174,9 +183,6 @@ void CPlayer::Uninit(void)
 		// 例外処理
 		assert(false);
 	}
-
-	// 体力を破棄
-	m_pLife->Uninit();
 
 	// 影を破棄
 	m_pShadow->Uninit();
@@ -242,9 +248,6 @@ void CPlayer::Update(void)
 	// 向きを更新
 	SetRotation(rotPlayer);
 
-	// 体力を更新
-	m_pLife->Update();
-
 	// 影の更新
 	m_pShadow->Update();
 
@@ -271,30 +274,29 @@ void CPlayer::Hit(const int nDmg)
 
 	if (IsDeath() != true)
 	{ // 死亡フラグが立っていない場合
-#if 0
-		// 体力からダメージ分減算
-		m_pLifeGauge->AddLife(-nDmg);
 
-		if (m_pLifeGauge->GetLife() > 0)
+		// 体力からダメージ分減算
+		m_pLife->AddNum(-nDmg);
+
+		if (m_pLife->GetNum() > 0)
 		{ // 生きている場合
 
 			// パーティクル3Dオブジェクトを生成
 			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
 		}
 		else
-#endif
-
 		{ // 死んでいる場合
 
 			// パーティクル3Dオブジェクトを生成
 			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
 			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
-			// TODO：PlayerのUninitどうするのこれ
-#if 0
-			// プレイヤーオブジェクトの終了
-			Uninit();
-#endif
+			// 更新と描画を停止
+			SetEnableUpdate(false);
+			SetEnableDraw(false);
+
+			// 魔法ロックオン全削除
+			m_pMagic->DeleteLockOn();
 		}
 	}
 }
@@ -340,6 +342,26 @@ CPlayer *CPlayer::Create(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 		return pPlayer;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	更新状況の設定処理
+//============================================================
+void CPlayer::SetEnableUpdate(const bool bUpdate)
+{
+	// 引数の更新状況を設定
+	CObject::SetEnableUpdate(bUpdate);		// 自身
+	m_pShadow->SetEnableUpdate(bUpdate);	// 影
+}
+
+//============================================================
+//	描画状況の設定処理
+//============================================================
+void CPlayer::SetEnableDraw(const bool bDraw)
+{
+	// 引数の描画状況を設定
+	CObject::SetEnableDraw(bDraw);		// 自身
+	m_pShadow->SetEnableDraw(bDraw);	// 影
 }
 
 //============================================================

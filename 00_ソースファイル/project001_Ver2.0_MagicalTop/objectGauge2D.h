@@ -61,6 +61,7 @@ public:
 	// 静的メンバ関数
 	static CObjectGauge2D *Create	// 生成
 	( // 引数
+		const CObject::LABEL label,	// オブジェクトラベル
 		const int nMax,				// 最大表示値
 		const int nFrame,			// 表示値変動フレーム
 		const D3DXVECTOR3& rPos,	// 位置

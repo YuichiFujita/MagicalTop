@@ -53,6 +53,7 @@ public:
 	void ShotMagic(void);						// 魔法発射
 	void SetMagic(const CMagic::TYPE type);		// 魔法設定
 	CMagic::TYPE GetMagic(void) const;			// 魔法取得
+	void DeleteLockOn(void);					// 魔法ロックオン全削除
 
 	// 静的メンバ関数
 	static CMagicManager *Create(void);	// 生成

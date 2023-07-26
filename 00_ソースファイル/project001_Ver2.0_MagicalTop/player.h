@@ -97,9 +97,11 @@ public:
 	);
 
 	// メンバ関数
-	D3DXMATRIX GetMtxWorld(void) const;		// マトリックス取得
-	float GetDistanceTarget(void) const;	// ターゲットとの距離取得
-	float GetRadius(void) const;			// 半径取得
+	void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
+	void SetEnableDraw(const bool bDraw);		// 描画状況設定
+	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
+	float GetDistanceTarget(void) const;		// ターゲットとの距離取得
+	float GetRadius(void) const;				// 半径取得
 
 private:
 	// メンバ関数
