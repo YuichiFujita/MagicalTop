@@ -19,8 +19,9 @@
 //************************************************************
 //	前方宣言
 //************************************************************
-class CLifeGauge3D;	// 体力ゲージ3Dクラス
-class CShadow;		// 影クラス
+class CLifeGauge3D;		// 体力ゲージ3Dクラス
+class CShadow;			// 影クラス
+class CObjectBillboard;	// オブジェクトビルボードクラス
 
 //************************************************************
 //	クラス定義
@@ -144,10 +145,12 @@ protected:
 		D3DXVECTOR3& rRotEnemy			// 敵向き
 	);
 
-	void Attack(const D3DXVECTOR3& rTarget);		// 攻撃
-	void CollisionTarget(D3DXVECTOR3& rPos);		// ターゲットとの当たり判定
-	void CollisionSpawnEnemy(D3DXVECTOR3& rPos);	// スポーン時の敵との当たり判定
-	void CollisionNormalEnemy(D3DXVECTOR3& rPos);	// 通常時の敵との当たり判定
+	void Attack(const D3DXVECTOR3& rTarget);			// 攻撃
+	void CollisionTarget(D3DXVECTOR3& rPos);			// ターゲットとの当たり判定
+	void CollisionSpawnEnemy(D3DXVECTOR3& rPos);		// スポーン時の敵との当たり判定
+	void CollisionNormalEnemy(D3DXVECTOR3& rPos);		// 通常時の敵との当たり判定
+	void SetDrawWarning(const bool bDraw);				// 警告の描画状況設定
+	void SetPositionWarning(const D3DXVECTOR3& rPos);	// 警告の位置設定
 
 private:
 	// 静的メンバ変数
@@ -156,15 +159,16 @@ private:
 	static int m_nNumAll;						// 敵の総数
 
 	// メンバ変数
-	CLifeGauge3D *m_pLifeGauge;	// 体力の情報
-	CShadow *m_pShadow;			// 影の情報
-	D3DXVECTOR3	m_oldPos;		// 過去位置
-	D3DXVECTOR3	m_movePos;		// 位置移動量
-	D3DXVECTOR3	m_moveRot;		// 向き変更量
-	STATE m_state;				// 状態
-	int m_nCounterAtk;			// 攻撃管理カウンター
-	const StatusInfo m_status;	// ステータス定数
-	const PartsInfo m_parts;	// パーツ定数
+	CLifeGauge3D *m_pLifeGauge;		// 体力の情報
+	CShadow *m_pShadow;				// 影の情報
+	CObjectBillboard *m_pWarning;	// 警告の情報
+	D3DXVECTOR3	m_oldPos;			// 過去位置
+	D3DXVECTOR3	m_movePos;			// 位置移動量
+	D3DXVECTOR3	m_moveRot;			// 向き変更量
+	STATE m_state;					// 状態
+	int m_nCounterAtk;				// 攻撃管理カウンター
+	const StatusInfo m_status;		// ステータス定数
+	const PartsInfo m_parts;		// パーツ定数
 };
 
 // 戦車敵クラス

@@ -15,6 +15,7 @@
 #include "multiModel.h"
 #include "lifeGauge3D.h"
 #include "shadow.h"
+#include "objectBillboard.h"
 #include "collision.h"
 #include "player.h"
 #include "target.h"
@@ -33,6 +34,8 @@
 #define ENE_GRAVITY	(1.0f)	// プレイヤー重力
 
 #define ENE_DMG_FRAME	(20)	// 敵のダメージ状態フレーム
+
+#define ENE_WAR_ADD_POSY	(100.0f)	// 警告表示位置 yの加算量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -57,11 +60,12 @@ CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_status(m
 {
 	// メンバ変数をクリア
 	m_pLifeGauge = NULL;		// 体力の情報
-	m_pShadow = NULL;			// 影の情報
-	m_oldPos  = VEC3_ZERO;		// 過去位置
-	m_movePos = VEC3_ZERO;		// 位置移動量
-	m_moveRot = VEC3_ZERO;		// 向き変更量
-	m_state   = STATE_SPAWN;	// 状態
+	m_pShadow  = NULL;			// 影の情報
+	m_pWarning = NULL;			// 警告の情報
+	m_oldPos   = VEC3_ZERO;		// 過去位置
+	m_movePos  = VEC3_ZERO;		// 位置移動量
+	m_moveRot  = VEC3_ZERO;		// 向き変更量
+	m_state    = STATE_SPAWN;	// 状態
 	m_nCounterAtk = 0;			// 攻撃管理カウンター
 
 	// 敵の総数を加算
@@ -82,13 +86,17 @@ CEnemy::~CEnemy()
 //============================================================
 HRESULT CEnemy::Init(void)
 {
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
 	// メンバ変数を初期化
 	m_pLifeGauge = NULL;		// 体力の情報
-	m_pShadow = NULL;			// 影の情報
-	m_oldPos  = VEC3_ZERO;		// 過去位置
-	m_movePos = VEC3_ZERO;		// 位置移動量
-	m_moveRot = VEC3_ZERO;		// 向き変更量
-	m_state   = STATE_SPAWN;	// 状態
+	m_pShadow  = NULL;			// 影の情報
+	m_pWarning = NULL;			// 警告の情報
+	m_oldPos   = VEC3_ZERO;		// 過去位置
+	m_movePos  = VEC3_ZERO;		// 位置移動量
+	m_moveRot  = VEC3_ZERO;		// 向き変更量
+	m_state    = STATE_SPAWN;	// 状態
 	m_nCounterAtk = 0;			// 攻撃管理カウンター
 
 	// 体力ゲージ3Dの生成
@@ -110,6 +118,19 @@ HRESULT CEnemy::Init(void)
 		assert(false);
 		return E_FAIL;
 	}
+
+	// オブジェクトビルボードの生成
+	m_pWarning = CObjectBillboard::Create(VEC3_ZERO, D3DXVECTOR3(160.0f, 160.0f, 0.0f));
+	if (UNUSED(m_pWarning))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// テクスチャを登録・割当
+	m_pWarning->BindTexture(pTexture->Regist("data\\TEXTURE\\warning000.png"));
 
 	// オブジェクトキャラクターの初期化
 	if (FAILED(CObjectChara::Init()))
@@ -149,6 +170,9 @@ void CEnemy::Uninit(void)
 	// 影を破棄
 	m_pShadow->Uninit();
 
+	// 警告を破棄
+	m_pWarning->Uninit();
+
 	// オブジェクトキャラクターの終了
 	CObjectChara::Uninit();
 }
@@ -163,6 +187,9 @@ void CEnemy::Update(void)
 
 	// 影の更新
 	m_pShadow->Update();
+
+	// 警告の更新
+	m_pWarning->Update();
 
 	// オブジェクトキャラクターの更新
 	CObjectChara::Update();
@@ -459,6 +486,7 @@ void CEnemy::Spawn(void)
 	// 変数を宣言
 	D3DXVECTOR3 posEnemy = GetPosition();		// 敵位置
 	D3DXVECTOR3 moveEnemy = GetMovePosition();	// 敵移動量
+	D3DXVECTOR3 posWarning = posEnemy;			// 警告位置
 
 	// 過去位置の更新
 	UpdateOldPosition();
@@ -476,6 +504,9 @@ void CEnemy::Spawn(void)
 	if (CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy))
 	{ // 着地した場合
 
+		// 描画をしない設定にする
+		m_pWarning->SetEnableDraw(false);
+
 		// 状態を設定
 		m_state = STATE_NORMAL;	// 通常状態
 	}
@@ -485,6 +516,12 @@ void CEnemy::Spawn(void)
 
 	// 位置移動量を反映
 	SetMovePosition(moveEnemy);
+
+	// 警告位置を地形に添わせる
+	posWarning.y = CSceneGame::GetField()->GetPositionHeight(posWarning);
+
+	// 警告表示位置を設定
+	m_pWarning->SetPosition(D3DXVECTOR3(posWarning.x, posWarning.y + ENE_WAR_ADD_POSY, posWarning.z));
 }
 
 //============================================================
@@ -770,6 +807,24 @@ void CEnemy::CollisionNormalEnemy(D3DXVECTOR3& rPos)
 	}
 }
 
+//============================================================
+//	警告の描画状況の設定処理
+//============================================================
+void CEnemy::SetDrawWarning(const bool bDraw)
+{
+	// 引数の描画状況を設定
+	m_pWarning->SetEnableDraw(bDraw);
+}
+
+//============================================================
+//	警告の位置の設定処理
+//============================================================
+void CEnemy::SetPositionWarning(const D3DXVECTOR3& rPos)
+{
+	// 引数の位置を設定
+	m_pWarning->SetPosition(rPos);
+}
+
 //************************************************************
 //	子クラス [CEnemyCar] のメンバ関数
 //************************************************************
@@ -882,6 +937,7 @@ void CEnemyCar::Spawn(void)
 	// 変数を宣言
 	D3DXVECTOR3 posEnemy = GetPosition();		// 敵位置
 	D3DXVECTOR3 moveEnemy = GetMovePosition();	// 敵移動量
+	D3DXVECTOR3 posWarning = posEnemy;			// 警告位置
 
 	// 過去位置の更新
 	UpdateOldPosition();
@@ -893,7 +949,7 @@ void CEnemyCar::Spawn(void)
 	{ // スポーン状態ごとの処理
 	case STATE_SPAWN:
 
-		if (m_nCounterSpawn < 20)	// TODO：定数
+		if (m_nCounterSpawn < 40)	// TODO：定数
 		{ // カウンターが一定値より小さい場合
 
 			// カウンターを加算
@@ -922,6 +978,9 @@ void CEnemyCar::Spawn(void)
 		// 着地判定
 		if (CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy))
 		{ // 着地した場合
+
+			// 警告の描画状況の設定
+			SetDrawWarning(false);	// 描画しない
 	
 			// 状態の設定
 			SetState(STATE_NORMAL);	// 通常状態
@@ -940,6 +999,11 @@ void CEnemyCar::Spawn(void)
 	// 位置移動量を反映
 	SetMovePosition(moveEnemy);
 
+	// 警告位置を地形に添わせる
+	posWarning.y = CSceneGame::GetField()->GetPositionHeight(posWarning);
+
+	// 警告の位置の設定
+	SetPositionWarning(D3DXVECTOR3(posWarning.x, posWarning.y + ENE_WAR_ADD_POSY, posWarning.z));
 }
 
 //============================================================
