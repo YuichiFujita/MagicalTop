@@ -27,6 +27,26 @@ class CObject3D;	// オブジェクト3Dクラス
 class CStage
 {
 public:
+	// テクスチャ列挙
+	typedef enum
+	{
+		TEXTURE_NORMAL = 0,	// エリア表示
+		TEXTURE_MAX			// この列挙型の総数
+	}TEXTURE;
+
+	// エリア列挙
+	typedef enum
+	{
+		AREA_NONE = -1,	// エリアなし
+		AREA_SAFE,		// セーフエリア
+		AREA_1,			// 第1エリア
+		AREA_2,			// 第2エリア
+		AREA_3,			// 第3エリア
+		AREA_4,			// 第4エリア
+		AREA_5,			// 第5エリア
+		AREA_MAX		// エリアの総数
+	}AREA;
+
 	// 制限列挙
 	typedef enum
 	{
@@ -41,18 +61,11 @@ public:
 	// デストラクタ
 	~CStage();
 
-	// エリア情報構造体
+	// ステージエリア構造体
 	typedef struct
 	{
 		D3DXCOLOR col;	// エリア色
 		float fRadius;	// エリア半径
-	}AreaInfo;
-
-	// ステージエリア構造体
-	typedef struct
-	{
-		AreaInfo *pInfo;	// エリアの情報
-		int nNumArea;		// エリアの総数
 	}StageArea;
 
 	// ステージ範囲構造体
@@ -77,8 +90,9 @@ public:
 
 	void SetStageLimit(const StageLimit& rLimit);	// ステージ範囲設定
 	StageLimit GetStageLimit(void) const;			// ステージ範囲取得
-	void SetStageArea(const StageArea& rArea);		// ステージエリア設定
-	StageArea GetStageArea(void) const;				// ステージエリア取得
+	void SetStageArea(const int nID, const StageArea& rArea);	// ステージエリア設定
+	StageArea GetStageArea(const int nID) const;				// ステージエリア取得
+	AREA GetAreaPlayer(void) const;	// プレイヤーの現在エリア取得
 
 	// 静的メンバ関数
 	static CStage *Create(void);				// 生成
@@ -88,10 +102,14 @@ private:
 	// 静的メンバ関数
 	static void LoadSetup(CStage *pStage);	// セットアップ
 
+	// 静的メンバ変数
+	static const char *mc_apTextureFile[];	// テクスチャ定数
+
 	// メンバ変数
-	CObject3D *m_pStageArea;	// ステージエリア表示の情報
-	StageArea  m_stageArea;		// ステージエリア
-	StageLimit m_stageLimit;	// ステージ範囲
+	CObject3D *m_pStageArea;			// ステージエリア表示の情報
+	StageArea  m_aStageArea[AREA_MAX];	// ステージエリア
+	StageLimit m_stageLimit;			// ステージ範囲
+	AREA m_area;	// プレイヤーの現在エリア
 };
 
 #endif	// _STAGE_H_

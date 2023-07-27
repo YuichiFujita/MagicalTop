@@ -23,6 +23,14 @@
 #define AREA_PRIO	(2)	// エリア表示の優先順位
 
 //************************************************************
+//	静的メンバ変数宣言
+//************************************************************
+const char *CStage::mc_apTextureFile[] =	// テクスチャ定数
+{
+	"data\\TEXTURE\\area000.png",	// エリア表示テクスチャ
+};
+
+//************************************************************
 //	親クラス [CStage] のメンバ関数
 //************************************************************
 //============================================================
@@ -32,8 +40,9 @@ CStage::CStage()
 {
 	// メンバ変数をクリア
 	m_pStageArea = NULL;	// ステージエリア表示の情報
-	memset(&m_stageArea, 0, sizeof(m_stageArea));	// ステージエリア
-	memset(&m_stageLimit, 0, sizeof(m_stageLimit));	// ステージ範囲
+	memset(&m_aStageArea[0], 0, sizeof(m_aStageArea));	// ステージエリア
+	memset(&m_stageLimit, 0, sizeof(m_stageLimit));		// ステージ範囲
+	m_area = AREA_NONE;		// プレイヤーの現在エリア
 }
 
 //============================================================
@@ -54,8 +63,9 @@ HRESULT CStage::Init(void)
 
 	// メンバ変数を初期化
 	m_pStageArea = NULL;	// ステージエリア表示の情報
-	memset(&m_stageArea, 0, sizeof(m_stageArea));	// ステージエリア
-	memset(&m_stageLimit, 0, sizeof(m_stageLimit));	// ステージ範囲
+	memset(&m_aStageArea[0], 0, sizeof(m_aStageArea));	// ステージエリア
+	memset(&m_stageLimit, 0, sizeof(m_stageLimit));		// ステージ範囲
+	m_area = AREA_NONE;		// プレイヤーの現在エリア
 
 	// ステージエリア表示の生成
 	m_pStageArea = CObject3D::Create
@@ -77,7 +87,7 @@ HRESULT CStage::Init(void)
 	}
 
 	// テクスチャを登録・割当
-	m_pStageArea->BindTexture(pTexture->Regist("data\\TEXTURE\\area000.png"));	// TODO
+	m_pStageArea->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_NORMAL]));
 
 	// 優先順位を設定
 	m_pStageArea->SetPriority(AREA_PRIO);
@@ -93,14 +103,6 @@ void CStage::Uninit(void)
 {
 	// ステージエリア表示を破棄
 	m_pStageArea->Uninit();
-
-	if (USED(m_stageArea.pInfo))
-	{ // ステージエリアが使用されている場合
-
-		// ステージエリアのメモリ開放
-		delete[] m_stageArea.pInfo;
-		m_stageArea.pInfo = NULL;
-	}
 }
 
 //============================================================
@@ -113,25 +115,34 @@ void CStage::Update(void)
 	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 	float fRadiusPlayer = CSceneGame::GetPlayer()->GetRadius();		// プレイヤー半径
 
+	// 現在のエリアを初期化
+	m_area = AREA_NONE;
+
 	// エリア表示の位置を設定
 	m_pStageArea->SetPosition(posTarget);
 
-	for (int nCntArea = 0; nCntArea < m_stageArea.nNumArea; nCntArea++)
-	{ // エリアの総数分繰り返す
+	for (int nCntArea = 0; nCntArea < AREA_MAX; nCntArea++)
+	{ // エリアの最大数分繰り返す
 
-		if (collision::Circle2D(posPlayer, posTarget, fRadiusPlayer, m_stageArea.pInfo[nCntArea].fRadius))
+		if (collision::Circle2D(posPlayer, posTarget, fRadiusPlayer, m_aStageArea[nCntArea].fRadius))
 		{ // エリア内の場合
 
 			// エリア表示の大きさを設定
-			m_pStageArea->SetScaling(D3DXVECTOR3(m_stageArea.pInfo[nCntArea].fRadius * 2.0f, 0.0f, m_stageArea.pInfo[nCntArea].fRadius * 2.0f));
+			m_pStageArea->SetScaling(D3DXVECTOR3(m_aStageArea[nCntArea].fRadius * 2.0f, 0.0f, m_aStageArea[nCntArea].fRadius * 2.0f));
 
 			// エリア表示の色を設定
-			m_pStageArea->SetColor(m_stageArea.pInfo[nCntArea].col);
+			m_pStageArea->SetColor(m_aStageArea[nCntArea].col);
+
+			// 現在のエリアを設定
+			m_area = (AREA)nCntArea;
 
 			// 処理を抜ける
 			break;
 		}
 	}
+
+	// 例外処理
+	assert(m_area != AREA_NONE);	// エリア外
 }
 
 //============================================================
@@ -218,42 +229,28 @@ CStage::StageLimit CStage::GetStageLimit(void) const
 //============================================================
 //	ステージエリアの設定処理
 //============================================================
-void CStage::SetStageArea(const StageArea& rArea)
+void CStage::SetStageArea(const int nID, const StageArea& rArea)
 {
-	if (UNUSED(m_stageArea.pInfo))
-	{ // 非使用中の場合
-
-		// 引数のエリアの総数分メモリ確保
-		m_stageArea.pInfo = new AreaInfo[rArea.nNumArea];
-
-		if (USED(m_stageArea.pInfo))
-		{ // 確保に成功した場合
-
-			// メモリクリア
-			memset(m_stageArea.pInfo, 0, sizeof(AreaInfo) * rArea.nNumArea);
-		}
-		else { assert(false); }	// 確保失敗
-	}
-	else { assert(false); }	// 使用中
-
-	// 引数のステージエリアの総数を設定
-	m_stageArea.nNumArea = rArea.nNumArea;
-
-	// 引数のステージエリアの情報を設定
-	for (int nCntArea = 0; nCntArea < rArea.nNumArea; nCntArea++)
-	{ // エリアの総数分繰り返す
-
-		m_stageArea.pInfo[nCntArea] = rArea.pInfo[nCntArea];
-	}
+	// 引数インデックスのステージエリアを設定
+	m_aStageArea[nID] = rArea;
 }
 
 //============================================================
 //	ステージエリア取得処理
 //============================================================
-CStage::StageArea CStage::GetStageArea(void) const
+CStage::StageArea CStage::GetStageArea(const int nID) const
 {
-	// ステージエリアを返す
-	return m_stageArea;
+	// 引数インデックスのステージエリアを返す
+	return m_aStageArea[nID];
+}
+
+//============================================================
+//	プレイヤーの現在エリア取得処理
+//============================================================
+CStage::AREA CStage::GetAreaPlayer(void) const
+{
+	// プレイヤーの現在エリアを返す
+	return m_area;
 }
 
 //============================================================
@@ -352,27 +349,7 @@ void CStage::LoadSetup(CStage *pStage)
 					// ファイルから文字列を読み込む
 					fscanf(pFile, "%s", &aString[0]);
 
-					if (strcmp(&aString[0], "NUM_AREA") == 0)
-					{ // 読み込んだ文字列が NUM_AREA の場合
-
-						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
-						fscanf(pFile, "%d", &stageArea.nNumArea);	// エリアの総数を読み込む
-
-						// 例外処理
-						assert(stageArea.nNumArea > 0);	// エリア数最低限以下
-
-						// エリアの総数分メモリ確保
-						stageArea.pInfo = new AreaInfo[stageArea.nNumArea];
-
-						if (USED(stageArea.pInfo))
-						{ // 確保に成功した場合
-
-							// メモリクリア
-							memset(stageArea.pInfo, 0, sizeof(AreaInfo) * stageArea.nNumArea);
-						}
-						else { assert(false); }	// 確保失敗
-					}
-					else if (strcmp(&aString[0], "AREA") == 0)
+					if (strcmp(&aString[0], "AREA") == 0)
 					{ // 読み込んだ文字列が AREA の場合
 
 						do
@@ -384,38 +361,33 @@ void CStage::LoadSetup(CStage *pStage)
 							if (strcmp(&aString[0], "COL") == 0)
 							{ // 読み込んだ文字列が COL の場合
 
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%f", &stageArea.pInfo[nArea].col.r);		// 赤色を読み込む
-								fscanf(pFile, "%f", &stageArea.pInfo[nArea].col.g);		// 緑色を読み込む
-								fscanf(pFile, "%f", &stageArea.pInfo[nArea].col.b);		// 青色を読み込む
-								fscanf(pFile, "%f", &stageArea.pInfo[nArea].col.a);		// α値を読み込む
+								fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+								fscanf(pFile, "%f", &stageArea.col.r);		// 赤色を読み込む
+								fscanf(pFile, "%f", &stageArea.col.g);		// 緑色を読み込む
+								fscanf(pFile, "%f", &stageArea.col.b);		// 青色を読み込む
+								fscanf(pFile, "%f", &stageArea.col.a);		// α値を読み込む
 							}
 							else if (strcmp(&aString[0], "RADIUS") == 0)
 							{ // 読み込んだ文字列が RADIUS の場合
 
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%f", &stageArea.pInfo[nArea].fRadius);	// 半径を読み込む
+								fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+								fscanf(pFile, "%f", &stageArea.fRadius);	// 半径を読み込む
 							}
 						} while (strcmp(&aString[0], "END_AREA") != 0);	// 読み込んだ文字列が END_AREA ではない場合ループ
 
 						// 例外処理
-						assert(nArea < stageArea.nNumArea);	// エリア数オーバー
+						assert(nArea < AREA_MAX);	// エリア数オーバー
+
+						// ステージエリアの設定
+						pStage->SetStageArea(nArea, stageArea);
 
 						// エリア数を加算
 						nArea++;
 					}
 				} while (strcmp(&aString[0], "END_AREASET") != 0);	// 読み込んだ文字列が END_AREASET ではない場合ループ
 
-				// ステージエリアの設定
-				pStage->SetStageArea(stageArea);
-
-				if (USED(stageArea.pInfo))
-				{ // ステージエリアが使用されている場合
-
-					// ステージエリアのメモリ開放
-					delete[] stageArea.pInfo;
-				}
-				else { assert(false); }	// 非使用中
+				// 例外処理
+				assert(nArea == AREA_MAX);	// エリア未設定
 			}
 
 			// ステージ範囲の設定

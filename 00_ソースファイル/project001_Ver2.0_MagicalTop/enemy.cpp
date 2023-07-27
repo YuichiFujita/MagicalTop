@@ -40,6 +40,11 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
+const char *CEnemy::mc_apTextureFile[] =	// テクスチャ定数
+{
+	"data\\TEXTURE\\warning000.png",	// 警告表示テクスチャ
+};
+
 CEnemy::StatusInfo CEnemy::m_aStatusInfo[CEnemy::TYPE_MAX] = {};	// ステータス情報
 CEnemy::PartsInfo CEnemy::m_aPartsInfo[CEnemy::TYPE_MAX] = {};		// パーツ情報
 int CEnemy::m_nNumAll = 0;											// 敵の総数
@@ -130,7 +135,7 @@ HRESULT CEnemy::Init(void)
 	}
 
 	// テクスチャを登録・割当
-	m_pWarning->BindTexture(pTexture->Regist("data\\TEXTURE\\warning000.png"));	// TODO
+	m_pWarning->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_NORMAL]));
 
 	// オブジェクトキャラクターの初期化
 	if (FAILED(CObjectChara::Init()))

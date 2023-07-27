@@ -30,6 +30,13 @@ class CObjectBillboard;	// オブジェクトビルボードクラス
 class CEnemy : public CObjectChara
 {
 public:
+	// テクスチャ列挙
+	typedef enum
+	{
+		TEXTURE_NORMAL = 0,	// 警告表示
+		TEXTURE_MAX			// この列挙型の総数
+	}TEXTURE;
+
 	// 種類列挙
 	typedef enum
 	{
@@ -154,6 +161,7 @@ protected:
 
 private:
 	// 静的メンバ変数
+	static const char *mc_apTextureFile[];		// テクスチャ定数
 	static StatusInfo m_aStatusInfo[TYPE_MAX];	// ステータス情報
 	static PartsInfo m_aPartsInfo[TYPE_MAX];	// パーツ情報
 	static int m_nNumAll;						// 敵の総数
