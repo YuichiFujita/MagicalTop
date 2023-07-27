@@ -12,6 +12,7 @@
 #include "sceneGame.h"
 #include "object.h"
 #include "lockCursor.h"
+#include "objectGauge2D.h"
 #include "player.h"
 #include "enemy.h"
 #include "collision.h"
@@ -26,6 +27,7 @@ CMagicManager::CMagicManager()
 {
 	// メンバ変数をクリア
 	memset(&m_apLockCursor[0], 0, sizeof(m_apLockCursor));	// ロックオン表示情報
+	m_pMana = NULL;	// マナの情報
 	m_magic = CMagic::TYPE_LV0_NORMAL;	// 魔法
 }
 
@@ -44,6 +46,7 @@ HRESULT CMagicManager::Init(void)
 {
 	// メンバ変数を初期化
 	memset(&m_apLockCursor[0], 0, sizeof(m_apLockCursor));	// ロックオン表示情報
+	m_pMana = NULL;	// マナの情報
 	m_magic = CMagic::TYPE_LV0_NORMAL;	// 魔法
 
 	for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)
@@ -58,6 +61,25 @@ HRESULT CMagicManager::Init(void)
 			assert(false);
 			return E_FAIL;
 		}
+	}
+
+	// 体力の生成
+	m_pMana = CObjectGauge2D::Create	// TODO：定数, LABEL変更
+	( // 引数
+		CObject::LABEL_GAUGE,				// オブジェクトラベル
+		100,								// 最大体力
+		10,									// 体力変動フレーム
+		D3DXVECTOR3(260.0f, 540.0f, 0.0f),	// 位置
+		D3DXVECTOR3(200.0f, 30.0f, 0.0f),	// ゲージ大きさ
+		D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f),	// 表ゲージ色
+		D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 裏ゲージ色
+	);
+	if (UNUSED(m_pMana))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
 	}
 
 	// 成功を返す
@@ -218,22 +240,57 @@ void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos)
 //============================================================
 //	魔法の発射処理
 //============================================================
-void CMagicManager::ShotMagic(void)
+bool CMagicManager::ShotMagic(void)
 {
 	// 変数を宣言
 	D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 rotPlayer = CSceneGame::GetPlayer()->GetRotation();	// プレイヤー向き
+	int nNumShot = 0;	// 発射数
 	bool bLock = false;	// ロックオン状況
 
-	for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)
-	{ // ロックオンの最大数分繰り返す
+	if (m_pMana->GetNum() > 0)
+	{ // マナがある場合
 
-		if (m_apLockCursor[nCntLock]->IsDraw())
-		{ // ロックオンしていた場合
+		for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)
+		{ // ロックオンの最大数分繰り返す
+
+			if (m_apLockCursor[nCntLock]->IsDraw())
+			{ // ロックオンしていた場合
+
+				// 変数を宣言
+				D3DXVECTOR3 magicPos = D3DXVECTOR3(posPlayer.x, posPlayer.y + PLAY_MAGIC_POS_PLUS_Y, posPlayer.z);	// 発射位置
+				D3DXVECTOR3 vecMove = m_apLockCursor[nCntLock]->GetLockObject()->GetPosition() - posPlayer;			// 移動方向
+
+				// 魔法オブジェクトの生成
+				CMagic::Create
+				( // 引数
+					m_magic,	// 種類
+					magicPos,	// 位置
+					VEC3_ZERO,	// 向き
+					vecMove		// 移動方向
+				);
+
+				// 発射数を加算
+				nNumShot++;
+
+				// ロックオンをしている状態にする
+				bLock = true;
+			}
+		}
+
+		if (bLock == false)
+		{ // ロックオンされていなかった場合
 
 			// 変数を宣言
 			D3DXVECTOR3 magicPos = D3DXVECTOR3(posPlayer.x, posPlayer.y + PLAY_MAGIC_POS_PLUS_Y, posPlayer.z);	// 発射位置
-			D3DXVECTOR3 vecMove = m_apLockCursor[nCntLock]->GetLockObject()->GetPosition() - posPlayer;			// 移動方向
+			D3DXVECTOR3 vecMove;					// 移動方向
+			float fRotVec = rotPlayer.y + D3DX_PI;	// 発射方向
+
+			// 向きを正規化
+			useful::NormalizeRot(fRotVec);
+
+			// 移動方向を設定
+			vecMove = D3DXVECTOR3(sinf(fRotVec), 0.0f, cosf(fRotVec));
 
 			// 魔法オブジェクトの生成
 			CMagic::Create
@@ -244,34 +301,19 @@ void CMagicManager::ShotMagic(void)
 				vecMove		// 移動方向
 			);
 
-			// ロックオンをしている状態にする
-			bLock = true;
+			// 発射数を加算
+			nNumShot++;
 		}
+
+		// マナを減算
+		m_pMana->AddNum(-nNumShot);
+
+		// 発射した状態を返す
+		return true;
 	}
 
-	if (bLock == false)
-	{ // ロックオンされていなかった場合
-
-		// 変数を宣言
-		D3DXVECTOR3 magicPos = D3DXVECTOR3(posPlayer.x, posPlayer.y + PLAY_MAGIC_POS_PLUS_Y, posPlayer.z);	// 発射位置
-		D3DXVECTOR3 vecMove;					// 移動方向
-		float fRotVec = rotPlayer.y + D3DX_PI;	// 発射方向
-
-		// 向きを正規化
-		useful::NormalizeRot(fRotVec);
-
-		// 移動方向を設定
-		vecMove = D3DXVECTOR3(sinf(fRotVec), 0.0f, cosf(fRotVec));
-
-		// 魔法オブジェクトの生成
-		CMagic::Create
-		( // 引数
-			m_magic,	// 種類
-			magicPos,	// 位置
-			VEC3_ZERO,	// 向き
-			vecMove		// 移動方向
-		);
-	}
+	// 発射していない状態を返す
+	return false;
 }
 
 //============================================================

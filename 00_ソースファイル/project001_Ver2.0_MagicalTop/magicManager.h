@@ -24,7 +24,8 @@
 //************************************************************
 //	前方宣言
 //************************************************************
-class CLockCursor;	// ロックオン表示
+class CLockCursor;		// ロックオン表示
+class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
 
 //************************************************************
 //	クラス定義
@@ -50,7 +51,7 @@ public:
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
 	void LockOnMagic(const D3DXVECTOR3& rPos);	// 魔法ロックオン
-	void ShotMagic(void);						// 魔法発射
+	bool ShotMagic(void);						// 魔法発射
 	void SetMagic(const CMagic::TYPE type);		// 魔法設定
 	CMagic::TYPE GetMagic(void) const;			// 魔法取得
 	void DeleteLockOn(void);					// 魔法ロックオン全削除
@@ -65,7 +66,8 @@ private:
 
 	// メンバ変数
 	CLockCursor *m_apLockCursor[MAX_LOCK];	// ロックオン表示情報
-	CMagic::TYPE m_magic;	// 魔法
+	CObjectGauge2D *m_pMana;	// マナの情報
+	CMagic::TYPE m_magic;		// 魔法
 };
 
 #endif	// _MAGICMANAGER_H_

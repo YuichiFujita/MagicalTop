@@ -16,6 +16,7 @@
 //	マクロ定義
 //************************************************************
 #define MAX_VERTEX	(12)	// 頂点数
+#define GAUGE_PRIO	(6)		// ゲージ2Dの優先順位
 
 //************************************************************
 //	子クラス [CObjectGauge2D] のメンバ関数
@@ -260,7 +261,7 @@ CObjectGauge2D *CObjectGauge2D::Create
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pObjectGauge2D = new CObjectGauge2D(nMax, nFrame, label);	// オブジェクトゲージ2D
+		pObjectGauge2D = new CObjectGauge2D(nMax, nFrame, label, GAUGE_PRIO);	// オブジェクトゲージ2D
 	}
 	else { assert(false); return NULL; }	// 使用中
 
@@ -334,6 +335,9 @@ void CObjectGauge2D::SetNum(const int nNum)
 
 	// ゲージの横幅加算量を設定
 	m_fAddRight = ((float)m_nNumGauge * ((m_sizeGauge.x * 2.0f) / (float)m_nMaxNumGauge)) - m_sizeGauge.x;
+
+	// 頂点情報の設定
+	SetVtx();
 }
 
 //============================================================

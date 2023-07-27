@@ -130,7 +130,7 @@ HRESULT CPlayer::Init(void)
 	// 体力の生成
 	m_pLife = CObjectGauge2D::Create	// TODO：定数
 	( // 引数
-		CObject::LABEL_LIFE,				// オブジェクトラベル
+		CObject::LABEL_GAUGE,				// オブジェクトラベル
 		PLAY_LIFE,							// 最大体力
 		(int)(NORMAL_CNT * 0.25f),			// 体力変動フレーム
 		D3DXVECTOR3(260.0f, 640.0f, 0.0f),	// 位置
@@ -721,11 +721,13 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion, D3DXVECTOR3& rPos)
 	if (pKeyboard->GetTrigger(DIK_RETURN))
 	{ // 魔法の操作が行われた場合
 
-		// アクションモーションを設定
-		currentMotion = MOTION_ACTION;
-
 		// 魔法の発射
-		m_pMagic->ShotMagic();
+		if (m_pMagic->ShotMagic())
+		{ // 発射できた場合
+
+			// アクションモーションを設定
+			currentMotion = MOTION_ACTION;
+		}
 	}
 
 	// 現在のモーションを返す
