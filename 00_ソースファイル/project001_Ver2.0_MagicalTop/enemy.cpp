@@ -130,7 +130,7 @@ HRESULT CEnemy::Init(void)
 	}
 
 	// テクスチャを登録・割当
-	m_pWarning->BindTexture(pTexture->Regist("data\\TEXTURE\\warning000.png"));
+	m_pWarning->BindTexture(pTexture->Regist("data\\TEXTURE\\warning000.png"));	// TODO
 
 	// オブジェクトキャラクターの初期化
 	if (FAILED(CObjectChara::Init()))

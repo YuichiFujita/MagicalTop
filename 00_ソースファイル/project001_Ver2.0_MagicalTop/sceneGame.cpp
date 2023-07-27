@@ -220,6 +220,14 @@ HRESULT CSceneGame::Uninit(void)
 //============================================================
 void CSceneGame::Update(void)
 {
+	if (USED(m_pStage))
+	{ // 使用中の場合
+
+		// ステージの更新
+		m_pStage->Update();
+	}
+	else { assert(false); }	// 非使用中
+
 	if (USED(m_pWaveManager))
 	{ // 使用中の場合
 
@@ -227,6 +235,8 @@ void CSceneGame::Update(void)
 		m_pWaveManager->Update();
 	}
 	else { assert(false); }	// 非使用中
+
+	// TODO：遷移のタイミングで壊れる問題死亡フラグで回避
 }
 
 //============================================================

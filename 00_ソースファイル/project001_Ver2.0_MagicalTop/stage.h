@@ -16,6 +16,11 @@
 #include "main.h"
 
 //************************************************************
+//	前方宣言
+//************************************************************
+class CObject3D;	// オブジェクト3Dクラス
+
+//************************************************************
 //	クラス定義
 //************************************************************
 // ステージクラス
@@ -36,6 +41,20 @@ public:
 	// デストラクタ
 	~CStage();
 
+	// エリア情報構造体
+	typedef struct
+	{
+		D3DXCOLOR col;	// エリア色
+		float fRadius;	// エリア半径
+	}AreaInfo;
+
+	// ステージエリア構造体
+	typedef struct
+	{
+		AreaInfo *pInfo;	// エリアの情報
+		int nNumArea;		// エリアの総数
+	}StageArea;
+
 	// ステージ範囲構造体
 	typedef struct
 	{
@@ -51,12 +70,15 @@ public:
 	// メンバ関数
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
+	void Update(void);	// 更新
 
 	void LimitPosition(D3DXVECTOR3& rPos, const float fRadius);	// 位置補正
 	bool LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove, const float fHeight);	// 範囲外着地
 
 	void SetStageLimit(const StageLimit& rLimit);	// ステージ範囲設定
 	StageLimit GetStageLimit(void) const;			// ステージ範囲取得
+	void SetStageArea(const StageArea& rArea);		// ステージエリア設定
+	StageArea GetStageArea(void) const;				// ステージエリア取得
 
 	// 静的メンバ関数
 	static CStage *Create(void);				// 生成
@@ -67,6 +89,8 @@ private:
 	static void LoadSetup(CStage *pStage);	// セットアップ
 
 	// メンバ変数
+	CObject3D *m_pStageArea;	// ステージエリア表示の情報
+	StageArea  m_stageArea;		// ステージエリア
 	StageLimit m_stageLimit;	// ステージ範囲
 };
 

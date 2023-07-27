@@ -67,6 +67,12 @@ HRESULT CShadow::Init(void)
 		return E_FAIL;
 	}
 
+	// Zテストの設定
+	SetFunc(D3DCMP_ALWAYS);
+
+	// Zバッファの使用状況の設定
+	SetZEnable(false);
+
 	// 成功を返す
 	return S_OK;
 }
@@ -108,10 +114,6 @@ void CShadow::Draw(void)
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
-	// Zテストを無効にする
-	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);	// Zテストの設定
-	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);		// Zバッファ更新の有効 / 無効の設定
-
 	// αブレンディングを減算合成に設定
 	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
@@ -119,10 +121,6 @@ void CShadow::Draw(void)
 
 	// オブジェクト3Dの描画
 	CObject3D::Draw();
-
-	// Zテストを有効にする
-	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);	// Zテストの設定
-	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);		// Zバッファ更新の有効 / 無効の設定
 
 	// αブレンディングを元に戻す
 	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);

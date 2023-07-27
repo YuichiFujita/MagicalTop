@@ -166,7 +166,7 @@ void CObjectBillboard::Draw(void)
 	// ライティングを無効にする
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-	// Zテストを無効にする
+	// Zテストを設定する
 	pDevice->SetRenderState(D3DRS_ZFUNC, m_func);				// Zテストの設定
 	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, m_bZEnable);	// Zバッファ更新の有効 / 無効の設定
 

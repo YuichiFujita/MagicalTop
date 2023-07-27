@@ -27,13 +27,16 @@
 CObject3D::CObject3D()
 {
 	// メンバ変数をクリア
-	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pVtxBuff = NULL;		// 頂点バッファへのポインタ
-	m_pos	= VEC3_ZERO;	// 位置
-	m_rot	= VEC3_ZERO;	// 向き
-	m_size	= VEC3_ZERO;	// 大きさ
-	m_col	= XCOL_WHITE;	// 色
-	m_nTextureID = 0;		// テクスチャインデックス
+	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
+	m_pVtxBuff = NULL;			// 頂点バッファへのポインタ
+	m_pos	= VEC3_ZERO;		// 位置
+	m_rot	= VEC3_ZERO;		// 向き
+	m_size	= VEC3_ZERO;		// 大きさ
+	m_col	= XCOL_WHITE;		// 色
+	m_func	= D3DCMP_ALWAYS;	// Zテスト設定
+	m_bZEnable	= false;		// Zバッファの使用状況
+	m_bLight	= false;		// ライティング状況
+	m_nTextureID = 0;			// テクスチャインデックス
 }
 
 //============================================================
@@ -42,13 +45,16 @@ CObject3D::CObject3D()
 CObject3D::CObject3D(const CObject::LABEL label, const int nPriority) : CObject(label, nPriority)
 {
 	// メンバ変数をクリア
-	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
-	m_pVtxBuff = NULL;		// 頂点バッファへのポインタ
-	m_pos	= VEC3_ZERO;	// 位置
-	m_rot	= VEC3_ZERO;	// 向き
-	m_size	= VEC3_ZERO;	// 大きさ
-	m_col	= XCOL_WHITE;	// 色
-	m_nTextureID = 0;		// テクスチャインデックス
+	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
+	m_pVtxBuff = NULL;			// 頂点バッファへのポインタ
+	m_pos	= VEC3_ZERO;		// 位置
+	m_rot	= VEC3_ZERO;		// 向き
+	m_size	= VEC3_ZERO;		// 大きさ
+	m_col	= XCOL_WHITE;		// 色
+	m_func	= D3DCMP_ALWAYS;	// Zテスト設定
+	m_bZEnable	= false;		// Zバッファの使用状況
+	m_bLight	= false;		// ライティング状況
+	m_nTextureID = 0;			// テクスチャインデックス
 }
 
 //============================================================
@@ -74,6 +80,9 @@ HRESULT CObject3D::Init(void)
 	m_rot	= VEC3_ZERO;		// 向き
 	m_size	= VEC3_ZERO;		// 大きさ
 	m_col	= XCOL_WHITE;		// 色
+	m_func	= D3DCMP_LESSEQUAL;	// Zテスト設定
+	m_bZEnable	= true;			// Zバッファの使用状況
+	m_bLight	= true;			// ライティング状況
 	m_nTextureID = NONE_IDX;	// テクスチャインデックス
 
 	if (UNUSED(m_pVtxBuff))
@@ -143,6 +152,13 @@ void CObject3D::Draw(void)
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 	CTexture *pTexture = CManager::GetTexture();						// テクスチャへのポインタ
 
+	// ライティングを設定する
+	pDevice->SetRenderState(D3DRS_LIGHTING, m_bLight);
+
+	// Zテストを設定する
+	pDevice->SetRenderState(D3DRS_ZFUNC, m_func);				// Zテストの設定
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, m_bZEnable);	// Zバッファ更新の有効 / 無効の設定
+
 	// ワールドマトリックスの初期化
 	D3DXMatrixIdentity(&m_mtxWorld);
 
@@ -168,12 +184,28 @@ void CObject3D::Draw(void)
 
 	// ポリゴンの描画
 	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+
+	// ライティングを有効にする
+	pDevice->SetRenderState(D3DRS_LIGHTING, true);
+
+	// Zテストを有効にする
+	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);	// Zテストの設定
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, true);		// Zバッファ更新の有効 / 無効の設定
 }
 
 //============================================================
 //	生成処理
 //============================================================
-CObject3D *CObject3D::Create(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, const D3DXVECTOR3& rRot, const D3DXCOLOR& rCol)
+CObject3D *CObject3D::Create
+(
+	const D3DXVECTOR3& rPos,	// 位置
+	const D3DXVECTOR3& rSize,	// 大きさ
+	const D3DXVECTOR3& rRot,	// 向き
+	const D3DXCOLOR& rCol,		// 色
+	const bool bLight,			// ライティング状況
+	const D3DCMPFUNC func,		// Zテスト設定
+	const bool bZEnable			// Zバッファの使用状況
+)
 {
 	// ポインタを宣言
 	CObject3D *pObject3D = NULL;	// オブジェクト3D生成用
@@ -212,6 +244,15 @@ CObject3D *CObject3D::Create(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, 
 
 		// 色を設定
 		pObject3D->SetColor(rCol);
+
+		// ライティングを設定
+		pObject3D->SetLighting(bLight);
+
+		// Zテストを設定
+		pObject3D->SetFunc(func);
+
+		// Zバッファの使用状況を設定
+		pObject3D->SetZEnable(bZEnable);
 
 		// 確保したアドレスを返す
 		return pObject3D;
@@ -282,6 +323,33 @@ void CObject3D::SetColor(const D3DXCOLOR& rCol)
 }
 
 //============================================================
+//	ライティング設定処理
+//============================================================
+void CObject3D::SetLighting(const bool bLight)
+{
+	// 引数のライティング状況を設定
+	m_bLight = bLight;
+}
+
+//============================================================
+//	Zテストの設定処理
+//============================================================
+void CObject3D::SetFunc(const D3DCMPFUNC func)
+{
+	// 引数のZテストの設定を設定
+	m_func = func;
+}
+
+//============================================================
+//	Zバッファの使用状況の設定処理
+//============================================================
+void CObject3D::SetZEnable(const bool bEnable)
+{
+	// 引数のZバッファの使用状況を設定
+	m_bZEnable = bEnable;
+}
+
+//============================================================
 //	頂点位置の設定処理
 //============================================================
 void CObject3D::SetVertexPosition(const int nID, const D3DXVECTOR3& rPos)
@@ -347,6 +415,33 @@ D3DXCOLOR CObject3D::GetColor(void) const
 {
 	// 色を返す
 	return m_col;
+}
+
+//============================================================
+//	ライティング取得処理
+//============================================================
+bool CObject3D::GetLighting(void) const
+{
+	// ライティング状況を返す
+	return m_bLight;
+}
+
+//============================================================
+//	Zテスト取得処理
+//============================================================
+D3DCMPFUNC CObject3D::GetFunc(void) const
+{
+	// Zテストの設定を返す
+	return m_func;
+}
+
+//============================================================
+//	Zバッファの使用状況取得処理
+//============================================================
+bool CObject3D::GetZEnable(void) const
+{
+	// Zバッファの使用状況を返す
+	return m_bZEnable;
 }
 
 //============================================================

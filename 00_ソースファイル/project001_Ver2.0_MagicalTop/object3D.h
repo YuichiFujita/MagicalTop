@@ -41,8 +41,11 @@ public:
 	( // 引数
 		const D3DXVECTOR3& rPos,	// 位置
 		const D3DXVECTOR3& rSize,	// 大きさ
-		const D3DXVECTOR3& rRot = VEC3_ZERO,	// 向き
-		const D3DXCOLOR& rCol = XCOL_WHITE		// 色
+		const D3DXVECTOR3& rRot = VEC3_ZERO,		// 向き
+		const D3DXCOLOR& rCol = XCOL_WHITE,			// 色
+		const bool bLight = true,					// ライティング状況
+		const D3DCMPFUNC func = D3DCMP_LESSEQUAL,	// Zテスト設定
+		const bool bZEnable = true					// Zバッファの使用状況
 	);
 
 	// メンバ関数
@@ -51,12 +54,18 @@ public:
 	void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
 	void SetScaling(const D3DXVECTOR3& rSize);	// 大きさ設定
 	void SetColor(const D3DXCOLOR& rCol);		// 色設定
+	void SetLighting(const bool bLight);		// ライティング設定
+	void SetFunc(const D3DCMPFUNC func);		// Zテスト設定
+	void SetZEnable(const bool bEnable);		// Zバッファの使用状況設定
 	void SetVertexPosition(const int nID, const D3DXVECTOR3& rPos);	// 頂点位置設定
 
 	D3DXVECTOR3 GetPosition(void) const;	// 位置取得
 	D3DXVECTOR3 GetRotation(void) const;	// 向き取得
 	D3DXVECTOR3 GetScaling(void) const;		// 大きさ取得
 	D3DXCOLOR GetColor(void) const;			// 色取得
+	bool GetLighting(void) const;			// ライティング取得
+	D3DCMPFUNC GetFunc(void) const;			// Zテスト取得
+	bool GetZEnable(void) const;			// Zバッファの使用状況取得
 	D3DXVECTOR3 GetVertexPosition(const int nID);		// 頂点位置取得
 	float GetPositionHeight(const D3DXVECTOR3&rPos);	// ポリゴンの着地取得
 
@@ -75,6 +84,9 @@ private:
 	D3DXVECTOR3	m_rot;	// 向き
 	D3DXVECTOR3	m_size;	// 大きさ
 	D3DXCOLOR	m_col;	// 色
+	D3DCMPFUNC	m_func;	// Zテスト設定
+	bool m_bZEnable;	// Zバッファの使用状況
+	bool m_bLight;		// ライティング状況
 	int m_nTextureID;	// テクスチャインデックス
 };
 
