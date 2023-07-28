@@ -15,7 +15,25 @@
 #include "objectGauge2D.h"
 #include "player.h"
 #include "enemy.h"
+#include "stage.h"
 #include "collision.h"
+
+//************************************************************
+//	マクロ定義
+//************************************************************
+#define MAX_MANA	(100)	// 最大マナ
+#define MANA_FRAME	(10)	// マナ変動フレーム
+
+#define GAUGE_POS		(D3DXVECTOR3(260.0f, 540.0f, 0.0f))	// 位置
+#define GAUGE_GAUGESIZE	(D3DXVECTOR3(200.0f, 30.0f, 0.0f))	// ゲージ大きさ
+#define GAUGE_FRONTCOL	(D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f))	// 表ゲージ色
+#define GAUGE_BACKCOL	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	// 裏ゲージ色
+
+#define HEAL_CNT	(120)	// 回復状態に移行するまでのカウンター
+#define NORMAL_CNT	(40)	// 通常状態に移行するまでのカウンター
+
+#define HEAL_SAFE_PLUS	(2)		// 回復状態移行カウンターのセーフエリア時の加算量
+#define HEALCNT_AREAMUL	(10)	// セーフエリア外での回復カウンター設定用係数
 
 //************************************************************
 //	親クラス [CMagicManager] のメンバ関数
@@ -27,8 +45,11 @@ CMagicManager::CMagicManager()
 {
 	// メンバ変数をクリア
 	memset(&m_apLockCursor[0], 0, sizeof(m_apLockCursor));	// ロックオン表示情報
-	m_pMana = NULL;	// マナの情報
+	m_pMana = NULL;						// マナの情報
 	m_magic = CMagic::TYPE_LV0_NORMAL;	// 魔法
+	m_state = STATE_NORMAL;				// 状態
+	m_nCounterState = 0;				// 状態管理カウンター
+	m_nCounterHeal = 0;					// 回復管理カウンター
 }
 
 //============================================================
@@ -46,8 +67,11 @@ HRESULT CMagicManager::Init(void)
 {
 	// メンバ変数を初期化
 	memset(&m_apLockCursor[0], 0, sizeof(m_apLockCursor));	// ロックオン表示情報
-	m_pMana = NULL;	// マナの情報
+	m_pMana = NULL;						// マナの情報
 	m_magic = CMagic::TYPE_LV0_NORMAL;	// 魔法
+	m_state = STATE_NORMAL;				// 状態
+	m_nCounterState = 0;				// 状態管理カウンター
+	m_nCounterHeal = 0;					// 回復管理カウンター
 
 	for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)
 	{ // ロックオンの最大数分繰り返す
@@ -63,16 +87,16 @@ HRESULT CMagicManager::Init(void)
 		}
 	}
 
-	// 体力の生成
-	m_pMana = CObjectGauge2D::Create	// TODO：定数, LABEL変更
+	// マナの生成
+	m_pMana = CObjectGauge2D::Create
 	( // 引数
-		CObject::LABEL_GAUGE,				// オブジェクトラベル
-		100,								// 最大体力
-		10,									// 体力変動フレーム
-		D3DXVECTOR3(260.0f, 540.0f, 0.0f),	// 位置
-		D3DXVECTOR3(200.0f, 30.0f, 0.0f),	// ゲージ大きさ
-		D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f),	// 表ゲージ色
-		D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 裏ゲージ色
+		CObject::LABEL_GAUGE,	// オブジェクトラベル
+		MAX_MANA,				// 最大マナ
+		MANA_FRAME,				// マナ変動フレーム
+		GAUGE_POS,				// 位置
+		GAUGE_GAUGESIZE,		// ゲージ大きさ
+		GAUGE_FRONTCOL,			// 表ゲージ色
+		GAUGE_BACKCOL			// 裏ゲージ色
 	);
 	if (UNUSED(m_pMana))
 	{ // 非使用中の場合
@@ -92,6 +116,99 @@ HRESULT CMagicManager::Init(void)
 void CMagicManager::Uninit(void)
 {
 
+}
+
+//============================================================
+//	更新処理
+//============================================================
+void CMagicManager::Update(void)
+{
+	switch (m_state)
+	{ // 状態ごとの処理
+	case STATE_NORMAL:	// 通常状態
+
+		if (m_nCounterState < HEAL_CNT)
+		{ // カウンターが一定値より小さい場合
+
+			if (CSceneGame::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
+			{ // セーフエリアにいる場合
+
+				// カウンターを加算
+				m_nCounterState += HEAL_SAFE_PLUS;
+			}
+			else
+			{ // セーフエリアにいない場合
+
+				// カウンターを加算
+				m_nCounterState++;
+			}
+		}
+		else
+		{ // カウンターが一定値以上の場合
+
+			// カウンターを初期化
+			m_nCounterState = 0;
+
+			// 状態を変更
+			m_state = STATE_HEAL;	// 回復状態
+		}
+
+		break;
+
+	case STATE_ATTACK:	// 攻撃状態
+
+		if (m_nCounterState < NORMAL_CNT)
+		{ // カウンターが一定値より小さい場合
+
+			// カウンターを加算
+			m_nCounterState++;
+		}
+		else
+		{ // カウンターが一定値以上の場合
+
+			// カウンターを初期化
+			m_nCounterState = 0;
+
+			// 状態を変更
+			m_state = STATE_NORMAL;	// 通常状態
+		}
+
+		break;
+
+	case STATE_HEAL:	// 回復状態
+
+		if (CSceneGame::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
+		{ // セーフエリアにいる場合
+
+			// マナを回復
+			m_pMana->AddNum(1);
+		}
+		else
+		{ // セーフエリアにいない場合
+
+			if (m_nCounterHeal < HEALCNT_AREAMUL * CSceneGame::GetStage()->GetAreaPlayer())
+			{ // カウンターが一定値より小さい場合
+
+				// カウンターを加算
+				m_nCounterHeal++;
+			}
+			else
+			{ // カウンターが一定値以上の場合
+
+				// カウンターを初期化
+				m_nCounterHeal = 0;
+
+				// マナを回復
+				m_pMana->AddNum(1);
+			}
+		}
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
 }
 
 //============================================================
@@ -305,8 +422,14 @@ bool CMagicManager::ShotMagic(void)
 			nNumShot++;
 		}
 
-		// マナを減算
+		// マナを消費
 		m_pMana->AddNum(-nNumShot);
+
+		// カウンターを初期化
+		m_nCounterState = 0;
+
+		// 状態を設定
+		m_state = STATE_ATTACK;	// 攻撃状態
 
 		// 発射した状態を返す
 		return true;

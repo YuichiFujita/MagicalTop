@@ -258,6 +258,9 @@ void CPlayer::Update(void)
 	// 向きを更新
 	SetRotation(rotPlayer);
 
+	// 魔法マネージャーの更新
+	m_pMagic->Update();
+
 	// 影の更新
 	m_pShadow->Update();
 

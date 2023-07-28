@@ -34,6 +34,15 @@ class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
 class CMagicManager
 {
 public:
+	// 状態列挙
+	typedef enum
+	{
+		STATE_NORMAL = 0,	// 通常状態
+		STATE_ATTACK,		// 攻撃状態
+		STATE_HEAL,			// 回復状態
+		STATE_MAX,			// この列挙型の総数
+	}STATE;
+
 	// コンストラクタ
 	CMagicManager();
 
@@ -50,6 +59,7 @@ public:
 	// メンバ関数
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
+	void Update(void);	// 更新
 	void LockOnMagic(const D3DXVECTOR3& rPos);	// 魔法ロックオン
 	bool ShotMagic(void);						// 魔法発射
 	void SetMagic(const CMagic::TYPE type);		// 魔法設定
@@ -68,6 +78,9 @@ private:
 	CLockCursor *m_apLockCursor[MAX_LOCK];	// ロックオン表示情報
 	CObjectGauge2D *m_pMana;	// マナの情報
 	CMagic::TYPE m_magic;		// 魔法
+	STATE m_state;				// 状態
+	int m_nCounterState;		// 状態管理カウンター
+	int m_nCounterHeal;			// 回復管理カウンター
 };
 
 #endif	// _MAGICMANAGER_H_
