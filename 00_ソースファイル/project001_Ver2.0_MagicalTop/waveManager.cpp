@@ -330,7 +330,7 @@ void CWaveManager::Update(void)
 	case STATE_END:		// 終了状態
 
 		// シーンの設定
-		CManager::SetMode(CScene::MODE_RESULT);	// リザルト画面
+		CManager::SetScene(CScene::MODE_RESULT);	// リザルト画面
 
 		// 処理を抜ける
 		return;
@@ -345,7 +345,7 @@ void CWaveManager::Update(void)
 	{ // プレイヤーが死亡状態、またはターゲットが破壊状態の場合
 
 		// シーンの設定
-		CManager::SetMode(CScene::MODE_RESULT);	// リザルト画面
+		CManager::SetScene(CScene::MODE_RESULT);	// リザルト画面
 
 		// 処理を抜ける
 		return;

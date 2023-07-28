@@ -28,6 +28,7 @@ class CCamera;			// カメラクラス
 class CLight;			// ライトクラス
 class CTexture;			// テクスチャクラス
 class CModel;			// モデルクラス
+class CFade;			// フェードクラス
 class CDebugProc;		// デバッグ表示クラス
 
 #ifdef _DEBUG	// デバッグ処理
@@ -58,6 +59,7 @@ public:
 	// 静的メンバ関数
 	static CManager *Create(HINSTANCE hInstance, HWND hWnd);	// 生成
 	static HRESULT Release(CManager *&prManager);				// 破棄
+	static void SetScene(const CScene::MODE mode);		// シーン設定
 	static HRESULT SetMode(const CScene::MODE mode);	// モード設定
 	static CScene::MODE GetMode(void);					// モード取得
 
@@ -70,6 +72,7 @@ public:
 	static CLight			*GetLight(void);		// ライト取得
 	static CTexture			*GetTexture(void);		// テクスチャ取得
 	static CModel			*GetModel(void);		// モデル取得
+	static CFade			*GetFade(void);			// フェード取得
 	static CScene			*GetScene(void);		// シーン取得
 	static CDebugProc		*GetDebugProc(void);	// デバッグ表示取得
 
@@ -91,6 +94,7 @@ private:
 	static CLight			*m_pLight;		// ライトオブジェクト
 	static CTexture			*m_pTexture;	// テクスチャオブジェクト
 	static CModel			*m_pModel;		// モデルオブジェクト
+	static CFade			*m_pFade;		// フェードオブジェクト
 	static CScene			*m_pScene;		// シーンオブジェクト
 	static CDebugProc		*m_pDebugProc;	// デバッグ表示オブジェクト
 

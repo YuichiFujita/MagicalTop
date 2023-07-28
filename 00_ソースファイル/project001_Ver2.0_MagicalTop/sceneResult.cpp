@@ -85,7 +85,7 @@ void CSceneResult::Update(void)
 	if (CManager::GetKeyboard()->GetTrigger(DIK_RETURN))
 	{
 		// シーンの設定
-		CManager::SetMode(MODE_TITLE);	// タイトル画面
+		CManager::SetScene(MODE_TITLE);	// タイトル画面
 	}
 }
 

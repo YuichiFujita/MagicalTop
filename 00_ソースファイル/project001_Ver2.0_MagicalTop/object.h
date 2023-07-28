@@ -108,6 +108,7 @@ public:
 	static void ReleaseAll(void);	// 全破棄
 	static void UpdateAll(void);	// 全更新
 	static void DrawAll(void);		// 全描画
+	static int GetNumAll(void);		// 総数取得
 	static bool CheckUse(const CObject *pObject);	// 使用確認
 	static CObject *GetTop(const int nPriority);	// 先頭オブジェクト取得
 	static CObject *GetCur(const int nPriority);	// 最後尾オブジェクト取得

@@ -13,6 +13,7 @@
 #include "sound.h"
 #include "camera.h"
 #include "light.h"
+#include "fade.h"
 #include "texture.h"
 #include "model.h"
 #include "value.h"
@@ -35,6 +36,7 @@ CCamera			*CManager::m_pCamera	= NULL;		// カメラオブジェクト
 CLight			*CManager::m_pLight		= NULL;		// ライトオブジェクト
 CTexture		*CManager::m_pTexture	= NULL;		// テクスチャオブジェクト
 CModel			*CManager::m_pModel		= NULL;		// モデルオブジェクト
+CFade			*CManager::m_pFade		= NULL;		// フェードオブジェクト
 CScene			*CManager::m_pScene		= NULL;		// シーンオブジェクト
 CDebugProc		*CManager::m_pDebugProc	= NULL;		// デバッグ表示オブジェクト
 
@@ -164,8 +166,15 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		return E_FAIL;
 	}
 
-	// シーンの設定
-	SetMode(CScene::MODE_TITLE);	// タイトル画面
+	// フェードの生成・シーンの設定
+	m_pFade = CFade::Create();
+	if (UNUSED(m_pFade))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	//--------------------------------------------------------
 	//	デバッグ用
@@ -261,6 +270,15 @@ HRESULT CManager::Uninit(void)
 		return E_FAIL;
 	}
 
+	// フェードの破棄
+	if (FAILED(CFade::Release(m_pFade)))
+	{ // 破棄に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// ライトの破棄
 	if (FAILED(CLight::Release(m_pLight)))
 	{ // 破棄に失敗した場合
@@ -318,6 +336,9 @@ HRESULT CManager::Uninit(void)
 	// オブジェクトの全破棄
 	CObject::ReleaseAll();
 
+	// 例外処理
+	assert(CObject::GetNumAll() == 0);	// 破棄の失敗
+
 	// レンダラーの破棄
 	if (FAILED(CRenderer::Release(m_pRenderer)))
 	{ // 破棄に失敗した場合
@@ -364,6 +385,14 @@ void CManager::Update(void)
 
 		// キーボードの更新
 		m_pKeyboard->Update();
+	}
+	else { assert(false); }	// 非使用中
+
+	if (USED(m_pFade))
+	{ // 使用中の場合
+
+		// フェードの更新
+		m_pFade->Update();
 	}
 	else { assert(false); }	// 非使用中
 
@@ -490,6 +519,15 @@ HRESULT CManager::Release(CManager *&prManager)
 		return S_OK;
 	}
 	else { assert(false); return E_FAIL; }	// 非使用中
+}
+
+//============================================================
+//	シーンの設定処理
+//============================================================
+void CManager::SetScene(const CScene::MODE mode)
+{
+	// 次のシーンを設定
+	m_pFade->Set(mode);
 }
 
 //============================================================
@@ -623,6 +661,15 @@ CModel *CManager::GetModel(void)
 {
 	// モデルのポインタを返す
 	return m_pModel;
+}
+
+//============================================================
+//	フェード取得処理
+//============================================================
+CFade *CManager::GetFade(void)
+{
+	// フェードのポインタを返す
+	return m_pFade;
 }
 
 //============================================================
