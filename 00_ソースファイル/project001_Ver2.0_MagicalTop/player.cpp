@@ -29,7 +29,6 @@
 //	マクロ定義
 //************************************************************
 #define PLAYER_SETUP_TXT	"data\\TXT\\player.txt"	// セットアップテキスト相対パス
-
 #define PLAY_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 
 #define MAX_MOVEX		(5.0f)	// 自動歩行時の速度割合用
@@ -50,21 +49,24 @@
 //************************************************************
 const char *CPlayer::mc_apModelFile[] =	// モデル定数
 {
-	"data\\MODEL\\PLAYER\\body.x",		// 体モデル
-	"data\\MODEL\\PLAYER\\head.x",		// 頭モデル
-	"data\\MODEL\\PLAYER\\sleeve_l.x",	// 左腕モデル
-	"data\\MODEL\\PLAYER\\sleeve_r.x",	// 右腕モデル
-	"data\\MODEL\\PLAYER\\wrist_l.x",	// 左手首モデル
-	"data\\MODEL\\PLAYER\\wrist_r.x",	// 右手首モデル
-	"data\\MODEL\\PLAYER\\hand_l.x",	// 左手モデル
-	"data\\MODEL\\PLAYER\\hand_r.x",	// 右手モデル
-	"data\\MODEL\\PLAYER\\pants_l.x",	// 左足モデル
-	"data\\MODEL\\PLAYER\\pants_r.x",	// 右足モデル
-	"data\\MODEL\\PLAYER\\leg_l.x",		// 左腿モデル
-	"data\\MODEL\\PLAYER\\leg_r.x",		// 右腿モデル
-	"data\\MODEL\\PLAYER\\shoes_l.x",	// 左靴モデル
-	"data\\MODEL\\PLAYER\\shoes_r.x",	// 右靴モデル
-	"data\\MODEL\\PLAYER\\knife.x",		// ナイフモデル
+	"data\\MODEL\\PLAYER\\00_waist.x",	// 腰
+	"data\\MODEL\\PLAYER\\01_body.x",	// 体
+	"data\\MODEL\\PLAYER\\02_cloak.x",	// マント
+	"data\\MODEL\\PLAYER\\03_head.x",	// 頭
+	"data\\MODEL\\PLAYER\\04_hat.x",	// 帽子
+	"data\\MODEL\\PLAYER\\05_armUL.x",	// 左上腕
+	"data\\MODEL\\PLAYER\\06_armUR.x",	// 右上腕
+	"data\\MODEL\\PLAYER\\07_armDL.x",	// 左下腕
+	"data\\MODEL\\PLAYER\\08_armDR.x",	// 右下腕
+	"data\\MODEL\\PLAYER\\09_handL.x",	// 左手
+	"data\\MODEL\\PLAYER\\10_handR.x",	// 右手
+	"data\\MODEL\\PLAYER\\11_legUL.x",	// 左太もも
+	"data\\MODEL\\PLAYER\\12_legUR.x",	// 右太もも
+	"data\\MODEL\\PLAYER\\13_legDL.x",	// 左脛
+	"data\\MODEL\\PLAYER\\14_legDR.x",	// 右脛
+	"data\\MODEL\\PLAYER\\15_footL.x",	// 左足
+	"data\\MODEL\\PLAYER\\16_footR.x",	// 右足
+	"data\\MODEL\\PLAYER\\17_rod.x",	// 杖
 };
 
 //************************************************************
