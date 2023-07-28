@@ -71,6 +71,7 @@ public:
 	);
 
 	// ƒƒ“ƒoŠÖ”
+	void AddLife(const int nAdd);	// ‘Ì—Í‰ÁZ
 	void SetEnableUpdate(const bool bUpdate);	// XVó‹µİ’è
 	void SetEnableDraw(const bool bDraw);		// •`‰æó‹µİ’è
 	int GetState(void) const;		// ó‘Ôæ“¾

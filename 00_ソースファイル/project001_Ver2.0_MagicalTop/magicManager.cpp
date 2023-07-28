@@ -14,6 +14,7 @@
 #include "lockCursor.h"
 #include "objectGauge2D.h"
 #include "player.h"
+#include "target.h"
 #include "enemy.h"
 #include "stage.h"
 #include "collision.h"
@@ -34,6 +35,7 @@
 
 #define HEAL_SAFE_PLUS	(2)		// 回復状態移行カウンターのセーフエリア時の加算量
 #define HEALCNT_AREAMUL	(10)	// セーフエリア外での回復カウンター設定用係数
+#define SUB_TARGLIFE	(-2)	// セーフエリアでマナ回復時のターゲットへのダメージ量
 
 //************************************************************
 //	親クラス [CMagicManager] のメンバ関数
@@ -180,8 +182,15 @@ void CMagicManager::Update(void)
 		if (CSceneGame::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
 		{ // セーフエリアにいる場合
 
-			// マナを回復
-			m_pMana->AddNum(1);
+			if (m_pMana->GetNum() < MAX_MANA)
+			{ // マナが減っている場合
+
+				// マナを回復
+				m_pMana->AddNum(1);
+
+				// ターゲットの体力を減算
+				CSceneGame::GetTarget()->AddLife(SUB_TARGLIFE);
+			}
 		}
 		else
 		{ // セーフエリアにいない場合
