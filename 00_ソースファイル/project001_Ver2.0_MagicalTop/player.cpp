@@ -17,6 +17,7 @@
 #include "collision.h"
 
 #include "magicManager.h"
+#include "expManager.h"
 #include "objectGauge2D.h"
 #include "shadow.h"
 #include "enemy.h"
@@ -79,6 +80,7 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 {
 	// メンバ変数をクリア
 	m_pMagic		= NULL;				// 魔法マネージャーの情報
+	m_pExp			= NULL;				// 経験値マネージャーの情報
 	m_pLife			= NULL;				// 体力の情報
 	m_pShadow		= NULL;				// 影の情報
 	m_oldPos		= VEC3_ZERO;		// 過去位置
@@ -107,6 +109,7 @@ HRESULT CPlayer::Init(void)
 {
 	// メンバ変数を初期化
 	m_pMagic		= NULL;				// 魔法マネージャーの情報
+	m_pExp			= NULL;				// 経験値マネージャーの情報
 	m_pLife			= NULL;				// 体力の情報
 	m_pShadow		= NULL;				// 影の情報
 	m_oldPos		= VEC3_ZERO;		// 過去位置
@@ -122,6 +125,16 @@ HRESULT CPlayer::Init(void)
 	// 魔法マネージャーの生成
 	m_pMagic = CMagicManager::Create();
 	if (UNUSED(m_pMagic))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 経験値マネージャーの生成
+	m_pExp = CExpManager::Create();
+	if (UNUSED(m_pExp))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -187,6 +200,14 @@ void CPlayer::Uninit(void)
 {
 	// 魔法マネージャーを破棄
 	if (FAILED(m_pMagic->Release(m_pMagic)))
+	{ // 破棄に失敗した場合
+
+		// 例外処理
+		assert(false);
+	}
+
+	// 経験値マネージャーを破棄
+	if (FAILED(m_pExp->Release(m_pExp)))
 	{ // 破棄に失敗した場合
 
 		// 例外処理
@@ -262,6 +283,9 @@ void CPlayer::Update(void)
 
 	// 魔法マネージャーの更新
 	m_pMagic->Update();
+
+	// 経験値マネージャーの更新
+	m_pExp->Update();
 
 	// 影の更新
 	m_pShadow->Update();
@@ -373,6 +397,15 @@ CPlayer *CPlayer::Create(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 		return pPlayer;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	経験値の加算処理
+//============================================================
+void CPlayer::AddExp(const int nAdd)
+{
+	// 経験値を加算
+	m_pExp->AddExp(nAdd);
 }
 
 //============================================================

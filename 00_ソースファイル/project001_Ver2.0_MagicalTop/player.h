@@ -26,6 +26,7 @@
 //	前方宣言
 //************************************************************
 class CMagicManager;	// 魔法マネージャークラス
+class CExpManager;		// 経験値マネージャークラス
 class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
 class CShadow;			// 影クラス
 
@@ -106,6 +107,7 @@ public:
 	);
 
 	// メンバ関数
+	void AddExp(const int nAdd);				// 経験値加算
 	void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
 	void SetEnableDraw(const bool bDraw);		// 描画状況設定
 	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
@@ -131,9 +133,11 @@ private:
 	static const char *mc_apModelFile[];	// モデル定数
 
 	// メンバ変数
-	CMagicManager *m_pMagic;	// 魔法マネージャーの情報
-	CObjectGauge2D *m_pLife;	// 体力の情報
-	CShadow		*m_pShadow;		// 影の情報
+	CMagicManager	*m_pMagic;	// 魔法マネージャーの情報
+	CExpManager		*m_pExp;	// 経験値マネージャーの情報
+	CObjectGauge2D	*m_pLife;	// 体力の情報
+	CShadow			*m_pShadow;	// 影の情報
+
 	D3DXVECTOR3	m_oldPos;		// 過去位置
 	D3DXVECTOR3	m_move;			// 移動量
 	D3DXVECTOR3	m_destRot;		// 目標向き

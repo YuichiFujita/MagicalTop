@@ -277,7 +277,8 @@ bool CExpOrb::CollisionPlayer(void)
 		if (bHit)
 		{ // 当たっていた場合
 
-			// TODO：プレイヤー経験値取得記述
+			// プレイヤーの経験値の加算
+			CSceneGame::GetPlayer()->AddExp(1);
 		}
 	}
 
