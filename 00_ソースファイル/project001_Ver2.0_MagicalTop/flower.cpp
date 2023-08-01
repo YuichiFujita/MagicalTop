@@ -241,7 +241,7 @@ CFlower *CFlower::Create
 }
 
 //============================================================
-//	マナフラワーランダム生成処理
+//	ランダム生成処理
 //============================================================
 void CFlower::RandomSpawn
 (
@@ -271,7 +271,7 @@ void CFlower::RandomSpawn
 
 			// 生成位置を補正
 			collision::CirclePillar(pos, pTarget->GetPosition(), rSize.x, pTarget->GetRadius());	// ターゲット内部の生成防止
-			CSceneGame::GetStage()->LimitPosition(pos, rSize.x);										// ステージ範囲外の生成防止
+			CSceneGame::GetStage()->LimitPosition(pos, rSize.x);									// ステージ範囲外の生成防止
 
 			// マナフラワーオブジェクトの生成
 			CFlower::Create(type, pos, rSize, nLife);

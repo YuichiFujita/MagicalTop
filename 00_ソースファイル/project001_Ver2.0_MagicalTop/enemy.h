@@ -81,6 +81,7 @@ public:
 		D3DXVECTOR3 bullPos;		// 弾の発射位置
 		int		nLife;				// 体力
 		int		nScore;				// スコア加算量
+		int		nExp;				// 経験値生成量
 		int		nCounterAttack;		// 攻撃頻度
 		int		nBullParts;			// 弾の発射パーツ
 		int		nBullLife;			// 弾の寿命
@@ -115,7 +116,7 @@ public:
 		const D3DXVECTOR3& rPos,	// 位置
 		const D3DXVECTOR3& rRot		// 向き
 	);
-	static void RandomSpawn	// 敵ランダム生成
+	static void RandomSpawn	// ランダム生成
 	( // 引数
 		const int nNum,	// 生成数
 		const TYPE type	// 種類

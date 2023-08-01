@@ -55,7 +55,7 @@ public:
 		const D3DXVECTOR3& rSize,	// 大きさ
 		const int nLife				// 体力
 	);
-	static void RandomSpawn	// マナフラワーランダム生成
+	static void RandomSpawn	// ランダム生成
 	( // 引数
 		const int nNum,				// 生成数
 		const TYPE type,			// 種類

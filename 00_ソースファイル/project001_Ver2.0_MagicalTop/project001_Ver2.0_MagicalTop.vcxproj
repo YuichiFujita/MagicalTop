@@ -163,6 +163,7 @@
     <ClCompile Include="effect2D.cpp" />
     <ClCompile Include="effect3D.cpp" />
     <ClCompile Include="enemy.cpp" />
+    <ClCompile Include="expOrb.cpp" />
     <ClCompile Include="fade.cpp" />
     <ClCompile Include="field.cpp" />
     <ClCompile Include="flower.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="effect2D.h" />
     <ClInclude Include="effect3D.h" />
     <ClInclude Include="enemy.h" />
+    <ClInclude Include="expOrb.h" />
     <ClInclude Include="fade.h" />
     <ClInclude Include="field.h" />
     <ClInclude Include="flower.h" />

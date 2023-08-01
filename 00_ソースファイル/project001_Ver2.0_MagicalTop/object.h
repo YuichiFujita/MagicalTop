@@ -62,6 +62,7 @@ public:
 		LABEL_MAGIC,		// 魔法
 		LABEL_LOCK,			// ロックオン
 		LABEL_GAUGE,		// ゲージ
+		LABEL_EXP,			// 経験値
 		LABEL_BULLET,		// 弾
 		LABEL_FLOWER,		// マナフラワー
 		LABEL_FIELD,		// 地面

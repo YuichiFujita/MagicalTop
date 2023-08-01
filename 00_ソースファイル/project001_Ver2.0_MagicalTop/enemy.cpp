@@ -19,6 +19,7 @@
 #include "collision.h"
 #include "player.h"
 #include "target.h"
+#include "expOrb.h"
 #include "bullet.h"
 #include "stage.h"
 #include "score.h"
@@ -244,6 +245,9 @@ void CEnemy::Hit(const int nDmg)
 			// スコアを加算
 			CSceneGame::GetScore()->Add(m_status.nScore);
 
+			// 経験値のランダム生成
+			CExpOrb::RandomSpawn(m_status.nExp, pos);
+
 			// 敵オブジェクトの終了
 			Uninit();
 		}
@@ -306,7 +310,7 @@ CEnemy *CEnemy::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVECTO
 }
 
 //============================================================
-//	敵ランダム生成処理
+//	ランダム生成処理
 //============================================================
 void CEnemy::RandomSpawn
 (
@@ -1345,6 +1349,12 @@ void CEnemy::LoadSetup(void)
 
 								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
 								fscanf(pFile, "%d", &m_aStatusInfo[nType].nScore);	// スコア加算量を読み込む
+							}
+							else if (strcmp(&aString[0], "EXP") == 0)
+							{ // 読み込んだ文字列が EXP の場合
+
+								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nType].nExp);	// 経験値生成量を読み込む
 							}
 							else if (strcmp(&aString[0], "RADIUS") == 0)
 							{ // 読み込んだ文字列が RADIUS の場合
