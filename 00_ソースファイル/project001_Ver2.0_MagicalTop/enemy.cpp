@@ -30,12 +30,17 @@
 //************************************************************
 #define ENEMY_SETUP_TXT	"data\\TXT\\enemy.txt"	// セットアップテキスト相対パス
 
-#define ENE_REV		(0.02f)	// プレイヤー移動量の減衰係数
-#define ENE_GRAVITY	(1.0f)	// プレイヤー重力
-
-#define ENE_DMG_FRAME	(20)	// 敵のダメージ状態フレーム
-
+// 敵全体マクロ
+#define ENE_SPAWN_POSY		(3000.0f)	// スポーンするY座標
+#define ENE_REV				(0.02f)		// プレイヤー移動量の減衰係数
+#define ENE_GRAVITY			(1.0f)		// プレイヤー重力
+#define ENE_DMG_FRAME		(20)		// 敵のダメージ状態フレーム
 #define ENE_WAR_ADD_POSY	(100.0f)	// 警告表示位置 yの加算量
+#define ENE_BULL_LIMIT_Y	(0.1f)		// 弾の移動方向の制限値
+
+// 戦車敵マクロ
+#define ENECAR_REV_MUL		(0.03f)	// 主砲の向き補正値
+#define ENECAR_SHOTRANGE	(0.25f)	// 主砲射撃時の許容される向きの誤差量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -328,7 +333,7 @@ void CEnemy::RandomSpawn
 
 			// 生成位置を設定
 			pos.x = (float)(rand() % (nLimit * 2) - nLimit + 1);
-			pos.y = 3000.0f;	// TODO：定数直す
+			pos.y = ENE_SPAWN_POSY;
 			pos.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
 
 			// 生成向きを設定
@@ -539,6 +544,7 @@ void CEnemy::CollisionFind(void)
 	D3DXVECTOR3 posEnemy = GetPosition();	// 敵位置
 	D3DXVECTOR3 rotEnemy = GetRotation();	// 敵向き
 	float fPlayerRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
+	float fLookRadius;	// 視認対象半径
 
 	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))	// TODO：GETPLAYER
 	{ // プレイヤー・ターゲットが使用されている場合
@@ -549,12 +555,18 @@ void CEnemy::CollisionFind(void)
 
 			// 視認対象位置を設定
 			posLook = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+
+			// 視認対象半径を設定
+			fLookRadius = CSceneGame::GetTarget()->GetRadius();	// ターゲット半径
 		}
 		else
 		{ // 敵の検知範囲内の場合
 
 			// 視認対象位置を設定
 			posLook = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+
+			// 視認対象半径を設定
+			fLookRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
 		}
 
 		// 対象の方向を向かせる
@@ -585,7 +597,7 @@ void CEnemy::CollisionFind(void)
 			}
 
 			// 攻撃
-			Attack(posLook);
+			Attack(posLook, posEnemy, fLookRadius);
 		}
 	}
 
@@ -620,7 +632,7 @@ void CEnemy::Look(const D3DXVECTOR3& rPosLook, const D3DXVECTOR3& rPosEnemy, D3D
 //============================================================
 //	攻撃処理
 //============================================================
-void CEnemy::Attack(const D3DXVECTOR3& rTarget)
+void CEnemy::Attack(const D3DXVECTOR3& rLookPos, const D3DXVECTOR3& rThisPos, const float fLookRadius)
 {
 	// カウンターを加算
 	m_nCounterAtk++;
@@ -647,28 +659,32 @@ void CEnemy::Attack(const D3DXVECTOR3& rTarget)
 		posBull = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
 
 		// 弾の移動方向を求める
-		vecBull = rTarget - posBull;
-		D3DXVec3Normalize(&vecBull, &vecBull);		// 移動方向を正規化
-		useful::LimitNum(vecBull.y, -0.1f, 0.1f);	// 移動方向 yを制限	// TODO：定数マクロ化	// TODO：内側はいられたとき売っちゃうの防止
+		vecBull = rLookPos - posBull;
+		D3DXVec3Normalize(&vecBull, &vecBull);								// 移動方向を正規化
+		useful::LimitNum(vecBull.y, -ENE_BULL_LIMIT_Y, ENE_BULL_LIMIT_Y);	// 移動方向Yを制限
 
-		// 弾オブジェクトの生成
-		CBullet::Create
-		( // 引数
-			CBullet::TYPE_ENEMY,			// 種類
-			posBull,						// 位置
-			VEC3_ALL(m_status.fBullRadius),	// 大きさ
-			XCOL_WHITE,						// 色
-			vecBull,						// 移動方向
-			m_status.fBullMove,				// 移動速度
-			m_status.nBullLife,				// 寿命
-			m_status.nBullDamage			// 攻撃力
-		);
+		if (!collision::Circle2D(rThisPos, rLookPos, m_status.fRadius, fLookRadius))
+		{ // 発射位置より内側に標的が入っていない場合
 
-		// パーティクル3Dオブジェクトの生成
-		CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posBull);
+			// 弾オブジェクトの生成
+			CBullet::Create
+			( // 引数
+				CBullet::TYPE_ENEMY,			// 種類
+				posBull,						// 位置
+				VEC3_ALL(m_status.fBullRadius),	// 大きさ
+				XCOL_WHITE,						// 色
+				vecBull,						// 移動方向
+				m_status.fBullMove,				// 移動速度
+				m_status.nBullLife,				// 寿命
+				m_status.nBullDamage			// 攻撃力
+			);
 
-		// カウンターを初期化
-		m_nCounterAtk = 0;
+			// パーティクル3Dオブジェクトの生成
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posBull);
+
+			// カウンターを初期化
+			m_nCounterAtk = 0;
+		}
 	}
 }
 
@@ -1023,6 +1039,7 @@ void CEnemyCar::CollisionFind(void)
 	D3DXVECTOR3 rotEnemy	= GetRotation();		// 敵向き
 	D3DXVECTOR3 posLook		= VEC3_ZERO;			// 視認対象位置
 	D3DXVECTOR3 rotCannon	= VEC3_ZERO;			// キャノン向き
+	float fLookRadius		= 0.0f;					// 視認対象半径
 	float fPlayerRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
 
 	// 過去位置の更新
@@ -1037,12 +1054,18 @@ void CEnemyCar::CollisionFind(void)
 
 			// 視認対象位置を設定
 			posLook = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+
+			// 視認対象半径を設定
+			fLookRadius = CSceneGame::GetTarget()->GetRadius();	// ターゲット半径
 		}
 		else
 		{ // 敵の検知範囲内の場合
 
 			// 視認対象位置を設定
 			posLook = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+
+			// 視認対象半径を設定
+			fLookRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
 		}
 
 		// 視認対象の攻撃判定
@@ -1119,7 +1142,7 @@ void CEnemyCar::CollisionFind(void)
 			{ // 発射可能状態の場合
 
 				// 攻撃
-				Attack(posLook);
+				Attack(posLook, posEnemy, fLookRadius);
 			}
 		}
 	}
@@ -1157,14 +1180,14 @@ bool CEnemyCar::SetRotationCannon(const D3DXVECTOR3& rLookPos, const D3DXVECTOR3
 	useful::NormalizeRot(fDiffRot);		// 差分向きの正規化
 
 	// 向きの更新
-	cannonRot.y += fDiffRot * 0.03f;	// TODO：cannonの向き補正値作る
+	cannonRot.y += fDiffRot * ENECAR_REV_MUL;
 	useful::NormalizeRot(cannonRot.y);	// キャノン向きの正規化
 
 	// 向きを設定
 	GetMultiModel(MODEL_CANNON)->SetRotation(cannonRot - rEnemyRot);	// 本体の向きを減算
 
-	if (fDestRot + D3DX_PI <= cannonRot.y + D3DX_PI + 0.25f
-	&&  fDestRot + D3DX_PI >= cannonRot.y + D3DX_PI - 0.25f)	// TODO：cannonの誤差ステータス作る
+	if (fDestRot + D3DX_PI <= cannonRot.y + D3DX_PI + ENECAR_SHOTRANGE
+	&&  fDestRot + D3DX_PI >= cannonRot.y + D3DX_PI - ENECAR_SHOTRANGE)
 	{ // 主砲向きと目標向きの誤差が少ない場合
 
 		// 発射可能状態を返す

@@ -13,6 +13,7 @@
 #include "object.h"
 #include "lockCursor.h"
 #include "objectGauge2D.h"
+#include "multiModel.h"
 #include "player.h"
 #include "target.h"
 #include "enemy.h"
@@ -371,8 +372,12 @@ bool CMagicManager::ShotMagic(void)
 	// 変数を宣言
 	D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 rotPlayer = CSceneGame::GetPlayer()->GetRotation();	// プレイヤー向き
+	CMagic::StatusInfo status = CMagic::GetStatusInfo(m_magic);		// 魔法ステータス
 	int nNumShot = 0;	// 発射数
 	bool bLock = false;	// ロックオン状況
+
+	// ポインタを宣言
+	CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤーの情報
 
 	if (m_pMana->GetNum() > 0)
 	{ // マナがある場合
@@ -384,8 +389,24 @@ bool CMagicManager::ShotMagic(void)
 			{ // ロックオンしていた場合
 
 				// 変数を宣言
-				D3DXVECTOR3 magicPos = D3DXVECTOR3(posPlayer.x, posPlayer.y + PLAY_MAGIC_POS_PLUS_Y, posPlayer.z);	// 発射位置
-				D3DXVECTOR3 vecMove = m_apLockCursor[nCntLock]->GetLockObject()->GetPosition() - posPlayer;			// 移動方向
+				D3DXVECTOR3 magicPos, vecMove;	// 発射位置・移動方向
+				D3DXMATRIX  mtxTrans, mtxWorld;	// 計算用マトリックス
+
+				// ワールドマトリックスの初期化
+				D3DXMatrixIdentity(&mtxWorld);
+
+				// 位置を反映
+				D3DXMatrixTranslation(&mtxTrans, status.shotPos.x, status.shotPos.y, status.shotPos.z);
+				D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+
+				// マトリックスを掛け合わせる
+				D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &pPlayer->GetMultiModel(status.nShotParts)->GetMtxWorld());
+
+				// マトリックスから発射位置を求める
+				magicPos = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
+
+				// 移動方向を求める
+				vecMove = m_apLockCursor[nCntLock]->GetLockObject()->GetPosition() - magicPos;
 
 				// 魔法オブジェクトの生成
 				CMagic::Create
@@ -408,9 +429,22 @@ bool CMagicManager::ShotMagic(void)
 		{ // ロックオンされていなかった場合
 
 			// 変数を宣言
-			D3DXVECTOR3 magicPos = D3DXVECTOR3(posPlayer.x, posPlayer.y + PLAY_MAGIC_POS_PLUS_Y, posPlayer.z);	// 発射位置
-			D3DXVECTOR3 vecMove;					// 移動方向
+			D3DXVECTOR3 magicPos, vecMove;			// 発射位置・移動方向
+			D3DXMATRIX  mtxTrans, mtxWorld;			// 計算用マトリックス
 			float fRotVec = rotPlayer.y + D3DX_PI;	// 発射方向
+
+			// ワールドマトリックスの初期化
+			D3DXMatrixIdentity(&mtxWorld);
+
+			// 位置を反映
+			D3DXMatrixTranslation(&mtxTrans, status.shotPos.x, status.shotPos.y, status.shotPos.z);
+			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+
+			// マトリックスを掛け合わせる
+			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &pPlayer->GetMultiModel(status.nShotParts)->GetMtxWorld());
+
+			// マトリックスから発射位置を求める
+			magicPos = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
 
 			// 向きを正規化
 			useful::NormalizeRot(fRotVec);

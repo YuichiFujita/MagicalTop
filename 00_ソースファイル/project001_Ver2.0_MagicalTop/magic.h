@@ -43,6 +43,8 @@ public:
 	// ステータス構造体
 	typedef struct
 	{
+		D3DXVECTOR3 shotPos;	// 発射位置
+		int		nShotParts;		// 発射パーツ
 		int		nLock;			// ロックオン数
 		int		nLife;			// 寿命
 		int		nDamage;		// 攻撃力

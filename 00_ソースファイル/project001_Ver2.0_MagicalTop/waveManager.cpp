@@ -633,8 +633,6 @@ void CWaveManager::UpdateProgression(void)
 
 			// 敵の種類ごとに敵をランダムスポーンさせる
 			CEnemy::RandomSpawn(m_aWaveInfo[m_nSeason].pWave[m_nWave].pPoint[m_nPoint].aNumSpawn[nCntType], (CEnemy::TYPE)nCntType);
-
-			// TODO：敵上空にいてもロックオンできちゃう → 敵にSPAWNSTATE作る
 		}
 
 		// 余韻管理カウンターを設定

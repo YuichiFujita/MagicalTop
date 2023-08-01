@@ -152,7 +152,7 @@ protected:
 		D3DXVECTOR3& rRotEnemy			// 敵向き
 	);
 
-	void Attack(const D3DXVECTOR3& rTarget);			// 攻撃
+	void Attack(const D3DXVECTOR3& rLookPos, const D3DXVECTOR3& rThisPos, const float fLookRadius);	// 攻撃
 	void CollisionTarget(D3DXVECTOR3& rPos);			// ターゲットとの当たり判定
 	void CollisionSpawnEnemy(D3DXVECTOR3& rPos);		// スポーン時の敵との当たり判定
 	void CollisionNormalEnemy(D3DXVECTOR3& rPos);		// 通常時の敵との当たり判定

@@ -558,6 +558,20 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].fViewRadius);	// 視界範囲を読み込む
 							}
+							else if (strcmp(&aString[0], "SHOT_PARTS") == 0)
+							{ // 読み込んだ文字列が SHOT_PARTS の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nType].nShotParts);	// 発射パーツを読み込む
+							}
+							else if (strcmp(&aString[0], "SHOT_POS") == 0)
+							{ // 読み込んだ文字列が SHOT_POS の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].shotPos.x);	// 発射位置Xを読み込む
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].shotPos.y);	// 発射位置Yを読み込む
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].shotPos.z);	// 発射位置Zを読み込む
+							}
 							else if (strcmp(&aString[0], "HOMING_ENABLE") == 0)
 							{ // 読み込んだ文字列が HOMING_ENABLE の場合
 
