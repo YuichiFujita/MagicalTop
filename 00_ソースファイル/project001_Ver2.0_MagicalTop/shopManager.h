@@ -30,7 +30,8 @@ public:
 	// テクスチャ列挙
 	enum TEXTURE
 	{
-		TEXTURE_NORMAL = 0,	// 通常テクスチャ
+		TEXTURE_TARGET = 0,	// ターゲットアイコンテクスチャ
+		TEXTURE_EXP,		// 経験値アイコンテクスチャ
 		TEXTURE_MAX,		// この列挙型の総数
 	};
 
@@ -55,7 +56,9 @@ private:
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 
 	// メンバ変数
-	CObject2D *m_pBg;	// 背景情報
+	CObject2D *m_pBg;			// 背景情報
+	CObject2D *m_pIconTarget;	// ターゲットアイコン情報
+	CObject2D *m_pIconExp;		// 経験値アイコン情報
 };
 
 #endif	// _SHOPMANAGER_H_

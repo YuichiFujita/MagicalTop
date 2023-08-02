@@ -20,7 +20,8 @@
 //************************************************************
 const char *CShopManager::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\option000.png",	// 通常テクスチャ
+	"data\\TEXTURE\\icon000.png",	// ターゲットアイコンテクスチャ
+	"data\\TEXTURE\\icon001.png",	// 経験値アイコンテクスチャ
 };
 
 //************************************************************
@@ -48,6 +49,9 @@ CShopManager::~CShopManager()
 //============================================================
 HRESULT CShopManager::Init(void)
 {
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャ
+
 	// メンバ変数を初期化
 	m_pBg = NULL;	// 背景情報
 
@@ -57,7 +61,7 @@ HRESULT CShopManager::Init(void)
 		D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f),
 		D3DXVECTOR3(SCREEN_WIDTH * 0.85f, SCREEN_HEIGHT * 0.78f, 0.0f),
 		VEC3_ZERO,
-		D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.55f)
+		D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.55f)
 	);
 	if (UNUSED(m_pBg))
 	{ // 非使用中の場合
@@ -73,6 +77,52 @@ HRESULT CShopManager::Init(void)
 	// 描画をしない状態にする
 	m_pBg->SetEnableDraw(false);
 
+	// ターゲットアイコン情報の生成
+	m_pIconTarget = CObject2D::Create	// TODO：定数
+	( // 引数
+		D3DXVECTOR3(180.0f, 160.0f, 0.0f),
+		D3DXVECTOR3(120.0f, 120.0f, 0.0f)
+	);
+	if (UNUSED(m_pIconTarget))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// テクスチャを設定
+	m_pIconTarget->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_TARGET]));
+
+	// 優先順位を設定
+	m_pIconTarget->SetPriority(6);
+
+	// 描画をしない状態にする
+	m_pIconTarget->SetEnableDraw(false);
+
+	// 経験値アイコン情報の生成
+	m_pIconExp = CObject2D::Create	// TODO：定数
+	( // 引数
+		D3DXVECTOR3(700.0f, 160.0f, 0.0f),
+		D3DXVECTOR3(120.0f, 120.0f, 0.0f)
+	);
+	if (UNUSED(m_pIconExp))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// テクスチャを設定
+	m_pIconExp->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_EXP]));
+
+	// 優先順位を設定
+	m_pIconExp->SetPriority(6);
+
+	// 描画をしない状態にする
+	m_pIconExp->SetEnableDraw(false);
+
 	// 成功を返す
 	return S_OK;
 }
@@ -82,8 +132,10 @@ HRESULT CShopManager::Init(void)
 //============================================================
 void CShopManager::Uninit(void)
 {
-	// 背景情報を破棄
+	// オブジェクト2D情報を破棄
 	m_pBg->Uninit();
+	m_pIconTarget->Uninit();
+	m_pIconExp->Uninit();
 }
 
 //============================================================
@@ -92,12 +144,13 @@ void CShopManager::Uninit(void)
 void CShopManager::Update(void)
 {
 	// ポインタを宣言
-	CTexture		*pTexture	= CManager::GetTexture();	// テクスチャ
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
-	// 背景情報の更新
+	// オブジェクト2D情報の更新
 	m_pBg->Update();
+	m_pIconTarget->Update();
+	m_pIconExp->Update();
 }
 
 //============================================================
@@ -106,7 +159,9 @@ void CShopManager::Update(void)
 void CShopManager::SetEnableDraw(const bool bDraw)
 {
 	// 引数の描画状況を設定
-	m_pBg->SetEnableDraw(bDraw);	// 背景情報
+	m_pBg->SetEnableDraw(bDraw);			// 背景情報
+	m_pIconTarget->SetEnableDraw(bDraw);	// ターゲットアイコン情報
+	m_pIconExp->SetEnableDraw(bDraw);		// 経験値アイコン情報
 }
 
 //============================================================
