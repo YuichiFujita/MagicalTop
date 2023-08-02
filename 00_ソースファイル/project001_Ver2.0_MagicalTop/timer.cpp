@@ -34,7 +34,7 @@
 //============================================================
 //	コンストラクタ
 //============================================================
-CTimer::CTimer() : CObject(CObject::LABEL_TIMER, DEFAULT_PRIO)
+CTimer::CTimer() : CObject(CObject::LABEL_NUMBER, DEFAULT_PRIO)
 {
 	// メンバ変数をクリア
 	memset(&m_apValue[0], 0, sizeof(m_apValue));	// 数値の情報

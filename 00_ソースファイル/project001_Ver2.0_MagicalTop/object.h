@@ -62,6 +62,7 @@ public:
 		LABEL_MAGIC,		// 魔法
 		LABEL_LOCK,			// ロックオン
 		LABEL_GAUGE,		// ゲージ
+		LABEL_NUMBER,		// 数字
 		LABEL_EXP,			// 経験値
 		LABEL_BULLET,		// 弾
 		LABEL_FLOWER,		// マナフラワー
@@ -70,8 +71,6 @@ public:
 		LABEL_SCENERY,		// 景色
 		LABEL_SKY,			// 空
 		LABEL_SEA,			// 海
-		LABEL_SCORE,		// スコア
-		LABEL_TIMER,		// タイマー
 		LABEL_EFFECT2D,		// エフェクト
 		LABEL_PARTICLE2D,	// パーティクル
 		LABEL_EFFECT3D,		// エフェクト

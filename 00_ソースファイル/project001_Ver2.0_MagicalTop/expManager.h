@@ -19,6 +19,7 @@
 //	前方宣言
 //************************************************************
 class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
+class CMultiValue;		// マルチ数字クラス
 
 //************************************************************
 //	クラス定義
@@ -46,7 +47,7 @@ public:
 private:
 	// メンバ変数
 	CObjectGauge2D *m_pExp;	// 経験値の情報
-	int m_nLevel;	// レベル
+	CMultiValue *m_pLevel;	// レベルの情報
 };
 
 #endif	// _EXPMANAGER_H_

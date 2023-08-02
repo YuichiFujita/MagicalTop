@@ -13,6 +13,7 @@
 #include "object.h"
 #include "lockCursor.h"
 #include "objectGauge2D.h"
+#include "multiValue.h"
 #include "multiModel.h"
 #include "player.h"
 #include "target.h"
@@ -40,8 +41,8 @@
 CExpManager::CExpManager()
 {
 	// メンバ変数をクリア
-	m_pExp = NULL;	// 経験値の情報
-	m_nLevel = 0;	// レベル
+	m_pExp = NULL;		// 経験値の情報
+	m_pLevel = NULL;	// レベルの情報
 }
 
 //============================================================
@@ -58,8 +59,8 @@ CExpManager::~CExpManager()
 HRESULT CExpManager::Init(void)
 {
 	// メンバ変数を初期化
-	m_pExp = NULL;	// 経験値の情報
-	m_nLevel = 0;	// レベル
+	m_pExp = NULL;		// 経験値の情報
+	m_pLevel = NULL;	// レベルの情報
 
 	// 経験値の生成
 	m_pExp = CObjectGauge2D::Create
@@ -82,6 +83,23 @@ HRESULT CExpManager::Init(void)
 
 	// ゲージの設定
 	m_pExp->SetNum(0);
+
+	// レベルの生成
+	m_pLevel = CMultiValue::Create	// TODO：定数
+	( // 引数
+		0,
+		2,
+		D3DXVECTOR3(90.0f, 440.0f, 0.0f),
+		D3DXVECTOR3(50.0f, 60.0f, 0.0f),
+		D3DXVECTOR3(55.0f, 0.0f, 0.0f)
+	);
+	if (UNUSED(m_pLevel))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// 成功を返す
 	return S_OK;
@@ -115,7 +133,7 @@ void CExpManager::AddExp(const int nAdd)
 	{ // 経験値がオーバーする場合
 
 		// レベルを加算
-		m_nLevel++;
+		m_pLevel->AddNum(1);
 
 		// 経験値のあまりを設定
 		m_pExp->SetNum((nCurrentExp + nAdd) - MAX_EXP);

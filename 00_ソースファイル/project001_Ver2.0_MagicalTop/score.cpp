@@ -28,7 +28,7 @@
 //============================================================
 //	コンストラクタ
 //============================================================
-CScore::CScore() : CObject(CObject::LABEL_SCORE, DEFAULT_PRIO)
+CScore::CScore() : CObject(CObject::LABEL_NUMBER, DEFAULT_PRIO)
 {
 	// メンバ変数をクリア
 	memset(&m_apValue[0], 0, sizeof(m_apValue));	// 数値の情報
