@@ -8,29 +8,24 @@
 //	インクルードファイル
 //************************************************************
 #include "expManager.h"
-#include "manager.h"
-#include "sceneGame.h"
-#include "object.h"
-#include "lockCursor.h"
 #include "objectGauge2D.h"
 #include "multiValue.h"
-#include "multiModel.h"
-#include "player.h"
-#include "target.h"
-#include "enemy.h"
-#include "stage.h"
-#include "collision.h"
 
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define MAX_EXP		(100)	// 最大経験値
-#define EXP_FRAME	(10)	// 経験値変動フレーム
-
+#define MAX_EXP			(100)	// 最大経験値
+#define EXP_FRAME		(10)	// 経験値変動フレーム
 #define GAUGE_POS		(D3DXVECTOR3(260.0f, 440.0f, 0.0f))	// 位置
 #define GAUGE_GAUGESIZE	(D3DXVECTOR3(200.0f, 30.0f, 0.0f))	// ゲージ大きさ
 #define GAUGE_FRONTCOL	(D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f))	// 表ゲージ色
 #define GAUGE_BACKCOL	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	// 裏ゲージ色
+
+#define FIRST_LV	(0)	// レベル初期値
+#define LV_DIGIT	(2)	// レベル桁数
+#define LV_POS		(D3DXVECTOR3(90.0f, 440.0f, 0.0f))	// 位置
+#define LV_SIZE		(D3DXVECTOR3(50.0f, 60.0f, 0.0f))	// 数値大きさ
+#define LV_SPACE	(D3DXVECTOR3(55.0f, 0.0f, 0.0f))	// 行間
 
 //************************************************************
 //	親クラス [CExpManager] のメンバ関数
@@ -85,13 +80,13 @@ HRESULT CExpManager::Init(void)
 	m_pExp->SetNum(0);
 
 	// レベルの生成
-	m_pLevel = CMultiValue::Create	// TODO：定数
+	m_pLevel = CMultiValue::Create
 	( // 引数
-		0,
-		2,
-		D3DXVECTOR3(90.0f, 440.0f, 0.0f),
-		D3DXVECTOR3(50.0f, 60.0f, 0.0f),
-		D3DXVECTOR3(55.0f, 0.0f, 0.0f)
+		FIRST_LV,	// レベル初期値
+		LV_DIGIT,	// レベル桁数
+		LV_POS,		// 位置
+		LV_SIZE,	// 数値大きさ
+		LV_SPACE	// 行間
 	);
 	if (UNUSED(m_pLevel))
 	{ // 非使用中の場合

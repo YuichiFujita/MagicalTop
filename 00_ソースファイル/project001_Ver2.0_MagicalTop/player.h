@@ -27,6 +27,7 @@
 //************************************************************
 class CMagicManager;	// 魔法マネージャークラス
 class CExpManager;		// 経験値マネージャークラス
+class CLevelupManager;	// 強化マネージャークラス
 class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
 class CShadow;			// 影クラス
 
@@ -133,20 +134,21 @@ private:
 	static const char *mc_apModelFile[];	// モデル定数
 
 	// メンバ変数
-	CMagicManager	*m_pMagic;	// 魔法マネージャーの情報
-	CExpManager		*m_pExp;	// 経験値マネージャーの情報
-	CObjectGauge2D	*m_pLife;	// 体力の情報
-	CShadow			*m_pShadow;	// 影の情報
+	CMagicManager	*m_pMagic;		// 魔法マネージャーの情報
+	CExpManager		*m_pExp;		// 経験値マネージャーの情報
+	CLevelupManager	*m_pLevelup;	// 強化マネージャーの情報
+	CObjectGauge2D	*m_pLife;		// 体力の情報
+	CShadow			*m_pShadow;		// 影の情報
 
-	D3DXVECTOR3	m_oldPos;		// 過去位置
-	D3DXVECTOR3	m_move;			// 移動量
-	D3DXVECTOR3	m_destRot;		// 目標向き
-	ROTATION m_rotation;		// 回転方向
-	STATE m_state;				// 状態
-	int   m_nCounterState;		// 状態管理カウンター
-	int   m_nNumModel;			// パーツの総数
-	float m_fDisTarget;			// ターゲットとの距離
-	bool  m_bJump;				// ジャンプ状況
+	D3DXVECTOR3	m_oldPos;	// 過去位置
+	D3DXVECTOR3	m_move;		// 移動量
+	D3DXVECTOR3	m_destRot;	// 目標向き
+	ROTATION m_rotation;	// 回転方向
+	STATE m_state;			// 状態
+	int   m_nCounterState;	// 状態管理カウンター
+	int   m_nNumModel;		// パーツの総数
+	float m_fDisTarget;		// ターゲットとの距離
+	bool  m_bJump;			// ジャンプ状況
 };
 
 #endif	// _PLAYER_H_
