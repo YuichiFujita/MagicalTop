@@ -12,19 +12,9 @@
 #include "input.h"
 #include "texture.h"
 #include "sceneGame.h"
+#include "shopManager.h"
 #include "object2D.h"
 #include "stage.h"
-
-//************************************************************
-//	マクロ定義
-//************************************************************
-#define MAX_EXP		(100)	// 最大強化
-#define EXP_FRAME	(10)	// 強化変動フレーム
-
-#define GAUGE_POS		(D3DXVECTOR3(260.0f, 440.0f, 0.0f))	// 位置
-#define GAUGE_GAUGESIZE	(D3DXVECTOR3(200.0f, 30.0f, 0.0f))	// ゲージ大きさ
-#define GAUGE_FRONTCOL	(D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f))	// 表ゲージ色
-#define GAUGE_BACKCOL	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	// 裏ゲージ色
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -44,8 +34,8 @@ const char *CLevelupManager::mc_apTextureFile[] =	// テクスチャ定数
 CLevelupManager::CLevelupManager()
 {
 	// メンバ変数をクリア
-	m_pOption	= NULL;		// 操作情報
-	m_pBg		= NULL;		// 背景情報
+	m_pShopManager = NULL;	// ショップマネージャーの情報
+	m_pOption = NULL;		// 操作情報
 	m_state = STATE_NORMAL;	// 状態
 }
 
@@ -63,9 +53,22 @@ CLevelupManager::~CLevelupManager()
 HRESULT CLevelupManager::Init(void)
 {
 	// メンバ変数を初期化
-	m_pOption	= NULL;		// 操作情報
-	m_pBg		= NULL;		// 背景情報
+	m_pShopManager = NULL;	// ショップマネージャーの情報
+	m_pOption = NULL;		// 操作情報
 	m_state = STATE_NORMAL;	// 状態
+
+	// ショップマネージャーの生成
+	m_pShopManager = CShopManager::Create();
+	if (UNUSED(m_pShopManager))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 描画をしない状態にする
+	m_pShopManager->SetEnableDraw(false);
 
 	// 操作情報の生成
 	m_pOption = CObject2D::Create	// TODO：定数
@@ -87,28 +90,6 @@ HRESULT CLevelupManager::Init(void)
 	// 描画をしない状態にする
 	m_pOption->SetEnableDraw(false);
 
-	// 背景情報の生成
-	m_pBg = CObject2D::Create	// TODO：定数
-	( // 引数
-		D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f),
-		D3DXVECTOR3(SCREEN_WIDTH * 0.85f, SCREEN_HEIGHT * 0.78f, 0.0f),
-		VEC3_ZERO,
-		D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.55f)
-	);
-	if (UNUSED(m_pBg))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// 優先順位を設定
-	m_pBg->SetPriority(6);
-
-	// 描画をしない状態にする
-	m_pBg->SetEnableDraw(false);
-
 	// 成功を返す
 	return S_OK;
 }
@@ -118,11 +99,16 @@ HRESULT CLevelupManager::Init(void)
 //============================================================
 void CLevelupManager::Uninit(void)
 {
+	// ショップマネージャーを破棄
+	if (FAILED(m_pShopManager->Release(m_pShopManager)))
+	{ // 破棄に失敗した場合
+
+		// 例外処理
+		assert(false);
+	}
+
 	// 操作情報を破棄
 	m_pOption->Uninit();
-
-	// 背景情報を破棄
-	m_pBg->Uninit();
 }
 
 //============================================================
@@ -165,8 +151,8 @@ void CLevelupManager::Update(void)
 
 		if (pKeyboard->GetTrigger(DIK_1))
 		{
-			// 背景情報を表示
-			m_pBg->SetEnableDraw(true);
+			// ショップを表示
+			m_pShopManager->SetEnableDraw(true);
 
 			// 状態を設定
 			m_state = STATE_INIT_SELECT;	// 強化選択状態(初期化)
@@ -188,12 +174,15 @@ void CLevelupManager::Update(void)
 
 		if (pKeyboard->GetTrigger(DIK_1))
 		{
-			// 背景情報を表示
-			m_pBg->SetEnableDraw(false);
+			// ショップを非表示
+			m_pShopManager->SetEnableDraw(false);
 
 			// 状態を設定
 			m_state = STATE_INIT_INSAFE;	// セーフエリア内状態(初期化)
 		}
+
+		// ショップマネージャーの更新
+		m_pShopManager->Update();
 
 		break;
 
@@ -209,7 +198,7 @@ void CLevelupManager::Update(void)
 		{ // セーフエリア外の場合
 
 			// 描画をしない状態にする
-			m_pBg->SetEnableDraw(false);
+			m_pShopManager->SetEnableDraw(false);
 			m_pOption->SetEnableDraw(false);
 
 			// 状態を設定
@@ -219,9 +208,6 @@ void CLevelupManager::Update(void)
 
 	// 操作情報の更新
 	m_pOption->Update();
-
-	// 背景情報の更新
-	m_pBg->Update();
 }
 
 //============================================================

@@ -213,6 +213,7 @@
     <ClCompile Include="scrollMeshField.cpp" />
     <ClCompile Include="sea.cpp" />
     <ClCompile Include="shadow.cpp" />
+    <ClCompile Include="shopManager.cpp" />
     <ClCompile Include="sky.cpp" />
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="stage.cpp" />
@@ -282,6 +283,7 @@
     <ClInclude Include="scrollMeshField.h" />
     <ClInclude Include="sea.h" />
     <ClInclude Include="shadow.h" />
+    <ClInclude Include="shopManager.h" />
     <ClInclude Include="sky.h" />
     <ClInclude Include="sound.h" />
     <ClInclude Include="stage.h" />
