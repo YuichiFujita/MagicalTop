@@ -222,6 +222,7 @@
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="useful.cpp" />
     <ClCompile Include="value.cpp" />
+    <ClCompile Include="valueUI.cpp" />
     <ClCompile Include="wall.cpp" />
     <ClCompile Include="waveManager.cpp" />
   </ItemGroup>
@@ -292,6 +293,7 @@
     <ClInclude Include="timer.h" />
     <ClInclude Include="useful.h" />
     <ClInclude Include="value.h" />
+    <ClInclude Include="valueUI.h" />
     <ClInclude Include="wall.h" />
     <ClInclude Include="waveManager.h" />
   </ItemGroup>
