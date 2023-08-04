@@ -322,7 +322,7 @@ void CLifeGauge3D::SetEnableDraw(const bool bDraw)
 	{ // テクスチャの最大数分繰り返す
 
 		// 引数の描画状況を設定
-		m_apBilboard[nCntLife]->SetEnableDraw(bDraw);		// HPゲージ表示
+		m_apBilboard[nCntLife]->SetEnableDraw(bDraw);	// HPゲージ表示
 	}
 }
 

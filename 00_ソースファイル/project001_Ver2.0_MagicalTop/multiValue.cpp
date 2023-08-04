@@ -103,6 +103,38 @@ void CMultiValue::Draw(void)
 }
 
 //============================================================
+//	描画状況の設定処理
+//============================================================
+void CMultiValue::SetEnableDraw(const bool bDraw)
+{
+	// 引数の描画状況を設定
+	CObject::SetEnableDraw(bDraw);	// 自身
+
+	for (int nCntValue = 0; nCntValue < m_nDigit; nCntValue++)
+	{ // 桁数分繰り返す
+
+		// 引数の描画状況を設定
+		m_apValue[nCntValue]->SetEnableDraw(bDraw);	// 数字
+	}
+}
+
+//============================================================
+//	優先順位の設定処理
+//============================================================
+void CMultiValue::SetPriority(const int nPriority)
+{
+	// 引数の優先順位を設定
+	CObject::SetPriority(nPriority);	// 自身
+
+	for (int nCntValue = 0; nCntValue < m_nDigit; nCntValue++)
+	{ // 桁数分繰り返す
+
+		// 引数の優先順位を設定
+		m_apValue[nCntValue]->SetPriority(nPriority);	// 数字
+	}
+}
+
+//============================================================
 //	生成処理
 //============================================================
 CMultiValue *CMultiValue::Create
@@ -205,13 +237,25 @@ void CMultiValue::SetNum(const int nNum)
 HRESULT CMultiValue::SetDigit(const int nDigit)
 {
 	// 変数を宣言
-	int nLimit = 1;		// 最大値の計算用
+	D3DXVECTOR3 rot = VEC3_ZERO;	// 向き
+	D3DXVECTOR3 size = VEC3_ONE;	// 大きさ
+	D3DXCOLOR col = XCOL_WHITE;		// 色
+	int nLimit = 1;					// 最大値の計算用
 
 	// 例外処理
 	assert(nDigit > 0);	// 桁数違反
 
 	// 引数の桁数を設定
 	m_nDigit = nDigit;
+
+	if (USED(m_apValue[0]))
+	{ // 先頭が使用されている場合
+
+		// 現在の設定を取得
+		rot = GetRotation();	// 向き
+		size = GetScaling();	// 大きさ
+		col = GetColor();		// 色
+	}
 
 	//--------------------------------------------------------
 	//	数字オブジェクトの破棄・生成
@@ -242,6 +286,21 @@ HRESULT CMultiValue::SetDigit(const int nDigit)
 			return E_FAIL;
 		}
 	}
+
+	//--------------------------------------------------------
+	//	基本情報の再設定
+	//--------------------------------------------------------
+	// 向きを設定
+	SetRotation(rot);
+
+	// 大きさを設定
+	SetScaling(size);
+
+	// 色を設定
+	SetColor(col);
+
+	// 数字位置の設定
+	SetNumPosition();
 
 	//--------------------------------------------------------
 	//	制限値の設定
@@ -347,13 +406,8 @@ void CMultiValue::SetPosition(const D3DXVECTOR3& rPos)
 	// 引数の位置を設定
 	m_pos = rPos;
 
-	// 数字の位置を設定
-	for (int nCntValue = 0; nCntValue < m_nDigit; nCntValue++)
-	{ // 桁数分繰り返す
-
-		// 原点の位置から数字の位置を設定
-		m_apValue[nCntValue]->SetPosition(rPos + (m_space * (float)nCntValue));
-	}
+	// 数字位置の設定
+	SetNumPosition();
 }
 
 //============================================================
@@ -456,6 +510,19 @@ D3DXVECTOR3 CMultiValue::GetSpace(void) const
 {
 	// 行間を返す
 	return m_space;
+}
+
+//============================================================
+//	数字位置の設定処理
+//============================================================
+void CMultiValue::SetNumPosition(void)
+{
+	for (int nCntValue = 0; nCntValue < m_nDigit; nCntValue++)
+	{ // 桁数分繰り返す
+
+		// 原点の位置から数字の位置を設定
+		m_apValue[nCntValue]->SetPosition(m_pos + (m_space * (float)nCntValue));
+	}
 }
 
 //============================================================

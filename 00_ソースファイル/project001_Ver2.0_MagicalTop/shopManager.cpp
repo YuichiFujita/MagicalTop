@@ -13,7 +13,16 @@
 #include "texture.h"
 #include "sceneGame.h"
 #include "object2D.h"
+#include "valueUI.h"
+#include "multiValue.h"
+#include "target.h"
+#include "player.h"
 #include "stage.h"
+
+//************************************************************
+//	マクロ定義
+//************************************************************
+#define SHOP_PRIO	(6)	// ショップ表示の優先順位
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -33,7 +42,11 @@ const char *CShopManager::mc_apTextureFile[] =	// テクスチャ定数
 CShopManager::CShopManager()
 {
 	// メンバ変数をクリア
-	m_pBg = NULL;	// 背景情報
+	m_pBg = NULL;			// 背景情報
+	m_pIconTarget = NULL;	// ターゲットアイコン情報
+	m_pIconExp = NULL;		// 経験値アイコン情報
+	m_pLife = NULL;			// ターゲット体力情報
+	m_pLv = NULL;			// プレイヤーレベル情報
 }
 
 //============================================================
@@ -53,8 +66,15 @@ HRESULT CShopManager::Init(void)
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャ
 
 	// メンバ変数を初期化
-	m_pBg = NULL;	// 背景情報
+	m_pBg = NULL;			// 背景情報
+	m_pIconTarget = NULL;	// ターゲットアイコン情報
+	m_pIconExp = NULL;		// 経験値アイコン情報
+	m_pLife = NULL;			// ターゲット体力情報
+	m_pLv = NULL;			// プレイヤーレベル情報
 
+	//--------------------------------------------------------
+	//	背景の生成・設定
+	//--------------------------------------------------------
 	// 背景情報の生成
 	m_pBg = CObject2D::Create	// TODO：定数
 	( // 引数
@@ -72,15 +92,18 @@ HRESULT CShopManager::Init(void)
 	}
 
 	// 優先順位を設定
-	m_pBg->SetPriority(6);
+	m_pBg->SetPriority(SHOP_PRIO);
 
 	// 描画をしない状態にする
 	m_pBg->SetEnableDraw(false);
 
+	//--------------------------------------------------------
+	//	ターゲットアイコンの生成・設定
+	//--------------------------------------------------------
 	// ターゲットアイコン情報の生成
 	m_pIconTarget = CObject2D::Create	// TODO：定数
 	( // 引数
-		D3DXVECTOR3(180.0f, 160.0f, 0.0f),
+		D3DXVECTOR3(180.0f, 190.0f, 0.0f),
 		D3DXVECTOR3(120.0f, 120.0f, 0.0f)
 	);
 	if (UNUSED(m_pIconTarget))
@@ -91,19 +114,22 @@ HRESULT CShopManager::Init(void)
 		return E_FAIL;
 	}
 
-	// テクスチャを設定
+	// テクスチャを割当・設定
 	m_pIconTarget->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_TARGET]));
 
 	// 優先順位を設定
-	m_pIconTarget->SetPriority(6);
+	m_pIconTarget->SetPriority(SHOP_PRIO);
 
 	// 描画をしない状態にする
 	m_pIconTarget->SetEnableDraw(false);
 
+	//--------------------------------------------------------
+	//	経験値アイコンの生成・設定
+	//--------------------------------------------------------
 	// 経験値アイコン情報の生成
 	m_pIconExp = CObject2D::Create	// TODO：定数
 	( // 引数
-		D3DXVECTOR3(700.0f, 160.0f, 0.0f),
+		D3DXVECTOR3(800.0f, 190.0f, 0.0f),
 		D3DXVECTOR3(120.0f, 120.0f, 0.0f)
 	);
 	if (UNUSED(m_pIconExp))
@@ -114,14 +140,70 @@ HRESULT CShopManager::Init(void)
 		return E_FAIL;
 	}
 
-	// テクスチャを設定
+	// テクスチャを割当・設定
 	m_pIconExp->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_EXP]));
 
 	// 優先順位を設定
-	m_pIconExp->SetPriority(6);
+	m_pIconExp->SetPriority(SHOP_PRIO);
 
 	// 描画をしない状態にする
 	m_pIconExp->SetEnableDraw(false);
+
+	//--------------------------------------------------------
+	//	ターゲット体力の生成・設定
+	//--------------------------------------------------------
+	// ターゲットの体力情報
+	m_pLife = CValueUI::Create
+	( // 引数
+		D3DXVECTOR3(380.0f, 140.0f, 0.0f),	// 
+		D3DXVECTOR3(0.0f, 100.0f, 0.0f),	// 
+		D3DXVECTOR3(280.0f, 90.0f, 0.0f),	// 
+		D3DXVECTOR3(80.0f, 90.0f, 0.0f),	// 
+		pTexture->Regist("data\\TEXTURE\\area000.png")
+	);
+
+	// 数字の行間を設定
+	m_pLife->GetMultiValue()->SetSpace(D3DXVECTOR3(80.0f, 0.0f, 0.0f));
+
+	// 数字の桁数を設定
+	m_pLife->GetMultiValue()->SetDigit(4);
+
+	// 数字の数値を設定
+	//m_pLife->GetMultiValue()->SetNum(CSceneGame::GetTarget()->GetLife());
+
+	// 優先順位を設定
+	m_pLife->SetPriority(SHOP_PRIO);
+
+	// 描画をしない状態にする
+	m_pLife->SetEnableDraw(false);
+
+	//--------------------------------------------------------
+	//	プレイヤーレベルの生成・設定
+	//--------------------------------------------------------
+	// プレイヤーのレベル情報
+	m_pLv = CValueUI::Create
+	( // 引数
+		D3DXVECTOR3(980.0f, 140.0f, 0.0f),	// 
+		D3DXVECTOR3(0.0f, 100.0f, 0.0f),	// 
+		D3DXVECTOR3(280.0f, 90.0f, 0.0f),	// 
+		D3DXVECTOR3(80.0f, 90.0f, 0.0f),	// 
+		pTexture->Regist("data\\TEXTURE\\area000.png")
+	);
+
+	// 数字の行間を設定
+	m_pLv->GetMultiValue()->SetSpace(D3DXVECTOR3(80.0f, 0.0f, 0.0f));
+
+	// 数字の桁数を設定
+	m_pLv->GetMultiValue()->SetDigit(2);
+
+	// 数字の数値を設定
+	//m_pLv->GetMultiValue()->SetNum(CSceneGame::GetPlayer()->GetLevel());
+
+	// 優先順位を設定
+	m_pLv->SetPriority(SHOP_PRIO);
+
+	// 描画をしない状態にする
+	m_pLv->SetEnableDraw(false);
 
 	// 成功を返す
 	return S_OK;
@@ -136,6 +218,10 @@ void CShopManager::Uninit(void)
 	m_pBg->Uninit();
 	m_pIconTarget->Uninit();
 	m_pIconExp->Uninit();
+
+	// 数字UI情報を破棄
+	m_pLife->Uninit();
+	m_pLv->Uninit();
 }
 
 //============================================================
@@ -147,10 +233,20 @@ void CShopManager::Update(void)
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
+	// 数値に体力を設定
+	m_pLife->GetMultiValue()->SetNum(CSceneGame::GetTarget()->GetLife());
+
+	// 数値にレベルを設定
+	m_pLv->GetMultiValue()->SetNum(CSceneGame::GetPlayer()->GetLevel());
+
 	// オブジェクト2D情報の更新
 	m_pBg->Update();
 	m_pIconTarget->Update();
 	m_pIconExp->Update();
+
+	// 数字UI情報の更新
+	m_pLife->Update();
+	m_pLv->Update();
 }
 
 //============================================================
@@ -162,6 +258,8 @@ void CShopManager::SetEnableDraw(const bool bDraw)
 	m_pBg->SetEnableDraw(bDraw);			// 背景情報
 	m_pIconTarget->SetEnableDraw(bDraw);	// ターゲットアイコン情報
 	m_pIconExp->SetEnableDraw(bDraw);		// 経験値アイコン情報
+	m_pLife->SetEnableDraw(bDraw);			// ターゲット体力情報
+	m_pLv->SetEnableDraw(bDraw);			// プレイヤーレベル情報
 }
 
 //============================================================

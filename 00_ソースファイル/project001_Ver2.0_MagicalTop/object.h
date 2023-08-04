@@ -92,11 +92,12 @@ public:
 	virtual void Draw(void)		= 0;	// 描画
 
 	// 仮想関数
-	virtual void Hit(const int nDmg);	// ヒット
+	virtual void Hit(const int nDmg);					// ヒット
 	virtual void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
 	virtual void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
 	virtual void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
 	virtual void SetEnableDraw(const bool bDraw);		// 描画状況設定
+	virtual void SetPriority(const int nPriority);		// 優先順位設定
 	virtual D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
 	virtual D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	virtual D3DXVECTOR3 GetRotation(void) const;		// 向き取得
@@ -114,10 +115,9 @@ public:
 	static CObject *GetCur(const int nPriority);	// 最後尾オブジェクト取得
 
 	// メンバ関数
-	void	SetLabel(const LABEL label);		// ラベル設定
-	LABEL	GetLabel(void) const;				// ラベル取得
-	void	SetPriority(const int nPriority);	// 優先順位設定
-	int		GetPriority(void) const;			// 優先順位取得
+	void	SetLabel(const LABEL label);	// ラベル設定
+	LABEL	GetLabel(void) const;			// ラベル取得
+	int		GetPriority(void) const;		// 優先順位取得
 
 	DWORD	GetID(void) const;		// ユニークID取得
 	bool	IsUpdate(void) const;	// 更新状況取得

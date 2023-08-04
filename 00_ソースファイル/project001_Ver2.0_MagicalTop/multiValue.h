@@ -44,6 +44,8 @@ public:
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
 	void Draw(void);	// 描画
+	void SetEnableDraw(const bool bDraw);	// 描画状況設定
+	void SetPriority(const int nPriority);	// 優先順位設定
 
 	// 静的メンバ関数
 	static CMultiValue *Create	// 生成
@@ -81,7 +83,8 @@ public:
 
 private:
 	// メンバ関数
-	void SetTexNum(void);	// 数字のテクスチャ座標設定
+	void SetNumPosition(void);	// 数字の位置設定
+	void SetTexNum(void);		// 数字のテクスチャ座標設定
 
 	// メンバ変数
 	CValue *m_apValue[MAX_DIGIT];	// 数値の情報

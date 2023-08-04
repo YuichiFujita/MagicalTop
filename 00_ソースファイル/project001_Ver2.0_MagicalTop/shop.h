@@ -1,67 +1,75 @@
 //============================================================
 //
-//	ショップマネージャーヘッダー [shopManager.h]
+//	ショップヘッダー [shop.h]
 //	Author：藤田勇一
 //
 //============================================================
 //************************************************************
 //	二重インクルード防止
 //************************************************************
-#ifndef _SHOPMANAGER_H_
-#define _SHOPMANAGER_H_
+#ifndef _SHOP_H_
+#define _SHOP_H_
 
 //************************************************************
 //	インクルードファイル
 //************************************************************
 #include "main.h"
+#include "object.h"
 
 //************************************************************
 //	前方宣言
 //************************************************************
-class CObject2D;	// オブジェクト2Dクラス
-class CValueUI;		// 数字UIクラス
+class CAnim2D;	// アニメーション2Dクラス
+class CValueUI;	// 数字UIクラス
 
 //************************************************************
 //	クラス定義
 //************************************************************
-// ショップマネージャークラス
-class CShopManager
+// ショップクラス
+class CShop : public CObject
 {
 public:
-	// テクスチャ列挙
-	enum TEXTURE
+	// 購入列挙
+	enum BUY
 	{
-		TEXTURE_TARGET = 0,	// ターゲットアイコンテクスチャ
-		TEXTURE_EXP,		// 経験値アイコンテクスチャ
-		TEXTURE_MAX,		// この列挙型の総数
+		BUY_LV1_FIRE = 0,	// LV1炎魔法
+		BUY_LV1_WATER,		// LV1水魔法
+		BUY_LV1_WIND,		// LV1風魔法
+		BUY_LV2_FIRE,		// LV2炎魔法
+		BUY_LV2_WATER,		// LV2水魔法
+		BUY_LV2_WIND,		// LV2風魔法
+		BUY_MAX				// この列挙型の総数
 	};
 
 	// コンストラクタ
-	CShopManager();
+	CShop();
 
 	// デストラクタ
-	~CShopManager();
+	~CShop();
 
-	// メンバ関数
+	// オーバーライド関数
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
-	void SetEnableDraw(const bool bDraw);	// 描画状況設定
+	void Draw(void);	// 描画
 
 	// 静的メンバ関数
-	static CShopManager *Create(void);	// 生成
-	static HRESULT Release(CShopManager *&prShopManager);	// 破棄
+	static CShop *Create	// 生成
+	( // 引数
+		const BUY buy,			// 購入品
+		const D3DXVECTOR3& rPos	// 位置
+	);
+
+	// メンバ関数
+	void Set(const BUY buy);	// 設定
+	BUY  Get(void);				// 取得
 
 private:
-	// 静的メンバ変数
-	static const char *mc_apTextureFile[];	// テクスチャ定数
-
 	// メンバ変数
-	CObject2D *m_pBg;			// 背景情報
-	CObject2D *m_pIconTarget;	// ターゲットアイコン情報
-	CObject2D *m_pIconExp;		// 経験値アイコン情報
-	CValueUI *m_pLife;			// ターゲット体力情報
-	CValueUI *m_pLv;			// プレイヤーレベル情報
+	CAnim2D *m_pIcon;	// 購入品アイコン
+	CValueUI *m_pLife;	// 必要体力
+	CValueUI *m_pLv;	// 必要レベル
+	BUY m_buy;			// 購入品
 };
 
-#endif	// _SHOPMANAGER_H_
+#endif	// _SHOP_H_

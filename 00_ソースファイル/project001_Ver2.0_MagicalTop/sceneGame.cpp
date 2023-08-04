@@ -113,9 +113,9 @@ HRESULT CSceneGame::Init(void)
 	// 空オブジェクトの生成
 	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
 
-	// プレイヤーオブジェクトの生成
-	m_pPlayer = CPlayer::Create(D3DXVECTOR3(0.0f, 0.0f, -100.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-	if (UNUSED(m_pPlayer))
+	// ターゲットオブジェクトの生成
+	m_pTarget = CTarget::Create(CTarget::MODEL_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO);
+	if (UNUSED(m_pTarget))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -123,9 +123,9 @@ HRESULT CSceneGame::Init(void)
 		return E_FAIL;
 	}
 
-	// ターゲットオブジェクトの生成
-	m_pTarget = CTarget::Create(CTarget::MODEL_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO);
-	if (UNUSED(m_pTarget))
+	// プレイヤーオブジェクトの生成
+	m_pPlayer = CPlayer::Create(D3DXVECTOR3(0.0f, 0.0f, -100.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	if (UNUSED(m_pPlayer))
 	{ // 非使用中の場合
 
 		// 失敗を返す
