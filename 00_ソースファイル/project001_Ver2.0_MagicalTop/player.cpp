@@ -523,7 +523,7 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 	float fLimit = CSceneGame::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
 
 	MOTION	currentMotion = motion;	// 現在のモーション
-	int		nRotation;				// 回転方向
+	int		nRotation = 0;			// 回転方向
 
 	// ポインタを宣言
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード

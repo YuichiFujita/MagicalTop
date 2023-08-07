@@ -71,7 +71,7 @@ HRESULT CMagicManager::Init(void)
 	// メンバ変数を初期化
 	memset(&m_apLockCursor[0], 0, sizeof(m_apLockCursor));	// ロックオン表示情報
 	m_pMana = NULL;						// マナの情報
-	m_magic = CMagic::TYPE_LV0_NORMAL;	// 魔法
+	m_magic = CMagic::TYPE_LV2_WIND;	// 魔法			// TODO：魔法初期値変更
 	m_state = STATE_NORMAL;				// 状態
 	m_nCounterState = 0;				// 状態管理カウンター
 	m_nCounterHeal = 0;					// 回復管理カウンター

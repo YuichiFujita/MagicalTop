@@ -16,6 +16,7 @@
 #include "effect3D.h"
 #include "enemy.h"
 #include "field.h"
+#include "objectTornado.h"
 
 //************************************************************
 //	マクロ定義
@@ -164,6 +165,13 @@ CMagic *CMagic::Create
 
 			// 初期魔法を生成
 			pMagic = new CNormalMagic(type);
+
+			break;
+
+		case TYPE_LV2_WIND:		// LV2風魔法
+
+			// LV2風魔法を生成
+			pMagic = new CLv2WindMagic(type);
 
 			break;
 
@@ -458,6 +466,155 @@ void CNormalMagic::Draw(void)
 }
 
 //************************************************************
+//	子クラス [CLv2WindMagic] のメンバ関数
+//************************************************************
+//============================================================
+//	コンストラクタ
+//============================================================
+CLv2WindMagic::CLv2WindMagic(const TYPE type) : CMagic(type)
+{
+	// メンバ変数をクリア
+	m_pTornado = NULL;	// 竜巻オブジェクト
+}
+
+//============================================================
+//	デストラクタ
+//============================================================
+CLv2WindMagic::~CLv2WindMagic()
+{
+
+}
+
+//============================================================
+//	初期化処理
+//============================================================
+HRESULT CLv2WindMagic::Init(void)
+{
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャ
+
+	// メンバ変数を初期化
+	m_pTornado = NULL;	// 竜巻オブジェクト
+
+	// 魔法の初期化
+	if (FAILED(CMagic::Init()))
+	{ // 初期化に失敗した場合
+
+		// 失敗を返す
+		return E_FAIL;
+	}
+
+	// 竜巻の生成
+	m_pTornado = CObjectTornado::Create
+	( // 引数
+		VEC3_ZERO,	// 位置
+		VEC3_ZERO,	// 成長向き
+		XCOL_WHITE,	// 色
+		NULL,		// 親のマトリックス
+		2,			// 渦の周回数
+		32,			// 渦の分割数
+		0.3f,		// 向きの変更量
+		15.0f,		// ポリゴンの太さ
+		2.0f,		// ポリゴン外周の y座標加算量
+		15.0f,		// 生成時の横ずれ量
+		1.0f,		// 生成時の透明度
+		1.0f,		// 横ずれの加算量
+		1.5f,		// 縦ずれの加算量
+		0.0f,		// 透明度の減算量
+		0.0f,		// 横ずれの成長量
+		0.0f,		// 縦ずれの成長量
+		0.0f		// 透明度の成長量
+	);
+
+	// テクスチャを割当・設定
+	m_pTornado->BindTexture(pTexture->Regist("data\\TEXTURE\\tornado000.png"));
+
+	// ラベルを設定
+	m_pTornado->SetLabel(CObject::LABEL_MAGIC);
+
+	// 優先順位を設定
+	m_pTornado->SetPriority(5);
+
+	// 成功を返す
+	return S_OK;
+}
+
+//============================================================
+//	終了処理
+//============================================================
+void CLv2WindMagic::Uninit(void)
+{
+	// 竜巻の終了
+	m_pTornado->SetGrow
+	( // 引数
+		0.35f,	// 向きの変更量
+		0.005f,	// 横ずれの成長量
+		0.08f,	// 縦ずれの成長量
+		0.06f	// 透明度の成長量
+	);
+
+	// 魔法の終了
+	CMagic::Uninit();
+}
+
+//============================================================
+//	更新処理
+//============================================================
+void CLv2WindMagic::Update(void)
+{
+	// 変数を宣言
+	D3DXVECTOR3 pos = GetPosition();	// 位置
+
+	// 位置を地面に補正
+	pos.y = CSceneGame::GetField()->GetPositionHeight(pos);
+
+	// トルネードの位置を設定
+	m_pTornado->SetPosition(pos + D3DXVECTOR3(0.0f, 20.0f, 0.0f));
+
+	// 位置を設定
+	SetPosition(pos);
+
+	// エフェクトを生成
+	CEffect3D::Create(CEffect3D::TYPE_NORMAL, pos, VEC3_ZERO, VEC3_ZERO, D3DXCOLOR(0.0f, 0.65f, 0.0f, 0.4f), 38, 56.0f, 3.8f, 0.06f);
+
+	// 竜巻の更新
+	m_pTornado->Update();
+
+	// 魔法の更新
+	CMagic::Update();
+}
+
+//============================================================
+//	描画処理
+//============================================================
+void CLv2WindMagic::Draw(void)
+{
+	// 魔法の描画
+	CMagic::Draw();
+}
+
+//============================================================
+//	魔法判定
+//============================================================
+bool CLv2WindMagic::Collision(CObject *pObject)
+{
+	// 変数を宣言
+	bool bHit = false;	// 当たったかの判定
+
+	// 敵との当たり判定
+	bHit = collision::CirclePillar
+	( // 引数
+		GetPosition(),				// 判定位置
+		pObject->GetPosition(),		// 判定目標位置
+		GetStatusInfo().fRadius,	// 判定半径
+		pObject->GetRadius()		// 判定目標半径
+	);
+
+	// 当たったかの判定を返す
+	return bHit;
+}
+
+//************************************************************
 //	子クラス [CMagic] のセットアップ関数
 //************************************************************
 //============================================================
@@ -571,15 +728,6 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].shotPos.x);	// 発射位置Xを読み込む
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].shotPos.y);	// 発射位置Yを読み込む
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].shotPos.z);	// 発射位置Zを読み込む
-							}
-							else if (strcmp(&aString[0], "HOMING_ENABLE") == 0)
-							{ // 読み込んだ文字列が HOMING_ENABLE の場合
-
-								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
-								fscanf(pFile, "%d", &nHoming);		// ホーミングのON/OFFを読み込む
-
-								// 読み込んだ値をbool型に変換
-								m_aStatusInfo[nType].bHoming = (nHoming == 0) ? true : false;
 							}
 						} while (strcmp(&aString[0], "END_MAGICSET") != 0);	// 読み込んだ文字列が END_MAGICSET ではない場合ループ
 					}

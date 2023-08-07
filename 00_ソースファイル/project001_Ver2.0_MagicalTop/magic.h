@@ -18,6 +18,11 @@
 #include "motion.h"
 
 //************************************************************
+//	前方宣言
+//************************************************************
+class CObjectTornado;	// オブジェクト竜巻クラス
+
+//************************************************************
 //	クラス定義
 //************************************************************
 // 魔法クラス
@@ -28,9 +33,12 @@ public:
 	typedef enum
 	{
 		TYPE_LV0_NORMAL = 0,	// 初期魔法
-		TYPE_LV1_FIRE,			// 炎魔法
-		TYPE_LV1_WATER,			// 水魔法
-		TYPE_LV1_WIND,			// 風魔法
+		TYPE_LV1_FIRE,			// LV1炎魔法
+		TYPE_LV1_WATER,			// LV1水魔法
+		TYPE_LV1_WIND,			// LV1風魔法
+		TYPE_LV2_FIRE,			// LV2炎魔法
+		TYPE_LV2_WATER,			// LV2水魔法
+		TYPE_LV2_WIND,			// LV2風魔法
 		TYPE_MAX				// この列挙型の総数
 	}TYPE;
 
@@ -52,7 +60,6 @@ public:
 		float	fHeight;		// 縦幅
 		float	fMove;			// 移動量
 		float	fViewRadius;	// 視界範囲
-		bool	bHoming;		// ホーミングの ON/OFF
 	}StatusInfo;
 
 	// オーバーライド関数
@@ -116,6 +123,28 @@ public:
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
 	void Draw(void);	// 描画
+};
+
+// LV2風魔法クラス
+class CLv2WindMagic : public CMagic
+{
+public:
+	// コンストラクタ
+	CLv2WindMagic(const TYPE type);
+
+	// デストラクタ
+	~CLv2WindMagic();
+
+	// オーバーライド関数
+	HRESULT Init(void);	// 初期化
+	void Uninit(void);	// 終了
+	void Update(void);	// 更新
+	void Draw(void);	// 描画
+	bool Collision(CObject *pObject);	// 魔法判定
+
+private:
+	// メンバ変数
+	CObjectTornado *m_pTornado;	// 竜巻オブジェクト
 };
 
 #endif	// _MAGIC_H_

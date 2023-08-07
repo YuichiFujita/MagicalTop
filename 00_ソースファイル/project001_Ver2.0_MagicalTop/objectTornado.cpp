@@ -72,24 +72,24 @@ HRESULT CObjectTornado::Init(void)
 	m_nTextureID = NONE_IDX;	// テクスチャインデックス
 
 	// 竜巻の情報を初期化
-	m_tornado.pos     = VEC3_ZERO;	// 位置
-	m_tornado.rot     = VEC3_ZERO;	// 向き
-	m_tornado.direRot = VEC3_ZERO;	// 成長向き
-	m_tornado.col     = XCOL_WHITE;	// 色
-	m_tornado.pMtxParent  = NULL;	// 親のマトリックス
-	m_tornado.fMoveRot    = 0.0f;	// 向きの変更量
-	m_tornado.fThickness  = 0.0f;	// ポリゴンの太さ
-	m_tornado.fOuterPlus  = 0.0f;	// ポリゴン外周の y座標加算量
-	m_tornado.fSetWidth   = 0.0f;	// 生成時の横ずれ量
-	m_tornado.fSetAlpha   = 0.0f;	// 生成時の透明度
-	m_tornado.fAddWidth   = 0.0f;	// 横ずれの加算量
-	m_tornado.fAddHeight  = 0.0f;	// 縦ずれの加算量
-	m_tornado.fSubAlpha   = 0.0f;	// 透明度の減算量
-	m_tornado.fGrowWidth  = 0.0f;	// 横ずれの成長量
-	m_tornado.fGrowHeight = 0.0f;	// 縦ずれの成長量
-	m_tornado.fGrowAlpha  = 0.0f;	// 透明度の成長量
-	m_tornado.cull   = D3DCULL_CCW;	// カリング状況
-	m_tornado.bLight = true;		// ライティング状況
+	m_tornado.pos     = VEC3_ZERO;		// 位置
+	m_tornado.rot     = VEC3_ZERO;		// 向き
+	m_tornado.direRot = VEC3_ZERO;		// 成長向き
+	m_tornado.col     = XCOL_WHITE;		// 色
+	m_tornado.pMtxParent  = NULL;		// 親のマトリックス
+	m_tornado.fMoveRot    = 0.0f;		// 向きの変更量
+	m_tornado.fThickness  = 0.0f;		// ポリゴンの太さ
+	m_tornado.fOuterPlus  = 0.0f;		// ポリゴン外周の y座標加算量
+	m_tornado.fSetWidth   = 0.0f;		// 生成時の横ずれ量
+	m_tornado.fSetAlpha   = 0.0f;		// 生成時の透明度
+	m_tornado.fAddWidth   = 0.0f;		// 横ずれの加算量
+	m_tornado.fAddHeight  = 0.0f;		// 縦ずれの加算量
+	m_tornado.fSubAlpha   = 0.0f;		// 透明度の減算量
+	m_tornado.fGrowWidth  = 0.0f;		// 横ずれの成長量
+	m_tornado.fGrowHeight = 0.0f;		// 縦ずれの成長量
+	m_tornado.fGrowAlpha  = 0.0f;		// 透明度の成長量
+	m_tornado.cull   = D3DCULL_NONE;	// カリング状況
+	m_tornado.bLight = false;			// ライティング状況
 
 	// 渦を設定
 	if (FAILED(SetVortex(1, 1)))

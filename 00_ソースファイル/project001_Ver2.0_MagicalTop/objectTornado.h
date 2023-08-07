@@ -80,8 +80,8 @@ public:
 		const float fGrowWidth,				// 横ずれの成長量
 		const float fGrowHeight,			// 縦ずれの成長量
 		const float fGrowAlpha,				// 透明度の成長量
-		const D3DCULL cull = D3DCULL_CCW,	// カリング状況
-		const bool bLight = true			// ライティング状況
+		const D3DCULL cull = D3DCULL_NONE,	// カリング状況
+		const bool bLight = false			// ライティング状況
 	);
 
 	// メンバ関数
