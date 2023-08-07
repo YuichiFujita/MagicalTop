@@ -16,10 +16,16 @@
 #include "main.h"
 
 //************************************************************
+//	マクロ定義
+//************************************************************
+#define MAX_SHOP	(3)	// ショップの品目数
+
+//************************************************************
 //	前方宣言
 //************************************************************
 class CObject2D;	// オブジェクト2Dクラス
 class CValueUI;		// 数字UIクラス
+class CShop;		// ショップクラス
 
 //************************************************************
 //	クラス定義
@@ -33,7 +39,18 @@ public:
 	{
 		TEXTURE_TARGET = 0,	// ターゲットアイコンテクスチャ
 		TEXTURE_EXP,		// 経験値アイコンテクスチャ
+		TEXTURE_LIFE,		// 体力テクスチャ
+		TEXTURE_LV,			// レベルテクスチャ
 		TEXTURE_MAX,		// この列挙型の総数
+	};
+
+	// 選択列挙
+	enum SELECT
+	{
+		SELECT_LEFT = 0,	// 左選択
+		SELECT_CENTER,		// 中央選択
+		SELECT_RIGHT,		// 右選択
+		SELECT_MAX,			// この列挙型の総数
 	};
 
 	// コンストラクタ
@@ -62,6 +79,9 @@ private:
 	CObject2D *m_pIconExp;		// 経験値アイコン情報
 	CValueUI *m_pLife;			// ターゲット体力情報
 	CValueUI *m_pLv;			// プレイヤーレベル情報
+	CShop *m_apShop[MAX_SHOP];	// ショップ情報
+	int m_nSelect;		// 現在の選択番号
+	int m_nOldSelect;	// 過去の選択番号
 };
 
 #endif	// _SHOPMANAGER_H_

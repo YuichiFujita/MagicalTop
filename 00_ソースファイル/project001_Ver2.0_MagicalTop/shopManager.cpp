@@ -14,6 +14,7 @@
 #include "sceneGame.h"
 #include "object2D.h"
 #include "valueUI.h"
+#include "shop.h"
 #include "multiValue.h"
 #include "target.h"
 #include "player.h"
@@ -31,6 +32,8 @@ const char *CShopManager::mc_apTextureFile[] =	// テクスチャ定数
 {
 	"data\\TEXTURE\\icon000.png",	// ターゲットアイコンテクスチャ
 	"data\\TEXTURE\\icon001.png",	// 経験値アイコンテクスチャ
+	"data\\TEXTURE\\shop000.png",	// 体力テクスチャ
+	"data\\TEXTURE\\shop001.png",	// レベルテクスチャ
 };
 
 //************************************************************
@@ -47,6 +50,9 @@ CShopManager::CShopManager()
 	m_pIconExp = NULL;		// 経験値アイコン情報
 	m_pLife = NULL;			// ターゲット体力情報
 	m_pLv = NULL;			// プレイヤーレベル情報
+	memset(&m_apShop[0], 0, sizeof(m_apShop));	// ショップ情報
+	m_nSelect = 0;		// 現在の選択番号
+	m_nOldSelect = 0;	// 過去の選択番号
 }
 
 //============================================================
@@ -71,6 +77,9 @@ HRESULT CShopManager::Init(void)
 	m_pIconExp = NULL;		// 経験値アイコン情報
 	m_pLife = NULL;			// ターゲット体力情報
 	m_pLv = NULL;			// プレイヤーレベル情報
+	memset(&m_apShop[0], 0, sizeof(m_apShop));	// ショップ情報
+	m_nSelect = 0;		// 現在の選択番号
+	m_nOldSelect = 0;	// 過去の選択番号
 
 	//--------------------------------------------------------
 	//	背景の生成・設定
@@ -103,7 +112,7 @@ HRESULT CShopManager::Init(void)
 	// ターゲットアイコン情報の生成
 	m_pIconTarget = CObject2D::Create	// TODO：定数
 	( // 引数
-		D3DXVECTOR3(180.0f, 190.0f, 0.0f),
+		D3DXVECTOR3(160.0f, 150.0f, 0.0f),
 		D3DXVECTOR3(120.0f, 120.0f, 0.0f)
 	);
 	if (UNUSED(m_pIconTarget))
@@ -129,7 +138,7 @@ HRESULT CShopManager::Init(void)
 	// 経験値アイコン情報の生成
 	m_pIconExp = CObject2D::Create	// TODO：定数
 	( // 引数
-		D3DXVECTOR3(800.0f, 190.0f, 0.0f),
+		D3DXVECTOR3(750.0f, 145.0f, 0.0f),
 		D3DXVECTOR3(120.0f, 120.0f, 0.0f)
 	);
 	if (UNUSED(m_pIconExp))
@@ -152,24 +161,28 @@ HRESULT CShopManager::Init(void)
 	//--------------------------------------------------------
 	//	ターゲット体力の生成・設定
 	//--------------------------------------------------------
-	// ターゲットの体力情報
+	// ターゲットの体力情報の生成
 	m_pLife = CValueUI::Create
 	( // 引数
-		D3DXVECTOR3(380.0f, 140.0f, 0.0f),	// 
-		D3DXVECTOR3(0.0f, 100.0f, 0.0f),	// 
+		D3DXVECTOR3(280.0f, 160.0f, 0.0f),	// 
+		D3DXVECTOR3(110.0f, -10.0f, 0.0f),	// 
 		D3DXVECTOR3(280.0f, 90.0f, 0.0f),	// 
 		D3DXVECTOR3(80.0f, 90.0f, 0.0f),	// 
-		pTexture->Regist("data\\TEXTURE\\area000.png")
+		pTexture->Regist(mc_apTextureFile[TEXTURE_LIFE])
 	);
+	if (UNUSED(m_pLife))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// 数字の行間を設定
 	m_pLife->GetMultiValue()->SetSpace(D3DXVECTOR3(80.0f, 0.0f, 0.0f));
 
 	// 数字の桁数を設定
 	m_pLife->GetMultiValue()->SetDigit(4);
-
-	// 数字の数値を設定
-	//m_pLife->GetMultiValue()->SetNum(CSceneGame::GetTarget()->GetLife());
 
 	// 優先順位を設定
 	m_pLife->SetPriority(SHOP_PRIO);
@@ -180,15 +193,22 @@ HRESULT CShopManager::Init(void)
 	//--------------------------------------------------------
 	//	プレイヤーレベルの生成・設定
 	//--------------------------------------------------------
-	// プレイヤーのレベル情報
+	// プレイヤーのレベル情報の生成
 	m_pLv = CValueUI::Create
 	( // 引数
-		D3DXVECTOR3(980.0f, 140.0f, 0.0f),	// 
-		D3DXVECTOR3(0.0f, 100.0f, 0.0f),	// 
+		D3DXVECTOR3(900.0f, 160.0f, 0.0f),	// 
+		D3DXVECTOR3(140.0f, -8.0f, 0.0f),	// 
 		D3DXVECTOR3(280.0f, 90.0f, 0.0f),	// 
 		D3DXVECTOR3(80.0f, 90.0f, 0.0f),	// 
-		pTexture->Regist("data\\TEXTURE\\area000.png")
+		pTexture->Regist(mc_apTextureFile[TEXTURE_LV])
 	);
+	if (UNUSED(m_pLv))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// 数字の行間を設定
 	m_pLv->GetMultiValue()->SetSpace(D3DXVECTOR3(80.0f, 0.0f, 0.0f));
@@ -196,14 +216,38 @@ HRESULT CShopManager::Init(void)
 	// 数字の桁数を設定
 	m_pLv->GetMultiValue()->SetDigit(2);
 
-	// 数字の数値を設定
-	//m_pLv->GetMultiValue()->SetNum(CSceneGame::GetPlayer()->GetLevel());
-
 	// 優先順位を設定
 	m_pLv->SetPriority(SHOP_PRIO);
 
 	// 描画をしない状態にする
 	m_pLv->SetEnableDraw(false);
+
+	//--------------------------------------------------------
+	//	プレイヤーレベルの生成・設定
+	//--------------------------------------------------------
+	for (int nCntShop = 0; nCntShop < MAX_SHOP; nCntShop++)
+	{ // ショップの品目数分繰り返す
+
+		// ショップ情報の生成
+		m_apShop[nCntShop] = CShop::Create
+		( // 引数
+			CShop::BUY_LV1_FIRE,
+			D3DXVECTOR3(285.0f, 420.0f, 0.0f) + D3DXVECTOR3(350.0f * nCntShop, 0.0f, 0.0f)
+		);
+		if (UNUSED(m_apShop[nCntShop]))
+		{ // 非使用中の場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// 優先順位を設定
+		m_apShop[nCntShop]->SetPriority(SHOP_PRIO);
+
+		// 描画をしない状態にする
+		m_apShop[nCntShop]->SetEnableDraw(false);
+	}
 
 	// 成功を返す
 	return S_OK;
@@ -222,6 +266,17 @@ void CShopManager::Uninit(void)
 	// 数字UI情報を破棄
 	m_pLife->Uninit();
 	m_pLv->Uninit();
+
+	for (int nCntShop = 0; nCntShop < MAX_SHOP; nCntShop++)
+	{ // ショップの品目数分繰り返す
+
+		if (USED(m_apShop[nCntShop]))
+		{ // ショップが使用されている場合
+
+			// ショップ情報を破棄
+			m_apShop[nCntShop]->Uninit();
+		}
+	}
 }
 
 //============================================================
@@ -233,11 +288,30 @@ void CShopManager::Update(void)
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
+	// 過去の選択番号を更新
+	m_nOldSelect = m_nSelect;
+
 	// 数値に体力を設定
 	m_pLife->GetMultiValue()->SetNum(CSceneGame::GetTarget()->GetLife());
 
 	// 数値にレベルを設定
 	m_pLv->GetMultiValue()->SetNum(CSceneGame::GetPlayer()->GetLevel());
+
+	// 選択操作
+	if (pKeyboard->GetTrigger(DIK_LEFT))
+	{
+		// 選択中番号を減算
+		m_nSelect = (m_nSelect + (SELECT_MAX - 1)) % SELECT_MAX;
+	}
+	else if (pKeyboard->GetTrigger(DIK_RIGHT))
+	{
+		// 選択中番号を加算
+		m_nSelect = (m_nSelect + 1) % SELECT_MAX;
+	}
+
+	// 選択中のカラーを設定
+	m_apShop[m_nOldSelect]->SetColor(D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f));	// 過去の選択を暗くする
+	m_apShop[m_nSelect]->SetColor(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));		// 現在の選択を明るくする
 
 	// オブジェクト2D情報の更新
 	m_pBg->Update();
@@ -260,6 +334,13 @@ void CShopManager::SetEnableDraw(const bool bDraw)
 	m_pIconExp->SetEnableDraw(bDraw);		// 経験値アイコン情報
 	m_pLife->SetEnableDraw(bDraw);			// ターゲット体力情報
 	m_pLv->SetEnableDraw(bDraw);			// プレイヤーレベル情報
+
+	for (int nCntShop = 0; nCntShop < MAX_SHOP; nCntShop++)
+	{ // ショップの品目数分繰り返す
+
+		// 引数の描画状況を設定
+		m_apShop[nCntShop]->SetEnableDraw(bDraw);	// ショップ情報
+	}
 }
 
 //============================================================

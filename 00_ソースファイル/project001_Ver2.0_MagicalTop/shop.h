@@ -29,6 +29,14 @@ class CValueUI;	// 数字UIクラス
 class CShop : public CObject
 {
 public:
+	// テクスチャ列挙
+	enum TEXTURE
+	{
+		TEXTURE_LIFE = 0,	// 体力テクスチャ
+		TEXTURE_LV,			// レベルテクスチャ
+		TEXTURE_MAX,		// この列挙型の総数
+	};
+
 	// 購入列挙
 	enum BUY
 	{
@@ -52,6 +60,11 @@ public:
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
 	void Draw(void);	// 描画
+	void SetEnableDraw(const bool bDraw);	// 描画状況設定
+	void SetPriority(const int nPriority);	// 優先順位設定
+
+	// オーバーロードしたオーバーライド関数
+	HRESULT Init(const BUY buy);	// 初期化
 
 	// 静的メンバ関数
 	static CShop *Create	// 生成
@@ -63,12 +76,24 @@ public:
 	// メンバ関数
 	void Set(const BUY buy);	// 設定
 	BUY  Get(void);				// 取得
+	void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
+	void SetColor(const D3DXCOLOR& rCol);		// 色設定
+	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
+	D3DXCOLOR GetColor(void) const;				// 色取得
 
 private:
+	// メンバ関数
+	void SetPositionRelative(void);	// 相対位置設定
+
+	// 静的メンバ変数
+	static const char *mc_apTextureFile[];	// テクスチャ定数
+
 	// メンバ変数
 	CAnim2D *m_pIcon;	// 購入品アイコン
 	CValueUI *m_pLife;	// 必要体力
 	CValueUI *m_pLv;	// 必要レベル
+	D3DXVECTOR3 m_pos;	// 位置
+	D3DXCOLOR m_col;	// 色
 	BUY m_buy;			// 購入品
 };
 
