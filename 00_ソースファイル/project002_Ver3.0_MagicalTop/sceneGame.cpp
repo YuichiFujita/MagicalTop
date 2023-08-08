@@ -236,6 +236,9 @@ void CSceneGame::Update(void)
 	}
 	else { assert(false); }	// 非使用中
 
+	// シーンの更新
+	CScene::Update();
+
 	// TODO：遷移のタイミングで壊れる問題シーンにも死亡フラグ追加で回避
 }
 

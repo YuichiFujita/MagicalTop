@@ -8,6 +8,10 @@
 //	インクルードファイル
 //************************************************************
 #include "scene.h"
+#include "manager.h"
+#include "renderer.h"
+#include "light.h"
+#include "camera.h"
 #include "sceneTitle.h"
 #include "sceneGame.h"
 #include "sceneResult.h"
@@ -29,6 +33,36 @@ CScene::CScene()
 CScene::~CScene()
 {
 
+}
+
+//============================================================
+//	更新処理
+//============================================================
+void CScene::Update(void)
+{
+	if (USED(CManager::GetLight()))
+	{ // 使用中の場合
+
+		// ライトの更新
+		CManager::GetLight()->Update();
+	}
+	else { assert(false); }	// 非使用中
+
+	if (USED(CManager::GetCamera()))
+	{ // 使用中の場合
+
+		// カメラの更新
+		CManager::GetCamera()->Update();
+	}
+	else { assert(false); }	// 非使用中
+
+	if (USED(CManager::GetRenderer()))
+	{ // 使用中の場合
+
+		// レンダラーの更新
+		CManager::GetRenderer()->Update();
+	}
+	else { assert(false); }	// 非使用中
 }
 
 //============================================================

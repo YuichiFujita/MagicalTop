@@ -43,7 +43,7 @@
 #define PLAY_JUMP		(20.0f)	// プレイヤージャンプ量
 #define PLAY_GRAVITY	(1.0f)	// プレイヤー重力
 #define PLAY_RADIUS		(20.0f)	// プレイヤー半径
-#define PLAY_LIFE		(20)	// プレイヤー体力
+#define PLAY_LIFE		(250)	// プレイヤー体力
 #define NORMAL_CNT		(180)	// 通常状態に移行するまでのカウンター
 
 //************************************************************

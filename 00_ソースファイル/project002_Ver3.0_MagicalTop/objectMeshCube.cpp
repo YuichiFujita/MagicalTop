@@ -125,13 +125,13 @@ HRESULT CObjectMeshCube::Init(void)
 	m_meshCube.texState   = TEXSTATE_ONE;		// テクスチャの使用状態
 
 	// テクスチャインデックスの初期化
-	m_meshCube.texID.All	= 0;	// 全面のテクスチャインデックス
-	m_meshCube.texID.Left	= 0;	// 左のテクスチャインデックス
-	m_meshCube.texID.Right	= 0;	// 右のテクスチャインデックス
-	m_meshCube.texID.Bottom	= 0;	// 下のテクスチャインデックス
-	m_meshCube.texID.Top	= 0;	// 上のテクスチャインデックス
-	m_meshCube.texID.Near	= 0;	// 前のテクスチャインデックス
-	m_meshCube.texID.Far	= 0;	// 後のテクスチャインデックス
+	m_meshCube.texID.All	= NONE_IDX;	// 全面のテクスチャインデックス
+	m_meshCube.texID.Left	= NONE_IDX;	// 左のテクスチャインデックス
+	m_meshCube.texID.Right	= NONE_IDX;	// 右のテクスチャインデックス
+	m_meshCube.texID.Bottom	= NONE_IDX;	// 下のテクスチャインデックス
+	m_meshCube.texID.Top	= NONE_IDX;	// 上のテクスチャインデックス
+	m_meshCube.texID.Near	= NONE_IDX;	// 前のテクスチャインデックス
+	m_meshCube.texID.Far	= NONE_IDX;	// 後のテクスチャインデックス
 
 	// テクスチャ分割数の初期化
 	m_meshCube.aTexPart[0] = VEC2_ONE;	// 分割数 x

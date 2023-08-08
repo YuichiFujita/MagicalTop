@@ -87,6 +87,9 @@ void CSceneResult::Update(void)
 		// シーンの設定
 		CManager::SetScene(MODE_TITLE);	// タイトル画面
 	}
+
+	// シーンの更新
+	CScene::Update();
 }
 
 //============================================================

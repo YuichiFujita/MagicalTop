@@ -33,8 +33,7 @@ const char *CBubble::mc_apModelFile[] =	// モデル定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CBubble::CBubble(const int nMaxNum, const D3DXVECTOR3& rMaxScale) : CObjectModel(CObject::LABEL_NONE, BUBBLE_PRIO),
-m_maxScale(rMaxScale), m_nMaxNum(nMaxNum)
+CBubble::CBubble(const int nMaxNum, const D3DXVECTOR3& rMaxScale) : CObjectModel(CObject::LABEL_NONE, BUBBLE_PRIO), m_maxScale(rMaxScale), m_nMaxNum(nMaxNum)
 {
 	// メンバ変数をクリア
 	m_pParentObject = NULL;	// 親オブジェクト

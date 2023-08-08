@@ -105,7 +105,7 @@ HRESULT CTarget::Init(void)
 		CObjectMeshCube::BORDERSTATE_ON,	// 縁取り状態
 		CUBE_BORD,							// 縁取り太さ
 		CObjectMeshCube::TEXSTATE_ONE,		// テクスチャ状態
-		CObjectMeshCube::FACETEX(-1),		// テクスチャ種類
+		CObjectMeshCube::FACETEX(NONE_IDX),	// テクスチャ種類
 		VEC2_ONE,		// テクスチャ分割数 x
 		VEC2_ONE,		// テクスチャ分割数 y
 		VEC2_ONE,		// テクスチャ分割数 z

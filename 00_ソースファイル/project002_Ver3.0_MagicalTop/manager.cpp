@@ -403,30 +403,6 @@ void CManager::Update(void)
 		m_pScene->Update();
 	}
 	else { assert(false); }	// 非使用中
-
-	if (USED(m_pLight))
-	{ // 使用中の場合
-
-		// ライトの更新
-		m_pLight->Update();
-	}
-	else { assert(false); }	// 非使用中
-
-	if (USED(m_pCamera))
-	{ // 使用中の場合
-
-		// カメラの更新
-		m_pCamera->Update();
-	}
-	else { assert(false); }	// 非使用中
-
-	if (USED(m_pRenderer))
-	{ // 使用中の場合
-
-		// レンダラーの更新
-		m_pRenderer->Update();
-	}
-	else { assert(false); }	// 非使用中
 }
 
 //============================================================
