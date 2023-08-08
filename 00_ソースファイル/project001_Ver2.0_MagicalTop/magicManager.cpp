@@ -51,6 +51,7 @@ CMagicManager::CMagicManager()
 	m_pMana = NULL;						// マナの情報
 	m_magic = CMagic::TYPE_LV0_NORMAL;	// 魔法
 	m_state = STATE_NORMAL;				// 状態
+	m_nCounterMagic = 0;				// 魔法管理カウンター
 	m_nCounterState = 0;				// 状態管理カウンター
 	m_nCounterHeal = 0;					// 回復管理カウンター
 }
@@ -73,6 +74,7 @@ HRESULT CMagicManager::Init(void)
 	m_pMana = NULL;						// マナの情報
 	m_magic = CMagic::TYPE_LV2_WIND;	// 魔法			// TODO：魔法初期値変更
 	m_state = STATE_NORMAL;				// 状態
+	m_nCounterMagic = 0;				// 魔法管理カウンター
 	m_nCounterState = 0;				// 状態管理カウンター
 	m_nCounterHeal = 0;					// 回復管理カウンター
 
@@ -126,6 +128,13 @@ void CMagicManager::Uninit(void)
 //============================================================
 void CMagicManager::Update(void)
 {
+	if (m_nCounterMagic > 0)
+	{ // カウンターが 0より大きい場合
+
+		// カウンターを減算
+		m_nCounterMagic--;
+	}
+
 	switch (m_state)
 	{ // 状態ごとの処理
 	case STATE_NORMAL:	// 通常状態
@@ -379,8 +388,9 @@ bool CMagicManager::ShotMagic(void)
 	// ポインタを宣言
 	CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤーの情報
 
-	if (m_pMana->GetNum() > 0)
-	{ // マナがある場合
+	if (m_pMana->GetNum() > 0
+	&&  m_nCounterMagic <= 0)
+	{ // マナがある且つ、クールタイムが終了した場合
 
 		for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)
 		{ // ロックオンの最大数分繰り返す
@@ -416,6 +426,9 @@ bool CMagicManager::ShotMagic(void)
 					VEC3_ZERO,	// 向き
 					vecMove		// 移動方向
 				);
+
+				// カウンターを設定
+				m_nCounterMagic = status.nCoolTime;
 
 				// 発射数を加算
 				nNumShot++;
@@ -460,6 +473,9 @@ bool CMagicManager::ShotMagic(void)
 				VEC3_ZERO,	// 向き
 				vecMove		// 移動方向
 			);
+
+			// カウンターを設定
+			m_nCounterMagic = status.nCoolTime;
 
 			// 発射数を加算
 			nNumShot++;

@@ -56,6 +56,7 @@ public:
 		int		nLock;			// ロックオン数
 		int		nLife;			// 寿命
 		int		nDamage;		// 攻撃力
+		int		nCoolTime;		// クールタイム
 		float	fRadius;		// 半径
 		float	fHeight;		// 縦幅
 		float	fMove;			// 移動量

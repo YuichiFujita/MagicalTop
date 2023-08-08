@@ -79,6 +79,7 @@ private:
 	CObjectGauge2D *m_pMana;	// マナの情報
 	CMagic::TYPE m_magic;		// 魔法
 	STATE m_state;				// 状態
+	int m_nCounterMagic;		// 魔法管理カウンター
 	int m_nCounterState;		// 状態管理カウンター
 	int m_nCounterHeal;			// 回復管理カウンター
 };

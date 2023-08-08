@@ -676,38 +676,44 @@ void CMagic::LoadSetup(void)
 							else if (strcmp(&aString[0], "LOCK") == 0)
 							{ // 読み込んだ文字列が LOCK の場合
 
-								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_aStatusInfo[nType].nLock);	// ロックオン数を読み込む
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nType].nLock);		// ロックオン数を読み込む
 							}
 							else if (strcmp(&aString[0], "LIFE") == 0)
 							{ // 読み込んだ文字列が LIFE の場合
 
-								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_aStatusInfo[nType].nLife);	// 寿命を読み込む
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nType].nLife);		// 寿命を読み込む
 							}
 							else if (strcmp(&aString[0], "DAMAGE") == 0)
 							{ // 読み込んだ文字列が DAMAGE の場合
 
-								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_aStatusInfo[nType].nDamage);	// 攻撃力を読み込む
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nType].nDamage);		// 攻撃力を読み込む
+							}
+							else if (strcmp(&aString[0], "COOLTIME") == 0)
+							{ // 読み込んだ文字列が COOLTIME の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nType].nCoolTime);	// クールタイムを読み込む
 							}
 							else if (strcmp(&aString[0], "RADIUS") == 0)
 							{ // 読み込んだ文字列が RADIUS の場合
 
-								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fRadius);	// 半径を読み込む
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fRadius);		// 半径を読み込む
 							}
 							else if (strcmp(&aString[0], "HEIGHT") == 0)
 							{ // 読み込んだ文字列が HEIGHT の場合
 
-								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fHeight);	// 縦幅を読み込む
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fHeight);		// 縦幅を読み込む
 							}
 							else if (strcmp(&aString[0], "MOVE") == 0)
 							{ // 読み込んだ文字列が MOVE の場合
 
-								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fMove);	// 移動量を読み込む
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fMove);		// 移動量を読み込む
 							}
 							else if (strcmp(&aString[0], "VIEW_RADIUS") == 0)
 							{ // 読み込んだ文字列が VIEW_RADIUS の場合
