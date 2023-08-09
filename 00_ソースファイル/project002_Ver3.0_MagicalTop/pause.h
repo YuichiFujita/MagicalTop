@@ -1,51 +1,57 @@
 //============================================================
 //
-//	レンダラーヘッダー [renderer.h]
+//	ポーズヘッダー [pause.h]
 //	Author：藤田勇一
 //
 //============================================================
 //************************************************************
 //	二重インクルード防止
 //************************************************************
-#ifndef _RENDERER_H_
-#define _RENDERER_H_
+#ifndef _PAUSE_H_
+#define _PAUSE_H_
 
 //************************************************************
 //	インクルードファイル
 //************************************************************
 #include "main.h"
+#include "object.h"
+
+//************************************************************
+//	前方宣言
+//************************************************************
+class CObject2D;	// オブジェクト2Dクラス
 
 //************************************************************
 //	クラス定義
 //************************************************************
-// レンダラークラス
-class CRenderer
+// ポーズクラス
+class CPause
 {
 public:
 	// コンストラクタ
-	CRenderer();
+	CPause();
 
 	// デストラクタ
-	~CRenderer();
+	~CPause();
 
-	// メンバ関数
-	HRESULT Init(HWND hWnd, BOOL bWindow);		// 初期化
+	// オーバーライド関数
+	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
 	void Draw(void);	// 描画
-	LPDIRECT3DDEVICE9 GetDevice(void) const;	// デバイス取得
+	void SetEnableDraw(const bool bDraw);	// 描画状況設定
 
 	// 静的メンバ関数
-	static CRenderer *Create(HWND hWnd);			// 生成
-	static HRESULT Release(CRenderer *&prRenderer);	// 破棄
+	static CPause *Create(void);				// 生成
+	static HRESULT Release(CPause *&prPause);	// 破棄
+
+	// メンバ関数
+	bool IsPause(void);	// ポーズ状況取得
 
 private:
-	// メンバ関数
-	HRESULT CRenderer::CreateDevice(HWND hWnd, D3DPRESENT_PARAMETERS d3dpp);	// デバイス生成
-
 	// メンバ変数
-	LPDIRECT3D9			m_pD3D;			// Direct3Dオブジェクト
-	LPDIRECT3DDEVICE9	m_pD3DDevice;	// Direct3Dデバイス
+	CObject2D *m_pTitle;	// タイトル情報
+	bool m_bPause;	// ポーズ状況
 };
 
-#endif	// _RENDERER_H_
+#endif	// _PAUSE_H_

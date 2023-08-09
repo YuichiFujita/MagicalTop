@@ -346,8 +346,9 @@ bool CMagic::CollisionEnemy(void)
 					continue;
 				}
 
-				if (pObjCheck->GetState() == CEnemy::STATE_SPAWN)
-				{ // 敵の状態がスポーン状態の場合
+				if (pObjCheck->GetState() == CEnemy::STATE_SPAWN
+				||  pObjCheck->GetState() == CEnemy::STATE_DEATH)
+				{ // 敵の状態がスポーンまたは死亡状態の場合
 
 					// 次のオブジェクトへのポインタを代入
 					pObjCheck = pObjectNext;

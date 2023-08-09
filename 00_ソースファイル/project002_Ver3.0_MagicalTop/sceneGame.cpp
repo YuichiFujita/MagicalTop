@@ -14,6 +14,7 @@
 
 #include "waveManager.h"
 #include "stage.h"
+#include "pause.h"
 #include "target.h"
 #include "player.h"
 #include "score.h"
@@ -32,6 +33,7 @@
 //	静的メンバ変数宣言
 //************************************************************
 CWaveManager *CSceneGame::m_pWaveManager = NULL;	// ウェーブマネージャー
+CPause	*CSceneGame::m_pPause	= NULL;				// ポーズ
 CStage	*CSceneGame::m_pStage	= NULL;				// ステージ
 CPlayer	*CSceneGame::m_pPlayer	= NULL;				// プレイヤーオブジェクト
 CField	*CSceneGame::m_pField	= NULL;				// 地面オブジェクト
@@ -66,6 +68,16 @@ HRESULT CSceneGame::Init(void)
 	// ウェーブマネージャーの生成
 	m_pWaveManager = CWaveManager::Create();
 	if (UNUSED(m_pWaveManager))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// ポーズの生成
+	m_pPause = CPause::Create();
+	if (UNUSED(m_pPause))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -195,6 +207,15 @@ HRESULT CSceneGame::Uninit(void)
 		return E_FAIL;
 	}
 
+	// ポーズの破棄
+	if (FAILED(CPause::Release(m_pPause)))
+	{ // 破棄に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// ステージの破棄
 	if (FAILED(CStage::Release(m_pStage)))
 	{ // 破棄に失敗した場合
@@ -220,24 +241,36 @@ HRESULT CSceneGame::Uninit(void)
 //============================================================
 void CSceneGame::Update(void)
 {
-	if (USED(m_pStage))
+	if (USED(m_pPause))
 	{ // 使用中の場合
 
-		// ステージの更新
-		m_pStage->Update();
+		// ポーズの更新
+		m_pPause->Update();
 	}
 	else { assert(false); }	// 非使用中
 
-	if (USED(m_pWaveManager))
-	{ // 使用中の場合
+	if (!m_pPause->IsPause())
+	{ // ポーズ中ではない場合
 
-		// ウェーブマネージャーの更新
-		m_pWaveManager->Update();
+		if (USED(m_pStage))
+		{ // 使用中の場合
+
+			// ステージの更新
+			m_pStage->Update();
+		}
+		else { assert(false); }	// 非使用中
+
+		if (USED(m_pWaveManager))
+		{ // 使用中の場合
+
+			// ウェーブマネージャーの更新
+			m_pWaveManager->Update();
+		}
+		else { assert(false); }	// 非使用中
+
+		// シーンの更新
+		CScene::Update();
 	}
-	else { assert(false); }	// 非使用中
-
-	// シーンの更新
-	CScene::Update();
 
 	// TODO：遷移のタイミングで壊れる問題シーンにも死亡フラグ追加で回避
 }
@@ -257,6 +290,15 @@ CWaveManager *CSceneGame::GetWaveManager(void)
 {
 	// ウェーブマネージャーのポインタを返す
 	return m_pWaveManager;
+}
+
+//============================================================
+//	ポーズ取得処理
+//============================================================
+CPause *CSceneGame::GetPause(void)
+{
+	// ポーズのポインタを返す
+	return m_pPause;
 }
 
 //============================================================

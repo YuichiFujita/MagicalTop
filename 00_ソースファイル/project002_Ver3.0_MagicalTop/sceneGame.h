@@ -20,6 +20,7 @@
 //	前方宣言
 //************************************************************
 class CWaveManager;	// ウェーブマネージャークラス
+class CPause;		// ポーズクラス
 class CStage;		// ステージクラス
 class CPlayer;		// プレイヤークラス
 class CTarget;		// ターゲットクラス
@@ -48,6 +49,7 @@ public:
 
 	// 静的メンバ関数
 	static CWaveManager	*GetWaveManager(void);	// ウェーブマネージャー取得
+	static CPause		*GetPause(void);		// ポーズ取得
 	static CStage		*GetStage(void);		// ステージ取得
 	static CPlayer		*GetPlayer(void);		// プレイヤー取得
 	static CTarget		*GetTarget(void);		// ターゲット取得
@@ -58,6 +60,7 @@ public:
 private:
 	// 静的メンバ変数
 	static CWaveManager	*m_pWaveManager;	// ウェーブマネージャー
+	static CPause		*m_pPause;			// ポーズ
 	static CStage		*m_pStage;			// ステージ
 	static CPlayer		*m_pPlayer;			// プレイヤーオブジェクト
 	static CTarget		*m_pTarget;			// ターゲットオブジェクト
