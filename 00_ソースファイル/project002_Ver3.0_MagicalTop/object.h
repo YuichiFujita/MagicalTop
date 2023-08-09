@@ -56,7 +56,6 @@ public:
 	typedef enum
 	{
 		LABEL_NONE = 0,		// なし
-		LABEL_PAUSE,		// ポーズ
 		LABEL_PLAYER,		// プレイヤー
 		LABEL_ENEMY,		// 敵
 		LABEL_TARGET,		// ターゲット

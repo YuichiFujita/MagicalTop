@@ -61,6 +61,13 @@ public:
 	// デストラクタ
 	~CStage();
 
+	// ステージ風構造体
+	typedef struct
+	{
+		D3DXVECTOR3 vecWind;	// 風量
+		int nCounter;	// 風量変更カウンター
+	}StageWind;
+
 	// ステージエリア構造体
 	typedef struct
 	{
@@ -92,7 +99,8 @@ public:
 	StageLimit GetStageLimit(void) const;			// ステージ範囲取得
 	void SetStageArea(const int nID, const StageArea& rArea);	// ステージエリア設定
 	StageArea GetStageArea(const int nID) const;				// ステージエリア取得
-	AREA GetAreaPlayer(void) const;	// プレイヤーの現在エリア取得
+	AREA GetAreaPlayer(void) const;		// プレイヤーの現在エリア取得
+	D3DXVECTOR3 GetVecWind(void) const;	// 風の方向取得
 
 	// 静的メンバ関数
 	static CStage *Create(void);				// 生成
@@ -107,6 +115,7 @@ private:
 
 	// メンバ変数
 	CObject3D *m_pStageArea;			// ステージエリア表示の情報
+	StageWind  m_stageWind;				// ステージ風
 	StageArea  m_aStageArea[AREA_MAX];	// ステージエリア
 	StageLimit m_stageLimit;			// ステージ範囲
 	AREA m_area;	// プレイヤーの現在エリア

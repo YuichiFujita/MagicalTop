@@ -62,8 +62,6 @@ public:
 	void Update(void);	// 更新
 	void LockOnMagic(const D3DXVECTOR3& rPos);	// 魔法ロックオン
 	bool ShotMagic(void);						// 魔法発射
-	void SetMagic(const CMagic::TYPE type);		// 魔法設定
-	CMagic::TYPE GetMagic(void) const;			// 魔法取得
 	void DeleteLockOn(void);					// 魔法ロックオン全削除
 
 	// 静的メンバ関数
@@ -77,7 +75,6 @@ private:
 	// メンバ変数
 	CLockCursor *m_apLockCursor[MAX_LOCK];	// ロックオン表示情報
 	CObjectGauge2D *m_pMana;	// マナの情報
-	CMagic::TYPE m_magic;		// 魔法
 	STATE m_state;				// 状態
 	int m_nCounterMagic;		// 魔法管理カウンター
 	int m_nCounterState;		// 状態管理カウンター

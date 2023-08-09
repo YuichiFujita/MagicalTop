@@ -570,7 +570,7 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 	}
 
 	// 移動操作
-	if (pKeyboard->GetPress(DIK_W))
+	if (pKeyboard->GetPress(DIK_W) || pPad->GetPressLStickY() > 0.0f)
 	{ // 奥移動の操作が行われた場合
 
 		// 移動量を更新
@@ -580,7 +580,7 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 		// 目標向きを更新
 		m_destRot.y = D3DXToRadian(180 - (PULSROT_MOVEZ * nRotation)) + rot.y;
 	}
-	else if (pKeyboard->GetPress(DIK_S))
+	else if (pKeyboard->GetPress(DIK_S) || pPad->GetPressLStickY() < 0.0f)
 	{ // 手前移動の操作が行われた場合
 
 		// 移動量を更新
@@ -592,7 +592,7 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 	}
 
 	// 移動量増加・反転操作
-	else if (pKeyboard->GetPress(DIK_A))
+	else if (pKeyboard->GetPress(DIK_A) || pPad->GetPressLStickX() < 0.0f)
 	{ // 左移動の操作が行われた場合
 
 		if (m_rotation == ROTATION_LEFT)
@@ -612,7 +612,7 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 			m_rotation = ROTATION_LEFT;
 		}
 	}
-	else if (pKeyboard->GetPress(DIK_D))
+	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPressLStickX() > 0.0f)
 	{ // 右移動の操作が行われた場合
 
 		if (m_rotation == ROTATION_RIGHT)
@@ -789,7 +789,7 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion, D3DXVECTOR3& rPos)
 	// 魔法のロックオン
 	m_pMagic->LockOnMagic(rPos);
 
-	if (pKeyboard->GetTrigger(DIK_RETURN))
+	if (pKeyboard->GetTrigger(DIK_RETURN) || pPad->GetTrigger(CInputPad::KEY_A))
 	{ // 魔法の操作が行われた場合
 
 		// 魔法の発射

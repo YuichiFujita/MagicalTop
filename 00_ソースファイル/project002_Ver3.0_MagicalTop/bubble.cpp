@@ -95,7 +95,7 @@ void CBubble::Update(void)
 
 		// バブルの位置を求める
 		posBubble = posParent;	// 親オブジェクトの座標代入
-		posBubble.y += m_pParentObject->GetHeight() * 0.5f;	// オブジェクトの縦幅の半分を加算
+		//posBubble.y += m_pParentObject->GetHeight() * 0.5f;	// オブジェクトの縦幅の半分を加算
 
 		// バブルの拡大率を求める
 		scaleBubble.x = m_nHitNum * (m_maxScale.x / (float)m_nMaxNum);
@@ -201,7 +201,7 @@ void CBubble::AddHitNum(const int nAdd)
 void CBubble::SetHitNum(const int nNum)
 {
 	// 引数の値をヒット数に設定
-	m_nHitNum += nNum;
+	m_nHitNum = nNum;
 
 	// 範囲内制限
 	useful::LimitNum(m_nHitNum, 0, m_nMaxNum);

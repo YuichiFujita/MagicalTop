@@ -49,7 +49,6 @@ CMagicManager::CMagicManager()
 	// メンバ変数をクリア
 	memset(&m_apLockCursor[0], 0, sizeof(m_apLockCursor));	// ロックオン表示情報
 	m_pMana = NULL;				// マナの情報
-	m_magic = CMagic::TYPE_FLY;	// 魔法
 	m_state = STATE_NORMAL;		// 状態
 	m_nCounterMagic = 0;		// 魔法管理カウンター
 	m_nCounterState = 0;		// 状態管理カウンター
@@ -72,7 +71,6 @@ HRESULT CMagicManager::Init(void)
 	// メンバ変数を初期化
 	memset(&m_apLockCursor[0], 0, sizeof(m_apLockCursor));	// ロックオン表示情報
 	m_pMana = NULL;				// マナの情報
-	m_magic = CMagic::TYPE_FLY;	// 魔法
 	m_state = STATE_NORMAL;		// 状態
 	m_nCounterMagic = 0;		// 魔法管理カウンター
 	m_nCounterState = 0;		// 状態管理カウンター
@@ -236,7 +234,7 @@ void CMagicManager::Update(void)
 void CMagicManager::LockOnMagic(const D3DXVECTOR3& rPos)
 {
 	// 変数を宣言
-	CMagic::StatusInfo status = CMagic::GetStatusInfo(m_magic);	// 魔法ステータス
+	CMagic::StatusInfo status = CMagic::GetStatusInfo();	// 魔法ステータス
 	int nCurrentLock = 0;	// 現在のロックオン数
 
 	// 変数配列を宣言
@@ -382,7 +380,7 @@ bool CMagicManager::ShotMagic(void)
 	// 変数を宣言
 	D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 rotPlayer = CSceneGame::GetPlayer()->GetRotation();	// プレイヤー向き
-	CMagic::StatusInfo status = CMagic::GetStatusInfo(m_magic);		// 魔法ステータス
+	CMagic::StatusInfo status = CMagic::GetStatusInfo();			// 魔法ステータス
 	int nNumShot = 0;	// 発射数
 	bool bLock = false;	// ロックオン状況
 
@@ -422,7 +420,6 @@ bool CMagicManager::ShotMagic(void)
 				// 魔法オブジェクトの生成
 				CMagic::Create
 				( // 引数
-					m_magic,	// 種類
 					magicPos,	// 位置
 					VEC3_ZERO,	// 向き
 					vecMove		// 移動方向
@@ -469,7 +466,6 @@ bool CMagicManager::ShotMagic(void)
 			// 魔法オブジェクトの生成
 			CMagic::Create
 			( // 引数
-				m_magic,	// 種類
 				magicPos,	// 位置
 				VEC3_ZERO,	// 向き
 				vecMove		// 移動方向
@@ -497,24 +493,6 @@ bool CMagicManager::ShotMagic(void)
 
 	// 発射していない状態を返す
 	return false;
-}
-
-//============================================================
-//	魔法の設定処理
-//============================================================
-void CMagicManager::SetMagic(const CMagic::TYPE type)
-{
-	// 引数の魔法を設定
-	m_magic = type;
-}
-
-//============================================================
-//	魔法取得処理
-//============================================================
-CMagic::TYPE CMagicManager::GetMagic(void) const
-{
-	// 魔法を返す
-	return m_magic;
 }
 
 //============================================================

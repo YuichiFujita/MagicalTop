@@ -82,7 +82,11 @@ HRESULT CSceneResult::Uninit(void)
 //============================================================
 void CSceneResult::Update(void)
 {
-	if (CManager::GetKeyboard()->GetTrigger(DIK_RETURN))
+	if (CManager::GetKeyboard()->GetTrigger(DIK_RETURN)
+	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_A)
+	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_B)
+	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_X)
+	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_Y))
 	{
 		// シーンの設定
 		CManager::SetScene(MODE_TITLE);	// タイトル画面

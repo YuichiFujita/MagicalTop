@@ -87,7 +87,7 @@ void CPause::Update(void)
 	if (CManager::GetFade()->GetState() == CFade::FADE_NONE)
 	{ // フェードが何もしない状態の場合
 
-		if (CManager::GetKeyboard()->GetTrigger(DIK_P))
+		if (CManager::GetKeyboard()->GetTrigger(DIK_P) || CManager::GetPad()->GetTrigger(CInputPad::KEY_START))
 		{
 			// ポーズ状況を切り替え
 			m_bPause = (!m_bPause) ? true : false;

@@ -149,7 +149,7 @@ void CLevelupManager::Update(void)
 
 	case STATE_INSAFE:		// セーフエリア内状態
 
-		if (pKeyboard->GetTrigger(DIK_1))
+		if (pKeyboard->GetTrigger(DIK_1) || CManager::GetPad()->GetTrigger(CInputPad::KEY_X))
 		{
 			// ショップを表示
 			m_pShopManager->SetEnableDraw(true);
@@ -172,7 +172,7 @@ void CLevelupManager::Update(void)
 
 	case STATE_SELECT:		// 強化選択状態
 
-		if (pKeyboard->GetTrigger(DIK_1))
+		if (pKeyboard->GetTrigger(DIK_1) || CManager::GetPad()->GetTrigger(CInputPad::KEY_X))
 		{
 			// ショップを非表示
 			m_pShopManager->SetEnableDraw(false);

@@ -82,7 +82,11 @@ HRESULT CSceneTitle::Uninit(void)
 //============================================================
 void CSceneTitle::Update(void)
 {
-	if (CManager::GetKeyboard()->GetTrigger(DIK_RETURN))
+	if (CManager::GetKeyboard()->GetTrigger(DIK_RETURN)
+	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_A)
+	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_B)
+	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_X)
+	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_Y))
 	{
 		// ƒV[ƒ“‚Ìİ’è
 		CManager::SetScene(MODE_GAME);	// ƒQ[ƒ€‰æ–Ê

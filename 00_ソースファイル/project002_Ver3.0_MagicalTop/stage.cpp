@@ -40,6 +40,7 @@ CStage::CStage()
 {
 	// メンバ変数をクリア
 	m_pStageArea = NULL;	// ステージエリア表示の情報
+	memset(&m_stageWind, 0, sizeof(m_stageWind));		// ステージ風
 	memset(&m_aStageArea[0], 0, sizeof(m_aStageArea));	// ステージエリア
 	memset(&m_stageLimit, 0, sizeof(m_stageLimit));		// ステージ範囲
 	m_area = AREA_NONE;		// プレイヤーの現在エリア
@@ -63,6 +64,7 @@ HRESULT CStage::Init(void)
 
 	// メンバ変数を初期化
 	m_pStageArea = NULL;	// ステージエリア表示の情報
+	memset(&m_stageWind, 0, sizeof(m_stageWind));		// ステージ風
 	memset(&m_aStageArea[0], 0, sizeof(m_aStageArea));	// ステージエリア
 	memset(&m_stageLimit, 0, sizeof(m_stageLimit));		// ステージ範囲
 	m_area = AREA_NONE;		// プレイヤーの現在エリア
@@ -143,6 +145,42 @@ void CStage::Update(void)
 
 	// 例外処理
 	assert(m_area != AREA_NONE);	// エリア外
+
+	// TODO：風速
+#if 0
+	if (m_stageWind.nCounter < 60)
+	{
+		// カウンターを加算
+		m_stageWind.nCounter++;
+	}
+	else
+	{
+
+		// 変数を宣言
+		float fRot = (float)(rand() % 629 - 314) * 0.01f;	// 向き
+		float fScale = (float)(rand() % 8 + 1);				// 大きさ
+
+#if 0
+		int nRRRRot = rand() % 4;
+		float fRot = 0.0f;
+
+		for (int nCnt = 0; nCnt <= nRRRRot; nCnt++)
+		{
+			fRot += D3DX_PI * 0.5f;
+		}
+#endif
+
+		// カウンターを初期化
+		m_stageWind.nCounter = 0;
+
+		// 風のベクトルを設定
+		m_stageWind.vecWind.x = sinf(fRot) * fScale;
+		m_stageWind.vecWind.y = 0.0f;
+		m_stageWind.vecWind.z = cosf(fRot) * fScale;
+	}
+
+	CManager::GetDebugProc()->Print("%f %f %f\n", m_stageWind.vecWind.x, m_stageWind.vecWind.y, m_stageWind.vecWind.z);
+#endif
 }
 
 //============================================================
@@ -251,6 +289,15 @@ CStage::AREA CStage::GetAreaPlayer(void) const
 {
 	// プレイヤーの現在エリアを返す
 	return m_area;
+}
+
+//============================================================
+//	風の方向取得処理
+//============================================================
+D3DXVECTOR3 CStage::GetVecWind(void) const
+{
+	// 風の方向を返す
+	return m_stageWind.vecWind;
 }
 
 //============================================================

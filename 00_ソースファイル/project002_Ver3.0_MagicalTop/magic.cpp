@@ -16,6 +16,8 @@
 #include "effect3D.h"
 #include "enemy.h"
 #include "field.h"
+#include "stage.h"
+#include "bubble.h"
 
 //************************************************************
 //	マクロ定義
@@ -25,7 +27,7 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
-CMagic::StatusInfo CMagic::m_aStatusInfo[CMagic::TYPE_MAX] = {};	// ステータス情報
+CMagic::StatusInfo CMagic::m_statusInfo = {};	// ステータス情報
 
 //************************************************************
 //	子クラス [CMagic] のメンバ関数
@@ -33,15 +35,15 @@ CMagic::StatusInfo CMagic::m_aStatusInfo[CMagic::TYPE_MAX] = {};	// ステータス情
 //============================================================
 //	コンストラクタ
 //============================================================
-CMagic::CMagic(const TYPE type) : CObject(CObject::LABEL_MAGIC), m_status(m_aStatusInfo[type])
+CMagic::CMagic() : CObject(CObject::LABEL_MAGIC)
 {
 	// メンバ変数をクリア
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
+	m_pBubble	= NULL;			// バブル情報
 	m_pos		= VEC3_ZERO;	// 現在位置
 	m_movePos	= VEC3_ZERO;	// 位置移動量
 	m_rot		= VEC3_ZERO;	// 向き
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
-	m_nLife		= 0;			// 寿命
 }
 
 //============================================================
@@ -59,11 +61,21 @@ HRESULT CMagic::Init(void)
 {
 	// メンバ変数を初期化
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
+	m_pBubble	= NULL;			// バブル情報
 	m_pos		= VEC3_ZERO;	// 現在位置
 	m_movePos	= VEC3_ZERO;	// 位置移動量
 	m_rot		= VEC3_ZERO;	// 向き
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
-	m_nLife		= 0;			// 寿命
+
+	// バブル情報の生成
+	m_pBubble = CBubble::Create(this, GetStatusInfo().nLife, D3DXVECTOR3(6.0f, 6.0f, 6.0f), VEC3_ZERO);
+	if (UNUSED(m_pBubble))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// 成功を返す
 	return S_OK;
@@ -74,6 +86,9 @@ HRESULT CMagic::Init(void)
 //============================================================
 void CMagic::Uninit(void)
 {
+	// バブルの終了
+	m_pBubble->Uninit();
+
 	// 魔法を破棄
 	Release();
 }
@@ -83,13 +98,19 @@ void CMagic::Uninit(void)
 //============================================================
 void CMagic::Update(void)
 {
-	if (m_nLife > 0)
-	{ // 寿命が残っている場合
+	// 移動量を加算
+	m_pos += m_movePos;
 
-		// カウンターを減算
-		m_nLife--;
-	}
-	else
+	// 位置に風速を加算
+	m_pos += CSceneGame::GetStage()->GetVecWind();
+
+	// ヒット数を設定
+	m_pBubble->AddHitNum(1);
+
+	// バブルの更新
+	m_pBubble->Update();
+
+	if (m_pBubble->GetHitNum() >= m_statusInfo.nLife)
 	{ // 寿命が来た場合
 
 		// オブジェクトの終了
@@ -99,12 +120,18 @@ void CMagic::Update(void)
 		return;
 	}
 
-	// 移動量を加算
-	m_pos += m_movePos;
-
-	// 敵との当たり判定
 	if (CollisionEnemy())
 	{ // 敵と当たっていた場合
+
+		// オブジェクトの終了
+		Uninit();
+
+		// 関数を抜ける
+		return;
+	}
+
+	if (m_pos.y < CSceneGame::GetField()->GetPositionHeight(m_pos))
+	{ // 地面に当たっている場合
 
 		// オブジェクトの終了
 		Uninit();
@@ -145,32 +172,19 @@ void CMagic::Draw(void)
 //============================================================
 CMagic *CMagic::Create
 (
-	const TYPE type,			// 種類
 	const D3DXVECTOR3& rPos,	// 位置
 	const D3DXVECTOR3& rRot,	// 向き
 	const D3DXVECTOR3& rVec		// 移動方向
 )
 {
 	// ポインタを宣言
-	CMagic *pMagic = NULL;	// 魔法生成用
+	CMagic *pMagic = NULL;		// 魔法生成用
 
 	if (UNUSED(pMagic))
 	{ // 使用されていない場合
 
 		// メモリ確保
-		switch (type)
-		{ // 種類ごとの処理
-		case TYPE_FLY:	// 浮遊魔法
-
-			// 浮遊魔法を生成
-			pMagic = new CFlyMagic(type);
-
-			break;
-
-		default:	// 例外処理
-			assert(false);
-			break;
-		}
+		pMagic = new CMagic;	// 魔法
 	}
 	else { assert(false); return NULL; }	// 使用中
 
@@ -210,15 +224,10 @@ CMagic *CMagic::Create
 //============================================================
 //	ステータス情報取得処理
 //============================================================
-CMagic::StatusInfo CMagic::GetStatusInfo(const TYPE type)
+CMagic::StatusInfo CMagic::GetStatusInfo(void)
 {
-	if (type < TYPE_MAX)
-	{ // 引数のインデックスが使用可能な場合
-
-		// 引数のステータス情報を返す
-		return m_aStatusInfo[type];
-	}
-	else { assert(false); return m_aStatusInfo[0]; }	// 使用不可
+	// ステータス情報を返す
+	return m_statusInfo;
 }
 
 //============================================================
@@ -239,7 +248,7 @@ void CMagic::SetMove(D3DXVECTOR3 vec, const float fMove)
 void CMagic::SetLife(const int nLife)
 {
 	// 引数の寿命を代入
-	m_nLife = nLife;
+	//m_nLife = nLife;
 }
 
 //============================================================
@@ -266,6 +275,15 @@ void CMagic::SetRotation(const D3DXVECTOR3& rRot)
 }
 
 //============================================================
+//	寿命取得処理
+//============================================================
+int CMagic::GetLife(void) const
+{
+	// 寿命を返す
+	return 1;
+}
+
+//============================================================
 //	位置取得処理
 //============================================================
 D3DXVECTOR3 CMagic::GetPosition(void) const
@@ -281,36 +299,6 @@ D3DXVECTOR3 CMagic::GetRotation(void) const
 {
 	// 向きを返す
 	return m_rot;
-}
-
-//============================================================
-//	ステータス情報取得処理
-//============================================================
-CMagic::StatusInfo CMagic::GetStatusInfo(void) const
-{
-	// ステータス情報を返す
-	return m_status;
-}
-
-//============================================================
-//	魔法判定
-//============================================================
-bool CMagic::Collision(CObject *pObject)
-{
-	// 変数を宣言
-	bool bHit = false;	// 当たったかの判定
-
-	// 敵との当たり判定
-	bHit = collision::Circle3D
-	( // 引数
-		m_pos,					// 判定位置
-		pObject->GetPosition(),	// 判定目標位置
-		m_status.fRadius,		// 判定半径
-		pObject->GetRadius()	// 判定目標半径
-	);
-
-	// 当たったかの判定を返す
-	return bHit;
 }
 
 //============================================================
@@ -358,11 +346,17 @@ bool CMagic::CollisionEnemy(void)
 				}
 
 				// 魔法判定
-				if (Collision(pObjCheck))
+				if (collision::Circle3D
+				( // 引数
+					m_pos,						// 判定位置
+					pObjCheck->GetPosition(),	// 判定目標位置
+					20.0f,			// 判定半径
+					pObjCheck->GetRadius()		// 判定目標半径
+				))
 				{ // 魔法に当たっていた場合
 
 					// 敵のヒット処理
-					pObjCheck->Hit(m_status.nDamage);
+					pObjCheck->Hit(m_statusInfo.nDamage);
 
 					// 当たった判定を返す
 					return true;
@@ -378,89 +372,6 @@ bool CMagic::CollisionEnemy(void)
 	return false;
 }
 
-//************************************************************
-//	子クラス [CFlyMagic] のメンバ関数
-//************************************************************
-//============================================================
-//	コンストラクタ
-//============================================================
-CFlyMagic::CFlyMagic(const TYPE type) : CMagic(type)
-{
-
-}
-
-//============================================================
-//	デストラクタ
-//============================================================
-CFlyMagic::~CFlyMagic()
-{
-
-}
-
-//============================================================
-//	初期化処理
-//============================================================
-HRESULT CFlyMagic::Init(void)
-{
-	// 魔法の初期化
-	if (FAILED(CMagic::Init()))
-	{ // 初期化に失敗した場合
-
-		// 失敗を返す
-		return E_FAIL;
-	}
-
-	// 成功を返す
-	return S_OK;
-}
-
-//============================================================
-//	終了処理
-//============================================================
-void CFlyMagic::Uninit(void)
-{
-	// 魔法の終了
-	CMagic::Uninit();
-}
-
-//============================================================
-//	更新処理
-//============================================================
-void CFlyMagic::Update(void)
-{
-	// 変数を宣言
-	D3DXVECTOR3 pos = GetPosition();	// 位置
-
-	if (pos.y <= CSceneGame::GetField()->GetPositionHeight(pos))
-	{ // 地面に当たっている場合
-
-		// オブジェクトの終了
-		Uninit();
-
-		// 関数を抜ける
-		return;
-	}
-
-	// エフェクトを生成
-	CEffect3D::Create(CEffect3D::TYPE_NORMAL, pos, VEC3_ZERO, VEC3_ZERO, D3DXCOLOR(0.6f, 0.65f, 0.0f, 1.0f), 38, 56.0f, 1.8f, 0.06f);
-	CEffect3D::Create(CEffect3D::TYPE_NORMAL, pos, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, 24, 50.0f, 2.3f, 0.06f);
-
-	// 魔法の更新
-	CMagic::Update();
-}
-
-//============================================================
-//	描画処理
-//============================================================
-void CFlyMagic::Draw(void)
-{
-	// 魔法の描画
-	CMagic::Draw();
-}
-
-//************************************************************
-//	子クラス [CMagic] のセットアップ関数
-//************************************************************
 //============================================================
 //	セットアップ処理
 //============================================================
@@ -478,7 +389,7 @@ void CMagic::LoadSetup(void)
 	FILE *pFile;	// ファイルポインタ
 
 	// 静的メンバ変数の情報をクリア
-	memset(&m_aStatusInfo[0], 0, sizeof(m_aStatusInfo));	// ステータス情報
+	memset(&m_statusInfo, 0, sizeof(m_statusInfo));	// ステータス情報
 
 	// ファイルを読み込み形式で開く
 	pFile = fopen(MAGIC_SETUP_TXT, "r");
@@ -520,64 +431,52 @@ void CMagic::LoadSetup(void)
 							else if (strcmp(&aString[0], "LOCK") == 0)
 							{ // 読み込んだ文字列が LOCK の場合
 
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_aStatusInfo[nType].nLock);		// ロックオン数を読み込む
+								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_statusInfo.nLock);		// ロックオン数を読み込む
 							}
 							else if (strcmp(&aString[0], "LIFE") == 0)
 							{ // 読み込んだ文字列が LIFE の場合
 
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_aStatusInfo[nType].nLife);		// 寿命を読み込む
+								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_statusInfo.nLife);		// 寿命を読み込む
 							}
 							else if (strcmp(&aString[0], "DAMAGE") == 0)
 							{ // 読み込んだ文字列が DAMAGE の場合
 
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_aStatusInfo[nType].nDamage);		// 攻撃力を読み込む
+								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_statusInfo.nDamage);		// 攻撃力を読み込む
 							}
 							else if (strcmp(&aString[0], "COOLTIME") == 0)
 							{ // 読み込んだ文字列が COOLTIME の場合
 
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_aStatusInfo[nType].nCoolTime);	// クールタイムを読み込む
-							}
-							else if (strcmp(&aString[0], "RADIUS") == 0)
-							{ // 読み込んだ文字列が RADIUS の場合
-
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fRadius);		// 半径を読み込む
-							}
-							else if (strcmp(&aString[0], "HEIGHT") == 0)
-							{ // 読み込んだ文字列が HEIGHT の場合
-
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fHeight);		// 縦幅を読み込む
+								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_statusInfo.nCoolTime);	// クールタイムを読み込む
 							}
 							else if (strcmp(&aString[0], "MOVE") == 0)
 							{ // 読み込んだ文字列が MOVE の場合
 
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fMove);		// 移動量を読み込む
+								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_statusInfo.fMove);		// 移動量を読み込む
 							}
 							else if (strcmp(&aString[0], "VIEW_RADIUS") == 0)
 							{ // 読み込んだ文字列が VIEW_RADIUS の場合
 
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fViewRadius);	// 視界範囲を読み込む
+								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_statusInfo.fViewRadius);	// 視界範囲を読み込む
 							}
 							else if (strcmp(&aString[0], "SHOT_PARTS") == 0)
 							{ // 読み込んだ文字列が SHOT_PARTS の場合
 
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_aStatusInfo[nType].nShotParts);	// 発射パーツを読み込む
+								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_statusInfo.nShotParts);	// 発射パーツを読み込む
 							}
 							else if (strcmp(&aString[0], "SHOT_POS") == 0)
 							{ // 読み込んだ文字列が SHOT_POS の場合
 
-								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].shotPos.x);	// 発射位置Xを読み込む
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].shotPos.y);	// 発射位置Yを読み込む
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].shotPos.z);	// 発射位置Zを読み込む
+								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_statusInfo.shotPos.x);	// 発射位置Xを読み込む
+								fscanf(pFile, "%f", &m_statusInfo.shotPos.y);	// 発射位置Yを読み込む
+								fscanf(pFile, "%f", &m_statusInfo.shotPos.z);	// 発射位置Zを読み込む
 							}
 						} while (strcmp(&aString[0], "END_MAGICSET") != 0);	// 読み込んだ文字列が END_MAGICSET ではない場合ループ
 					}

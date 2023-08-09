@@ -298,12 +298,12 @@ void CShopManager::Update(void)
 	m_pLv->GetMultiValue()->SetNum(CSceneGame::GetPlayer()->GetLevel());
 
 	// ‘I‘ğ‘€ì
-	if (pKeyboard->GetTrigger(DIK_LEFT))
+	if (pKeyboard->GetTrigger(DIK_LEFT) || pPad->GetTrigger(CInputPad::KEY_LEFT))
 	{
 		// ‘I‘ğ’†”Ô†‚ğŒ¸Z
 		m_nSelect = (m_nSelect + (SELECT_MAX - 1)) % SELECT_MAX;
 	}
-	else if (pKeyboard->GetTrigger(DIK_RIGHT))
+	else if (pKeyboard->GetTrigger(DIK_RIGHT) || pPad->GetTrigger(CInputPad::KEY_RIGHT))
 	{
 		// ‘I‘ğ’†”Ô†‚ğ‰ÁZ
 		m_nSelect = (m_nSelect + 1) % SELECT_MAX;
