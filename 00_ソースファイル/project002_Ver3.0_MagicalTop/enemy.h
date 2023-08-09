@@ -81,6 +81,7 @@ public:
 	typedef struct
 	{
 		D3DXVECTOR3 bullPos;		// 弾の発射位置
+		D3DXVECTOR3 bubbleSize;		// バブルの大きさ
 		int		nLife;				// 体力
 		int		nScore;				// スコア加算量
 		int		nExp;				// 経験値生成量
@@ -96,7 +97,6 @@ public:
 		float	fForwardMove;		// 前進の移動量
 		float	fBackwardMove;		// 後退の移動量
 		float	fLookRevision;		// プレイヤー方向を向く補正係数
-		float	fLifeUp;			// 体力表示のY位置加算量
 		float	fFindRadius;		// 検知範囲
 		float	fAttackRadius;		// 攻撃範囲
 		float	fBackwardRadius;	// 後退範囲

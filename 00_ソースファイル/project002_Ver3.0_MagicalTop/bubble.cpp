@@ -33,11 +33,11 @@ const char *CBubble::mc_apModelFile[] =	// モデル定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CBubble::CBubble(const int nMaxNum, const D3DXVECTOR3& rMaxScale) : CObjectModel(CObject::LABEL_NONE, BUBBLE_PRIO), m_maxScale(rMaxScale), m_nMaxNum(nMaxNum)
+CBubble::CBubble(const int nMaxLevel, const D3DXVECTOR3& rMaxScale) : CObjectModel(CObject::LABEL_NONE, BUBBLE_PRIO), m_maxScale(rMaxScale), m_nMaxLevel(nMaxLevel)
 {
 	// メンバ変数をクリア
 	m_pParentObject = NULL;	// 親オブジェクト
-	m_nHitNum = 0;			// バブルヒット数
+	m_nLevel = 0;			// 大きさレベル
 }
 
 //============================================================
@@ -55,7 +55,7 @@ HRESULT CBubble::Init(void)
 {
 	// メンバ変数を初期化
 	m_pParentObject = NULL;	// 親オブジェクト
-	m_nHitNum = 0;			// バブルヒット数
+	m_nLevel = 0;			// 大きさレベル
 
 	// オブジェクトモデルの初期化
 	if (FAILED(CObjectModel::Init()))
@@ -94,13 +94,13 @@ void CBubble::Update(void)
 		D3DXVECTOR3 scaleBubble = VEC3_ZERO;	// バブル拡大率
 
 		// バブルの位置を求める
-		posBubble = posParent;	// 親オブジェクトの座標代入
-		//posBubble.y += m_pParentObject->GetHeight() * 0.5f;	// オブジェクトの縦幅の半分を加算
+		posBubble = posParent;		// 親オブジェクトの座標代入
+		posBubble.y += m_fPosUp;	// Y位置上昇量を加算
 
 		// バブルの拡大率を求める
-		scaleBubble.x = m_nHitNum * (m_maxScale.x / (float)m_nMaxNum);
-		scaleBubble.y = m_nHitNum * (m_maxScale.y / (float)m_nMaxNum);
-		scaleBubble.z = m_nHitNum * (m_maxScale.z / (float)m_nMaxNum);
+		scaleBubble.x = m_nLevel * (m_maxScale.x / (float)m_nMaxLevel);
+		scaleBubble.y = m_nLevel * (m_maxScale.y / (float)m_nMaxLevel);
+		scaleBubble.z = m_nLevel * (m_maxScale.z / (float)m_nMaxLevel);
 
 		// 位置を設定
 		SetPosition(posBubble);
@@ -123,14 +123,27 @@ void CBubble::Draw(void)
 }
 
 //============================================================
+//	半径取得処理
+//============================================================
+float CBubble::GetRadius(void) const
+{
+	// 変数を宣言
+	D3DXVECTOR3 size = GetScaling();	// 大きさ
+
+	// バブルの大きさの平均サイズを返す
+	return (size.x + size.y + size.z) / 3;
+}
+
+//============================================================
 //	生成処理
 //============================================================
 CBubble *CBubble::Create
 ( // 引数
 	CObject *pObject,				// 親オブジェクト
-	const int nMaxNum,				// 最大値
+	const int nMaxLevel,			// 最大レベル
 	const D3DXVECTOR3& rMaxScale,	// 最大拡大率
 	const D3DXVECTOR3& rPos,		// 位置
+	const float fPosUp,				// Y位置加算量
 	const D3DXVECTOR3& rRot,		// 向き
 	const D3DXVECTOR3& rScale		// 拡大率
 )
@@ -143,7 +156,7 @@ CBubble *CBubble::Create
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pBubble = new CBubble(nMaxNum, rMaxScale);	// バブル
+		pBubble = new CBubble(nMaxLevel, rMaxScale);	// バブル
 	}
 	else { assert(false); return NULL; }	// 使用中
 
@@ -174,6 +187,9 @@ CBubble *CBubble::Create
 		// 大きさを設定
 		pBubble->SetScaling(rScale);
 
+		// Y位置加算量の設定
+		pBubble->SetPositionUp(fPosUp);
+
 		// 親オブジェクトを設定
 		pBubble->SetParentObject(pObject);
 
@@ -184,36 +200,54 @@ CBubble *CBubble::Create
 }
 
 //============================================================
-//	ヒット数加算処理
+//	レベル加算処理
 //============================================================
-void CBubble::AddHitNum(const int nAdd)
+void CBubble::AddLevel(const int nAdd)
 {
-	// ヒット数を引数分加算
-	m_nHitNum += nAdd;
+	// レベルを引数分加算
+	m_nLevel += nAdd;
 
 	// 範囲内制限
-	useful::LimitNum(m_nHitNum, 0, m_nMaxNum);
+	useful::LimitNum(m_nLevel, 0, m_nMaxLevel);
 }
 
 //============================================================
-//	ヒット数設定処理
+//	レベル設定処理
 //============================================================
-void CBubble::SetHitNum(const int nNum)
+void CBubble::SetLevel(const int nNum)
 {
-	// 引数の値をヒット数に設定
-	m_nHitNum = nNum;
+	// 引数の値をレベルに設定
+	m_nLevel = nNum;
 
 	// 範囲内制限
-	useful::LimitNum(m_nHitNum, 0, m_nMaxNum);
+	useful::LimitNum(m_nLevel, 0, m_nMaxLevel);
 }
 
 //============================================================
-//	ヒット数取得処理
+//	レベル取得処理
 //============================================================
-int CBubble::GetHitNum(void) const
+int CBubble::GetLevel(void) const
 {
-	// ヒット数を返す
-	return m_nHitNum;
+	// レベルを返す
+	return m_nLevel;
+}
+
+//============================================================
+//	Y位置加算量の設定処理
+//============================================================
+void CBubble::SetPositionUp(const float fUp)
+{
+	// 引数のY位置加算量を設定
+	m_fPosUp = fUp;
+}
+
+//============================================================
+//	Y位置加算量取得処理
+//============================================================
+float CBubble::GetPositionUp(void) const
+{
+	// Y位置加算量を返す
+	return m_fPosUp;
 }
 
 //============================================================

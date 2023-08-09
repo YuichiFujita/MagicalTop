@@ -39,10 +39,10 @@ public:
 	typedef struct
 	{
 		D3DXVECTOR3 shotPos;	// 発射位置
+		D3DXVECTOR3 bubbleSize;	// バブル大きさ
 		int		nShotParts;		// 発射パーツ
 		int		nLock;			// ロックオン数
 		int		nLife;			// 寿命
-		int		nDamage;		// 攻撃力
 		int		nCoolTime;		// クールタイム
 		float	fMove;			// 移動量
 		float	fViewRadius;	// 視界範囲
@@ -66,10 +66,8 @@ public:
 
 	// メンバ関数
 	void SetMove(D3DXVECTOR3 vec, const float fMove);	// 移動量設定
-	void SetLife(const int nLife);						// 寿命設定
-	void SetPosition(const D3DXVECTOR3& rPos);			// 位置設定
-	void SetRotation(const D3DXVECTOR3& rRot);			// 向き設定
-	int GetLife(void) const;				// 寿命取得
+	void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
+	void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
 	D3DXVECTOR3 GetPosition(void) const;	// 位置取得
 	D3DXVECTOR3 GetRotation(void) const;	// 向き取得
 

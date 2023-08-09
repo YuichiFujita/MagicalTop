@@ -68,7 +68,7 @@ HRESULT CMagic::Init(void)
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
 
 	// バブル情報の生成
-	m_pBubble = CBubble::Create(this, GetStatusInfo().nLife, D3DXVECTOR3(6.0f, 6.0f, 6.0f), VEC3_ZERO);
+	m_pBubble = CBubble::Create(this, m_statusInfo.nLife, m_statusInfo.bubbleSize, VEC3_ZERO, 0.0f);
 	if (UNUSED(m_pBubble))
 	{ // 非使用中の場合
 
@@ -104,13 +104,13 @@ void CMagic::Update(void)
 	// 位置に風速を加算
 	m_pos += CSceneGame::GetStage()->GetVecWind();
 
-	// ヒット数を設定
-	m_pBubble->AddHitNum(1);
+	// バブルレベルを加算
+	m_pBubble->AddLevel(1);
 
 	// バブルの更新
 	m_pBubble->Update();
 
-	if (m_pBubble->GetHitNum() >= m_statusInfo.nLife)
+	if (m_pBubble->GetLevel() >= m_statusInfo.nLife)
 	{ // 寿命が来た場合
 
 		// オブジェクトの終了
@@ -212,9 +212,6 @@ CMagic *CMagic::Create
 		// 移動量を設定
 		pMagic->SetMove(rVec, pMagic->GetStatusInfo().fMove);
 
-		// 寿命の設定
-		pMagic->SetLife(pMagic->GetStatusInfo().nLife);
-
 		// 確保したアドレスを返す
 		return pMagic;
 	}
@@ -243,15 +240,6 @@ void CMagic::SetMove(D3DXVECTOR3 vec, const float fMove)
 }
 
 //============================================================
-//	寿命の設定処理
-//============================================================
-void CMagic::SetLife(const int nLife)
-{
-	// 引数の寿命を代入
-	//m_nLife = nLife;
-}
-
-//============================================================
 //	位置の設定処理
 //============================================================
 void CMagic::SetPosition(const D3DXVECTOR3& rPos)
@@ -272,15 +260,6 @@ void CMagic::SetRotation(const D3DXVECTOR3& rRot)
 	useful::NormalizeRot(m_rot.x);
 	useful::NormalizeRot(m_rot.y);
 	useful::NormalizeRot(m_rot.z);
-}
-
-//============================================================
-//	寿命取得処理
-//============================================================
-int CMagic::GetLife(void) const
-{
-	// 寿命を返す
-	return 1;
 }
 
 //============================================================
@@ -350,13 +329,13 @@ bool CMagic::CollisionEnemy(void)
 				( // 引数
 					m_pos,						// 判定位置
 					pObjCheck->GetPosition(),	// 判定目標位置
-					20.0f,			// 判定半径
+					m_pBubble->GetRadius(),		// 判定半径
 					pObjCheck->GetRadius()		// 判定目標半径
 				))
 				{ // 魔法に当たっていた場合
 
 					// 敵のヒット処理
-					pObjCheck->Hit(m_statusInfo.nDamage);
+					pObjCheck->Hit(0);
 
 					// 当たった判定を返す
 					return true;
@@ -440,12 +419,6 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
 								fscanf(pFile, "%d", &m_statusInfo.nLife);		// 寿命を読み込む
 							}
-							else if (strcmp(&aString[0], "DAMAGE") == 0)
-							{ // 読み込んだ文字列が DAMAGE の場合
-
-								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_statusInfo.nDamage);		// 攻撃力を読み込む
-							}
 							else if (strcmp(&aString[0], "COOLTIME") == 0)
 							{ // 読み込んだ文字列が COOLTIME の場合
 
@@ -477,6 +450,14 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%f", &m_statusInfo.shotPos.x);	// 発射位置Xを読み込む
 								fscanf(pFile, "%f", &m_statusInfo.shotPos.y);	// 発射位置Yを読み込む
 								fscanf(pFile, "%f", &m_statusInfo.shotPos.z);	// 発射位置Zを読み込む
+							}
+							else if (strcmp(&aString[0], "BUBBLE_SIZE") == 0)
+							{ // 読み込んだ文字列が BUBBLE_SIZE の場合
+
+								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_statusInfo.bubbleSize.x);	// バブル大きさXを読み込む
+								fscanf(pFile, "%f", &m_statusInfo.bubbleSize.y);	// バブル大きさYを読み込む
+								fscanf(pFile, "%f", &m_statusInfo.bubbleSize.z);	// バブル大きさZを読み込む
 							}
 						} while (strcmp(&aString[0], "END_MAGICSET") != 0);	// 読み込んだ文字列が END_MAGICSET ではない場合ループ
 					}

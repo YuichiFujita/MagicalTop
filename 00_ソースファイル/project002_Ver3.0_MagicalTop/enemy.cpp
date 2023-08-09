@@ -33,6 +33,9 @@
 #define ENEMY_SETUP_TXT	"data\\TXT\\enemy.txt"	// セットアップテキスト相対パス
 
 // 敵全体マクロ
+#define SIZE_WARNING	(D3DXVECTOR3(160.0f, 160.0f, 0.0f))	// 警告表示の大きさ
+#define WARNING_PRIO	(5)	// 警告表示の優先順位
+
 #define ENE_SPAWN_POSY		(3000.0f)	// スポーンするY座標
 #define ENE_REV				(0.02f)		// 敵の移動量の減衰係数
 #define ENE_GRAVITY			(1.0f)		// 敵の重力
@@ -42,9 +45,14 @@
 #define ENE_DEATH_ADD_POSY	(6.0f)		// 死亡時のY座標上昇量
 #define ENE_DEATH_POSY		(1300.0f)	// 死亡するY座標
 
+#define DAMAGE_CNT		(120)	// ダメージ状態維持カウント
+#define BUBBLE_SUB_CNT	(400)	// バブル消失カウント
+
 // 戦車敵マクロ
 #define ENECAR_REV_MUL		(0.03f)	// 主砲の向き補正値
 #define ENECAR_SHOTRANGE	(0.25f)	// 主砲射撃時の許容される向きの誤差量
+
+#define SPAWN_WAIT_CNT	(40)	// 戦車スポーン上空待機カウント
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -128,7 +136,7 @@ HRESULT CEnemy::Init(void)
 	}
 
 	// オブジェクトビルボードの生成
-	m_pWarning = CObjectBillboard::Create(VEC3_ZERO, D3DXVECTOR3(160.0f, 160.0f, 0.0f));
+	m_pWarning = CObjectBillboard::Create(VEC3_ZERO, SIZE_WARNING);
 	if (UNUSED(m_pWarning))
 	{ // 非使用中の場合
 
@@ -140,8 +148,11 @@ HRESULT CEnemy::Init(void)
 	// テクスチャを登録・割当
 	m_pWarning->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_NORMAL]));
 
+	// 優先順位を設定
+	m_pWarning->SetPriority(WARNING_PRIO);
+
 	// バブルを生成
-	m_pBubble = CBubble::Create(this, 6, D3DXVECTOR3(26.0f, 26.0f, 26.0f), VEC3_ZERO);
+	m_pBubble = CBubble::Create(this, m_status.nLife, m_status.bubbleSize, VEC3_ZERO, m_status.fHeight * 0.5f);
 	if (UNUSED(m_pBubble))
 	{ // 非使用中の場合
 
@@ -233,10 +244,10 @@ void CEnemy::Hit(const int nDmg)
 	if (IsDeath() != true)
 	{ // 死亡フラグが立っていない場合
 
-		// バブルヒット数を加算
-		m_pBubble->AddHitNum(1);
+		// レベルを加算
+		m_pBubble->AddLevel(1);
 
-		if (m_pBubble->GetHitNum() < 6)	// TODO：Bubbleヒット数が定数
+		if (m_pBubble->GetLevel() < m_status.nLife)
 		{ // 生きている場合
 
 			// パーティクル3Dオブジェクトを生成
@@ -560,14 +571,14 @@ void CEnemy::Spawn(void)
 //============================================================
 void CEnemy::Damage(void)
 {
-	if (m_nCounterState < 120)
-	{ // 
+	if (m_nCounterState < DAMAGE_CNT)
+	{ // カウンターが一定値より小さい場合
 
 		// カウンターを加算
 		m_nCounterState++;
 	}
 	else
-	{ // 
+	{ // カウンターが一定値以上の場合
 
 		// カウンターを初期化
 		m_nCounterState = 0;
@@ -929,23 +940,23 @@ void CEnemy::SetPositionWarning(const D3DXVECTOR3& rPos)
 //============================================================
 void CEnemy::SubBubble(void)
 {
-	if (m_pBubble->GetHitNum() > 0)
-	{ // バブルヒット数が 0より大きい場合
+	if (m_pBubble->GetLevel() > 0)
+	{ // バブルレベルが 0より大きい場合
 
-		if (m_nCounterBubble < 800)
-		{ // 
+		if (m_nCounterBubble < BUBBLE_SUB_CNT)
+		{ // カウンターが一定値より小さい場合
 
 			// カウンターを加算
 			m_nCounterBubble++;
 		}
 		else
-		{ // 
+		{ // カウンターが一定値以上の場合
 
 			// カウンターを初期化
 			m_nCounterBubble = 0;
 
-			// バブルヒット数を減算
-			m_pBubble->AddHitNum(-1);
+			// レベルを減算
+			m_pBubble->AddLevel(-1);
 		}
 	}
 }
@@ -1017,7 +1028,7 @@ void CEnemyCar::Update(void)
 
 	case STATE_NORMAL:
 
-		//	バブル削除
+		// バブル削除
 		SubBubble();
 
 		// 敵の動作の更新
@@ -1099,7 +1110,7 @@ void CEnemyCar::Spawn(void)
 	{ // スポーン状態ごとの処理
 	case STATE_SPAWN:
 
-		if (m_nCounterSpawn < 40)	// TODO：定数
+		if (m_nCounterSpawn < SPAWN_WAIT_CNT)
 		{ // カウンターが一定値より小さい場合
 
 			// カウンターを加算
@@ -1531,6 +1542,14 @@ void CEnemy::LoadSetup(void)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].bullPos.y);	// 弾の発射位置Yを読み込む
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].bullPos.z);	// 弾の発射位置Zを読み込む
 							}
+							else if (strcmp(&aString[0], "BUBBLE_SIZE") == 0)
+							{ // 読み込んだ文字列が BUBBLE_SIZE の場合
+
+								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].bubbleSize.x);	// バブルの大きさXを読み込む
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].bubbleSize.y);	// バブルの大きさYを読み込む
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].bubbleSize.z);	// バブルの大きさZを読み込む
+							}
 							else if (strcmp(&aString[0], "SHADOW_RADIUS") == 0)
 							{ // 読み込んだ文字列が SHADOW_RADIUS の場合
 
@@ -1560,12 +1579,6 @@ void CEnemy::LoadSetup(void)
 
 								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].fLookRevision);	// 振り向き補正係数を読み込む
-							}
-							else if (strcmp(&aString[0], "LIFE_POSUP") == 0)
-							{ // 読み込んだ文字列が LIFE_POSUP の場合
-
-								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fLifeUp);			// 体力表示のY位置加算量を読み込む
 							}
 							else if (strcmp(&aString[0], "FIND_RADIUS") == 0)
 							{ // 読み込んだ文字列が FIND_RADIUS の場合

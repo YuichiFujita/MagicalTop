@@ -387,8 +387,7 @@ bool CMagicManager::ShotMagic(void)
 	// ポインタを宣言
 	CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤーの情報
 
-	if (m_pMana->GetNum() > 0
-	&&  m_nCounterMagic <= 0)
+	if (m_pMana->GetNum() > 0 && m_nCounterMagic <= 0)
 	{ // マナがある且つ、クールタイムが終了した場合
 
 		for (int nCntLock = 0; nCntLock < MAX_LOCK; nCntLock++)
@@ -398,7 +397,7 @@ bool CMagicManager::ShotMagic(void)
 			{ // ロックオンしていた場合
 
 				// 変数を宣言
-				D3DXVECTOR3 magicPos, vecMove;	// 発射位置・移動方向
+				D3DXVECTOR3 magicPos, targetPos, vecMove;	// 発射位置・目標位置・移動方向
 				D3DXMATRIX  mtxTrans, mtxWorld;	// 計算用マトリックス
 
 				// ワールドマトリックスの初期化
@@ -415,7 +414,9 @@ bool CMagicManager::ShotMagic(void)
 				magicPos = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
 
 				// 移動方向を求める
-				vecMove = m_apLockCursor[nCntLock]->GetLockObject()->GetPosition() - magicPos;
+				targetPos = m_apLockCursor[nCntLock]->GetLockObject()->GetPosition();			// ロックオンオブジェクトの位置を設定
+				targetPos.y += m_apLockCursor[nCntLock]->GetLockObject()->GetHeight() * 0.5f;	// 発射位置を縦軸の中心に移動
+				vecMove = targetPos - magicPos;	// ベクトルを求める
 
 				// 魔法オブジェクトの生成
 				CMagic::Create
