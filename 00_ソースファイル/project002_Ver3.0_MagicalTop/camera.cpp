@@ -541,7 +541,7 @@ void CCamera::Bargaining(void)
 
 		// 目標の視点の位置を更新
 		m_aCamera[TYPE_MAIN].destPosV.x = m_aCamera[TYPE_MAIN].destPosR.x + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));
-		m_aCamera[TYPE_MAIN].destPosV.y = 1400.0f;	// TODO：定数
+		m_aCamera[TYPE_MAIN].destPosV.y = 1400.0f;
 		m_aCamera[TYPE_MAIN].destPosV.z = m_aCamera[TYPE_MAIN].destPosR.z + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));
 
 		// 目標の位置までの差分を計算

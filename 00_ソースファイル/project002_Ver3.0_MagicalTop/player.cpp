@@ -754,39 +754,14 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 	}
 	else
 	{
+
 #if 1
-		// 変数を宣言
-		int nRotation = (int)area % 2;
+		// 移動量を更新
+		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
+		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
 
-		// 移動量を設定
-		switch (nRotation)
-		{ // 回転方向ごとの処理
-		case ROTATION_LEFT:
-
-			// 移動量を更新
-			m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-			m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(90) + rot.y;
-
-			break;
-
-		case ROTATION_RIGHT:
-
-			// 移動量を更新
-			m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-			m_move.z -= cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(270) + rot.y;
-
-			break;
-
-		default:	// 例外処理
-			assert(false);
-			break;
-		}
+		// 目標向きを更新
+		m_destRot.y = D3DXToRadian(90) + rot.y;
 
 		if (pKeyboard->GetPress(DIK_A) || pPad->GetPressLStickX() < 0.0f)
 		{
@@ -834,6 +809,7 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 			break;
 		}
 #endif
+
 	}
 
 #else	// デバッグ用歩行

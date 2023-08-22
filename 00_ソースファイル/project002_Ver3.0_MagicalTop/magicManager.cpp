@@ -39,6 +39,7 @@
 #define HEAL_SAFE_PLUS	(2)		// 回復状態移行カウンターのセーフエリア時の加算量
 #define HEALCNT_AREAMUL	(10)	// セーフエリア外での回復カウンター設定用係数
 #define SUB_TARGLIFE	(-2)	// セーフエリアでマナ回復時のターゲットへのダメージ量
+#define NUM_DEADZONE	(100)	// デッドゾーンの値
 
 //************************************************************
 //	親クラス [CMagicManager] のメンバ関数
@@ -289,10 +290,10 @@ bool CMagicManager::ShotMagic(void)
 		// 発射向きを設定
 		fRotVec = D3DXToRadian(90) + rot.y;
 	}
-	else if (pPad->GetPressRStickX() >  100
-		 ||  pPad->GetPressRStickX() < -100
-		 ||  pPad->GetPressRStickY() >  100
-		 ||  pPad->GetPressRStickY() < -100)	// TODO：定数
+	else if (pPad->GetPressRStickX() >  NUM_DEADZONE
+		 ||  pPad->GetPressRStickX() < -NUM_DEADZONE
+		 ||  pPad->GetPressRStickY() >  NUM_DEADZONE
+		 ||  pPad->GetPressRStickY() < -NUM_DEADZONE)
 	{
 		// 発射した状態にする
 		bShot = true;

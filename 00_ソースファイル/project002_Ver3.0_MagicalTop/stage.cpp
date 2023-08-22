@@ -20,7 +20,8 @@
 //	マクロ定義
 //************************************************************
 #define STAGE_SETUP_TXT	"data\\TXT\\stage.txt"	// セットアップテキスト相対パス
-#define AREA_PRIO	(2)	// エリア表示の優先順位
+#define AREA_PRIO	(2)			// エリア表示の優先順位
+#define AREA_ROT	(0.025f)	// エリアの回転量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -115,6 +116,7 @@ void CStage::Update(void)
 	// 変数を宣言
 	D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+	D3DXVECTOR3 rotArea = m_pStageArea->GetRotation();				// エリア表示向き
 	float fRadiusPlayer = CSceneGame::GetPlayer()->GetRadius();		// プレイヤー半径
 
 	// 現在のエリアを初期化
@@ -122,6 +124,10 @@ void CStage::Update(void)
 
 	// エリア表示の位置を設定
 	m_pStageArea->SetPosition(posTarget);
+
+	// エリア表示の向きを設定
+	rotArea.y -= AREA_ROT;
+	m_pStageArea->SetRotation(rotArea);
 
 	for (int nCntArea = 0; nCntArea < AREA_MAX; nCntArea++)
 	{ // エリアの最大数分繰り返す
