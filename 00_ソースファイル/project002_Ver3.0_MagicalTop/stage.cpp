@@ -147,7 +147,7 @@ void CStage::Update(void)
 	assert(m_area != AREA_NONE);	// エリア外
 
 	// TODO：風速
-#if 0
+#if 1
 	if (m_stageWind.nCounter < 60)
 	{
 		// カウンターを加算

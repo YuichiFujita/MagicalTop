@@ -191,6 +191,8 @@ public:
 	SHORT GetPressLStickY(int nPlayer = 0);			// プレス取得 (LスティックY)
 	SHORT GetPressRStickX(int nPlayer = 0);			// プレス取得 (RスティックX)
 	SHORT GetPressRStickY(int nPlayer = 0);			// プレス取得 (RスティックY)
+	float GetPressLStickRot(int nPlayer = 0);		// プレス取得 (Lスティック向き)
+	float GetPressRStickRot(int nPlayer = 0);		// プレス取得 (Rスティック向き)
 	bool GetTrigger(KEY nJoyKey, int nPlayer = 0);	// トリガー取得 (ボタン)
 	bool GetRelease(KEY nJoyKey, int nPlayer = 0);	// リリース取得 (ボタン)
 

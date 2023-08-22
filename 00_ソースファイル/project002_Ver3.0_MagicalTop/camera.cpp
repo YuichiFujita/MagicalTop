@@ -448,6 +448,7 @@ void CCamera::Follow(void)
 //============================================================
 void CCamera::Bargaining(void)
 {
+#if 0
 	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
 	{ // プレイヤー・ターゲットが使用されている場合
 
@@ -502,6 +503,62 @@ void CCamera::Bargaining(void)
 		m_aCamera[TYPE_MAIN].posR.y += diffPosR.y * REV_POS_R.y;
 		m_aCamera[TYPE_MAIN].posR.z += diffPosR.z * REV_POS_R.x;
 	}
+#else
+	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
+	{ // プレイヤー・ターゲットが使用されている場合
+
+		// 変数を宣言
+		D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+		D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+		D3DXVECTOR3 destPosR = VEC3_ZERO;	// カメラの注視点の目標位置
+		D3DXVECTOR3 diffPosR = VEC3_ZERO;	// カメラの注視点の位置差分
+		D3DXVECTOR3 diffPosV = VEC3_ZERO;	// カメラの視点の位置差分
+		float fDisTarget = CSceneGame::GetPlayer()->GetDistanceTarget();	// ターゲットとプレイヤー間の距離
+		float fDiffRot = 0.0f;	// カメラの向き差分
+
+		// 差分向きを求める
+		fDiffRot = m_aCamera[TYPE_MAIN].destRot.y - m_aCamera[TYPE_MAIN].rot.y;
+		useful::NormalizeRot(fDiffRot);		// 差分向き正規化
+
+		// 向きを更新
+		m_aCamera[TYPE_MAIN].rot.y += fDiffRot * REV_ROT;
+		useful::NormalizeRot(m_aCamera[TYPE_MAIN].rot.y);	// 向き正規化
+
+		// ターゲットとプレイヤーの中間位置を求める
+		destPosR = (posPlayer - posTarget) * REV_CENTER;	// 中間位置を設定
+		destPosR.y = 0.0f;	// y座標を初期化
+
+		// カメラの向きをターゲットに向かせる
+		m_aCamera[TYPE_MAIN].rot.y = atan2f(posPlayer.x - posTarget.x, posPlayer.z - posTarget.z);
+
+		// カメラの距離を設定
+		m_aCamera[TYPE_MAIN].fDis = FIRST_DIS - (fDisTarget * REV_PULS_DIS);
+
+		// 目標の注視点の位置を更新
+		m_aCamera[TYPE_MAIN].destPosR.x = destPosR.x;
+		m_aCamera[TYPE_MAIN].destPosR.y = POSR_Y;
+		m_aCamera[TYPE_MAIN].destPosR.z = destPosR.z;
+
+		// 目標の視点の位置を更新
+		m_aCamera[TYPE_MAIN].destPosV.x = m_aCamera[TYPE_MAIN].destPosR.x + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));
+		m_aCamera[TYPE_MAIN].destPosV.y = 1400.0f;	// TODO：定数
+		m_aCamera[TYPE_MAIN].destPosV.z = m_aCamera[TYPE_MAIN].destPosR.z + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));
+
+		// 目標の位置までの差分を計算
+		diffPosV = m_aCamera[TYPE_MAIN].destPosV - m_aCamera[TYPE_MAIN].posV;	// 視点
+		diffPosR = m_aCamera[TYPE_MAIN].destPosR - m_aCamera[TYPE_MAIN].posR;	// 注視点
+
+		// 視点の位置を更新
+		m_aCamera[TYPE_MAIN].posV.x += diffPosV.x * REV_POS_V.x;
+		m_aCamera[TYPE_MAIN].posV.y += diffPosV.y * REV_POS_V.y;
+		m_aCamera[TYPE_MAIN].posV.z += diffPosV.z * REV_POS_V.x;
+
+		// 注視点の位置を更新
+		m_aCamera[TYPE_MAIN].posR.x += diffPosR.x * REV_POS_R.x;
+		m_aCamera[TYPE_MAIN].posR.y += diffPosR.y * REV_POS_R.y;
+		m_aCamera[TYPE_MAIN].posR.z += diffPosR.z * REV_POS_R.x;
+	}
+#endif
 }
 
 //============================================================

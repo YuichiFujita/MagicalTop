@@ -785,6 +785,9 @@ bool CInputPad::GetPress(KEY nJoyKey, int nPlayer)
 //============================================================
 SHORT CInputPad::GetPressLStickX(int nPlayer)
 {
+	// スティックの傾きの値を補正
+	useful::LimitNum(m_aJoyKeyStatePress[nPlayer].Gamepad.sThumbLX, (SHORT)-SHRT_MAX, (SHORT)SHRT_MAX);
+
 	// スティックの傾きの値を返す (左右)
 	return m_aJoyKeyStatePress[nPlayer].Gamepad.sThumbLX;
 }
@@ -794,6 +797,9 @@ SHORT CInputPad::GetPressLStickX(int nPlayer)
 //============================================================
 SHORT CInputPad::GetPressLStickY(int nPlayer)
 {
+	// スティックの傾きの値を補正
+	useful::LimitNum(m_aJoyKeyStatePress[nPlayer].Gamepad.sThumbLY, (SHORT)-SHRT_MAX, (SHORT)SHRT_MAX);
+
 	// スティックの傾きの値を返す (上下)
 	return m_aJoyKeyStatePress[nPlayer].Gamepad.sThumbLY;
 }
@@ -803,6 +809,9 @@ SHORT CInputPad::GetPressLStickY(int nPlayer)
 //============================================================
 SHORT CInputPad::GetPressRStickX(int nPlayer)
 {
+	// スティックの傾きの値を補正
+	useful::LimitNum(m_aJoyKeyStatePress[nPlayer].Gamepad.sThumbRX, (SHORT)-SHRT_MAX, (SHORT)SHRT_MAX);
+
 	// スティックの傾きの値を返す (左右)
 	return m_aJoyKeyStatePress[nPlayer].Gamepad.sThumbRX;
 }
@@ -812,8 +821,41 @@ SHORT CInputPad::GetPressRStickX(int nPlayer)
 //============================================================
 SHORT CInputPad::GetPressRStickY(int nPlayer)
 {
+	// スティックの傾きの値を補正
+	useful::LimitNum(m_aJoyKeyStatePress[nPlayer].Gamepad.sThumbRY, (SHORT)-SHRT_MAX, (SHORT)SHRT_MAX);
+
 	// スティックの傾きの値を返す (上下)
-	return m_aJoyKeyStatePress[nPlayer].Gamepad.sThumbRY;
+	return -m_aJoyKeyStatePress[nPlayer].Gamepad.sThumbRY;
+}
+
+//============================================================
+//	プレス取得処理 (Lスティック向き)
+//============================================================
+float CInputPad::GetPressLStickRot(int nPlayer)
+{
+	// 変数を宣言
+	float fRot = 0.0f;	// スティック傾き
+
+	// ステックの傾きを計算
+	fRot = atan2f((float)GetPressLStickY(), (float)GetPressLStickX());
+
+	// ステックの傾きを返す
+	return fRot;
+}
+
+//============================================================
+//	プレス取得処理 (Rスティック向き)
+//============================================================
+float CInputPad::GetPressRStickRot(int nPlayer)
+{
+	// 変数を宣言
+	float fRot = 0.0f;	// スティック傾き
+
+	// ステックの傾きを計算
+	fRot = atan2f((float)GetPressRStickY(), (float)GetPressRStickX());
+
+	// ステックの傾きを返す
+	return fRot;
 }
 
 //============================================================

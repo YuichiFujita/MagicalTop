@@ -17,14 +17,8 @@
 #include "magic.h"
 
 //************************************************************
-//	マクロ定義
-//************************************************************
-#define MAX_LOCK	(6)	// ロックオンの最大数
-
-//************************************************************
 //	前方宣言
 //************************************************************
-class CLockCursor;		// ロックオン表示クラス
 class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
 
 //************************************************************
@@ -49,31 +43,18 @@ public:
 	// デストラクタ
 	~CMagicManager();
 
-	// ロックオン情報構造体
-	typedef struct
-	{
-		CObject *pObject;	// ロックオンしたオブジェクト
-		float fLength;		// ロックオンオブジェクトとの距離
-	}LockInfo;
-
 	// メンバ関数
-	HRESULT Init(void);	// 初期化
-	void Uninit(void);	// 終了
-	void Update(void);	// 更新
-	void LockOnMagic(const D3DXVECTOR3& rPos);	// 魔法ロックオン
-	bool ShotMagic(void);						// 魔法発射
-	void DeleteLockOn(void);					// 魔法ロックオン全削除
+	HRESULT Init(void);		// 初期化
+	void Uninit(void);		// 終了
+	void Update(void);		// 更新
+	bool ShotMagic(void);	// 魔法発射
 
 	// 静的メンバ関数
 	static CMagicManager *Create(void);	// 生成
 	static HRESULT Release(CMagicManager *&prMagicManager);	// 破棄
 
 private:
-	// メンバ関数
-	void SortLockOnMagic(LockInfo *pLock, const int nNumLock, CObject *pObject, const float fLength);	// ロックオンソート
-
 	// メンバ変数
-	CLockCursor *m_apLockCursor[MAX_LOCK];	// ロックオン表示情報
 	CObjectGauge2D *m_pMana;	// マナの情報
 	STATE m_state;				// 状態
 	int m_nCounterMagic;		// 魔法管理カウンター
