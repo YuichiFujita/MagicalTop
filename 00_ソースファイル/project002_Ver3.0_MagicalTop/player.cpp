@@ -1413,7 +1413,6 @@ void CPlayer::LoadSetup(void)
 				// モーション情報の設定
 				CObjectChara::SetMotionInfo(info);
 			}
-
 		} while (nEnd != EOF);	// 読み込んだ文字列が EOF ではない場合ループ
 		
 		// ファイルを閉じる

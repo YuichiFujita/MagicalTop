@@ -57,14 +57,41 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
+CEnemy::StatusInfo CEnemy::m_aStatusInfo[CEnemy::TYPE_MAX] = {};	// ステータス情報
+CEnemy::PartsInfo CEnemy::m_aPartsInfo[CEnemy::TYPE_MAX] = {};		// パーツ情報
+CMotion::Info CEnemy::m_aMotionInfo[CEnemy::TYPE_MAX] = {};			// モーション情報
+int CEnemy::m_nNumAll = 0;											// 敵の総数
+
 const char *CEnemy::mc_apTextureFile[] =	// テクスチャ定数
 {
 	"data\\TEXTURE\\warning000.png",	// 警告表示テクスチャ
 };
 
-CEnemy::StatusInfo CEnemy::m_aStatusInfo[CEnemy::TYPE_MAX] = {};	// ステータス情報
-CEnemy::PartsInfo CEnemy::m_aPartsInfo[CEnemy::TYPE_MAX] = {};		// パーツ情報
-int CEnemy::m_nNumAll = 0;											// 敵の総数
+const char *CEnemyHuman::mc_apModelFile[] =	// 歩兵モデル定数
+{
+	"data\\MODEL\\ENEMY\\HUMAN\\00_waist.x",				// 腰
+	"data\\MODEL\\ENEMY\\HUMAN\\01_body.x",					// 体
+	"data\\MODEL\\ENEMY\\HUMAN\\02_head.x",					// 頭
+	"data\\MODEL\\ENEMY\\HUMAN\\03_armUL.x",				// 左上腕
+	"data\\MODEL\\ENEMY\\HUMAN\\04_armUR.x",				// 右上腕
+	"data\\MODEL\\ENEMY\\HUMAN\\05_armDL.x",				// 左下腕
+	"data\\MODEL\\ENEMY\\HUMAN\\06_armDR.x",				// 右下腕
+	"data\\MODEL\\ENEMY\\HUMAN\\07_handL.x",				// 左手
+	"data\\MODEL\\ENEMY\\HUMAN\\08_handR.x",				// 右手
+	"data\\MODEL\\ENEMY\\HUMAN\\09_legUL.x",				// 左太もも
+	"data\\MODEL\\ENEMY\\HUMAN\\10_legUR.x",				// 右太もも
+	"data\\MODEL\\ENEMY\\HUMAN\\11_legDL.x",				// 左脛
+	"data\\MODEL\\ENEMY\\HUMAN\\12_legDR.x",				// 右脛
+	"data\\MODEL\\ENEMY\\HUMAN\\13_footL.x",				// 左足
+	"data\\MODEL\\ENEMY\\HUMAN\\14_footR.x",				// 右足
+	"data\\MODEL\\ENEMY\\HUMAN\\15_waistpouchBack.x",		// ウエストポーチ(後)
+	"data\\MODEL\\ENEMY\\HUMAN\\16_waistpouchRight.x",		// ウエストポーチ(左)
+	"data\\MODEL\\ENEMY\\HUMAN\\17_waistpouchBackright.x",	// ウエストポーチ(左後)
+	"data\\MODEL\\ENEMY\\HUMAN\\18_legURpouch.x",			// 右太ももポーチ
+	"data\\MODEL\\ENEMY\\HUMAN\\19_armor.x",				// アーマー
+	"data\\MODEL\\ENEMY\\HUMAN\\20_knife.x",				// ナイフ
+	"data\\MODEL\\ENEMY\\HUMAN\\21_assault.x",				// 銃
+};
 
 const char *CEnemyCar::mc_apModelFile[] =	// 戦車モデル定数
 {
@@ -78,7 +105,7 @@ const char *CEnemyCar::mc_apModelFile[] =	// 戦車モデル定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_status(m_aStatusInfo[type]), m_parts(m_aPartsInfo[type])
+CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_status(m_aStatusInfo[type]), m_parts(m_aPartsInfo[type]), m_motion(m_aMotionInfo[type])
 {
 	// メンバ変数をクリア
 	m_pShadow  = NULL;			// 影の情報
@@ -287,6 +314,13 @@ CEnemy *CEnemy::Create(const TYPE type, const D3DXVECTOR3& rPos, const D3DXVECTO
 		// メモリ確保
 		switch (type)
 		{ // 種類ごとの処理
+		case TYPE_HUMAN:	// 戦車
+
+			// 歩兵を生成
+			pEnemy = new CEnemyHuman(type);
+
+			break;
+
 		case TYPE_CAR:	// 戦車
 
 			// 戦車を生成
@@ -521,6 +555,15 @@ CEnemy::PartsInfo CEnemy::GetPartsInfo(void) const
 }
 
 //============================================================
+//	モーション情報取得処理
+//============================================================
+CMotion::Info CEnemy::GetMotionInfo(void) const
+{
+	// モーション情報を返す
+	return m_motion;
+}
+
+//============================================================
 //	スポーン動作
 //============================================================
 void CEnemy::Spawn(void)
@@ -620,80 +663,6 @@ bool CEnemy::Death(void)
 
 	// 未死亡を返す
 	return false;
-}
-
-//============================================================
-//	検知範囲の当たり判定
-//============================================================
-void CEnemy::CollisionFind(void)
-{
-	// 変数を宣言
-	D3DXVECTOR3 posLook;	// 視認対象位置
-	D3DXVECTOR3 posEnemy = GetPosition();	// 敵位置
-	D3DXVECTOR3 rotEnemy = GetRotation();	// 敵向き
-	float fPlayerRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
-	float fLookRadius;	// 視認対象半径
-
-	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))	// TODO：GETPLAYER
-	{ // プレイヤー・ターゲットが使用されている場合
-
-		// 視認対象の設定
-		if (collision::Circle2D(CSceneGame::GetPlayer()->GetPosition(), posEnemy, fPlayerRadius, m_status.fFindRadius) == false)
-		{ // 敵の検知範囲外の場合
-
-			// 視認対象位置を設定
-			posLook = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
-
-			// 視認対象半径を設定
-			fLookRadius = CSceneGame::GetTarget()->GetRadius();	// ターゲット半径
-		}
-		else
-		{ // 敵の検知範囲内の場合
-
-			// 視認対象位置を設定
-			posLook = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
-
-			// 視認対象半径を設定
-			fLookRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
-		}
-
-		// 対象の方向を向かせる
-		Look(posLook, posEnemy, rotEnemy);
-
-		if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, m_status.fAttackRadius) == false)
-		{ // 敵の攻撃範囲外の場合
-
-			// 対象の方向に移動 (前進)
-			posEnemy.x -= sinf(rotEnemy.y) * m_status.fForwardMove;
-			posEnemy.z -= cosf(rotEnemy.y) * m_status.fForwardMove;
-
-			// ステージ範囲外の補正
-			CSceneGame::GetStage()->LimitPosition(posEnemy, m_status.fRadius);
-		}
-		else
-		{ // 敵の攻撃範囲内の場合
-
-			if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, m_status.fBackwardRadius) == true && m_status.bBackward == true)
-			{ // 敵の後退範囲内且つ、後退がONの場合
-
-				// 対象の逆方向に移動 (後退)
-				posEnemy.x += sinf(rotEnemy.y) * m_status.fBackwardMove;
-				posEnemy.z += cosf(rotEnemy.y) * m_status.fBackwardMove;
-
-				// ステージ範囲外の補正
-				CSceneGame::GetStage()->LimitPosition(posEnemy, m_status.fRadius);
-			}
-
-			// 攻撃
-			Attack(posLook, posEnemy, fLookRadius);
-		}
-	}
-
-	// 位置を更新
-	SetPosition(posEnemy);
-
-	// 向きを更新
-	SetRotation(rotEnemy);
 }
 
 //============================================================
@@ -959,6 +928,363 @@ void CEnemy::SubBubble(void)
 			m_pBubble->AddLevel(-1);
 		}
 	}
+}
+
+//************************************************************
+//	子クラス [CEnemyHuman] のメンバ関数
+//************************************************************
+//============================================================
+//	コンストラクタ
+//============================================================
+CEnemyHuman::CEnemyHuman(const TYPE type) : CEnemy(type)
+{
+
+}
+
+//============================================================
+//	デストラクタ
+//============================================================
+CEnemyHuman::~CEnemyHuman()
+{
+
+}
+
+//============================================================
+//	初期化処理
+//============================================================
+HRESULT CEnemyHuman::Init(void)
+{
+	// 変数を宣言
+	CMotion::Info motion = GetMotionInfo();
+
+	// 敵の初期化
+	if (FAILED(CEnemy::Init()))
+	{ // 初期化に失敗した場合
+
+		// 失敗を返す
+		return E_FAIL;
+	}
+
+	for (int nCntEnemy = 0; nCntEnemy < motion.nNumMotion; nCntEnemy++)
+	{ // 
+
+		// モーション情報の設定
+		CObjectChara::SetMotionInfo(motion.aMotionInfo[nCntEnemy]);
+	}
+
+	// モデル情報の設定
+	SetModelInfo();
+
+	// モーションの設定
+	SetMotion(0);
+
+	// 成功を返す
+	return S_OK;
+}
+
+//============================================================
+//	終了処理
+//============================================================
+void CEnemyHuman::Uninit(void)
+{
+	// 敵の終了
+	CEnemy::Uninit();
+}
+
+//============================================================
+//	更新処理
+//============================================================
+void CEnemyHuman::Update(void)
+{
+#if 1
+	switch (GetState())
+	{ // 状態ごとの処理
+	case STATE_SPAWN:
+
+		// スポーン動作の更新
+		Spawn();
+
+		break;
+
+	case STATE_NORMAL:
+
+		// バブル削除
+		SubBubble();
+
+		// 敵の動作の更新
+		CollisionFind();
+
+		break;
+
+	case STATE_DAMAGE:
+
+		// ダメージ動作の更新
+		Damage();
+
+		// 敵の動作の更新
+		CollisionFind();
+
+		break;
+
+	case STATE_DEATH:
+
+		// 死亡動作の更新
+		if (Death())
+		{ // 死亡した場合
+
+			// 処理を抜ける
+			return;
+		}
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
+#endif
+
+	// 敵の更新
+	CEnemy::Update();
+}
+
+//============================================================
+//	描画処理
+//============================================================
+void CEnemyHuman::Draw(void)
+{
+	// 敵の描画
+	CEnemy::Draw();
+}
+
+//============================================================
+//	モデルファイル取得処理
+//============================================================
+const char* CEnemyHuman::GetModelFileName(const int nModel) const
+{
+	if (nModel < MODEL_MAX)
+	{ // 使用できるインデックスの場合
+
+		// 引数のインデックスのモデルを返す
+		return mc_apModelFile[nModel];
+	}
+	else { assert(false); return NONE_STRING; }	// 範囲外
+}
+
+//============================================================
+//	検知範囲の当たり判定
+//============================================================
+void CEnemyHuman::CollisionFind(void)
+{
+#if 0
+	// 変数を宣言
+	StatusInfo  status		= GetStatusInfo();		// 敵ステータス
+	D3DXVECTOR3 posEnemy	= GetPosition();		// 敵位置
+	D3DXVECTOR3 moveEnemy	= GetMovePosition();	// 敵移動量
+	D3DXVECTOR3 rotEnemy	= GetRotation();		// 敵向き
+	D3DXVECTOR3 posLook		= VEC3_ZERO;			// 視認対象位置
+	D3DXVECTOR3 rotCannon	= VEC3_ZERO;			// キャノン向き
+	float fLookRadius		= 0.0f;					// 視認対象半径
+	float fPlayerRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
+
+	// 過去位置の更新
+	UpdateOldPosition();
+
+	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))	// TODO：GETPLAYER
+	{ // プレイヤー・ターゲットが使用されている場合
+
+		// 視認対象の検知判定
+		if (collision::Circle2D(CSceneGame::GetPlayer()->GetPosition(), posEnemy, fPlayerRadius, status.fFindRadius) == false)
+		{ // 敵の検知範囲外の場合
+
+			// 視認対象位置を設定
+			posLook = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+
+			// 視認対象半径を設定
+			fLookRadius = CSceneGame::GetTarget()->GetRadius();	// ターゲット半径
+		}
+		else
+		{ // 敵の検知範囲内の場合
+
+			// 視認対象位置を設定
+			posLook = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+
+			// 視認対象半径を設定
+			fLookRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
+		}
+
+		// 視認対象の攻撃判定
+		if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, status.fAttackRadius) == false)
+		{ // 敵の攻撃範囲外の場合
+
+			// 対象の方向を向かせる
+			Look(posLook, posEnemy, rotEnemy);
+
+			// 対象の方向に移動 (前進)
+			moveEnemy.x -= sinf(rotEnemy.y) * status.fForwardMove;
+			moveEnemy.z -= cosf(rotEnemy.y) * status.fForwardMove;
+
+			// 重力を加算
+			moveEnemy.y -= ENE_GRAVITY;
+
+			// 移動量を加算
+			posEnemy += moveEnemy;
+
+			// 移動量を減衰
+			moveEnemy.x += (0.0f - moveEnemy.x) * ENE_REV;
+			moveEnemy.z += (0.0f - moveEnemy.z) * ENE_REV;
+
+			// ターゲットとの当たり判定
+			CollisionTarget(posEnemy);
+
+			// 通常状態の敵との当たり判定
+			CollisionNormalEnemy(posEnemy);
+
+			// 着地判定
+			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
+
+			// ステージ範囲外の補正
+			CSceneGame::GetStage()->LimitPosition(posEnemy, status.fRadius);
+		}
+		else
+		{ // 敵の攻撃範囲内の場合
+
+			if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, status.fBackwardRadius) == true && status.bBackward == true)
+			{ // 敵の後退範囲内且つ、後退がONの場合
+
+				// 対象の方向を向かせる
+				Look(posLook, posEnemy, rotEnemy);
+
+				// 対象の逆方向に移動 (後退)
+				moveEnemy.x += sinf(rotEnemy.y) * status.fBackwardMove;
+				moveEnemy.z += cosf(rotEnemy.y) * status.fBackwardMove;
+			}
+
+			// 重力を加算
+			moveEnemy.y -= ENE_GRAVITY;
+
+			// 移動量を加算
+			posEnemy += moveEnemy;
+
+			// 移動量を減衰
+			moveEnemy.x += (0.0f - moveEnemy.x) * ENE_REV;
+			moveEnemy.z += (0.0f - moveEnemy.z) * ENE_REV;
+
+			// ターゲットとの当たり判定
+			CollisionTarget(posEnemy);
+
+			// 通常状態の敵との当たり判定
+			CollisionNormalEnemy(posEnemy);
+
+			// 着地判定
+			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
+
+			// ステージ範囲外の補正
+			CSceneGame::GetStage()->LimitPosition(posEnemy, status.fRadius);
+
+			// キャノン向きの設定
+			if (SetRotationCannon(posLook, posEnemy, rotEnemy))
+			{ // 発射可能状態の場合
+
+				// 攻撃
+				Attack(posLook, posEnemy, fLookRadius);
+			}
+		}
+	}
+
+	// 位置を反映
+	SetPosition(posEnemy);
+
+	// 位置移動量を反映
+	SetMovePosition(moveEnemy);
+
+	// 向きを反映
+	SetRotation(rotEnemy);
+#else
+	// 変数を宣言
+	StatusInfo  status		= GetStatusInfo();		// 敵ステータス
+	D3DXVECTOR3 posEnemy	= GetPosition();		// 敵位置
+	D3DXVECTOR3 moveEnemy	= GetMovePosition();	// 敵移動量
+	D3DXVECTOR3 rotEnemy	= GetRotation();		// 敵向き
+	D3DXVECTOR3 posLook		= VEC3_ZERO;			// 視認対象位置
+	D3DXVECTOR3 rotCannon	= VEC3_ZERO;			// キャノン向き
+	float fLookRadius		= 0.0f;					// 視認対象半径
+	float fPlayerRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
+
+	// 過去位置の更新
+	UpdateOldPosition();
+
+	if (CSceneGame::GetTarget()->GetState() != CTarget::STATE_DESTROY)
+	{ // ターゲットが壊されていないる場合
+
+		// 視認対象位置を設定
+		posLook = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+
+		// 視認対象半径を設定
+		fLookRadius = CSceneGame::GetTarget()->GetRadius();	// ターゲット半径
+
+		// 視認対象の攻撃判定
+		if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, status.fAttackRadius) == false)
+		{ // 敵の攻撃範囲外の場合
+
+			// 対象の方向を向かせる
+			Look(posLook, posEnemy, rotEnemy);
+
+			// 対象の方向に移動 (前進)
+			moveEnemy.x -= sinf(rotEnemy.y) * status.fForwardMove;
+			moveEnemy.z -= cosf(rotEnemy.y) * status.fForwardMove;
+
+			// 重力を加算
+			moveEnemy.y -= ENE_GRAVITY;
+
+			// 移動量を加算
+			posEnemy += moveEnemy;
+
+			// 移動量を減衰
+			moveEnemy.x += (0.0f - moveEnemy.x) * ENE_REV;
+			moveEnemy.z += (0.0f - moveEnemy.z) * ENE_REV;
+
+			// ターゲットとの当たり判定
+			CollisionTarget(posEnemy);
+
+			// 通常状態の敵との当たり判定
+			CollisionNormalEnemy(posEnemy);
+
+			// 着地判定
+			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
+
+			// ステージ範囲外の補正
+			CSceneGame::GetStage()->LimitPosition(posEnemy, status.fRadius);
+		}
+		else
+		{ // 敵の攻撃範囲内の場合
+
+			// ターゲットとの当たり判定
+			CollisionTarget(posEnemy);
+
+			// 通常状態の敵との当たり判定
+			CollisionNormalEnemy(posEnemy);
+
+			// 着地判定
+			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
+
+			// ステージ範囲外の補正
+			CSceneGame::GetStage()->LimitPosition(posEnemy, status.fRadius);
+
+			// 攻撃
+			Attack(posLook, posEnemy, fLookRadius);
+		}
+	}
+
+	// 位置を反映
+	SetPosition(posEnemy);
+
+	// 位置移動量を反映
+	SetMovePosition(moveEnemy);
+
+	// 向きを反映
+	SetRotation(rotEnemy);
+#endif
 }
 
 //************************************************************
@@ -1441,10 +1767,17 @@ bool CEnemyCar::SetRotationCannon(const D3DXVECTOR3& rLookPos, const D3DXVECTOR3
 void CEnemy::LoadSetup(void)
 {
 	// 変数を宣言
-	int nType		= 0;	// 種類の代入用
-	int nID			= 0;	// インデックスの代入用
-	int nBackward	= 0;	// 後退のON/OFFの変換用
-	int nEnd		= 0;	// テキスト読み込み終了の確認用
+	CMotion::MotionInfo info;		// ポーズの代入用
+	D3DXVECTOR3 pos = VEC3_ZERO;	// 位置の代入用
+	D3DXVECTOR3 rot = VEC3_ZERO;	// 向きの代入用
+	int nType		= 0;			// 種類の代入用
+	int nID			= 0;			// インデックスの代入用
+	int nParentID	= 0;			// 親インデックスの代入用
+	int nNowPose	= 0;			// 現在のポーズ番号
+	int nNowKey		= 0;			// 現在のキー番号
+	int nLoop		= 0;			// ループのON/OFFの変換用
+	int nBackward	= 0;			// 後退のON/OFFの変換用
+	int nEnd		= 0;			// テキスト読み込み終了の確認用
 
 	// 変数配列を宣言
 	char aString[MAX_STRING];	// テキストの文字列の代入用
@@ -1455,6 +1788,7 @@ void CEnemy::LoadSetup(void)
 	// 静的メンバ変数の情報をクリア
 	memset(&m_aStatusInfo[0], 0, sizeof(m_aStatusInfo));	// ステータス情報
 	memset(&m_aPartsInfo[0], 0, sizeof(m_aPartsInfo));		// パーツ情報
+	memset(&m_aMotionInfo[0], 0, sizeof(m_aMotionInfo));	// モーション情報
 
 	// ファイルを読み込み形式で開く
 	pFile = fopen(ENEMY_SETUP_TXT, "r");
@@ -1701,6 +2035,128 @@ void CEnemy::LoadSetup(void)
 						} while (strcmp(&aString[0], "END_ENEMYSET") != 0);	// 読み込んだ文字列が END_ENEMYSET ではない場合ループ
 					}
 				} while (strcmp(&aString[0], "END_STATUSSET") != 0);		// 読み込んだ文字列が END_STATUSSET ではない場合ループ
+			}
+
+			// モーションの設定
+			else if (strcmp(&aString[0], "MOTIONSET") == 0)
+			{ // 読み込んだ文字列が MOTIONSET の場合
+
+				// モーション数を初期化
+				m_aMotionInfo[nType].nNumMotion = 0;
+
+				do
+				{ // 読み込んだ文字列が END_MOTIONSET ではない場合ループ
+
+					// ファイルから文字列を読み込む
+					fscanf(pFile, "%s", &aString[0]);
+
+					if (strcmp(&aString[0], "TYPE") == 0)
+					{ // 読み込んだ文字列が TYPE の場合
+
+						fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
+						fscanf(pFile, "%d", &nType);		// 種類を読み込む
+					}
+					else if (strcmp(&aString[0], "MOTION") == 0)
+					{ // 読み込んだ文字列が MOTION の場合
+
+						// 現在のポーズ番号を初期化
+						nNowPose = 0;
+
+						do
+						{ // 読み込んだ文字列が END_MOTION ではない場合ループ
+
+							// ファイルから文字列を読み込む
+							fscanf(pFile, "%s", &aString[0]);
+
+							if (strcmp(&aString[0], "LOOP") == 0)
+							{ // 読み込んだ文字列が LOOP の場合
+
+								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
+								fscanf(pFile, "%d", &nLoop);		// ループのON/OFFを読み込む
+
+								// 読み込んだ値をbool型に変換
+								info.bLoop = (nLoop == 0) ? false : true;
+							}
+							else if (strcmp(&aString[0], "NUM_KEY") == 0)
+							{ // 読み込んだ文字列が NUM_KEY の場合
+
+								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
+								fscanf(pFile, "%d", &info.nNumKey);	// キーの総数を読み込む
+							}
+							else if (strcmp(&aString[0], "KEYSET") == 0)
+							{ // 読み込んだ文字列が KEYSET の場合
+
+								// 現在のキー番号を初期化
+								nNowKey = 0;
+
+								do
+								{ // 読み込んだ文字列が END_KEYSET ではない場合ループ
+
+									// ファイルから文字列を読み込む
+									fscanf(pFile, "%s", &aString[0]);
+
+									if (strcmp(&aString[0], "FRAME") == 0)
+									{ // 読み込んだ文字列が FRAME の場合
+
+										fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+										fscanf(pFile, "%d", &info.aKeyInfo[nNowPose].nFrame);	// キーが切り替わるまでのフレーム数を読み込む
+									}
+									else if (strcmp(&aString[0], "KEY") == 0)
+									{ // 読み込んだ文字列が KEY の場合
+
+										do
+										{ // 読み込んだ文字列が END_KEY ではない場合ループ
+
+											// ファイルから文字列を読み込む
+											fscanf(pFile, "%s", &aString[0]);
+
+											if (strcmp(&aString[0], "POS") == 0)
+											{ // 読み込んだ文字列が POS の場合
+
+												fscanf(pFile, "%s", &aString[0]);									// = を読み込む (不要)
+												fscanf(pFile, "%f", &info.aKeyInfo[nNowPose].aKey[nNowKey].pos.x);	// X位置を読み込む
+												fscanf(pFile, "%f", &info.aKeyInfo[nNowPose].aKey[nNowKey].pos.y);	// Y位置を読み込む
+												fscanf(pFile, "%f", &info.aKeyInfo[nNowPose].aKey[nNowKey].pos.z);	// Z位置を読み込む
+
+												// 読み込んだ位置にパーツの初期位置を加算
+												info.aKeyInfo[nNowPose].aKey[nNowKey].pos += m_aPartsInfo[nType].aInfo[nNowKey].pos;
+											}
+											else if (strcmp(&aString[0], "ROT") == 0)
+											{ // 読み込んだ文字列が ROT の場合
+
+												fscanf(pFile, "%s", &aString[0]);									// = を読み込む (不要)
+												fscanf(pFile, "%f", &info.aKeyInfo[nNowPose].aKey[nNowKey].rot.x);	// X向きを読み込む
+												fscanf(pFile, "%f", &info.aKeyInfo[nNowPose].aKey[nNowKey].rot.y);	// Y向きを読み込む
+												fscanf(pFile, "%f", &info.aKeyInfo[nNowPose].aKey[nNowKey].rot.z);	// Z向きを読み込む
+
+												// 読み込んだ向きにパーツの初期向きを加算
+												info.aKeyInfo[nNowPose].aKey[nNowKey].rot += m_aPartsInfo[nType].aInfo[nNowKey].rot;
+
+												// 初期向きを正規化
+												useful::NormalizeRot(info.aKeyInfo[nNowPose].aKey[nNowKey].rot.x);
+												useful::NormalizeRot(info.aKeyInfo[nNowPose].aKey[nNowKey].rot.y);
+												useful::NormalizeRot(info.aKeyInfo[nNowPose].aKey[nNowKey].rot.z);
+											}
+
+										} while (strcmp(&aString[0], "END_KEY") != 0);	// 読み込んだ文字列が END_KEY ではない場合ループ
+
+										// 現在のキー番号を加算
+										nNowKey++;
+									}
+								} while (strcmp(&aString[0], "END_KEYSET") != 0);	// 読み込んだ文字列が END_KEYSET ではない場合ループ
+
+								// 現在のポーズ番号を加算
+								nNowPose++;
+							}
+						} while (strcmp(&aString[0], "END_MOTION") != 0);	// 読み込んだ文字列が END_MOTION ではない場合ループ
+
+						// モーション情報の設定
+						m_aMotionInfo[nType].aMotionInfo[m_aMotionInfo[nType].nNumMotion] = info;
+
+						// モーション数を加算
+						m_aMotionInfo[nType].nNumMotion++;
+					}
+				} while (strcmp(&aString[0], "END_MOTIONSET") != 0);	// 読み込んだ文字列が END_MOTIONSET ではない場合ループ
 			}
 		} while (nEnd != EOF);	// 読み込んだ文字列が EOF ではない場合ループ
 		

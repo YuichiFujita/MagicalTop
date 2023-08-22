@@ -40,7 +40,7 @@ public:
 	// 種類列挙
 	typedef enum
 	{
-		TYPE_WALK = 0,	// 歩兵
+		TYPE_HUMAN = 0,	// 歩兵
 		TYPE_CAR,		// 戦車
 		TYPE_FLY,		// ヘリ
 		TYPE_MAX		// この列挙型の総数
@@ -139,16 +139,17 @@ public:
 	float GetHeight(void) const;					// 縦幅取得
 	StatusInfo GetStatusInfo(void) const;			// ステータス情報取得
 	PartsInfo GetPartsInfo(void) const;				// パーツ情報取得
-
-	// 純粋仮想関数
-	virtual const char* GetModelFileName(const int nModel) const = 0;	// モデルファイル取得
+	CMotion::Info GetMotionInfo(void) const;		// モーション情報取得
 
 protected:
+	// 純粋仮想関数
+	virtual const char* GetModelFileName(const int nModel) const = 0;	// モデルファイル取得
+	virtual void CollisionFind(void) = 0;	// 検知範囲の当たり判定
+
 	// 仮想関数
 	virtual void Spawn(void);	// スポーン動作
 	virtual void Damage(void);	// ダメージ動作
 	virtual bool Death(void);	// 死亡動作
-	virtual void CollisionFind(void);	// 検知範囲の当たり判定
 
 	// メンバ関数
 	void Look	// 対象視認
@@ -168,10 +169,11 @@ protected:
 
 private:
 	// 静的メンバ変数
-	static const char *mc_apTextureFile[];		// テクスチャ定数
-	static StatusInfo m_aStatusInfo[TYPE_MAX];	// ステータス情報
-	static PartsInfo m_aPartsInfo[TYPE_MAX];	// パーツ情報
-	static int m_nNumAll;						// 敵の総数
+	static const char *mc_apTextureFile[];			// テクスチャ定数
+	static StatusInfo m_aStatusInfo[TYPE_MAX];		// ステータス情報
+	static PartsInfo m_aPartsInfo[TYPE_MAX];		// パーツ情報
+	static CMotion::Info m_aMotionInfo[TYPE_MAX];	// モーション情報
+	static int m_nNumAll;							// 敵の総数
 
 	// メンバ変数
 	CShadow *m_pShadow;				// 影の情報
@@ -186,6 +188,60 @@ private:
 	int m_nCounterAtk;				// 攻撃管理カウンター
 	const StatusInfo m_status;		// ステータス定数
 	const PartsInfo m_parts;		// パーツ定数
+	const CMotion::Info m_motion;	// モーション定数
+};
+
+// 歩兵敵クラス
+class CEnemyHuman : public CEnemy
+{
+public:
+	// 種類列挙
+	typedef enum
+	{
+		MODEL_WAIST,				// 腰
+		MODEL_BODY,					// 体
+		MODEL_HEAD,					// 頭
+		MODEL_ARMUL,				// 左上腕
+		MODEL_ARMUR,				// 右上腕
+		MODEL_ARMDL,				// 左下腕
+		MODEL_ARMDR,				// 右下腕
+		MODEL_HANDL,				// 左手
+		MODEL_HANDR,				// 右手
+		MODEL_LEGUL,				// 左太もも
+		MODEL_LEGUR,				// 右太もも
+		MODEL_LEGDL,				// 左脛
+		MODEL_LEGDR,				// 右脛
+		MODEL_FOOTL,				// 左足
+		MODEL_FOOTR,				// 右足
+		MODEL_WAISTPOUCHBACK,		// ウエストポーチ(後)
+		MODEL_WAISTPOUCHRIGHT,		// ウエストポーチ(左)
+		MODEL_WAISTPOUCHBACKRIGHT,	// ウエストポーチ(左後)
+		MODEL_LEGURPOUCH,			// 右太ももポーチ
+		MODEL_ARMOR,				// アーマー
+		MODEL_KNIFE,				// ナイフ
+		MODEL_ASSAULT,				// 銃
+		MODEL_MAX					// この列挙型の総数
+	}MODEL;
+
+	// コンストラクタ
+	CEnemyHuman(const TYPE type);
+
+	// デストラクタ
+	~CEnemyHuman();
+
+	// オーバーライド関数
+	HRESULT Init(void);	// 初期化
+	void Uninit(void);	// 終了
+	void Update(void);	// 更新
+	void Draw(void);	// 描画
+	const char* GetModelFileName(const int nModel) const;	// モデルファイル取得
+
+private:
+	// オーバーライド関数
+	void CollisionFind(void);	// 検知範囲の当たり判定
+
+	// 静的メンバ変数
+	static const char *mc_apModelFile[];	// モデル定数
 };
 
 // 戦車敵クラス
