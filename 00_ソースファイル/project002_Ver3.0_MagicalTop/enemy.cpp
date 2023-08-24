@@ -1301,6 +1301,13 @@ void CEnemyHuman::CollisionFind(void)
 
 			// ステージ範囲外の補正
 			CSceneGame::GetStage()->LimitPosition(posEnemy, status.fRadius);
+
+			if (GetMotionType() != MOTION_MOVE)
+			{ // 現在のモーションが歩行じゃない場合
+
+				// モーションを設定
+				SetMotion(MOTION_MOVE);	// 歩行モーション
+			}
 		}
 		else
 		{ // 敵の攻撃範囲内の場合
@@ -1319,6 +1326,13 @@ void CEnemyHuman::CollisionFind(void)
 
 			// 攻撃
 			Attack(posLook, posEnemy, fLookRadius);
+
+			if (GetMotionType() != MOTION_ACTION)
+			{ // 現在のモーションが攻撃じゃない場合
+
+				// モーションを設定
+				SetMotion(MOTION_ACTION);	// 攻撃モーション
+			}
 		}
 	}
 
