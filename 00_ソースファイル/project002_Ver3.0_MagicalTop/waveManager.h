@@ -104,9 +104,10 @@ public:
 	}Season;
 
 	// メンバ関数
-	HRESULT Init(void);	// 初期化
-	void Uninit(void);	// 終了
-	void Update(void);	// 更新
+	HRESULT Init(void);		// 初期化
+	void Uninit(void);		// 終了
+	void Update(void);		// 更新
+	STATE GetState(void);	// 状態取得
 
 	// 静的メンバ関数
 	static void LoadSetup(void);		// セットアップ

@@ -10,6 +10,8 @@
 #include "pause.h"
 #include "renderer.h"
 #include "manager.h"
+#include "sceneGame.h"
+#include "waveManager.h"
 #include "input.h"
 #include "fade.h"
 #include "texture.h"
@@ -150,8 +152,9 @@ void CPause::Uninit(void)
 //============================================================
 void CPause::Update(void)
 {
-	if (CManager::GetFade()->GetState() == CFade::FADE_NONE)
-	{ // フェードしていない場合
+	if (CManager::GetFade()->GetState() == CFade::FADE_NONE
+	&&  CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
+	{ // フェードしていない且つ、ウェーブ進行状況の場合
 
 		if (CManager::GetKeyboard()->GetTrigger(DIK_P)
 		||  CManager::GetPad()->GetTrigger(CInputPad::KEY_START))
@@ -294,8 +297,9 @@ void CPause::Select(void)
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
-	if (CManager::GetFade()->GetState() == CFade::FADE_NONE)
-	{ // フェードしていない場合
+	if (CManager::GetFade()->GetState() == CFade::FADE_NONE
+	&&  CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
+	{ // フェードしていない且つ、ウェーブ進行状況の場合
 
 		if (pKeyboard->GetTrigger(DIK_W)
 		||  pKeyboard->GetTrigger(DIK_UP)
