@@ -29,6 +29,15 @@ class CBubble;	// バブルクラス
 class CMagic : public CObject
 {
 public:
+	// 状態列挙
+	typedef enum
+	{
+		STATE_NORMAL = 0,	// 通常状態
+		STATE_INHALE,		// 吸い込まれ状態
+		STATE_DELETE,		// 消失状態
+		STATE_MAX			// この列挙型の総数
+	}STATE;
+
 	// コンストラクタ
 	CMagic();
 
@@ -39,13 +48,11 @@ public:
 	typedef struct
 	{
 		D3DXVECTOR3 shotPos;	// 発射位置
-		D3DXVECTOR3 bubbleSize;	// バブル大きさ
 		int		nShotParts;		// 発射パーツ
-		int		nLock;			// ロックオン数
 		int		nLife;			// 寿命
 		int		nCoolTime;		// クールタイム
 		float	fMove;			// 移動量
-		float	fViewRadius;	// 視界範囲
+		float	bubbleRadius;	// バブル半径
 	}StatusInfo;
 
 	// オーバーライド関数
@@ -73,18 +80,20 @@ public:
 
 private:
 	// メンバ関数
+	bool CollisionTarget(void);	// ターゲットとの当たり判定
 	bool CollisionEnemy(void);	// 敵との当たり判定
 
 	// 静的メンバ変数
 	static StatusInfo m_statusInfo;	// ステータス情報
 
 	// メンバ変数
-	CBubble *m_pBubble;			// バブル情報
-	D3DXMATRIX	m_mtxWorld;		// ワールドマトリックス
-	D3DXVECTOR3	m_pos;			// 現在位置
-	D3DXVECTOR3	m_movePos;		// 位置移動量
-	D3DXVECTOR3	m_rot;			// 向き
-	D3DXVECTOR3	m_moveRot;		// 向き変更量
+	CBubble *m_pBubble;		// バブル情報
+	D3DXMATRIX	m_mtxWorld;	// ワールドマトリックス
+	D3DXVECTOR3	m_pos;		// 現在位置
+	D3DXVECTOR3	m_movePos;	// 位置移動量
+	D3DXVECTOR3	m_rot;		// 向き
+	D3DXVECTOR3	m_moveRot;	// 向き変更量
+	STATE m_state;			// 状態
 };
 
 #endif	// _MAGIC_H_

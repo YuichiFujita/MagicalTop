@@ -33,18 +33,21 @@
 #define PLAYER_SETUP_TXT	"data\\TXT\\player.txt"	// セットアップテキスト相対パス
 #define PLAY_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 
-#define MAX_MOVEX		(5.0f)	// 自動歩行時の速度割合用
-#define PULSROT_MOVEZ	(20)	// 前後移動時のプレイヤー向きの変更量
-#define PLUS_MOVEX		(0.5f)	// 左右回転の移動量の加算量
-#define PLAY_MOVEZ		(2.0f)	// 前後の移動量
-#define PLAY_REV		(0.2f)	// プレイヤー移動量の減衰係数
-#define PLAY_REV_ROTA	(0.15f)	// プレイヤー向き変更の減衰係数
-#define PLAY_CAM_ROTA	(0.04f)	// カメラ回転量
-#define PLAY_JUMP		(20.0f)	// プレイヤージャンプ量
-#define PLAY_GRAVITY	(1.0f)	// プレイヤー重力
-#define PLAY_RADIUS		(20.0f)	// プレイヤー半径
-#define PLAY_LIFE		(250)	// プレイヤー体力
-#define NORMAL_CNT		(180)	// 通常状態に移行するまでのカウンター
+#define MAX_MOVEX		(5.0f)		// 自動歩行時の速度割合用
+#define PULSROT_MOVEZ	(20)		// 前後移動時のプレイヤー向きの変更量
+#define PLUS_MOVEX		(0.5f)		// 左右回転の移動量の加算量
+#define PLAY_MOVEZ		(2.0f)		// 前後の移動量
+#define PLAY_REV		(0.2f)		// プレイヤー移動量の減衰係数
+#define PLAY_REV_ROTA	(0.15f)		// プレイヤー向き変更の減衰係数
+#define PLAY_CAM_ROTA	(0.04f)		// カメラ回転量
+#define PLAY_JUMP		(20.0f)		// プレイヤージャンプ量
+#define PLAY_GRAVITY	(1.0f)		// プレイヤー重力
+#define PLAY_RADIUS		(20.0f)		// プレイヤー半径
+#define PLAY_LIFE		(250)		// プレイヤー体力
+#define NORMAL_CNT		(180)		// 通常状態に移行するまでのカウンター
+#define AWAY_SIDE_MOVE	(100.0f)	// 吹っ飛び時の横移動量
+#define AWAY_UP_MOVE	(30.0f)		// 吹っ飛び時の上移動量
+#define AWAY_DMG		(50)		// 吹っ飛び時のダメージ量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -259,48 +262,69 @@ void CPlayer::Update(void)
 	// ターゲットとの距離を設定
 	m_fDisTarget = sqrtf((posPlayer.x - posTarget.x) * (posPlayer.x - posTarget.x)+ (posPlayer.z - posTarget.z) * (posPlayer.z - posTarget.z)) * 0.5f;
 
-	// 移動操作
-	currentMotion = Move(currentMotion);
+	if (m_state != STATE_BLOW_AWAY)
+	{ // 吹っ飛び状態ではない場合
 
-	// 向き更新
-	Rot(rotPlayer);
+		// 移動操作
+		currentMotion = Move(currentMotion);
 
-	// ジャンプ操作
-	currentMotion = Jump(currentMotion);
+		// 向き更新
+		Rot(rotPlayer);
 
-	// 位置更新
-	Pos(posPlayer);
+		// ジャンプ操作
+		currentMotion = Jump(currentMotion);
 
-	// 当たり判定
-	CollisionTarget(posPlayer);	// ターゲット
-	CollisionEnemy(posPlayer);	// 敵
+		// 位置更新
+		Pos(posPlayer);
 
-	// ステージ範囲外の補正
-	CSceneGame::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
+		// 当たり判定
+		CollisionTarget(posPlayer);	// ターゲット
+		CollisionEnemy(posPlayer);	// 敵
 
-	// 着地判定
-	if (Land(currentMotion, posPlayer) == MOTION_LANDING)
-	{ // 着地していた場合
+		// ステージ範囲外の補正
+		CSceneGame::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
 
-		if (GetMotionType() == MOTION_JUMP)
-		{ // 再生中モーションがジャンプだった場合
+		// 着地判定
+		if (Land(currentMotion, posPlayer) == MOTION_LANDING)
+		{ // 着地していた場合
 
-			// 着地モーションの設定
-			SetMotion(MOTION_LANDING);
+			if (GetMotionType() == MOTION_JUMP)
+			{ // 再生中モーションがジャンプだった場合
+
+				// 着地モーションの設定
+				SetMotion(MOTION_LANDING);
+			}
+		}
+
+		// 射撃操作
+		currentMotion = Magic(currentMotion, posPlayer);
+
+		// バリアとの当たり判定
+		if (CSceneGame::GetStage()->CollisionBarrier(posPlayer, PLAY_RADIUS))
+		{ // 当たっていた場合
+
+			// 変数を宣言
+			D3DXVECTOR3 vecAway = posPlayer - posTarget;	// 吹っ飛びベクトル
+			vecAway.y = 0.0f;								// 縦ベクトルを削除
+			D3DXVec3Normalize(&vecAway, &vecAway);			// ベクトルを正規化
+
+			// 移動量を設定
+			m_move = vecAway * AWAY_SIDE_MOVE;
+			m_move.y = AWAY_UP_MOVE;
+
+			// 状態を設定
+			m_state = STATE_BLOW_AWAY;	// 吹っ飛び状態
 		}
 	}
-
-	// 射撃操作
-	currentMotion = Magic(currentMotion, posPlayer);
-
-	// 状態遷移
-	State();
 
 	// 位置を更新
 	SetPosition(posPlayer);
 
 	// 向きを更新
 	SetRotation(rotPlayer);
+
+	// 状態遷移
+	State();
 
 	// 魔法マネージャーの更新
 	m_pMagic->Update();
@@ -515,13 +539,12 @@ float CPlayer::GetRadius(void) const
 //============================================================
 CPlayer::MOTION CPlayer::Move(MOTION motion)
 {
-#define MAX_SPEED_WIDTH	(2.8f)
+#define MAX_SPEED_SIDE	(1.6f)
 
 	// 変数を宣言
 	D3DXVECTOR3 rot = CManager::GetCamera()->GetRotation();			// カメラの向き
 	CStage::AREA area = CSceneGame::GetStage()->GetAreaPlayer();	// プレイヤーの現在エリア
 	MOTION currentMotion = motion;	// 現在のモーション
-	float fSpeedFlont, fSpeedBack;	// 移動速度の設定用
 
 	// ポインタを宣言
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
@@ -533,229 +556,35 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 #if 1
 
 #if 0
-#if 0
-	// 移動速度を設定
-	switch (area)
-	{ // エリアごとの処理
-	case CStage::AREA_SAFE:
-
-		// 前進速度を設定
-		fSpeedFlont = 1.0f;
-
-		// 後退速度を設定
-		fSpeedBack = 1.25f;
-
-		break;
-
-	case CStage::AREA_1:
-
-		// 前進速度を設定
-		fSpeedFlont = 1.0f;
-
-		// 後退速度を設定
-		fSpeedBack = 1.25f;
-
-		break;
-
-	case CStage::AREA_2:
-
-		// 前進速度を設定
-		fSpeedFlont = 1.25f;
-
-		// 後退速度を設定
-		fSpeedBack = 1.5f;
-
-		break;
-
-	case CStage::AREA_3:
-
-		// 前進速度を設定
-		fSpeedFlont = 1.5f;
-
-		// 後退速度を設定
-		fSpeedBack = 1.75f;
-
-		break;
-
-	case CStage::AREA_4:
-
-		// 前進速度を設定
-		fSpeedFlont = 2.0f;
-
-		// 後退速度を設定
-		fSpeedBack = 2.0f;
-
-		break;
-
-	case CStage::AREA_5:
-
-		// 前進速度を設定
-		fSpeedFlont = 3.0f;
-
-		// 後退速度を設定
-		fSpeedBack = 2.25f;
-
-		break;
-
-	default:	// 例外処理
-		assert(false);
-		break;
-	}
-
-	// 移動量を更新
-	m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-	m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-
-	// 目標向きを更新
-	m_destRot.y = D3DXToRadian(90) + rot.y;
-
-	// 移動操作
-	if (pKeyboard->GetPress(DIK_W) || pPad->GetPress(CInputPad::KEY_R1))
-	{
-		// 移動量を更新
-		m_move.x += sinf(rot.y) * fSpeedBack;
-		m_move.z += cosf(rot.y) * fSpeedBack;
-	}
-	else
-	{
-		// 移動量を更新
-		m_move.x -= sinf(rot.y) * fSpeedFlont;
-		m_move.z -= cosf(rot.y) * fSpeedFlont;
-	}
-#else
-	// 変数を宣言
-	float fLimit = CSceneGame::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
-	int nRotation = 0;	// 回転方向
-
-	// 移動モーションを設定
-	currentMotion = MOTION_MOVE;
-
-	// 移動量を設定
-	switch (m_rotation)
-	{ // 回転方向ごとの処理
-	case ROTATION_LEFT:
-
-		// 移動量を更新
-		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fLimit));
-		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fLimit));
-
-		// 目標向きを更新
-		m_destRot.y = D3DXToRadian(90) + rot.y;
-
-		// 左回転を設定
-		nRotation = 1;
-
-		break;
-
-	case ROTATION_RIGHT:
-
-		// 移動量を更新
-		m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fLimit));
-		m_move.z -= cosf(rot.y - (D3DX_PI * 0.5f)) * (m_fDisTarget * (MAX_MOVEX / fLimit));
-
-		// 目標向きを更新
-		m_destRot.y = D3DXToRadian(270) + rot.y;
-
-		// 右回転を設定
-		nRotation = -1;
-
-		break;
-
-	default:	// 例外処理
-		assert(false);
-		break;
-	}
-
-	// 移動操作
-	if (pKeyboard->GetPress(DIK_W) || pPad->GetPressLStickY() > 0.0f)
-	{ // 奥移動の操作が行われた場合
-
-		// 移動量を更新
-		m_move.x += sinf(rot.y) * PLAY_MOVEZ;
-		m_move.z += cosf(rot.y) * PLAY_MOVEZ;
-
-		// 目標向きを更新
-		m_destRot.y = D3DXToRadian(180 - (PULSROT_MOVEZ * nRotation)) + rot.y;
-	}
-	else if (pKeyboard->GetPress(DIK_S) || pPad->GetPressLStickY() < 0.0f)
-	{ // 手前移動の操作が行われた場合
-
-		// 移動量を更新
-		m_move.x -= sinf(rot.y) * PLAY_MOVEZ;
-		m_move.z -= cosf(rot.y) * PLAY_MOVEZ;
-
-		// 目標向きを更新
-		m_destRot.y = D3DXToRadian(0 + (PULSROT_MOVEZ * nRotation)) + rot.y;
-	}
-
-	// 移動量増加・反転操作
-	else if (pKeyboard->GetPress(DIK_A) || pPad->GetPressLStickX() < 0.0f)
-	{ // 左移動の操作が行われた場合
-
-		if (m_rotation == ROTATION_LEFT)
-		{ // 回転方向が左の場合
-
-			// 移動量を更新
-			m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * PLUS_MOVEX;
-			m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * PLUS_MOVEX;
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(90) + rot.y;
-		}
-		else
-		{ // 回転方向が右の場合
-
-			// 回転方向を左にする
-			m_rotation = ROTATION_LEFT;
-		}
-	}
-	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPressLStickX() > 0.0f)
-	{ // 右移動の操作が行われた場合
-
-		if (m_rotation == ROTATION_RIGHT)
-		{ // 回転方向が右の場合
-
-			// 移動量を更新
-			m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * PLUS_MOVEX;
-			m_move.z -= cosf(rot.y - (D3DX_PI * 0.5f)) * PLUS_MOVEX;
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(270) + rot.y;
-		}
-		else
-		{ // 回転方向が左の場合
-
-			// 回転方向を右にする
-			m_rotation = ROTATION_RIGHT;
-		}
-	}
-#endif
-#endif
 
 	if (pKeyboard->GetPress(DIK_W) || pPad->GetPressLStickY() > 0.0f)
-	{ // 奥移動の操作が行われた場合
+	{
+		// 移動量を更新
+		m_move.x += sinf(rot.y) * 1.5f;
+		m_move.z += cosf(rot.y) * 1.5f;
 
 		// 移動量を更新
-		m_move.x += sinf(rot.y) * 2.0f;
-		m_move.z += cosf(rot.y) * 2.0f;
+		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (0.6f / (float)CStage::AREA_MAX));
+		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (0.6f / (float)CStage::AREA_MAX));
 
 		// 目標向きを更新
 		m_destRot.y = D3DXToRadian(180) + rot.y;
 	}
 	else if (pKeyboard->GetPress(DIK_S) || pPad->GetPressLStickY() < 0.0f)
-	{ // 手前移動の操作が行われた場合
+	{
+		// 移動量を更新
+		m_move.x -= sinf(rot.y) * 1.5f;
+		m_move.z -= cosf(rot.y) * 1.5f;
 
 		// 移動量を更新
-		m_move.x -= sinf(rot.y) * 2.0f;
-		m_move.z -= cosf(rot.y) * 2.0f;
+		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (0.6f / (float)CStage::AREA_MAX));
+		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (0.6f / (float)CStage::AREA_MAX));
 
 		// 目標向きを更新
 		m_destRot.y = D3DXToRadian(0) + rot.y;
 	}
 	else
 	{
-
-#if 1
 		// 移動量を更新
 		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
 		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
@@ -766,51 +595,59 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 		if (pKeyboard->GetPress(DIK_A) || pPad->GetPressLStickX() < 0.0f)
 		{
 			// 移動量を更新
-			m_move.x += sinf(rot.y - (D3DX_PI * 0.5f));
-			m_move.z += cosf(rot.y - (D3DX_PI * 0.5f));
+			m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * 1.2f;
+			m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * 1.2f;
 		}
 		else if (pKeyboard->GetPress(DIK_D) || pPad->GetPressLStickX() > 0.0f)
 		{
 			// 移動量を更新
-			m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * ((((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX))) * 1.2f;
-			m_move.z -= cosf(rot.y - (D3DX_PI * 0.5f)) * ((((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX))) * 1.2f;
+			m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * ((((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX))) * 0.8f;
+			m_move.z -= cosf(rot.y - (D3DX_PI * 0.5f)) * ((((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX))) * 0.8f;
 		}
-#else
-		// 変数を宣言
-		int nRotation = (int)area % 2;
-
-		// 移動量を設定
-		switch (nRotation)
-		{ // 回転方向ごとの処理
-		case ROTATION_LEFT:
-
-			// 移動量を更新
-			m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-			m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(90) + rot.y;
-
-			break;
-
-		case ROTATION_RIGHT:
-
-			// 移動量を更新
-			m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-			m_move.z -= cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(270) + rot.y;
-
-			break;
-
-		default:	// 例外処理
-			assert(false);
-			break;
-		}
-#endif
-
 	}
+
+#else
+
+	// 変数を宣言
+	D3DXVECTOR3 vecTarg, vecSide;	// ターゲット方向ベクトル・横方向ベクトル
+
+	// ターゲット方向のベクトルを計算
+	vecTarg = CSceneGame::GetTarget()->GetPosition() - GetPosition();
+	vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
+	D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトルの正規化
+
+	// 横方向ベクトルを計算
+	vecSide = D3DXVECTOR3(vecTarg.z, 0.0f, -vecTarg.x);
+
+
+	
+	// 縦移動量を加算
+	m_move += vecTarg * 2.0f;
+
+	if (pKeyboard->GetPress(DIK_W) || pPad->GetPress(CInputPad::KEY_L1))
+	{
+		m_move -= vecTarg * 3.0f;
+	}
+
+	// 横移動量を加算
+	m_move += vecSide * 1.5f;
+
+	if (pKeyboard->GetPress(DIK_A) || pPad->GetPressLStickX() < 0.0f)
+	{
+		// 移動量を更新
+		m_move += vecSide * 1.4f;
+	}
+	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPressLStickX() > 0.0f)
+	{
+		// 移動量を更新
+		m_move -= vecSide * 1.0;
+	}
+
+	// 目標向きを更新
+	m_destRot.y = atan2f(m_move.x, m_move.z);
+	m_destRot.y += D3DX_PI;
+
+#endif
 
 #else	// デバッグ用歩行
 	// 移動操作
@@ -929,8 +766,8 @@ CPlayer::MOTION CPlayer::Jump(MOTION motion)
 	MOTION currentMotion = motion;	// 現在のモーション
 
 	// ポインタを宣言
-	CInputKeyboard	*pKeyboard = CManager::GetKeyboard();	// キーボード
-	CInputPad		*pPad = CManager::GetPad();				// パッド
+	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
+	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
 	// ジャンプ操作
 	if (m_bJump == false)
@@ -963,8 +800,8 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion, D3DXVECTOR3& rPos)
 	MOTION currentMotion = motion;	// 現在のモーション
 
 	// ポインタを宣言
-	CInputKeyboard	*pKeyboard = CManager::GetKeyboard();	// キーボード
-	CInputPad		*pPad = CManager::GetPad();				// パッド
+	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
+	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
 	// 魔法の発射
 	if (m_pMagic->ShotMagic())
@@ -984,7 +821,7 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion, D3DXVECTOR3& rPos)
 CPlayer::MOTION CPlayer::Land(MOTION motion, D3DXVECTOR3& rPos)
 {
 	// 変数を宣言
-	MOTION currentMotion  = motion;			// 現在のモーション
+	MOTION currentMotion = motion;	// 現在のモーション
 
 	// 着地判定
 	if (CSceneGame::GetField()->LandPosition(rPos, m_move)
@@ -1107,11 +944,39 @@ void CPlayer::Rot(D3DXVECTOR3& rRot)
 //============================================================
 void CPlayer::State(void)
 {
+	// 変数を宣言
+	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
+
 	switch (m_state)
 	{ // 状態ごとの処理
 	case STATE_NORMAL:
 
 		// 無し
+
+		break;
+
+	case STATE_BLOW_AWAY:
+
+		// 位置更新
+		Pos(posPlayer);
+
+		// ターゲットとの当たり判定
+		CollisionTarget(posPlayer);
+
+		// 着地判定
+		if (CSceneGame::GetField()->LandPosition(posPlayer, m_move)
+		||  CSceneGame::GetStage()->LandPosition(posPlayer, m_move, 0.0f))
+		{ // プレイヤーが着地していた場合
+
+			// 状態を設定
+			m_state = STATE_NORMAL;	// 通常状態
+
+			// ダメージ判定
+			Hit(AWAY_DMG);
+		}
+
+		// 位置を更新
+		SetPosition(posPlayer);
 
 		break;
 
@@ -1135,6 +1000,12 @@ void CPlayer::State(void)
 
 		break;
 
+	case STATE_DEATH:
+
+		// 無し
+
+		break;
+
 	default:	// 例外処理
 		assert(false);
 		break;
@@ -1149,8 +1020,8 @@ void CPlayer::CollisionTarget(D3DXVECTOR3& rPos)
 	// ポインタを宣言
 	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
 
-	if (USED(pTarget))
-	{ // ターゲットが使用されている場合
+	if (pTarget->GetState() != CTarget::STATE_DESTROY)
+	{ // ターゲットが破壊されていない場合
 
 		// ターゲットとの衝突判定
 		collision::CirclePillar
@@ -1207,14 +1078,19 @@ void CPlayer::CollisionEnemy(D3DXVECTOR3& rPos)
 					continue;
 				}
 
-				// 敵との衝突判定
-				collision::CirclePillar
+				// 敵との当たり判定
+				if (collision::Circle2D
 				( // 引数
 					rPos,						// 判定位置
 					pObjCheck->GetPosition(),	// 判定目標位置
 					PLAY_RADIUS,				// 判定半径
 					pObjCheck->GetRadius()		// 判定目標半径
-				);
+				))
+				{ // 当たっていた場合
+
+					// プレイヤーのヒット処理
+					Hit(20);	// TODO：定数
+				}
 
 				// 次のオブジェクトへのポインタを代入
 				pObjCheck = pObjectNext;

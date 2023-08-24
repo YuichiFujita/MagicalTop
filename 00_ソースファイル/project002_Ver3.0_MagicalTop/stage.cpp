@@ -28,7 +28,8 @@
 //************************************************************
 const char *CStage::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\area001.png",	// エリア表示テクスチャ
+	"data\\TEXTURE\\area002.png",	// エリア表示テクスチャ
+	"data\\TEXTURE\\area002.png",	// エリア表示テクスチャ
 };
 
 //************************************************************
@@ -40,10 +41,12 @@ const char *CStage::mc_apTextureFile[] =	// テクスチャ定数
 CStage::CStage()
 {
 	// メンバ変数をクリア
+	m_pStageBarrier = NULL;	// バリア表示の情報
 	m_pStageArea = NULL;	// ステージエリア表示の情報
-	memset(&m_stageWind, 0, sizeof(m_stageWind));		// ステージ風
-	memset(&m_aStageArea[0], 0, sizeof(m_aStageArea));	// ステージエリア
-	memset(&m_stageLimit, 0, sizeof(m_stageLimit));		// ステージ範囲
+	memset(&m_stageWind, 0, sizeof(m_stageWind));		// 風速
+	memset(&m_stageBarrier, 0, sizeof(m_stageBarrier));	// バリア
+	memset(&m_aStageArea[0], 0, sizeof(m_aStageArea));	// エリア
+	memset(&m_stageLimit, 0, sizeof(m_stageLimit));		// 範囲
 	m_area = AREA_NONE;		// プレイヤーの現在エリア
 }
 
@@ -64,10 +67,12 @@ HRESULT CStage::Init(void)
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 
 	// メンバ変数を初期化
+	m_pStageBarrier = NULL;	// バリア表示の情報
 	m_pStageArea = NULL;	// ステージエリア表示の情報
-	memset(&m_stageWind, 0, sizeof(m_stageWind));		// ステージ風
-	memset(&m_aStageArea[0], 0, sizeof(m_aStageArea));	// ステージエリア
-	memset(&m_stageLimit, 0, sizeof(m_stageLimit));		// ステージ範囲
+	memset(&m_stageWind, 0, sizeof(m_stageWind));		// 風速
+	memset(&m_stageBarrier, 0, sizeof(m_stageBarrier));	// バリア
+	memset(&m_aStageArea[0], 0, sizeof(m_aStageArea));	// エリア
+	memset(&m_stageLimit, 0, sizeof(m_stageLimit));		// 範囲
 	m_area = AREA_NONE;		// プレイヤーの現在エリア
 
 	// ステージエリア表示の生成
@@ -90,10 +95,35 @@ HRESULT CStage::Init(void)
 	}
 
 	// テクスチャを登録・割当
-	m_pStageArea->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_NORMAL]));
+	m_pStageArea->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_AREA]));
 
 	// 優先順位を設定
 	m_pStageArea->SetPriority(AREA_PRIO);
+
+	// ステージバリア表示の生成
+	m_pStageBarrier = CObject3D::Create
+	( // 引数
+		VEC3_ZERO,		// 位置
+		VEC3_ZERO,		// 大きさ
+		VEC3_ZERO,		// 向き
+		XCOL_WHITE,		// 色
+		false,			// ライティング状況
+		D3DCMP_ALWAYS,	// Zテスト設定
+		false			// Zバッファの使用状況
+	);
+	if (UNUSED(m_pStageBarrier))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// テクスチャを登録・割当
+	m_pStageBarrier->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_BARRIER]));
+
+	// 優先順位を設定
+	m_pStageBarrier->SetPriority(AREA_PRIO);
 
 	// 成功を返す
 	return S_OK;
@@ -104,6 +134,9 @@ HRESULT CStage::Init(void)
 //============================================================
 void CStage::Uninit(void)
 {
+	// ステージバリア表示を破棄
+	m_pStageBarrier->Uninit();
+
 	// ステージエリア表示を破棄
 	m_pStageArea->Uninit();
 }
@@ -118,6 +151,9 @@ void CStage::Update(void)
 	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 	D3DXVECTOR3 rotArea = m_pStageArea->GetRotation();				// エリア表示向き
 	float fRadiusPlayer = CSceneGame::GetPlayer()->GetRadius();		// プレイヤー半径
+
+	// バリア表示の位置を設定
+	m_pStageBarrier->SetPosition(posTarget);
 
 	// 現在のエリアを初期化
 	m_area = AREA_NONE;
@@ -153,7 +189,7 @@ void CStage::Update(void)
 	assert(m_area != AREA_NONE);	// エリア外
 
 	// TODO：風速
-#if 1
+#if 0
 	if (m_stageWind.nCounter < 60)
 	{
 		// カウンターを加算
@@ -187,6 +223,27 @@ void CStage::Update(void)
 
 	CManager::GetDebugProc()->Print("%f %f %f\n", m_stageWind.vecWind.x, m_stageWind.vecWind.y, m_stageWind.vecWind.z);
 #endif
+}
+
+//============================================================
+//	バリアとの当たり判定
+//============================================================
+bool CStage::CollisionBarrier(D3DXVECTOR3& rPos, float fRadius)
+{
+	// 変数を宣言
+	bool bHit = false;	// 判定確認用
+
+	// 円の当たり判定
+	bHit = collision::Circle2D
+	( // 引数
+		rPos,							// 判定位置
+		m_pStageBarrier->GetPosition(),	// 判定目標位置
+		fRadius,						// 判定半径
+		m_stageBarrier.fRadius			// 判定目標半径
+	);
+
+	// 判定状況を返す
+	return bHit;
 }
 
 //============================================================
@@ -298,6 +355,30 @@ CStage::AREA CStage::GetAreaPlayer(void) const
 }
 
 //============================================================
+//	ステージバリアの設定処理
+//============================================================
+void CStage::SetStageBarrier(const StageArea& rBarrier)
+{
+	// 引数のステージバリアを設定
+	m_stageBarrier = rBarrier;
+
+	// エリア表示の大きさを設定
+	m_pStageBarrier->SetScaling(D3DXVECTOR3(m_stageBarrier.fRadius * 2.0f, 0.0f, m_stageBarrier.fRadius * 2.0f));
+
+	// エリア表示の色を設定
+	m_pStageBarrier->SetColor(m_stageBarrier.col);
+}
+
+//============================================================
+//	ステージバリア取得処理
+//============================================================
+CStage::StageArea CStage::GetStageBarrier(void) const
+{
+	// ステージバリアを返す
+	return m_stageBarrier;
+}
+
+//============================================================
 //	風の方向取得処理
 //============================================================
 D3DXVECTOR3 CStage::GetVecWind(void) const
@@ -369,6 +450,7 @@ HRESULT CStage::Release(CStage *&prStage)
 void CStage::LoadSetup(CStage *pStage)
 {
 	// 変数を宣言
+	StageArea stageBarrier;	// ステージバリアの代入用
 	StageArea stageArea;	// ステージエリアの代入用
 	StageLimit stageLimit;	// ステージ範囲の代入用
 	int nArea = 0;			// エリアの読み込み数
@@ -392,8 +474,38 @@ void CStage::LoadSetup(CStage *pStage)
 			// ファイルから文字列を読み込む
 			nEnd = fscanf(pFile, "%s", &aString[0]);	// テキストを読み込みきったら EOF を返す
 
+			if (strcmp(&aString[0], "BARRIERSET") == 0)
+			{ // 読み込んだ文字列が BARRIERSET の場合
+
+				do
+				{ // 読み込んだ文字列が END_BARRIERSET ではない場合ループ
+
+					// ファイルから文字列を読み込む
+					fscanf(pFile, "%s", &aString[0]);
+
+					if (strcmp(&aString[0], "COL") == 0)
+					{ // 読み込んだ文字列が COL の場合
+
+						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+						fscanf(pFile, "%f", &stageBarrier.col.r);	// 赤色を読み込む
+						fscanf(pFile, "%f", &stageBarrier.col.g);	// 緑色を読み込む
+						fscanf(pFile, "%f", &stageBarrier.col.b);	// 青色を読み込む
+						fscanf(pFile, "%f", &stageBarrier.col.a);	// α値を読み込む
+					}
+					else if (strcmp(&aString[0], "RADIUS") == 0)
+					{ // 読み込んだ文字列が RADIUS の場合
+
+						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+						fscanf(pFile, "%f", &stageBarrier.fRadius);	// 半径を読み込む
+					}
+				} while (strcmp(&aString[0], "END_BARRIERSET") != 0);	// 読み込んだ文字列が END_BARRIERSET ではない場合ループ
+
+				// ステージバリアの設定
+				pStage->SetStageBarrier(stageBarrier);
+			}
+
 			// ステージエリアの設定
-			if (strcmp(&aString[0], "AREASET") == 0)
+			else if (strcmp(&aString[0], "AREASET") == 0)
 			{ // 読み込んだ文字列が AREASET の場合
 
 				do

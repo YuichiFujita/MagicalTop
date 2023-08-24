@@ -30,8 +30,9 @@ public:
 	// テクスチャ列挙
 	typedef enum
 	{
-		TEXTURE_NORMAL = 0,	// エリア表示
-		TEXTURE_MAX			// この列挙型の総数
+		TEXTURE_BARRIER = 0,	// バリア表示
+		TEXTURE_AREA,			// エリア表示
+		TEXTURE_MAX				// この列挙型の総数
 	}TEXTURE;
 
 	// エリア列挙
@@ -92,15 +93,18 @@ public:
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
 
+	bool CollisionBarrier(D3DXVECTOR3& rPos, float fRadius);	// バリアとの当たり判定
 	void LimitPosition(D3DXVECTOR3& rPos, const float fRadius);	// 位置補正
 	bool LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove, const float fHeight);	// 範囲外着地
 
-	void SetStageLimit(const StageLimit& rLimit);	// ステージ範囲設定
-	StageLimit GetStageLimit(void) const;			// ステージ範囲取得
+	void SetStageLimit(const StageLimit& rLimit);				// ステージ範囲設定
+	StageLimit GetStageLimit(void) const;						// ステージ範囲取得
 	void SetStageArea(const int nID, const StageArea& rArea);	// ステージエリア設定
 	StageArea GetStageArea(const int nID) const;				// ステージエリア取得
-	AREA GetAreaPlayer(void) const;		// プレイヤーの現在エリア取得
-	D3DXVECTOR3 GetVecWind(void) const;	// 風の方向取得
+	void SetStageBarrier(const StageArea& rBarrier);			// ステージバリア設定
+	StageArea GetStageBarrier(void) const;						// ステージバリア取得
+	AREA GetAreaPlayer(void) const;								// プレイヤーの現在エリア取得
+	D3DXVECTOR3 GetVecWind(void) const;							// 風の方向取得
 
 	// 静的メンバ関数
 	static CStage *Create(void);				// 生成
@@ -114,11 +118,13 @@ private:
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 
 	// メンバ変数
-	CObject3D *m_pStageArea;			// ステージエリア表示の情報
-	StageWind  m_stageWind;				// ステージ風
-	StageArea  m_aStageArea[AREA_MAX];	// ステージエリア
-	StageLimit m_stageLimit;			// ステージ範囲
-	AREA m_area;	// プレイヤーの現在エリア
+	CObject3D *m_pStageBarrier;			// バリア表示の情報
+	CObject3D *m_pStageArea;			// エリア表示の情報
+	StageWind  m_stageWind;				// 風速
+	StageArea  m_stageBarrier;			// バリア
+	StageArea  m_aStageArea[AREA_MAX];	// エリア
+	StageLimit m_stageLimit;			// 範囲
+	AREA m_area;						// プレイヤーの現在エリア
 };
 
 #endif	// _STAGE_H_

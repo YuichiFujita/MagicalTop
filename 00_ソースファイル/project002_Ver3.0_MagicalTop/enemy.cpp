@@ -34,9 +34,8 @@
 
 // 敵全体マクロ
 #define SIZE_WARNING	(D3DXVECTOR3(160.0f, 160.0f, 0.0f))	// 警告表示の大きさ
-#define WARNING_PRIO	(5)	// 警告表示の優先順位
+#define WARNING_PRIO	(4)	// 警告表示の優先順位
 
-#define ENE_SPAWN_POSY		(3000.0f)	// スポーンするY座標
 #define ENE_REV				(0.02f)		// 敵の移動量の減衰係数
 #define ENE_GRAVITY			(1.0f)		// 敵の重力
 #define ENE_DMG_FRAME		(20)		// 敵のダメージ状態フレーム
@@ -47,6 +46,9 @@
 
 #define DAMAGE_CNT		(120)	// ダメージ状態維持カウント
 #define BUBBLE_SUB_CNT	(400)	// バブル消失カウント
+
+// 歩兵マクロ
+#define HUMAN_FALL	(5.5f)	// 歩兵生成時の落下速度
 
 // 戦車敵マクロ
 #define ENECAR_REV_MUL		(0.03f)	// 主砲の向き補正値
@@ -272,7 +274,7 @@ void CEnemy::Hit(const int nDmg)
 	{ // 死亡フラグが立っていない場合
 
 		// レベルを加算
-		m_pBubble->AddLevel(1);
+		m_pBubble->AddLevel(nDmg);
 
 		if (m_pBubble->GetLevel() < m_status.nLife)
 		{ // 生きている場合
@@ -390,7 +392,7 @@ void CEnemy::RandomSpawn
 
 			// 生成位置を設定
 			pos.x = (float)(rand() % (nLimit * 2) - nLimit + 1);
-			pos.y = ENE_SPAWN_POSY;
+			pos.y = m_aStatusInfo[type].fSpawnHeight;
 			pos.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
 
 			// 生成向きを設定
@@ -966,7 +968,7 @@ HRESULT CEnemyHuman::Init(void)
 	}
 
 	for (int nCntEnemy = 0; nCntEnemy < motion.nNumMotion; nCntEnemy++)
-	{ // 
+	{ // 読み込んだモーション数分繰り返す
 
 		// モーション情報の設定
 		CObjectChara::SetMotionInfo(motion.aMotionInfo[nCntEnemy]);
@@ -976,7 +978,7 @@ HRESULT CEnemyHuman::Init(void)
 	SetModelInfo();
 
 	// モーションの設定
-	SetMotion(0);
+	SetMotion(MOTION_MOVE);
 
 	// 成功を返す
 	return S_OK;
@@ -996,7 +998,6 @@ void CEnemyHuman::Uninit(void)
 //============================================================
 void CEnemyHuman::Update(void)
 {
-#if 1
 	switch (GetState())
 	{ // 状態ごとの処理
 	case STATE_SPAWN:
@@ -1042,7 +1043,6 @@ void CEnemyHuman::Update(void)
 		assert(false);
 		break;
 	}
-#endif
 
 	// 敵の更新
 	CEnemy::Update();
@@ -1069,6 +1069,49 @@ const char* CEnemyHuman::GetModelFileName(const int nModel) const
 		return mc_apModelFile[nModel];
 	}
 	else { assert(false); return NONE_STRING; }	// 範囲外
+}
+
+//============================================================
+//	スポーン動作
+//============================================================
+void CEnemyHuman::Spawn(void)
+{
+	// 変数を宣言
+	D3DXVECTOR3 posEnemy = GetPosition();		// 敵位置
+	D3DXVECTOR3 moveEnemy = GetMovePosition();	// 敵移動量
+	D3DXVECTOR3 posWarning = posEnemy;			// 警告位置
+
+	// 過去位置の更新
+	UpdateOldPosition();
+
+	// スポーン状態の敵との当たり判定
+	CollisionSpawnEnemy(posEnemy);
+
+	// 位置を加算
+	posEnemy.y -= HUMAN_FALL;
+	
+	// 着地判定
+	if (CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy))
+	{ // 着地した場合
+
+		// 警告の描画状況の設定
+		SetDrawWarning(false);	// 描画しない
+	
+		// 状態の設定
+		SetState(STATE_NORMAL);	// 通常状態
+	}
+
+	// 位置を反映
+	SetPosition(posEnemy);
+
+	// 位置移動量を反映
+	SetMovePosition(moveEnemy);
+
+	// 警告位置を地形に添わせる
+	posWarning.y = CSceneGame::GetField()->GetPositionHeight(posWarning);
+
+	// 警告の位置の設定
+	SetPositionWarning(D3DXVECTOR3(posWarning.x, posWarning.y + ENE_WAR_ADD_POSY, posWarning.z));
 }
 
 //============================================================
@@ -1928,6 +1971,12 @@ void CEnemy::LoadSetup(void)
 
 								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].fHeight);	// 縦幅を読み込む
+							}
+							else if (strcmp(&aString[0], "SPAWN_HEIGHT") == 0)
+							{ // 読み込んだ文字列が SPAWN_HEIGHT の場合
+
+								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fSpawnHeight);	// 生成するY座標を読み込む
 							}
 							else if (strcmp(&aString[0], "BULLET_LIFE") == 0)
 							{ // 読み込んだ文字列が BULLET_LIFE の場合

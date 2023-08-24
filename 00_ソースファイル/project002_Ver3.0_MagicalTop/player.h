@@ -83,6 +83,7 @@ public:
 	{
 		STATE_NORMAL = 0,	// ’Êíó‘Ô
 		STATE_DAMAGE,		// ƒ_ƒ[ƒWó‘Ô
+		STATE_BLOW_AWAY,	// ‚Á”ò‚Ñó‘Ô
 		STATE_DEATH,		// Ž€–Só‘Ô
 		STATE_MAX			// ‚±‚Ì—ñ‹“Œ^‚Ì‘”
 	}STATE;

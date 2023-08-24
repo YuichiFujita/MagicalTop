@@ -92,6 +92,7 @@ public:
 		float	fBullRadius;		// 弾の半径
 		float	fBullMove;			// 弾の移動量
 		float	fShadowRadius;		// 影の半径
+		float	fSpawnHeight;		// 生成するY座標
 		float	fRadius;			// 半径
 		float	fHeight;			// 縦幅
 		float	fForwardMove;		// 前進の移動量
@@ -223,6 +224,14 @@ public:
 		MODEL_MAX					// この列挙型の総数
 	}MODEL;
 
+	// モーション列挙
+	typedef enum
+	{
+		MOTION_MOVE = 0,	// 歩行モーション
+		MOTION_ACTION,		// 攻撃モーション
+		MOTION_MAX			// この列挙型の総数
+	}MOTION;
+
 	// コンストラクタ
 	CEnemyHuman(const TYPE type);
 
@@ -238,6 +247,7 @@ public:
 
 private:
 	// オーバーライド関数
+	void Spawn(void);			// スポーン動作
 	void CollisionFind(void);	// 検知範囲の当たり判定
 
 	// 静的メンバ変数

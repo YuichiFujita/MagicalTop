@@ -14,6 +14,7 @@
 #include "texture.h"
 #include "collision.h"
 #include "effect3D.h"
+#include "target.h"
 #include "enemy.h"
 #include "field.h"
 #include "stage.h"
@@ -23,6 +24,10 @@
 //	マクロ定義
 //************************************************************
 #define MAGIC_SETUP_TXT	"data\\TXT\\magic.txt"	// セットアップテキスト相対パス
+
+#define PLUS_HIT_RADIUS	(5.5f)	// 当たり判定の拡張値
+#define MOVE_INHALE		(10.0f)	// 吸い込まれ時の魔法の移動量
+#define MOVE_DELETE		(3.0f)	// 消失時の魔法の移動量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -44,6 +49,7 @@ CMagic::CMagic() : CObject(CObject::LABEL_MAGIC)
 	m_movePos	= VEC3_ZERO;	// 位置移動量
 	m_rot		= VEC3_ZERO;	// 向き
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
+	m_state		= STATE_NORMAL;	// 状態
 }
 
 //============================================================
@@ -66,9 +72,10 @@ HRESULT CMagic::Init(void)
 	m_movePos	= VEC3_ZERO;	// 位置移動量
 	m_rot		= VEC3_ZERO;	// 向き
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
+	m_state		= STATE_NORMAL;	// 状態
 
 	// バブル情報の生成
-	m_pBubble = CBubble::Create(this, m_statusInfo.nLife, m_statusInfo.bubbleSize, VEC3_ZERO, 0.0f);
+	m_pBubble = CBubble::Create(this, m_statusInfo.nLife, VEC3_ALL(m_statusInfo.bubbleRadius), VEC3_ZERO, 0.0f);
 	if (UNUSED(m_pBubble))
 	{ // 非使用中の場合
 
@@ -98,40 +105,101 @@ void CMagic::Uninit(void)
 //============================================================
 void CMagic::Update(void)
 {
-	// 移動量を加算
-	m_pos += m_movePos;
+	// 変数を宣言
+	D3DXVECTOR3 vecTarg;
 
-	// 位置に風速を加算
-	m_pos += CSceneGame::GetStage()->GetVecWind();
+	switch (m_state)
+	{ // 状態ごとの処理
+	case STATE_NORMAL:	// 通常状態
 
-	// バブルレベルを加算
-	m_pBubble->AddLevel(1);
+		// 移動量を加算
+		m_pos += m_movePos;
+
+		// 位置に風速を加算
+		m_pos += CSceneGame::GetStage()->GetVecWind();
+
+		// バブルレベルを加算
+		m_pBubble->AddLevel(1);
+
+		if (m_pBubble->GetLevel() >= m_statusInfo.nLife)
+		{ // 寿命が来た場合
+
+			// 状態を設定
+			m_state = STATE_INHALE;	// 吸い込まれ状態
+		}
+
+		break;
+
+	case STATE_INHALE:	// 吸い込まれ状態
+
+		// ターゲット方向のベクトルを計算
+		vecTarg = CSceneGame::GetTarget()->GetPosition() - m_pos;
+		vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
+		D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトル正規化
+		
+		// 移動量を設定
+		m_movePos = vecTarg * MOVE_INHALE;
+
+		// ベクトルを90度回転
+		vecTarg = D3DXVECTOR3(-vecTarg.z, 0.0f, vecTarg.x);
+
+		// 移動量を加算
+		m_movePos += vecTarg * MOVE_INHALE;
+
+		// 移動量を加算
+		m_pos += m_movePos;
+
+		break;
+
+	case STATE_DELETE:	// 消失状態
+
+		// ターゲット方向のベクトルを計算
+		vecTarg = CSceneGame::GetTarget()->GetPosition() - m_pos;
+		vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
+		D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトル正規化
+		
+		// 移動量を設定
+		m_movePos = vecTarg * MOVE_DELETE;
+
+		// ベクトルを90度回転
+		vecTarg = D3DXVECTOR3(-vecTarg.z, 0.0f, vecTarg.x);
+
+		// 移動量を加算
+		m_movePos += vecTarg * MOVE_DELETE;
+
+		// 移動量を加算
+		m_pos += m_movePos;
+
+		// バブルレベルを減算
+		m_pBubble->AddLevel(-1);
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
+
+	if (m_state != STATE_DELETE)
+	{ // 消失状態ではない場合
+
+		// バリアとの当たり判定
+		if (CSceneGame::GetStage()->CollisionBarrier(m_pos, m_pBubble->GetRadius()))
+		{ // 当たっていた場合
+
+			// 状態を設定
+			m_state = STATE_DELETE;	// 消失状態
+		}
+	}
+
+	// 縦位置を補正
+	CSceneGame::GetField()->LandPosition(m_pos, VEC3_ZERO);
 
 	// バブルの更新
 	m_pBubble->Update();
 
-	if (m_pBubble->GetLevel() >= m_statusInfo.nLife)
-	{ // 寿命が来た場合
-
-		// オブジェクトの終了
-		Uninit();
-
-		// 関数を抜ける
-		return;
-	}
-
 	if (CollisionEnemy())
-	{ // 敵と当たっていた場合
-
-		// オブジェクトの終了
-		Uninit();
-
-		// 関数を抜ける
-		return;
-	}
-
-	if (m_pos.y < CSceneGame::GetField()->GetPositionHeight(m_pos))
-	{ // 地面に当たっている場合
+	{ // 敵に当たっていた場合
 
 		// オブジェクトの終了
 		Uninit();
@@ -281,6 +349,36 @@ D3DXVECTOR3 CMagic::GetRotation(void) const
 }
 
 //============================================================
+//	ターゲットとの当たり判定
+//============================================================
+bool CMagic::CollisionTarget(void)
+{
+	// ポインタを宣言
+	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
+
+	if (pTarget->GetState() != CTarget::STATE_DESTROY)
+	{ // ターゲットが破壊されていない場合
+
+		// ターゲットとの当たり判定
+		if (collision::Circle2D
+		( // 引数
+			m_pos,										// 判定位置
+			pTarget->GetPosition(),						// 判定目標位置
+			m_pBubble->GetRadius() + PLUS_HIT_RADIUS,	// 判定半径
+			pTarget->GetRadius()						// 判定目標半径
+		))
+		{ // 魔法に当たっていた場合
+
+			// 当たった判定を返す
+			return true;
+		}
+	}
+
+	// 当たっていない判定を返す
+	return false;
+}
+
+//============================================================
 //	敵との当たり判定
 //============================================================
 bool CMagic::CollisionEnemy(void)
@@ -327,15 +425,15 @@ bool CMagic::CollisionEnemy(void)
 				// 魔法判定
 				if (collision::Circle3D
 				( // 引数
-					m_pos,						// 判定位置
-					pObjCheck->GetPosition(),	// 判定目標位置
-					m_pBubble->GetRadius(),		// 判定半径
-					pObjCheck->GetRadius()		// 判定目標半径
+					m_pos,										// 判定位置
+					pObjCheck->GetPosition(),					// 判定目標位置
+					m_pBubble->GetRadius() + PLUS_HIT_RADIUS,	// 判定半径
+					pObjCheck->GetRadius()						// 判定目標半径
 				))
 				{ // 魔法に当たっていた場合
 
 					// 敵のヒット処理
-					pObjCheck->Hit(0);
+					pObjCheck->Hit(1);
 
 					// 当たった判定を返す
 					return true;
@@ -407,17 +505,11 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
 								fscanf(pFile, "%d", &nType);		// 種類を読み込む
 							}
-							else if (strcmp(&aString[0], "LOCK") == 0)
-							{ // 読み込んだ文字列が LOCK の場合
-
-								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_statusInfo.nLock);		// ロックオン数を読み込む
-							}
 							else if (strcmp(&aString[0], "LIFE") == 0)
 							{ // 読み込んだ文字列が LIFE の場合
 
-								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_statusInfo.nLife);		// 寿命を読み込む
+								fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_statusInfo.nLife);	// 寿命を読み込む
 							}
 							else if (strcmp(&aString[0], "COOLTIME") == 0)
 							{ // 読み込んだ文字列が COOLTIME の場合
@@ -431,11 +523,11 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_statusInfo.fMove);		// 移動量を読み込む
 							}
-							else if (strcmp(&aString[0], "VIEW_RADIUS") == 0)
-							{ // 読み込んだ文字列が VIEW_RADIUS の場合
+							else if (strcmp(&aString[0], "BUBBLE_RADIUS") == 0)
+							{ // 読み込んだ文字列が BUBBLE_RADIUS の場合
 
-								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_statusInfo.fViewRadius);	// 視界範囲を読み込む
+								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_statusInfo.bubbleRadius);	// バブル半径を読み込む
 							}
 							else if (strcmp(&aString[0], "SHOT_PARTS") == 0)
 							{ // 読み込んだ文字列が SHOT_PARTS の場合
@@ -450,14 +542,6 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%f", &m_statusInfo.shotPos.x);	// 発射位置Xを読み込む
 								fscanf(pFile, "%f", &m_statusInfo.shotPos.y);	// 発射位置Yを読み込む
 								fscanf(pFile, "%f", &m_statusInfo.shotPos.z);	// 発射位置Zを読み込む
-							}
-							else if (strcmp(&aString[0], "BUBBLE_SIZE") == 0)
-							{ // 読み込んだ文字列が BUBBLE_SIZE の場合
-
-								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_statusInfo.bubbleSize.x);	// バブル大きさXを読み込む
-								fscanf(pFile, "%f", &m_statusInfo.bubbleSize.y);	// バブル大きさYを読み込む
-								fscanf(pFile, "%f", &m_statusInfo.bubbleSize.z);	// バブル大きさZを読み込む
 							}
 						} while (strcmp(&aString[0], "END_MAGICSET") != 0);	// 読み込んだ文字列が END_MAGICSET ではない場合ループ
 					}
