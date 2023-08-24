@@ -139,9 +139,6 @@ void CRenderer::Update(void)
 {
 	// オブジェクトの全更新
 	CObject::UpdateAll();
-
-	// デバッグ表示の更新
-	CManager::GetDebugProc()->Update();
 }
 
 //============================================================

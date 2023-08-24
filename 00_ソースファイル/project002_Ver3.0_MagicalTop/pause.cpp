@@ -18,7 +18,25 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define PAUSE_PRIO	(7)	// ポーズ表示の優先順位
+#define PAUSE_PRIO	(6)	// ポーズ表示の優先順位
+
+#define PAUSE_POS	(D3DXVECTOR3(640.0f, 210.0f, 0.0f))	// セレクトメニューの位置
+#define PAUSE_SIZE	(D3DXVECTOR3(440.0f, 110.0f, 0.0f))	// セレクトメニューの大きさ
+#define PAUSE_SPACE	(D3DXVECTOR3(0.0f, 150.0f, 0.0f))	// セレクトメニューの空白
+
+#define BG_COL		(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.6f))	// 背景カラー
+#define CHOICE_COL	(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	// 選択中カラー
+#define DEFAULT_COL	(D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f))	// 非選択中カラー
+
+//************************************************************
+//	静的メンバ変数宣言
+//************************************************************
+const char *CPause::mc_apTextureFile[] =	// テクスチャ定数
+{
+	"data\\TEXTURE\\pause000.png",	// 再開テクスチャ
+	"data\\TEXTURE\\pause001.png",	// リトライテクスチャ
+	"data\\TEXTURE\\pause002.png",	// 終了テクスチャ
+};
 
 //************************************************************
 //	子クラス [CPause] のメンバ関数
@@ -29,8 +47,11 @@
 CPause::CPause()
 {
 	// メンバ変数をクリア
-	m_pTitle = NULL;	// タイトル情報
-	m_bPause = false;	// ポーズ状況
+	memset(&m_apSelect[0], 0, sizeof(m_apSelect));	// 選択情報
+	m_pBG		 = NULL;			// 背景情報
+	m_nSelect	 = SELECT_RESUME;	// 現在の選択
+	m_nOldSelect = SELECT_RESUME;	// 前回の選択
+	m_bPause	 = false;			// ポーズ状況
 }
 
 //============================================================
@@ -46,13 +67,25 @@ CPause::~CPause()
 //============================================================
 HRESULT CPause::Init(void)
 {
-	// メンバ変数を初期化
-	m_pTitle = NULL;	// タイトル情報
-	m_bPause = false;	// ポーズ状況
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャ
 
-	// タイトル情報の生成
-	m_pTitle = CObject2D::Create(D3DXVECTOR3(100.0f, 100.0f, 0.0f), D3DXVECTOR3(100.0f, 100.0f, 0.0f));	// TODO：オブジェクト2Dの位置・大きさ
-	if (UNUSED(m_pTitle))
+	// メンバ変数を初期化
+	memset(&m_apSelect[0], 0, sizeof(m_apSelect));	// 選択情報
+	m_pBG		 = NULL;			// 背景情報
+	m_nSelect	 = SELECT_RESUME;	// 現在の選択
+	m_nOldSelect = SELECT_RESUME;	// 前回の選択
+	m_bPause	 = false;			// ポーズ状況
+
+	// 背景情報の生成
+	m_pBG = CObject2D::Create
+	( // 引数
+		SCREEN_CENT,	// 位置
+		SCREEN_SIZE,	// 大きさ
+		VEC3_ZERO,		// 向き
+		BG_COL			// 色
+	);
+	if (UNUSED(m_pBG))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -61,7 +94,33 @@ HRESULT CPause::Init(void)
 	}
 
 	// 優先順位を設定
-	m_pTitle->SetPriority(PAUSE_PRIO);
+	m_pBG->SetPriority(PAUSE_PRIO);
+
+	for (int nCntPause = 0; nCntPause < SELECT_MAX; nCntPause++)
+	{ // 選択肢の項目数分繰り返す
+
+		// 選択情報の生成
+		m_apSelect[nCntPause] = CObject2D::Create
+		( // 引数
+			PAUSE_POS + (PAUSE_SPACE * (float)nCntPause),	// 位置
+			PAUSE_SIZE,	// 大きさ
+			VEC3_ZERO,	// 向き
+			DEFAULT_COL	// 色
+		);
+		if (UNUSED(m_apSelect[nCntPause]))
+		{ // 非使用中の場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// 優先順位を設定
+		m_apSelect[nCntPause]->SetPriority(PAUSE_PRIO);
+
+		// テクスチャを登録・割当
+		m_apSelect[nCntPause]->BindTexture(pTexture->Regist(mc_apTextureFile[nCntPause]));
+	}
 
 	// 描画状況の設定
 	SetEnableDraw(m_bPause);
@@ -75,8 +134,15 @@ HRESULT CPause::Init(void)
 //============================================================
 void CPause::Uninit(void)
 {
-	// タイトル情報の終了
-	m_pTitle->Uninit();
+	// 背景情報の終了
+	m_pBG->Uninit();
+
+	for (int nCntPause = 0; nCntPause < SELECT_MAX; nCntPause++)
+	{ // 選択肢の項目数分繰り返す
+
+		// 選択情報の終了
+		m_apSelect[nCntPause]->Uninit();
+	}
 }
 
 //============================================================
@@ -85,12 +151,16 @@ void CPause::Uninit(void)
 void CPause::Update(void)
 {
 	if (CManager::GetFade()->GetState() == CFade::FADE_NONE)
-	{ // フェードが何もしない状態の場合
+	{ // フェードしていない場合
 
-		if (CManager::GetKeyboard()->GetTrigger(DIK_P) || CManager::GetPad()->GetTrigger(CInputPad::KEY_START))
+		if (CManager::GetKeyboard()->GetTrigger(DIK_P)
+		||  CManager::GetPad()->GetTrigger(CInputPad::KEY_START))
 		{
 			// ポーズ状況を切り替え
 			m_bPause = (!m_bPause) ? true : false;
+
+			// 現在の選択を初期化
+			m_nSelect = SELECT_RESUME;
 
 			// 描画状況の設定
 			SetEnableDraw(m_bPause);
@@ -100,11 +170,28 @@ void CPause::Update(void)
 	if (m_bPause)
 	{ // ポーズ中の場合
 
-		// TODO：ポーズによる画面遷移の作成
+		// 選択操作
+		Select();
+
+		// 前回の選択要素の色を黒に設定
+		m_apSelect[m_nOldSelect]->SetColor(DEFAULT_COL);
+
+		// 現在の選択要素の色を白に設定
+		m_apSelect[m_nSelect]->SetColor(CHOICE_COL);
+
+		// 現在の選択要素を代入
+		m_nOldSelect = m_nSelect;
 	}
 
-	// タイトル情報の更新
-	m_pTitle->Update();
+	// 背景情報の更新
+	m_pBG->Update();
+
+	for (int nCntPause = 0; nCntPause < SELECT_MAX; nCntPause++)
+	{ // 選択肢の項目数分繰り返す
+
+		// 選択情報の更新
+		m_apSelect[nCntPause]->Update();
+	}
 }
 
 //============================================================
@@ -120,8 +207,15 @@ void CPause::Draw(void)
 //============================================================
 void CPause::SetEnableDraw(const bool bDraw)
 {
-	// 引数の描画状況を設定
-	m_pTitle->SetEnableDraw(bDraw);	// タイトル情報
+	// 背景情報の描画状況を設定
+	m_pBG->SetEnableDraw(bDraw);
+
+	for (int nCntPause = 0; nCntPause < SELECT_MAX; nCntPause++)
+	{ // 選択肢の項目数分繰り返す
+
+		// 選択情報の描画状況を設定
+		m_apSelect[nCntPause]->SetEnableDraw(bDraw);
+	}
 }
 
 //============================================================
@@ -130,7 +224,7 @@ void CPause::SetEnableDraw(const bool bDraw)
 CPause *CPause::Create(void)
 {
 	// ポインタを宣言
-	CPause *pPause = NULL;	// ポーズ生成用
+	CPause *pPause = NULL;		// ポーズ生成用
 
 	if (UNUSED(pPause))
 	{ // 使用されていない場合
@@ -189,4 +283,80 @@ bool CPause::IsPause(void)
 {
 	// ポーズ状況を返す
 	return m_bPause;
+}
+
+//============================================================
+//	選択操作処理
+//============================================================
+void CPause::Select(void)
+{
+	// ポインタを宣言
+	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
+	CInputPad		*pPad		= CManager::GetPad();		// パッド
+
+	if (CManager::GetFade()->GetState() == CFade::FADE_NONE)
+	{ // フェードしていない場合
+
+		if (pKeyboard->GetTrigger(DIK_W)
+		||  pKeyboard->GetTrigger(DIK_UP)
+		||  pPad->GetTrigger(CInputPad::KEY_UP))
+		{ // 上移動の操作が行われた場合
+
+			// 上に選択をずらす
+			m_nSelect = (m_nSelect + (SELECT_MAX - 1)) % SELECT_MAX;
+
+			// サウンドの再生
+			//PlaySound(SOUND_LABEL_SE_MOVE);		// SE (カーソル移動)
+		}
+		if (pKeyboard->GetTrigger(DIK_S)
+		||  pKeyboard->GetTrigger(DIK_DOWN)
+		||  pPad->GetTrigger(CInputPad::KEY_DOWN))
+		{ // 下移動の操作が行われた場合
+
+			// 下に選択をずらす
+			m_nSelect = (m_nSelect + 1) % SELECT_MAX;
+
+			// サウンドの再生
+			//PlaySound(SOUND_LABEL_SE_MOVE);		// SE (カーソル移動)
+		}
+
+		if (pKeyboard->GetTrigger(DIK_RETURN)  || pKeyboard->GetTrigger(DIK_SPACE)
+		||  pPad->GetTrigger(CInputPad::KEY_A) || pPad->GetTrigger(CInputPad::KEY_B)
+		||  pPad->GetTrigger(CInputPad::KEY_X) || pPad->GetTrigger(CInputPad::KEY_Y))
+		{ // 決定の操作が行われた場合
+
+			// サウンドの再生
+			//PlaySound(SOUND_LABEL_SE_DEC_01);	// SE (決定01)
+
+			switch (m_nSelect)
+			{ // 選択ごとの処理
+			case SELECT_RESUME:	// 再開
+
+				// ポーズを終了する
+				m_bPause = false;
+
+				// 描画状況の設定
+				SetEnableDraw(m_bPause);
+
+				// 処理を抜ける
+				break;
+
+			case SELECT_RETRY:	// リトライ
+
+				// シーンの設定
+				CManager::SetScene(CScene::MODE_GAME);	// ゲーム画面
+
+				// 処理を抜ける
+				break;
+
+			case SELECT_EXIT:	// 終了
+
+				// シーンの設定
+				CManager::SetScene(CScene::MODE_TITLE);	// タイトル画面
+
+				// 処理を抜ける
+				break;
+			}
+		}
+	}
 }

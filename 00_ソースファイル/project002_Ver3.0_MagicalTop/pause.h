@@ -28,6 +28,15 @@ class CObject2D;	// オブジェクト2Dクラス
 class CPause
 {
 public:
+	// 選択列挙
+	enum SELECT
+	{
+		SELECT_RESUME = 0,	// 再開
+		SELECT_RETRY,		// リトライ
+		SELECT_EXIT,		// 終了
+		SELECT_MAX			// この列挙型の総数
+	};
+
 	// コンストラクタ
 	CPause();
 
@@ -49,9 +58,18 @@ public:
 	bool IsPause(void);	// ポーズ状況取得
 
 private:
+	// メンバ関数
+	void Select(void);	// 選択操作
+
+	// 静的メンバ変数
+	static const char *mc_apTextureFile[];	// テクスチャ定数
+
 	// メンバ変数
-	CObject2D *m_pTitle;	// タイトル情報
-	bool m_bPause;	// ポーズ状況
+	CObject2D *m_apSelect[SELECT_MAX];	// 選択情報
+	CObject2D *m_pBG;	// 背景情報
+	int  m_nSelect;		// 現在の選択
+	int  m_nOldSelect;	// 前回の選択
+	bool m_bPause;		// ポーズ状況
 };
 
 #endif	// _PAUSE_H_
