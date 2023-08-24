@@ -30,9 +30,9 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
+// 敵全体マクロ
 #define ENEMY_SETUP_TXT	"data\\TXT\\enemy.txt"	// セットアップテキスト相対パス
 
-// 敵全体マクロ
 #define SIZE_WARNING	(D3DXVECTOR3(160.0f, 160.0f, 0.0f))	// 警告表示の大きさ
 #define WARNING_PRIO	(4)	// 警告表示の優先順位
 
@@ -50,7 +50,7 @@
 // 歩兵マクロ
 #define HUMAN_FALL	(5.5f)	// 歩兵生成時の落下速度
 
-// 戦車敵マクロ
+// 戦車マクロ
 #define ENECAR_REV_MUL		(0.03f)	// 主砲の向き補正値
 #define ENECAR_SHOTRANGE	(0.25f)	// 主砲射撃時の許容される向きの誤差量
 
@@ -59,6 +59,7 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
+// 敵全体メンバ変数
 CEnemy::StatusInfo CEnemy::m_aStatusInfo[CEnemy::TYPE_MAX] = {};	// ステータス情報
 CEnemy::PartsInfo CEnemy::m_aPartsInfo[CEnemy::TYPE_MAX] = {};		// パーツ情報
 CMotion::Info CEnemy::m_aMotionInfo[CEnemy::TYPE_MAX] = {};			// モーション情報
@@ -69,6 +70,7 @@ const char *CEnemy::mc_apTextureFile[] =	// テクスチャ定数
 	"data\\TEXTURE\\warning000.png",	// 警告表示テクスチャ
 };
 
+// 歩兵メンバ変数
 const char *CEnemyHuman::mc_apModelFile[] =	// 歩兵モデル定数
 {
 	"data\\MODEL\\ENEMY\\HUMAN\\00_waist.x",				// 腰
@@ -95,6 +97,7 @@ const char *CEnemyHuman::mc_apModelFile[] =	// 歩兵モデル定数
 	"data\\MODEL\\ENEMY\\HUMAN\\21_assault.x",				// 銃
 };
 
+// 戦車メンバ変数
 const char *CEnemyCar::mc_apModelFile[] =	// 戦車モデル定数
 {
 	"data\\MODEL\\ENEMY\\CAR\\caterpillar000.x",	// キャタピラ

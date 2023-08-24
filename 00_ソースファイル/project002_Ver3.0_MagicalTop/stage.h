@@ -103,6 +103,7 @@ public:
 	StageArea GetStageArea(const int nID) const;				// ステージエリア取得
 	void SetStageBarrier(const StageArea& rBarrier);			// ステージバリア設定
 	StageArea GetStageBarrier(void) const;						// ステージバリア取得
+	D3DXVECTOR3 GetStageBarrierPosition(void) const;			// ステージバリアの位置取得
 	AREA GetAreaPlayer(void) const;								// プレイヤーの現在エリア取得
 	D3DXVECTOR3 GetVecWind(void) const;							// 風の方向取得
 

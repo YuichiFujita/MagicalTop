@@ -25,7 +25,7 @@
 //************************************************************
 #define MAGIC_SETUP_TXT	"data\\TXT\\magic.txt"	// セットアップテキスト相対パス
 
-#define PLUS_HIT_RADIUS	(5.5f)	// 当たり判定の拡張値
+#define PLUS_HIT_RADIUS	(10.0f)	// 当たり判定の拡張値
 #define MOVE_INHALE		(10.0f)	// 吸い込まれ時の魔法の移動量
 #define MOVE_DELETE		(3.0f)	// 消失時の魔法の移動量
 
@@ -433,7 +433,7 @@ bool CMagic::CollisionEnemy(void)
 				{ // 魔法に当たっていた場合
 
 					// 敵のヒット処理
-					pObjCheck->Hit(1);
+					pObjCheck->Hit((m_pBubble->GetLevel() / (m_pBubble->GetMaxLevel() / 2)) + 1);
 
 					// 当たった判定を返す
 					return true;

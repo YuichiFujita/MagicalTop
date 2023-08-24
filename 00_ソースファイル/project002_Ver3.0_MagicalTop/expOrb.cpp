@@ -21,12 +21,10 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define EXP_MOVE		(13.0f)	// 経験値の移動量
+#define EXP_MOVE		(19.0f)	// 経験値の移動量
 #define EXP_REV_ROT		(0.25f)	// 経験値ホーミング時の向き補正係数
 #define EXP_PLUS_POSY	(30.0f)	// 経験値の地面からの上昇量
-
-#define EXP_RADIUS		(80.0f)		// 経験値の半径
-#define EXP_HIT_RADIUS	(120.0f)	// 経験値の当たり判定の半径
+#define EXP_RADIUS		(80.0f)	// 経験値の半径
 
 #define EXP_SPAWN_RADIUS	(250)	// 経験値出現時のランダム範囲
 
@@ -143,6 +141,12 @@ void CExpOrb::Update(void)
 		// ステージ範囲外の補正
 		CSceneGame::GetStage()->LimitPosition(posExp, EXP_RADIUS);
 
+		// 位置を設定
+		CObjectBillboard::SetPosition(posExp);
+
+		// 向きを設定
+		CObjectBillboard::SetRotation(rotExp);
+
 		// プレイヤーとの当たり判定
 		if (CollisionPlayer())
 		{ // プレイヤーに当たっている場合
@@ -153,12 +157,6 @@ void CExpOrb::Update(void)
 			// 関数を抜ける
 			return;
 		}
-
-		// 位置を設定
-		CObjectBillboard::SetPosition(posExp);
-
-		// 向きを設定
-		CObjectBillboard::SetRotation(rotExp);
 	}
 
 	// オブジェクトビルボードの更新
@@ -266,12 +264,12 @@ bool CExpOrb::CollisionPlayer(void)
 	{ // プレイヤーが使用されている場合
 
 		// プレイヤーとの当たり判定
-		bHit = collision::Circle2D
+		bHit = collision::Circle3D
 		( // 引数
-			GetPosition(),			// 経験値位置
-			pPlayer->GetPosition(),	// プレイヤー位置
-			EXP_HIT_RADIUS,			// 経験値半径
-			pPlayer->GetRadius()	// プレイヤー半径
+			GetPosition(),				// 経験値位置
+			pPlayer->GetPosition(),		// プレイヤー位置
+			EXP_RADIUS,					// 経験値半径
+			pPlayer->GetRadius() * 0.5f	// プレイヤー半径
 		);
 
 		if (bHit)

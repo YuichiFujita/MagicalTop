@@ -121,7 +121,6 @@ public:
 private:
 	// メンバ関数
 	MOTION Move(MOTION motion);						// 移動
-	MOTION Jump(MOTION motion);						// ジャンプ
 	MOTION Magic(MOTION motion, D3DXVECTOR3& rPos);	// 魔法
 	MOTION Land(MOTION motion, D3DXVECTOR3& rPos);	// 着地
 	void Motion(MOTION motion);						// モーション

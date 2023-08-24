@@ -150,10 +150,15 @@ void CStage::Update(void)
 	D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 	D3DXVECTOR3 rotArea = m_pStageArea->GetRotation();				// エリア表示向き
+	D3DXVECTOR3 rotBarrier = m_pStageBarrier->GetRotation();		// バリア表示向き
 	float fRadiusPlayer = CSceneGame::GetPlayer()->GetRadius();		// プレイヤー半径
 
 	// バリア表示の位置を設定
 	m_pStageBarrier->SetPosition(posTarget);
+
+	// バリア表示の向きを設定
+	rotBarrier.y -= AREA_ROT;
+	m_pStageBarrier->SetRotation(rotBarrier);
 
 	// 現在のエリアを初期化
 	m_area = AREA_NONE;
@@ -376,6 +381,15 @@ CStage::StageArea CStage::GetStageBarrier(void) const
 {
 	// ステージバリアを返す
 	return m_stageBarrier;
+}
+
+//============================================================
+//	ステージバリアの位置取得処理
+//============================================================
+D3DXVECTOR3 CStage::GetStageBarrierPosition(void) const
+{
+	// バリアの位置を返す
+	return m_pStageBarrier->GetPosition();
 }
 
 //============================================================
