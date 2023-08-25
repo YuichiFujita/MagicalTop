@@ -26,6 +26,13 @@ const char *CLevelupManager::mc_apTextureFile[] =	// テクスチャ定数
 };
 
 //************************************************************
+//	マクロ定義
+//************************************************************
+#define CONTROL_POS		(D3DXVECTOR3(1160.5f, 680.0f, 0.0f))	// 操作表示の位置
+#define CONTROL_SIZE	(D3DXVECTOR3(220.0f, 65.0f, 0.0f))		// 操作表示の大きさ
+#define CONTROL_PRIO	(6)	// 操作表示の優先順位
+
+//************************************************************
 //	親クラス [CLevelupManager] のメンバ関数
 //************************************************************
 //============================================================
@@ -74,10 +81,10 @@ HRESULT CLevelupManager::Init(void)
 	m_pShopManager->SetEnableDraw(false);
 
 	// 操作情報の生成
-	m_pControl = CObject2D::Create	// TODO：定数
+	m_pControl = CObject2D::Create
 	( // 引数
-		D3DXVECTOR3(1160.5f, 680.0f, 0.0f),
-		D3DXVECTOR3(220.0f, 65.0f, 0.0f)
+		CONTROL_POS,	// 位置
+		CONTROL_SIZE	// 大きさ
 	);
 	if (UNUSED(m_pControl))
 	{ // 非使用中の場合
@@ -91,7 +98,7 @@ HRESULT CLevelupManager::Init(void)
 	m_pControl->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_CONTROL]));
 
 	// 優先順位を設定
-	m_pControl->SetPriority(6);
+	m_pControl->SetPriority(CONTROL_PRIO);
 
 	// 描画をしない状態にする
 	m_pControl->SetEnableDraw(false);

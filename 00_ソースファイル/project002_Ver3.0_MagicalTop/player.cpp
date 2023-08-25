@@ -30,7 +30,7 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define PLAYER_SETUP_TXT	"data\\TXT\\player.txt"	// セットアップテキスト相対パス
+#define PLAYER_SETUP_TXT	"data\\TXT\\player.txt"				// セットアップテキスト相対パス
 #define PLAY_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 
 #define MAX_MOVEX		(5.0f)		// 自動歩行時の速度割合用
@@ -204,7 +204,7 @@ HRESULT CPlayer::Init(void)
 	SetModelInfo();
 
 	// モーションの設定
-	SetMotion(MOTION_NEUTRAL);
+	SetMotion(MOTION_MOVE);
 
 	// 成功を返す
 	return S_OK;
@@ -252,9 +252,8 @@ void CPlayer::Uninit(void)
 void CPlayer::Update(void)
 {
 	// 変数を宣言
-	MOTION currentMotion  = MOTION_NEUTRAL;	// 現在のモーション
+	int nCurrentMotion = NONE_IDX;	// 現在のモーション
 	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
-	D3DXVECTOR3 rotPlayer = GetRotation();	// プレイヤー向き
 	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 
 	// 過去位置を更新
@@ -263,66 +262,39 @@ void CPlayer::Update(void)
 	// ターゲットとの距離を設定
 	m_fDisTarget = sqrtf((posPlayer.x - posTarget.x) * (posPlayer.x - posTarget.x)+ (posPlayer.z - posTarget.z) * (posPlayer.z - posTarget.z)) * 0.5f;
 
-	if (m_state != STATE_BLOW_AWAY)
-	{ // 吹っ飛び状態ではない場合
+	switch (m_state)
+	{ // 状態ごとの処理
+	case STATE_NORMAL:
 
-		// 移動操作
-		currentMotion = Move(currentMotion);
+		// 通常状態時の更新
+		nCurrentMotion = UpdateNormal();
 
-		// 向き更新
-		Rot(rotPlayer);
+		break;
 
-		// 位置更新
-		Pos(posPlayer);
+	case STATE_BLOW_AWAY:
 
-		// ステージ範囲外の補正
-		CSceneGame::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
+		// 吹っ飛び状態時の更新
+		UpdateBlowAway();
 
-		// 着地判定
-		if (Land(currentMotion, posPlayer) == MOTION_LANDING)
-		{ // 着地していた場合
+		break;
 
-			if (GetMotionType() == MOTION_JUMP)
-			{ // 再生中モーションがジャンプだった場合
+	case STATE_DAMAGE:
 
-				// 着地モーションの設定
-				SetMotion(MOTION_LANDING);
-			}
-		}
+		// ダメージ状態時の更新
+		nCurrentMotion = UpdateDamage();
 
-		// 射撃操作
-		currentMotion = Magic(currentMotion, posPlayer);
+		break;
 
-		// 当たり判定
-		CollisionTarget(posPlayer);	// ターゲット
-		CollisionEnemy(posPlayer);	// 敵
+	case STATE_DEATH:
 
-		// バリアとの当たり判定
-		if (CSceneGame::GetStage()->CollisionBarrier(posPlayer, PLAY_RADIUS))
-		{ // 当たっていた場合
+		// 無し
 
-			// ヒット処理
-			Hit(BARRIER_DMG);
+		break;
 
-			// バリアの衝突判定
-			collision::CirclePillar
-			( // 引数
-				posPlayer,											// 判定位置
-				CSceneGame::GetStage()->GetStageBarrierPosition(),	// 判定目標位置
-				PLAY_RADIUS,										// 判定半径
-				CSceneGame::GetStage()->GetStageBarrier().fRadius	// 判定目標半径
-			);
-		}
+	default:	// 例外処理
+		assert(false);
+		break;
 	}
-
-	// 位置を更新
-	SetPosition(posPlayer);
-
-	// 向きを更新
-	SetRotation(rotPlayer);
-
-	// 状態遷移
-	State();
 
 	// 魔法マネージャーの更新
 	m_pMagic->Update();
@@ -337,7 +309,7 @@ void CPlayer::Update(void)
 	m_pShadow->Update();
 
 	// モーション・オブジェクトキャラクターの更新
-	Motion(currentMotion);
+	Motion(nCurrentMotion);
 }
 
 //============================================================
@@ -378,6 +350,9 @@ void CPlayer::Hit(const int nDmg)
 				// 移動量を設定
 				m_move = vecAway * AWAY_SIDE_MOVE;
 				m_move.y = AWAY_UP_MOVE;
+
+				// 吹っ飛びモーションに移行
+				SetMotion(STATE_BLOW_AWAY);
 
 				// パーティクル3Dオブジェクトを生成
 				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
@@ -543,21 +518,143 @@ float CPlayer::GetRadius(void) const
 }
 
 //============================================================
+//	通常状態時の更新処理
+//============================================================
+CPlayer::MOTION CPlayer::UpdateNormal(void)
+{
+	// 変数を宣言
+	MOTION currentMotion = MOTION_MOVE;		// 現在のモーション
+	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
+	D3DXVECTOR3 rotPlayer = GetRotation();	// プレイヤー向き
+
+	// 移動操作
+	Move();
+
+	// 向き更新
+	Rot(rotPlayer);
+
+	// 位置更新
+	Pos(posPlayer);
+
+	// ステージ範囲外の補正
+	CSceneGame::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
+
+	// 着地判定
+	Land(posPlayer);
+
+	// 魔法発射操作
+	currentMotion = Magic(currentMotion, posPlayer);
+
+	// 当たり判定
+	CollisionTarget(posPlayer);	// ターゲット
+	CollisionEnemy(posPlayer);	// 敵
+
+	// バリアとの当たり判定
+	if (CSceneGame::GetStage()->CollisionBarrier(posPlayer, PLAY_RADIUS))
+	{ // 当たっていた場合
+
+		// ヒット処理
+		Hit(BARRIER_DMG);
+
+		// バリアの衝突判定
+		collision::CirclePillar
+		( // 引数
+			posPlayer,											// 判定位置
+			CSceneGame::GetStage()->GetStageBarrierPosition(),	// 判定目標位置
+			PLAY_RADIUS,										// 判定半径
+			CSceneGame::GetStage()->GetStageBarrier().fRadius	// 判定目標半径
+		);
+	}
+
+	// 位置を更新
+	SetPosition(posPlayer);
+
+	// 向きを更新
+	SetRotation(rotPlayer);
+
+	// 現在のモーションを返す
+	return currentMotion;
+}
+
+//============================================================
+//	ダメージ状態時の更新処理
+//============================================================
+CPlayer::MOTION CPlayer::UpdateDamage(void)
+{
+	// 変数を宣言
+	MOTION currentMotion;	// 現在のモーション
+
+	// 通常状態時の更新
+	currentMotion = UpdateNormal();
+
+	if (m_nCounterState < NORMAL_CNT)
+	{ // カウンターが一定値より小さい場合
+
+		// カウンターを加算
+		m_nCounterState++;
+	}
+	else
+	{ // カウンターが一定値以上の場合
+
+		// カウンターを初期化
+		m_nCounterState = 0;
+
+		// 状態を変更
+		m_state = STATE_NORMAL;	// 通常状態
+	}
+
+	// 現在のモーションを返す
+	return currentMotion;
+}
+
+//============================================================
+//	吹っ飛び状態時の更新処理
+//============================================================
+void CPlayer::UpdateBlowAway(void)
+{
+	// 変数を宣言
+	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
+
+	// 位置更新
+	Pos(posPlayer);
+
+	// ターゲットとの当たり判定
+	CollisionTarget(posPlayer);
+
+	// ステージ範囲外の補正
+	CSceneGame::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
+
+	// 着地判定
+	if (Land(posPlayer))
+	{ // 着地していた場合
+
+		if (GetMotionType() != MOTION_LANDING)
+		{ // モーションが着地ではない場合
+
+			// 着地モーションに移行
+			SetMotion(MOTION_LANDING);
+
+			// 状態を設定
+			m_state = STATE_DAMAGE;	// ダメージ状態
+		}
+	}
+
+	// 位置を反映
+	SetPosition(posPlayer);
+}
+
+//============================================================
 //	移動処理
 //============================================================
-CPlayer::MOTION CPlayer::Move(MOTION motion)
+CPlayer::MOTION CPlayer::Move(void)
 {
 	// 変数を宣言
 	D3DXVECTOR3 rot = CManager::GetCamera()->GetRotation();			// カメラの向き
 	CStage::AREA area = CSceneGame::GetStage()->GetAreaPlayer();	// プレイヤーの現在エリア
-	MOTION currentMotion = motion;									// 現在のモーション
 
 	// ポインタを宣言
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad		= CManager::GetPad();		// パッド
-
-	// 移動モーションを設定
-	currentMotion = MOTION_MOVE;
 
 #if 1
 
@@ -759,8 +856,8 @@ CPlayer::MOTION CPlayer::Move(MOTION motion)
 	}
 #endif
 
-	// 現在のモーションを返す
-	return currentMotion;		// TODO：もはや待機モーションいらない
+	// 歩行モーションを返す
+	return MOTION_MOVE;
 }
 
 //============================================================
@@ -790,18 +887,18 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion, D3DXVECTOR3& rPos)
 //============================================================
 //	着地処理
 //============================================================
-CPlayer::MOTION CPlayer::Land(MOTION motion, D3DXVECTOR3& rPos)
+bool CPlayer::Land(D3DXVECTOR3& rPos)
 {
 	// 変数を宣言
-	MOTION currentMotion = motion;	// 現在のモーション
+	bool bLand = false;	// 着地状況
 
 	// 着地判定
 	if (CSceneGame::GetField()->LandPosition(rPos, m_move)
 	||  CSceneGame::GetStage()->LandPosition(rPos, m_move, 0.0f))
 	{ // プレイヤーが着地していた場合
 
-		// 着地モーションを設定
-		currentMotion = MOTION_LANDING;
+		// 着地している状態にする
+		bLand = true;
 
 		// ジャンプしていない状態にする
 		m_bJump = false;
@@ -813,26 +910,30 @@ CPlayer::MOTION CPlayer::Land(MOTION motion, D3DXVECTOR3& rPos)
 		m_bJump = true;
 	}
 
-	// 現在のモーションを返す
-	return currentMotion;
+	// 着地状況を返す
+	return bLand;
 }
 
 //============================================================
 //	モーション処理
 //============================================================
-void CPlayer::Motion(MOTION motion)
+void CPlayer::Motion(int nMotion)
 {
 	// 変数を宣言
-	MOTION animMotion = (MOTION)GetMotionType();	// 現在再生中のモーション
+	int nAnimMotion = GetMotionType();	// 現在再生中のモーション
 
-	if (IsMotionLoop(animMotion) == true)
-	{ // ループするモーションだった場合
+	if (nMotion != NONE_IDX)
+	{ // モーションが設定されている場合
 
-		if (animMotion != motion)
-		{ // 現在のモーションが再生中のモーションと一致しない場合
+		if (IsMotionLoop(nAnimMotion))
+		{ // ループするモーションだった場合
 
-			// 現在のモーションの設定
-			SetMotion(motion);
+			if (nAnimMotion != nMotion)
+			{ // 現在のモーションが再生中のモーションと一致しない場合
+
+				// 現在のモーションの設定
+				SetMotion(nMotion);
+			}
 		}
 	}
 
@@ -848,14 +949,14 @@ void CPlayer::Motion(MOTION motion)
 		case MOTION_ACTION:		// アクション状態
 
 			// 待機モーションに移行
-			SetMotion(MOTION_NEUTRAL);
+			SetMotion(MOTION_MOVE);
 
 			// 処理を抜ける
 			break;
 
-		case MOTION_JUMP:		// ジャンプ状態
+		case MOTION_BLOW_AWAY:	// 吹っ飛び状態
 
-			// 無し
+			// 
 
 			// 処理を抜ける
 			break;
@@ -863,7 +964,7 @@ void CPlayer::Motion(MOTION motion)
 		case MOTION_LANDING:	// 着地状態
 
 			// 待機モーションに移行
-			SetMotion(MOTION_NEUTRAL);
+			SetMotion(MOTION_MOVE);
 
 			// 処理を抜ける
 			break;
@@ -909,79 +1010,6 @@ void CPlayer::Rot(D3DXVECTOR3& rRot)
 
 	// 向きの正規化
 	useful::NormalizeRot(rRot.y);
-}
-
-//============================================================
-//	状態処理
-//============================================================
-void CPlayer::State(void)
-{
-	// 変数を宣言
-	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
-
-	switch (m_state)
-	{ // 状態ごとの処理
-	case STATE_NORMAL:
-
-		// 無し
-
-		break;
-
-	case STATE_BLOW_AWAY:
-
-		// 位置更新
-		Pos(posPlayer);
-
-		// ターゲットとの当たり判定
-		CollisionTarget(posPlayer);
-
-		// ステージ範囲外の補正
-		CSceneGame::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
-
-		// 着地判定
-		if (CSceneGame::GetField()->LandPosition(posPlayer, m_move)
-		||  CSceneGame::GetStage()->LandPosition(posPlayer, m_move, 0.0f))
-		{ // プレイヤーが着地していた場合
-
-			// 状態を設定
-			m_state = STATE_DAMAGE;	// ダメージ状態
-		}
-
-		// 位置を反映
-		SetPosition(posPlayer);
-
-		break;
-
-	case STATE_DAMAGE:
-
-		if (m_nCounterState < NORMAL_CNT)
-		{ // カウンターが一定値より小さい場合
-
-			// カウンターを加算
-			m_nCounterState++;
-		}
-		else
-		{ // カウンターが一定値以上の場合
-
-			// カウンターを初期化
-			m_nCounterState = 0;
-
-			// 状態を変更
-			m_state = STATE_NORMAL;	// 通常状態
-		}
-
-		break;
-
-	case STATE_DEATH:
-
-		// 無し
-
-		break;
-
-	default:	// 例外処理
-		assert(false);
-		break;
-	}
 }
 
 //============================================================

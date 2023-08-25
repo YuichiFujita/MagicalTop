@@ -62,10 +62,9 @@ public:
 	// モーション列挙
 	typedef enum
 	{
-		MOTION_NEUTRAL = 0,	// 待機モーション
-		MOTION_MOVE,		// 歩行モーション
+		MOTION_MOVE = 0,	// 歩行モーション
 		MOTION_ACTION,		// アクションモーション
-		MOTION_JUMP,		// ジャンプモーション
+		MOTION_BLOW_AWAY,	// 吹っ飛びモーション
 		MOTION_LANDING,		// 着地モーション
 		MOTION_MAX			// この列挙型の総数
 	}MOTION;
@@ -120,13 +119,16 @@ public:
 
 private:
 	// メンバ関数
-	MOTION Move(MOTION motion);						// 移動
+	MOTION UpdateNormal(void);	// 通常状態時の更新
+	MOTION UpdateDamage(void);	// ダメージ状態時の更新
+	void UpdateBlowAway(void);	// 吹っ飛び状態時の更新
+
+	MOTION Move(void);								// 移動
 	MOTION Magic(MOTION motion, D3DXVECTOR3& rPos);	// 魔法
-	MOTION Land(MOTION motion, D3DXVECTOR3& rPos);	// 着地
-	void Motion(MOTION motion);						// モーション
+	bool Land(D3DXVECTOR3& rPos);					// 着地
+	void Motion(int nMotion);						// モーション
 	void Pos(D3DXVECTOR3& rPos);					// 位置
 	void Rot(D3DXVECTOR3& rRot);					// 向き
-	void State(void);								// 状態
 	void CollisionTarget(D3DXVECTOR3& rPos);		// ターゲットとの当たり判定
 	void CollisionEnemy(D3DXVECTOR3& rPos);			// 敵との当たり判定
 	void LoadSetup(void);							// セットアップ
