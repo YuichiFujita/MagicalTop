@@ -12,6 +12,7 @@
 #include "input.h"
 #include "texture.h"
 #include "sceneGame.h"
+#include "waveManager.h"
 #include "shopManager.h"
 #include "object2D.h"
 #include "stage.h"
@@ -21,8 +22,7 @@
 //************************************************************
 const char *CLevelupManager::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\option000.png",	// 強化テクスチャ
-	"data\\TEXTURE\\option001.png",	// 終了テクスチャ
+	"data\\TEXTURE\\option000.png",	// 操作テクスチャ
 };
 
 //************************************************************
@@ -35,7 +35,7 @@ CLevelupManager::CLevelupManager()
 {
 	// メンバ変数をクリア
 	m_pShopManager = NULL;	// ショップマネージャーの情報
-	m_pOption = NULL;		// 操作情報
+	m_pControl = NULL;		// 操作情報
 	m_state = STATE_NORMAL;	// 状態
 }
 
@@ -52,9 +52,12 @@ CLevelupManager::~CLevelupManager()
 //============================================================
 HRESULT CLevelupManager::Init(void)
 {
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャ
+
 	// メンバ変数を初期化
 	m_pShopManager = NULL;	// ショップマネージャーの情報
-	m_pOption = NULL;		// 操作情報
+	m_pControl = NULL;		// 操作情報
 	m_state = STATE_NORMAL;	// 状態
 
 	// ショップマネージャーの生成
@@ -71,12 +74,12 @@ HRESULT CLevelupManager::Init(void)
 	m_pShopManager->SetEnableDraw(false);
 
 	// 操作情報の生成
-	m_pOption = CObject2D::Create	// TODO：定数
+	m_pControl = CObject2D::Create	// TODO：定数
 	( // 引数
 		D3DXVECTOR3(1160.5f, 680.0f, 0.0f),
 		D3DXVECTOR3(220.0f, 65.0f, 0.0f)
 	);
-	if (UNUSED(m_pOption))
+	if (UNUSED(m_pControl))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -84,11 +87,14 @@ HRESULT CLevelupManager::Init(void)
 		return E_FAIL;
 	}
 
+	// テクスチャを読込・割当
+	m_pControl->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_CONTROL]));
+
 	// 優先順位を設定
-	m_pOption->SetPriority(6);
+	m_pControl->SetPriority(6);
 
 	// 描画をしない状態にする
-	m_pOption->SetEnableDraw(false);
+	m_pControl->SetEnableDraw(false);
 
 	// 成功を返す
 	return S_OK;
@@ -108,7 +114,7 @@ void CLevelupManager::Uninit(void)
 	}
 
 	// 操作情報を破棄
-	m_pOption->Uninit();
+	m_pControl->Uninit();
 }
 
 //============================================================
@@ -123,66 +129,46 @@ void CLevelupManager::Update(void)
 
 	switch (m_state)
 	{ // 状態ごとの処理
-	case STATE_NORMAL:		// 通常状態
+	case STATE_NORMAL:	// 通常状態
 
-		if (CSceneGame::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
-		{ // セーフエリア内の場合
+		if (CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_WAIT)
+		{ // 次の季節へ移行待ちの場合
 
-			// 操作情報を表示
-			m_pOption->SetEnableDraw(true);
-
-			// 状態を設定
-			m_state = STATE_INIT_INSAFE;	// セーフエリア内状態(初期化)
-		}
-
-		break;
-
-	case STATE_INIT_INSAFE:	// セーフエリア内状態(初期化)
-
-		// 強化表示のテクスチャを設定
-		m_pOption->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_STRENGTHEN]));
-
-		// 状態を設定
-		m_state = STATE_INSAFE;	// セーフエリア内状態
-
-		// 処理を抜けずに下に続く
-
-	case STATE_INSAFE:		// セーフエリア内状態
-
-		if (pKeyboard->GetTrigger(DIK_1) || CManager::GetPad()->GetTrigger(CInputPad::KEY_X))
-		{
 			// ショップを表示
 			m_pShopManager->SetEnableDraw(true);
 
+			// 操作情報を表示
+			m_pControl->SetEnableDraw(true);
+
 			// 状態を設定
-			m_state = STATE_INIT_SELECT;	// 強化選択状態(初期化)
+			m_state = STATE_SELECT;	// 強化選択状態
 		}
 
 		break;
 
-	case STATE_INIT_SELECT:	// 強化選択状態(初期化)
-
-		// 終了表示のテクスチャを設定
-		m_pOption->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_END]));
-
-		// 状態を設定
-		m_state = STATE_SELECT;	// 強化選択状態(初期化)
-
-		// 処理を抜けずに下に続く
-
-	case STATE_SELECT:		// 強化選択状態
+	case STATE_SELECT:	// 強化選択状態
 
 		if (pKeyboard->GetTrigger(DIK_1) || CManager::GetPad()->GetTrigger(CInputPad::KEY_X))
-		{
+		{ // 強化終了の操作が行われた場合
+
 			// ショップを非表示
 			m_pShopManager->SetEnableDraw(false);
 
+			// 操作情報を非表示
+			m_pControl->SetEnableDraw(false);
+
 			// 状態を設定
-			m_state = STATE_INIT_INSAFE;	// セーフエリア内状態(初期化)
+			m_state = STATE_NORMAL;	// 通常状態
+
+			// 次季節へ移行
+			CSceneGame::GetWaveManager()->NextSeason();
 		}
 
 		// ショップマネージャーの更新
 		m_pShopManager->Update();
+
+		// 操作情報の更新
+		m_pControl->Update();
 
 		break;
 
@@ -190,24 +176,6 @@ void CLevelupManager::Update(void)
 		assert(false);
 		break;
 	}
-
-	if (m_state != STATE_NORMAL)
-	{ // 状態が通常状態以外の場合
-
-		if (CSceneGame::GetStage()->GetAreaPlayer() != CStage::AREA_SAFE)
-		{ // セーフエリア外の場合
-
-			// 描画をしない状態にする
-			m_pShopManager->SetEnableDraw(false);
-			m_pOption->SetEnableDraw(false);
-
-			// 状態を設定
-			m_state = STATE_NORMAL;	// 通常状態
-		}
-	}
-
-	// 操作情報の更新
-	m_pOption->Update();
 }
 
 //============================================================

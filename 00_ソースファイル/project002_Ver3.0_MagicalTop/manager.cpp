@@ -511,10 +511,10 @@ HRESULT CManager::Release(CManager *&prManager)
 //============================================================
 //	シーンの設定処理
 //============================================================
-void CManager::SetScene(const CScene::MODE mode)
+void CManager::SetScene(const CScene::MODE mode, const int nWait)
 {
 	// 次のシーンを設定
-	m_pFade->Set(mode);
+	m_pFade->Set(mode, nWait);
 }
 
 //============================================================

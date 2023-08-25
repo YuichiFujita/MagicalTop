@@ -57,11 +57,11 @@ public:
 	void Draw(void);		// 描画
 
 	// 静的メンバ関数
-	static CManager *Create(HINSTANCE hInstance, HWND hWnd);	// 生成
-	static HRESULT Release(CManager *&prManager);				// 破棄
-	static void SetScene(const CScene::MODE mode);		// シーン設定
-	static HRESULT SetMode(const CScene::MODE mode);	// モード設定
-	static CScene::MODE GetMode(void);					// モード取得
+	static CManager *Create(HINSTANCE hInstance, HWND hWnd);			// 生成
+	static HRESULT Release(CManager *&prManager);						// 破棄
+	static void SetScene(const CScene::MODE mode, const int nWait = 0);	// シーン設定
+	static HRESULT SetMode(const CScene::MODE mode);					// モード設定
+	static CScene::MODE GetMode(void);									// モード取得
 
 	static CRenderer		*GetRenderer(void);		// レンダラー取得
 	static CInputKeyboard	*GetKeyboard(void);		// キーボード取得

@@ -32,6 +32,7 @@ public:
 	typedef enum
 	{
 		FADE_NONE = 0,	// 何もしていない状態
+		FADE_WAIT,		// フェード余韻状態
 		FADE_IN,		// フェードイン状態
 		FADE_OUT,		// フェードアウト状態
 		FADE_MAX		// この列挙型の総数
@@ -47,8 +48,8 @@ public:
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
-	void Set(const CScene::MODE mode);	// 次シーンへのフェード設定
-	FADE GetState(void) const;			// フェード状態取得
+	void Set(const CScene::MODE mode, const int nWait);	// 次シーンへのフェード設定
+	FADE GetState(void) const;	// フェード状態取得
 
 	// 静的メンバ関数
 	static CFade *Create(void);				// 生成
@@ -59,6 +60,7 @@ private:
 	CObject2D *m_pObject2D;		// フェード表示の情報
 	FADE m_fade;				// フェード状態
 	CScene::MODE m_modeNext;	// 次のシーンモード
+	int m_nCounterWait;			// 余韻管理カウンター
 };
 
 #endif	// _FADE_H_

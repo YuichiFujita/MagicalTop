@@ -31,8 +31,7 @@ public:
 	// テクスチャ列挙
 	enum TEXTURE
 	{
-		TEXTURE_STRENGTHEN = 0,	// 強化テクスチャ
-		TEXTURE_END,			// 終了テクスチャ
+		TEXTURE_CONTROL = 0,	// 操作テクスチャ
 		TEXTURE_MAX,			// この列挙型の総数
 	};
 
@@ -40,9 +39,6 @@ public:
 	enum STATE
 	{
 		STATE_NORMAL = 0,	// 通常状態
-		STATE_INIT_INSAFE,	// セーフエリア内状態(初期化)
-		STATE_INSAFE,		// セーフエリア内状態
-		STATE_INIT_SELECT,	// 強化選択状態(初期化)
 		STATE_SELECT,		// 強化選択状態
 		STATE_MAX,			// この列挙型の総数
 	};
@@ -68,7 +64,7 @@ private:
 
 	// メンバ変数
 	CShopManager *m_pShopManager;	// ショップマネージャーの情報
-	CObject2D *m_pOption;	// 操作情報
+	CObject2D *m_pControl;	// 操作情報
 	STATE m_state;	// 状態
 };
 

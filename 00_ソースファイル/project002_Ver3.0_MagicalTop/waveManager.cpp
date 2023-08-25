@@ -68,6 +68,8 @@ CWaveManager::Season CWaveManager::m_aWaveInfo[CWaveManager::SEASON_MAX] = {};	/
 #define SEASON_SUB_ROT	(0.005f)	// シーズン表示のY向き加算量
 #define SEASON_MUL_SIZE	(1.05f)		// シーズン表示の拡大率乗算量
 
+#define WAIT_FRAME	(240)	//	リザルト遷移時の余韻フレーム
+
 //************************************************************
 //	親クラス [CWaveManager] のメンバ関数
 //************************************************************
@@ -322,8 +324,7 @@ void CWaveManager::Update(void)
 
 	case STATE_WAIT:	// 次季節の開始待機状態
 
-		// 次季節の開始待機
-		UpdateWait();
+		// levelupManager側で次の季節に移行する
 
 		break;
 
@@ -345,7 +346,7 @@ void CWaveManager::Update(void)
 	{ // プレイヤーが死亡状態、またはターゲットが破壊状態の場合
 
 		// シーンの設定
-		CManager::SetScene(CScene::MODE_RESULT);	// リザルト画面
+		CManager::SetScene(CScene::MODE_RESULT, WAIT_FRAME);	// リザルト画面
 
 		// 処理を抜ける
 		return;
@@ -372,6 +373,20 @@ CWaveManager::STATE CWaveManager::GetState(void)
 {
 	// 状態を返す
 	return m_state;
+}
+
+//============================================================
+//	季節の移行処理
+//============================================================
+void CWaveManager::NextSeason(void)
+{
+	if (m_state == STATE_WAIT)
+	{ // 次の季節の開始待機状態の場合
+
+		// 状態を変更
+		m_state = STATE_SEASON_START_INIT;	// 季節の開始状態
+	}
+	else { assert(false); }	// 使用不可タイミング
 }
 
 //============================================================
@@ -794,33 +809,6 @@ void CWaveManager::UpdateWaveEnd(void)
 			m_state = STATE_END;	// 終了状態
 		}
 	}
-}
-
-//============================================================
-//	次季節の開始待機処理
-//============================================================
-void CWaveManager::UpdateWait(void)
-{
-	// TODO：仮の季節待機処理
-#if 1
-	if (m_nCounterState <= 180)
-	{ // カウンターが一定値以下の場合
-
-		// 状態管理カウンターを加算
-		m_nCounterState++;
-	}
-	else
-	{ // カウンターが一定値より大きい場合
-
-		// 状態管理カウンターを初期化
-		m_nCounterState = 0;
-
-		// 状態を変更
-		m_state = STATE_SEASON_START_INIT;	// 季節の開始状態
-	}
-#else
-
-#endif
 }
 
 //============================================================

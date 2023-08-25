@@ -11,6 +11,8 @@
 #include "manager.h"
 #include "renderer.h"
 #include "model.h"
+#include "sceneGame.h"
+#include "waveManager.h"
 #include "objectMeshCube.h"
 #include "lifeGauge3D.h"
 #include "shadow.h"
@@ -180,20 +182,24 @@ void CTarget::Update(void)
 		if (m_pLifeGauge->GetLife() < TARG_LIFE && nNumFlower > 0)
 		{ // 体力が減少している且つ、マナフラワーが一本でも生えている場合
 
-			if (m_nCounterState < STATE_HEAL_CNT)
-			{ // カウンターが一定値より小さい場合
+			if (CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
+			{ // ウェーブ進行状態の場合
 
-				// カウンターを加算
-				m_nCounterState++;
-			}
-			else
-			{ // カウンターが一定値以上の場合
+				if (m_nCounterState < STATE_HEAL_CNT)
+				{ // カウンターが一定値より小さい場合
 
-				// カウンターを初期化
-				m_nCounterState = 0;
+					// カウンターを加算
+					m_nCounterState++;
+				}
+				else
+				{ // カウンターが一定値以上の場合
 
-				// 状態を変更
-				m_state = STATE_HEAL;	// 回復状態
+					// カウンターを初期化
+					m_nCounterState = 0;
+
+					// 状態を変更
+					m_state = STATE_HEAL;	// 回復状態
+				}
 			}
 		}
 
@@ -221,8 +227,9 @@ void CTarget::Update(void)
 
 	case STATE_HEAL:	// 回復状態
 
-		if (m_pLifeGauge->GetLife() < TARG_LIFE)
-		{ // 体力が最大値より少ない場合
+		if (m_pLifeGauge->GetLife() < TARG_LIFE
+		&&  CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
+		{ // 体力が最大値より少ない且つ、ウェーブ進行状態の場合
 
 			if (m_nCounterHeal < WAIT_HEAL_CNT)
 			{ // カウンターが一定値より小さい場合

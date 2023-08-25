@@ -108,6 +108,7 @@ public:
 	void Uninit(void);		// 終了
 	void Update(void);		// 更新
 	STATE GetState(void);	// 状態取得
+	void NextSeason(void);	// 季節移行
 
 	// 静的メンバ関数
 	static void LoadSetup(void);		// セットアップ
@@ -123,7 +124,6 @@ private:
 	void UpdateProgression(void);	// ウェーブ進行
 	void InitWaveEnd(void);			// 季節の終了初期化
 	void UpdateWaveEnd(void);		// 季節の終了
-	void UpdateWait(void);			// 次季節の開始待機
 
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];		// テクスチャ定数

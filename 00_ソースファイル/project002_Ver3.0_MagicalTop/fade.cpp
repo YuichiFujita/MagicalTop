@@ -29,6 +29,7 @@ CFade::CFade()
 	m_pObject2D	= NULL;					// フェード表示の情報
 	m_fade		= FADE_NONE;			// フェード状態
 	m_modeNext	= CScene::MODE_TITLE;	// 次のシーンモード
+	m_nCounterWait = 0;					// 余韻管理カウンター
 }
 
 //============================================================
@@ -48,6 +49,7 @@ HRESULT CFade::Init(void)
 	m_pObject2D = NULL;					// フェード表示の情報
 	m_fade		= FADE_IN;				// フェード状態
 	m_modeNext	= CScene::MODE_TITLE;	// 次のシーンモード
+	m_nCounterWait = 0;					// 余韻管理カウンター
 
 	// オブジェクト2Dの生成
 	m_pObject2D = CObject2D::Create
@@ -97,6 +99,23 @@ void CFade::Update(void)
 
 		switch (m_fade)
 		{ // フェード状態ごとの処理
+		case FADE_WAIT:	// フェード余韻状態
+
+			if (m_nCounterWait > 0)
+			{ // カウンターが 0より大きい場合
+
+				// カウンターを減算
+				m_nCounterWait--;
+			}
+			else
+			{ // カウンターが 0以下の場合
+
+				// フェード状態を設定
+				m_fade = FADE_OUT;	// フェードアウト状態
+			}
+
+			break;
+
 		case FADE_IN:	// フェードイン状態
 
 			// α値を減算
@@ -150,16 +169,31 @@ void CFade::Update(void)
 //============================================================
 //	次シーンへのフェード設定処理
 //============================================================
-void CFade::Set(const CScene::MODE mode)
+void CFade::Set(const CScene::MODE mode, const int nWait)
 {
+	// 例外処理
+	assert(nWait >= 0);	// 余韻フレームオーバー
+
 	if (m_fade == FADE_NONE)
 	{ // フェードが行われていない場合
 
 		// 引数のモードを設定
 		m_modeNext = mode;
 
+		// 余韻管理カウンターを設定
+		m_nCounterWait = nWait;
+
 		// フェード状態を設定
-		m_fade = FADE_OUT;	// フェードアウト状態
+		if (m_nCounterWait <= 0)
+		{ // カウンターが 0以下の場合
+
+			m_fade = FADE_OUT;	// フェードアウト状態
+		}
+		else
+		{ // カウンターが 0より大きい場合
+
+			m_fade = FADE_WAIT;	// フェード余韻状態
+		}
 	}
 }
 
