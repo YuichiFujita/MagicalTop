@@ -41,13 +41,18 @@ public:
 	void SetPosition(const D3DXVECTOR3& rPos);		// 位置設定
 	void SetRotation(const D3DXVECTOR3& rRot);		// 向き設定
 	void SetScaling(const D3DXVECTOR3& rScale);		// 大きさ設定
+	void SetAlpha(const float fAlpha);				// 透明度設定
 	void SetModelData(const CModel::Model& rModel);	// モデル情報設定
-	D3DXMATRIX GetMtxWorld(void) const;				// マトリックス取得
-	D3DXVECTOR3 GetPosition(void) const;			// 位置取得
-	D3DXVECTOR3 GetRotation(void) const;			// 向き取得
-	D3DXVECTOR3 GetScaling(void) const;				// 大きさ取得
-	CMultiModel GetParent(void) const;				// 親取得
-	CModel::Model GetModelData(void) const;			// モデル情報取得
+	HRESULT SetMaterial(const LPD3DXBUFFER pBuffMat, const int nNumMat);	// マテリアル設定
+
+	D3DXMATRIX GetMtxWorld(void) const;		// マトリックス取得
+	D3DXVECTOR3 GetPosition(void) const;	// 位置取得
+	D3DXVECTOR3 GetRotation(void) const;	// 向き取得
+	D3DXVECTOR3 GetScaling(void) const;		// 大きさ取得
+	float GetAlpha(void) const;				// 透明度取得
+	float GetMaxAlpha(void) const;			// 最大透明度取得
+	CMultiModel GetParent(void) const;		// 親取得
+	CModel::Model GetModelData(void) const;	// モデル情報取得
 
 	// 静的メンバ関数
 	static CMultiModel *Create	// 生成
@@ -62,6 +67,7 @@ private:
 	// メンバ変数
 	CModel::Model	m_modelData;	// モデル情報
 	CMultiModel		*m_pParent;		// 親モデルへのポインタ
+	D3DXMATERIAL	*m_pMat;		// マテリアルへのポインタ
 	D3DXMATRIX		m_mtxWorld;		// ワールドマトリックス
 	D3DXVECTOR3		m_pos;			// 位置
 	D3DXVECTOR3		m_rot;			// 向き

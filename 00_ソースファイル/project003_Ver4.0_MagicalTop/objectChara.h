@@ -57,11 +57,14 @@ public:
 	void SetMotion(const int nType);					// モーション設定
 	void SetPosition(const D3DXVECTOR3& rPos);			// 位置設定
 	void SetRotation(const D3DXVECTOR3& rRot);			// 向き設定
+	void SetAlpha(const float fAlpha);					// 透明度設定
 	int  GetMotionType(void) const;						// モーション種類取得
 	bool IsMotionFinish(void) const;					// モーション終了取得
 	bool IsMotionLoop(const int nType) const;			// モーションループ取得
 	D3DXVECTOR3 GetPosition(void) const;				// 位置取得
 	D3DXVECTOR3 GetRotation(void) const;				// 向き取得
+	float GetAlpha(void) const;							// 透明度取得
+	float GetMaxAlpha(void) const;						// 最大透明度取得
 	D3DXVECTOR3 GetPartsPosition(const int nID) const;	// パーツ位置取得
 	D3DXVECTOR3 GetPartsRotation(const int nID) const;	// パーツ向き取得
 	CMultiModel *GetMultiModel(const int nID) const;	// マルチモデル取得

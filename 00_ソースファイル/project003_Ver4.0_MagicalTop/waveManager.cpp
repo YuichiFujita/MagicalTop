@@ -621,6 +621,9 @@ void CWaveManager::UpdateWaveStart(void)
 
 		// 状態を変更
 		m_state = STATE_PROGRESSION;	// ウェーブ進行状態
+
+		// プレイヤーを再出現させる
+		CSceneGame::GetPlayer()->SetRespawn(D3DXVECTOR3(0.0f, 0.0f, -1000.0f));
 	}
 
 	// 大きさを設定
@@ -676,6 +679,9 @@ void CWaveManager::UpdateProgression(void)
 		}
 		else
 		{ // カウンターが一定値より大きい場合
+
+			// プレイヤーを表示しない状態にする
+			CSceneGame::GetPlayer()->SetDisp(false);
 
 			// 状態管理カウンターを初期化
 			m_nCounterState = 0;

@@ -49,6 +49,7 @@
 #define ENE_HIT_DMG		(20)		// 敵ヒット時のダメージ量
 #define AWAY_SIDE_MOVE	(100.0f)	// 吹っ飛び時の横移動量
 #define AWAY_UP_MOVE	(30.0f)		// 吹っ飛び時の上移動量
+#define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -93,7 +94,7 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 	m_move			= VEC3_ZERO;		// 移動量
 	m_destRot		= VEC3_ZERO;		// 目標向き
 	m_rotation		= ROTATION_LEFT;	// 回転方向
-	m_state			= STATE_NORMAL;		// 状態
+	m_state			= STATE_NONE;		// 状態
 	m_nCounterState	= 0;				// 状態管理カウンター
 	m_nNumModel		= 0;				// パーツの総数
 	m_fDisTarget	= 0.0f;				// ターゲットとの距離
@@ -123,7 +124,7 @@ HRESULT CPlayer::Init(void)
 	m_move			= VEC3_ZERO;		// 移動量
 	m_destRot		= VEC3_ZERO;		// 目標向き
 	m_rotation		= ROTATION_LEFT;	// 回転方向
-	m_state			= STATE_NORMAL;		// 状態
+	m_state			= STATE_NONE;		// 状態
 	m_nCounterState	= 0;				// 状態管理カウンター
 	m_nNumModel		= 0;				// パーツの総数
 	m_fDisTarget	= 0.0f;				// ターゲットとの距離
@@ -203,6 +204,12 @@ HRESULT CPlayer::Init(void)
 	// モデル情報の設定
 	SetModelInfo();
 
+	// 透明度を設定
+	SetAlpha(0.0f);
+
+	// 影を描画しない設定にする
+	m_pShadow->SetEnableDraw(false);
+
 	// モーションの設定
 	SetMotion(MOTION_MOVE);
 
@@ -264,28 +271,48 @@ void CPlayer::Update(void)
 
 	switch (m_state)
 	{ // 状態ごとの処理
-	case STATE_NORMAL:
+	case STATE_NONE:		// 何もしない状態
+
+		// 無し
+
+		break;
+
+	case STATE_FADEOUT:		// フェードアウト状態
+
+		// フェードアウト状態時の更新
+		UpdateFadeOut();
+
+		break;
+
+	case STATE_NORMAL:		// 通常状態
 
 		// 通常状態時の更新
 		nCurrentMotion = UpdateNormal();
 
 		break;
 
-	case STATE_BLOW_AWAY:
+	case STATE_BLOW_AWAY:	// 吹っ飛び状態
 
 		// 吹っ飛び状態時の更新
 		UpdateBlowAway();
 
 		break;
 
-	case STATE_DAMAGE:
+	case STATE_DAMAGE:		// ダメージ状態
 
 		// ダメージ状態時の更新
 		nCurrentMotion = UpdateDamage();
 
 		break;
 
-	case STATE_DEATH:
+	case STATE_FADEIN:		// フェードイン状態
+
+		// フェードイン状態時の更新
+		UpdateFadeIn();
+
+		break;
+
+	case STATE_DEATH:		// 死亡状態
 
 		// 無し
 
@@ -352,7 +379,7 @@ void CPlayer::Hit(const int nDmg)
 				m_move.y = AWAY_UP_MOVE;
 
 				// 吹っ飛びモーションに移行
-				SetMotion(STATE_BLOW_AWAY);
+				SetMotion(MOTION_BLOW_AWAY);
 
 				// パーティクル3Dオブジェクトを生成
 				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
@@ -387,7 +414,7 @@ void CPlayer::Hit(const int nDmg)
 //============================================================
 //	生成処理
 //============================================================
-CPlayer *CPlayer::Create(const D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
+CPlayer *CPlayer::Create(D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 {
 	// ポインタを宣言
 	CPlayer *pPlayer = NULL;	// プレイヤー生成用
@@ -434,6 +461,49 @@ void CPlayer::AddExp(const int nAdd)
 {
 	// 経験値を加算
 	m_pExp->AddExp(nAdd);
+}
+
+//============================================================
+//	再出現設定の設定処理
+//============================================================
+void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
+{
+	// ステージ範囲外の補正
+	CSceneGame::GetStage()->LimitPosition(rPos, PLAY_RADIUS);
+
+	// 着地判定
+	Land(rPos);
+
+	// 引数の位置を設定
+	SetPosition(rPos);
+
+	// 表示する設定にする
+	SetDisp(true);
+}
+
+//============================================================
+//	表示の設定処理
+//============================================================
+void CPlayer::SetDisp(const bool bDisp)
+{
+	if (bDisp)
+	{ // 表示する状態の場合
+
+		// 状態を設定
+		m_state = STATE_FADEOUT;	// フェードアウト状態
+
+		// 影を描画する設定にする
+		m_pShadow->SetEnableDraw(true);
+	}
+	else
+	{ // 表示しない状態の場合
+
+		// 状態を設定
+		m_state = STATE_FADEIN;		// フェードイン状態
+
+		// 影を描画しない設定にする
+		m_pShadow->SetEnableDraw(false);
+	}
 }
 
 //============================================================
@@ -641,6 +711,56 @@ void CPlayer::UpdateBlowAway(void)
 
 	// 位置を反映
 	SetPosition(posPlayer);
+}
+
+//============================================================
+//	フェードアウト状態時の更新処理
+//============================================================
+void CPlayer::UpdateFadeOut(void)
+{
+	// 変数を宣言
+	float fAlpha = GetAlpha();	// 透明度
+
+	// 透明度を上げる
+	fAlpha += FADE_LEVEL;
+
+	if (fAlpha >= GetMaxAlpha())
+	{ // 透明度が上がり切った場合
+
+		// 透明度を補正
+		fAlpha = GetMaxAlpha();
+
+		// 状態を設定
+		m_state = STATE_NORMAL;	// 通常状態
+	}
+
+	// 透明度を設定
+	SetAlpha(fAlpha);
+}
+
+//============================================================
+//	フェードイン状態時の更新処理
+//============================================================
+void CPlayer::UpdateFadeIn(void)
+{
+	// 変数を宣言
+	float fAlpha = GetAlpha();	// 透明度
+
+	// 透明度を下げる
+	fAlpha -= FADE_LEVEL;
+
+	if (fAlpha <= 0.0f)
+	{ // 透明度が下がり切った場合
+
+		// 透明度を補正
+		fAlpha = 0.0f;
+
+		// 状態を設定
+		m_state = STATE_NONE;	// 何もしない状態
+	}
+
+	// 透明度を設定
+	SetAlpha(fAlpha);
 }
 
 //============================================================

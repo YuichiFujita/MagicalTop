@@ -24,6 +24,7 @@ CMultiModel::CMultiModel()
 	memset(&m_modelData, 0, sizeof(m_modelData));	// モデル情報
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
 	m_pParent = NULL;		// 親モデルへのポインタ
+	m_pMat	= NULL;			// マテリアルへのポインタ
 	m_pos	= VEC3_ZERO;	// 位置
 	m_rot	= VEC3_ZERO;	// 向き
 	m_scale	= VEC3_ZERO;	// 大きさ
@@ -46,6 +47,7 @@ HRESULT CMultiModel::Init(void)
 	memset(&m_modelData, 0, sizeof(m_modelData));	// モデル情報
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));		// ワールドマトリックス
 	m_pParent = NULL;		// 親モデルへのポインタ
+	m_pMat	= NULL;			// マテリアルへのポインタ
 	m_pos	= VEC3_ZERO;	// 位置
 	m_rot	= VEC3_ZERO;	// 向き
 	m_scale	= VEC3_ONE;		// 大きさ
@@ -59,7 +61,14 @@ HRESULT CMultiModel::Init(void)
 //============================================================
 void CMultiModel::Uninit(void)
 {
+	// マテリアルへのポインタを破棄
+	if (USED(m_pMat))
+	{ // ポインタが使用されていた場合
 
+		// メモリ開放
+		delete[] m_pMat;
+		m_pMat = NULL;
+	}
 }
 
 //============================================================
@@ -83,7 +92,6 @@ void CMultiModel::Draw(void)
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
-	D3DXMATERIAL *pMat;		// マテリアルデータへのポインタ
 
 	// ワールドマトリックスの初期化
 	D3DXMatrixIdentity(&m_mtxWorld);
@@ -123,14 +131,11 @@ void CMultiModel::Draw(void)
 	// 現在のマテリアルを取得
 	pDevice->GetMaterial(&matDef);
 
-	// マテリアルデータへのポインタを取得
-	pMat = (D3DXMATERIAL*)m_modelData.pBuffMat->GetBufferPointer();
-
 	for (int nCntMat = 0; nCntMat < (int)m_modelData.dwNumMat; nCntMat++)
 	{ // マテリアルの数分繰り返す
 
 		// マテリアルの設定
-		pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
+		pDevice->SetMaterial(&m_pMat[nCntMat].MatD3D);
 
 		// テクスチャの設定
 		pDevice->SetTexture(0, pTexture->GetTexture(m_modelData.pTextureID[nCntMat]));
@@ -230,6 +235,9 @@ void CMultiModel::BindModel(CModel::Model *pModel)
 
 		// モデルを割り当て
 		m_modelData = *pModel;
+
+		// マテリアルの設定
+		SetMaterial(m_modelData.pBuffMat, (int)m_modelData.dwNumMat);
 	}
 	else { assert(false); }	// 非使用中
 }
@@ -285,12 +293,89 @@ void CMultiModel::SetScaling(const D3DXVECTOR3& rScale)
 }
 
 //============================================================
+//	透明度の設定処理
+//============================================================
+void CMultiModel::SetAlpha(const float fAlpha)
+{
+	// ポインタを宣言
+	D3DXMATERIAL *pOriginMat;	// マテリアルデータへのポインタ
+
+	// マテリアルデータへのポインタを取得
+	pOriginMat = (D3DXMATERIAL*)m_modelData.pBuffMat->GetBufferPointer();
+
+	for (int nCntMat = 0; nCntMat < (int)m_modelData.dwNumMat; nCntMat++)
+	{ // マテリアルの数分繰り返す
+
+		// 変数を宣言
+		float fSetAlpha = fAlpha;	// 設定する透明度
+
+		// 透明度の補正
+		useful::LimitNum(fSetAlpha, 0.0f, pOriginMat[nCntMat].MatD3D.Diffuse.a);
+
+		// 透明度を設定
+		m_pMat[nCntMat].MatD3D.Diffuse.a = fSetAlpha;
+	}
+}
+
+//============================================================
 //	モデル情報の設定処理
 //============================================================
 void CMultiModel::SetModelData(const CModel::Model& rModel)
 {
 	// 引数のモデル情報を代入
 	m_modelData = rModel;
+}
+
+//============================================================
+//	マテリアルの設定処理
+//============================================================
+HRESULT CMultiModel::SetMaterial(const LPD3DXBUFFER pBuffMat, const int nNumMat)
+{
+	// ポインタを宣言
+	D3DXMATERIAL *pOriginMat;	// マテリアルデータへのポインタ
+
+	//--------------------------------------------------------
+	//	メモリ開放・確保
+	//--------------------------------------------------------
+	if (USED(m_pMat))
+	{ // ポインタが使用されていた場合
+
+		// メモリ開放
+		delete[] m_pMat;
+		m_pMat = NULL;
+	}
+
+	if (UNUSED(m_pMat))
+	{ // ポインタが使用されていない場合
+
+		// マテリアル数分のメモリ確保
+		m_pMat = new D3DXMATERIAL[nNumMat];
+
+		if (USED(m_pMat))
+		{ // 確保に成功した場合
+
+			// メモリクリア
+			memset(m_pMat, 0, sizeof(D3DXMATERIAL) * nNumMat);
+		}
+		else { assert(false); return E_FAIL; }	// 確保失敗
+	}
+	else { assert(false); return E_FAIL; }	// 使用中
+
+	//--------------------------------------------------------
+	//	マテリアル情報を設定
+	//--------------------------------------------------------
+	// マテリアルデータへのポインタを取得
+	pOriginMat = (D3DXMATERIAL*)m_modelData.pBuffMat->GetBufferPointer();
+
+	for (int nCntMat = 0; nCntMat < nNumMat; nCntMat++)
+	{ // マテリアルの数分繰り返す
+
+		// マテリアルデータをコピー
+		m_pMat[nCntMat] = pOriginMat[nCntMat];
+	}
+
+	// 成功を返す
+	return S_OK;
 }
 
 //============================================================
@@ -327,6 +412,59 @@ D3DXVECTOR3 CMultiModel::GetScaling(void) const
 {
 	// 大きさを返す
 	return m_scale;
+}
+
+//============================================================
+//	透明度取得処理
+//============================================================
+float CMultiModel::GetAlpha(void) const
+{
+	// 変数を宣言
+	float fAlpha = 0.0f;	// 最も不透明なマテリアルの透明度
+
+	// 最も不透明な透明度を探す
+	for (int nCntMat = 0; nCntMat < (int)m_modelData.dwNumMat; nCntMat++)
+	{ // マテリアルの数分繰り返す
+
+		if (m_pMat[nCntMat].MatD3D.Diffuse.a > fAlpha)
+		{ // マテリアルの透明度がより不透明だった場合
+
+			// 現在のマテリアルの透明度を保存
+			fAlpha = m_pMat[nCntMat].MatD3D.Diffuse.a;
+		}
+	}
+
+	// 全パーツ内で最も不透明だったマテリアルの透明度を返す
+	return fAlpha;
+}
+
+//============================================================
+//	最大透明度取得処理
+//============================================================
+float CMultiModel::GetMaxAlpha(void) const
+{
+	// 変数を宣言
+	float fAlpha = 0.0f;		// 最も不透明なマテリアルの透明度
+
+	// ポインタを宣言
+	D3DXMATERIAL *pOriginMat;	// マテリアルデータへのポインタ
+
+	// マテリアルデータへのポインタを取得
+	pOriginMat = (D3DXMATERIAL*)m_modelData.pBuffMat->GetBufferPointer();
+
+	for (int nCntMat = 0; nCntMat < (int)m_modelData.dwNumMat; nCntMat++)
+	{ // マテリアルの数分繰り返す
+
+		if (pOriginMat[nCntMat].MatD3D.Diffuse.a > fAlpha)
+		{ // マテリアルの透明度がより不透明だった場合
+
+			// 現在のマテリアルの透明度を保存
+			fAlpha = pOriginMat[nCntMat].MatD3D.Diffuse.a;
+		}
+	}
+
+	// 全パーツ内で最も不透明だったマテリアルの透明度を返す
+	return fAlpha;
 }
 
 //============================================================

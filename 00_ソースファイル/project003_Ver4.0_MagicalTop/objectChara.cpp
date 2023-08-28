@@ -255,6 +255,19 @@ void CObjectChara::SetRotation(const D3DXVECTOR3& rRot)
 }
 
 //============================================================
+//	透明度の設定処理
+//============================================================
+void CObjectChara::SetAlpha(const float fAlpha)
+{
+	for (int nCntParts = 0; nCntParts < m_nNumModel; nCntParts++)
+	{ // パーツの最大数分繰り返す
+
+		// 引数の透明度を設定
+		m_apMultiModel[nCntParts]->SetAlpha(fAlpha);
+	}
+}
+
+//============================================================
 //	モーション種類取得処理
 //============================================================
 int CObjectChara::GetMotionType(void) const
@@ -297,6 +310,54 @@ D3DXVECTOR3 CObjectChara::GetRotation(void) const
 {
 	// 向きを返す
 	return m_rot;
+}
+
+//============================================================
+//	透明度取得処理
+//============================================================
+float CObjectChara::GetAlpha(void) const
+{
+	// 変数を宣言
+	float fAlpha = 0.0f;	// 最も不透明なマテリアルの透明度
+
+	// 最も不透明な透明度を探す
+	for (int nCntParts = 0; nCntParts < m_nNumModel; nCntParts++)
+	{ // パーツの最大数分繰り返す
+
+		if (m_apMultiModel[nCntParts]->GetAlpha() > fAlpha)
+		{ // マテリアルの透明度がより不透明だった場合
+
+			// 現在のマテリアルの透明度を保存
+			fAlpha = m_apMultiModel[nCntParts]->GetAlpha();
+		}
+	}
+
+	// 全パーツ内で最も不透明だったマテリアルの透明度を返す
+	return fAlpha;
+}
+
+//============================================================
+//	最大透明度取得処理
+//============================================================
+float CObjectChara::GetMaxAlpha(void) const
+{
+	// 変数を宣言
+	float fAlpha = 0.0f;	// 最も不透明なマテリアルの透明度
+
+	// 最も不透明な透明度を探す
+	for (int nCntParts = 0; nCntParts < m_nNumModel; nCntParts++)
+	{ // パーツの最大数分繰り返す
+
+		if (m_apMultiModel[nCntParts]->GetMaxAlpha() > fAlpha)
+		{ // マテリアルの透明度がより不透明だった場合
+
+			// 現在のマテリアルの透明度を保存
+			fAlpha = m_apMultiModel[nCntParts]->GetMaxAlpha();
+		}
+	}
+
+	// 全パーツ内で最も不透明だったマテリアルの透明度を返す
+	return fAlpha;
 }
 
 //============================================================

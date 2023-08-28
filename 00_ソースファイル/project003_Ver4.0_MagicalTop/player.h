@@ -80,9 +80,12 @@ public:
 	// 状態列挙
 	typedef enum
 	{
-		STATE_NORMAL = 0,	// 通常状態
+		STATE_NONE = 0,		// 何もしない状態
+		STATE_FADEOUT,		// フェードアウト状態
+		STATE_NORMAL,		// 通常状態
 		STATE_DAMAGE,		// ダメージ状態
 		STATE_BLOW_AWAY,	// 吹っ飛び状態
+		STATE_FADEIN,		// フェードイン状態
 		STATE_DEATH,		// 死亡状態
 		STATE_MAX			// この列挙型の総数
 	}STATE;
@@ -103,12 +106,14 @@ public:
 	// 静的メンバ関数
 	static CPlayer *Create	// 生成
 	( // 引数
-		const D3DXVECTOR3& rPos,	// 位置
-		const D3DXVECTOR3& rRot		// 向き
+		D3DXVECTOR3& rPos,		// 位置
+		const D3DXVECTOR3& rRot	// 向き
 	);
 
 	// メンバ関数
 	void AddExp(const int nAdd);				// 経験値加算
+	void SetRespawn(D3DXVECTOR3& rPos);			// 再出現設定
+	void SetDisp(const bool bDisp);				// 表示設定
 	void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
 	void SetEnableDraw(const bool bDraw);		// 描画状況設定
 	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
@@ -122,6 +127,8 @@ private:
 	MOTION UpdateNormal(void);	// 通常状態時の更新
 	MOTION UpdateDamage(void);	// ダメージ状態時の更新
 	void UpdateBlowAway(void);	// 吹っ飛び状態時の更新
+	void UpdateFadeOut(void);	// フェードアウト状態時の更新
+	void UpdateFadeIn(void);	// フェードイン状態時の更新
 
 	MOTION Move(void);								// 移動
 	MOTION Magic(MOTION motion, D3DXVECTOR3& rPos);	// 魔法
