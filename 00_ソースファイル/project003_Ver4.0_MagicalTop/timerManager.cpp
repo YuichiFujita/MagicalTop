@@ -12,12 +12,6 @@
 #include "renderer.h"
 #include "value.h"
 
-#ifdef _DEBUG	// デバッグ処理
-
-#include "input.h"
-
-#endif	// _DEBUG
-
 //************************************************************
 //	マクロ定義
 //************************************************************
@@ -25,8 +19,8 @@
 #define TIME_SIZE	(D3DXVECTOR3(60.0f, 80.0f, 0.0f))		// ポリゴン大きさ
 #define TIME_SPACE	(D3DXVECTOR3(TIME_SIZE.x, 0.0f, 0.0f))	// ポリゴン間の空白
 
-#define TIME_NUMMIN	((DWORD)0)			// 最少タイム
-#define TIME_NUMMAX	((DWORD)99 * 60000)	// 最大タイム
+#define TIME_NUMMIN	(DWORD)(0)			// 最少タイム
+#define TIME_NUMMAX	(DWORD)(99 * 60000)	// 最大タイム
 
 //************************************************************
 //	子クラス [CTimerManager] のメンバ関数
@@ -38,11 +32,13 @@ CTimerManager::CTimerManager()
 {
 	// メンバ変数をクリア
 	memset(&m_apValue[0], 0, sizeof(m_apValue));	// 数値の情報
-	m_dwStartTime	= 0;			// 開始時間
-	m_dwTime		= 0;			// 経過時間
-	m_dwStopTime	= 0;			// 停止時間
-	m_state			= STATE_NONE;	// 計測状態
-	m_bStop			= true;			// 計測停止状況
+	m_dwStartTime		= 0;			// 開始時間
+	m_dwTime			= 0;			// 経過時間
+	m_dwStopStartTime	= 0;			// 停止開始時間
+	m_dwStopTime		= 0;			// 停止時間
+	m_dwTempTime		= 0;			// 経過時間の計算用
+	m_state				= STATE_NONE;	// 計測状態
+	m_bStop				= true;			// 計測停止状況
 }
 
 //============================================================
@@ -60,11 +56,13 @@ HRESULT CTimerManager::Init(void)
 {
 	// メンバ変数を初期化
 	memset(&m_apValue[0], 0, sizeof(m_apValue));	// 数値の情報
-	m_dwStartTime	= 0;			// 開始時間
-	m_dwTime		= 0;			// 経過時間
-	m_dwStopTime	= 0;			// 停止時間
-	m_state			= STATE_NONE;	// 計測状態
-	m_bStop			= true;			// 計測停止状況
+	m_dwStartTime		= 0;			// 開始時間
+	m_dwTime			= 0;			// 経過時間
+	m_dwStopStartTime	= 0;			// 停止開始時間
+	m_dwStopTime		= 0;			// 停止時間
+	m_dwTempTime		= 0;			// 経過時間の計算用
+	m_state				= STATE_NONE;	// 計測状態
+	m_bStop				= true;			// 計測停止状況
 
 	for (int nCntTimer = 0; nCntTimer < MAX_TIMER; nCntTimer++)
 	{ // タイマーの桁数分繰り返す
@@ -103,37 +101,11 @@ void CTimerManager::Uninit(void)
 //============================================================
 void CTimerManager::Update(void)
 {
-#ifdef _DEBUG	// デバッグ処理
-
-	if (CManager::GetKeyboard()->GetTrigger(DIK_F2))
-	{
-		// 停止状況を逆転
-		EnableStop((m_bStop) ? false : true);
-	}
-
-#if 0
-	if (CManager::GetKeyboard()->GetTrigger(DIK_F3))
-	{
-		// タイマーを加算
-		AddMSec(1);
-	}
-	if (CManager::GetKeyboard()->GetTrigger(DIK_F4))
-	{
-		// タイマーを加算
-		AddSec(1);
-	}
-	if (CManager::GetKeyboard()->GetTrigger(DIK_F5))
-	{
-		// タイマーを加算
-		AddMin(1);
-	}
-#endif
-
-#endif	// _DEBUG
-
 	switch (m_state)
 	{ // 計測状態ごとの処理
 	case STATE_NONE:
+
+		// 無し
 
 		break;
 
@@ -143,19 +115,13 @@ void CTimerManager::Update(void)
 		{ // 計測中の場合
 
 			// 現在の計測ミリ秒を設定
-			m_dwTime = timeGetTime() - m_dwStopTime - m_dwStartTime;
-
-			// タイマーの補正
-			useful::LimitNum(m_dwTime, TIME_NUMMIN, TIME_NUMMAX);
+			m_dwTime = timeGetTime() - m_dwTempTime;
 		}
 		else
 		{ // 計測停止中の場合
 
 			// 現在の停止ミリ秒を設定
-			m_dwStopTime = timeGetTime() - m_dwTime - m_dwStartTime;
-
-			// タイマーの補正
-			useful::LimitNum(m_dwTime, TIME_NUMMIN, TIME_NUMMAX);
+			m_dwStopTime = timeGetTime() - m_dwStopStartTime;
 		}
 
 		break;
@@ -252,8 +218,9 @@ void CTimerManager::Start(void)
 	if (m_state != STATE_MEASURE)
 	{ // タイムの計測中ではない場合
 
-		// タイマーを設定
-		m_dwStartTime = timeGetTime();	// 現在時刻を取得
+		// 開始時刻を取得
+		m_dwStartTime = timeGetTime();
+		m_dwTempTime  = m_dwStartTime;
 
 		// 非停止状態にする
 		EnableStop(false);
@@ -279,54 +246,96 @@ void CTimerManager::EnableStop(const bool bStop)
 {
 	// 引数の停止状況を代入
 	m_bStop = bStop;
+
+	if (bStop)
+	{ // 停止する場合
+
+		// 停止開始時刻を取得
+		m_dwStopStartTime = timeGetTime();
+	}
+	else
+	{ // 再開する場合
+
+		// 停止時間を加算
+		m_dwTempTime += m_dwStopTime;
+
+		// 停止関連の時間を初期化
+		m_dwStopStartTime = 0;	// 停止開始時間
+		m_dwStopTime = 0;		// 停止時間
+	}
 }
 
-#if 0
 //============================================================
 //	ミリ秒の加算処理
 //============================================================
-void CTimerManager::AddMSec(const int nMSec)
+void CTimerManager::AddMSec(long nMSec)
 {
-	// 引数のミリ秒を加算
-	m_dwTime += nMSec;
+	if (!m_bStop)
+	{ // 停止中ではない場合
 
-	// タイマーの補正
-	useful::LimitNum(m_dwTime, TIME_NUMMIN, TIME_NUMMAX);
+		// 加算量の補正
+		useful::LimitNum(nMSec, -(long)m_dwTime, (long)TIME_NUMMAX);
 
-	// 数字のテクスチャ座標の設定
-	SetTexNum();
+		// 引数のミリ秒を減算
+		m_dwTempTime -= (DWORD)nMSec;
+
+		// 現在の計測ミリ秒を設定
+		m_dwTime = timeGetTime() - m_dwTempTime;
+
+		// 数字のテクスチャ座標の設定
+		SetTexNum();
+	}
 }
 
 //============================================================
 //	秒の加算処理
 //============================================================
-void CTimerManager::AddSec(const int nSec)
+void CTimerManager::AddSec(long nSec)
 {
-	// 引数の秒を加算
-	m_dwTime += nSec * 1000;	// ミリ秒に変換
+	if (!m_bStop)
+	{ // 停止中ではない場合
 
-	// タイマーの補正
-	useful::LimitNum(m_dwTime, TIME_NUMMIN, TIME_NUMMAX);
+		// 引数をミリ秒に変換
+		nSec *= 1000;
 
-	// 数字のテクスチャ座標の設定
-	SetTexNum();
+		// 加算量の補正
+		useful::LimitNum(nSec, -(long)m_dwTime, (long)TIME_NUMMAX);
+
+		// 引数の秒を減算
+		m_dwTempTime -= (DWORD)nSec;
+
+		// 現在の計測ミリ秒を設定
+		m_dwTime = timeGetTime() - m_dwTempTime;
+
+		// 数字のテクスチャ座標の設定
+		SetTexNum();
+	}
 }
 
 //============================================================
 //	分の加算処理
 //============================================================
-void CTimerManager::AddMin(const int nMin)
+void CTimerManager::AddMin(long nMin)
 {
-	// 引数の分を加算
-	m_dwTime += nMin * 60000;	// ミリ秒に変換
+	if (!m_bStop)
+	{ // 停止中ではない場合
 
-	// タイマーの補正
-	useful::LimitNum(m_dwTime, TIME_NUMMIN, TIME_NUMMAX);
+		// 引数をミリ秒に変換
+		nMin *= 60000;
 
-	// 数字のテクスチャ座標の設定
-	SetTexNum();
+		// 加算量の補正
+		useful::LimitNum(nMin, -(long)m_dwTime, (long)TIME_NUMMAX);
+
+		// 引数の分を減算
+		m_dwTempTime -= (DWORD)nMin;
+
+		// 現在の計測ミリ秒を設定
+		m_dwTime = timeGetTime() - m_dwTempTime;
+
+		// 数字のテクスチャ座標の設定
+		SetTexNum();
+	}
 }
-#endif
 
 //============================================================
 //	ミリ秒の取得処理

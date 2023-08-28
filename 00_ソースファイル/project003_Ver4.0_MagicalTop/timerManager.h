@@ -60,16 +60,12 @@ public:
 	void End(void);		// 計測終了
 
 	void EnableStop(const bool bStop);	// 計測停止設定
-
-#if 0
-	void AddMSec(const int nMSec);	// ミリ秒加算
-	void AddSec(const int nSec);	// 秒加算
-	void AddMin(const int nMin);	// 分加算
-#endif
-
-	int GetMSec(void);	// ミリ秒取得
-	int GetSec(void);	// 秒取得
-	int GetMin(void);	// 分取得
+	void AddMSec(long nMSec);	// ミリ秒加算
+	void AddSec(long nSec);		// 秒加算
+	void AddMin(long nMin);		// 分加算
+	int GetMSec(void);			// ミリ秒取得
+	int GetSec(void);			// 秒取得
+	int GetMin(void);			// 分取得
 
 	// 静的メンバ関数
 	static CTimerManager *Create(void);	// 生成
@@ -81,14 +77,13 @@ private:
 
 	// メンバ変数
 	CValue *m_apValue[MAX_TIMER];	// 数値の情報
-	DWORD m_dwStartTime;	// 開始時間
-	DWORD m_dwTime;			// 経過時間
-	DWORD m_dwStopTime;		// 停止時間
-	DWORD m_dwTempTime;		// 経過時間の計算用
-	STATE m_state;			// 計測状態
-	bool  m_bStop;			// 計測停止状況
+	DWORD m_dwStartTime;			// 開始時間
+	DWORD m_dwTime;					// 経過時間
+	DWORD m_dwStopStartTime;		// 停止開始時間
+	DWORD m_dwStopTime;				// 停止時間
+	DWORD m_dwTempTime;				// 経過時間の計算用
+	STATE m_state;					// 計測状態
+	bool  m_bStop;					// 計測停止状況
 };
 
 #endif	// _TIMERMANAGER_H_
-
-// TODO：タイマー加減算できるようにする
