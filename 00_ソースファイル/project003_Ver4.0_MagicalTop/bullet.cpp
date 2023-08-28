@@ -129,17 +129,6 @@ void CBullet::Update(void)
 		return;
 	}
 
-	// プレイヤーとの当たり判定
-	if (CollisionPlayer())
-	{ // プレイヤーに当たっている場合
-
-		// オブジェクトの終了
-		Uninit();
-
-		// 関数を抜ける
-		return;
-	}
-
 	// 位置を設定
 	CObjectBillboard::SetPosition(pos);
 

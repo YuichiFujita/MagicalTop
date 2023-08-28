@@ -1,13 +1,13 @@
 //============================================================
 //
-//	タイマー処理 [timer.cpp]
+//	タイマーマネージャー処理 [timerManager.cpp]
 //	Author：藤田勇一
 //
 //============================================================
 //************************************************************
 //	インクルードファイル
 //************************************************************
-#include "timer.h"
+#include "timerManager.h"
 #include "manager.h"
 #include "renderer.h"
 #include "value.h"
@@ -29,12 +29,12 @@
 #define TIME_NUMMAX	((DWORD)99 * 60000)	// 最大タイム
 
 //************************************************************
-//	子クラス [CTimer] のメンバ関数
+//	子クラス [CTimerManager] のメンバ関数
 //************************************************************
 //============================================================
 //	コンストラクタ
 //============================================================
-CTimer::CTimer() : CObject(CObject::LABEL_NUMBER, DEFAULT_PRIO)
+CTimerManager::CTimerManager()
 {
 	// メンバ変数をクリア
 	memset(&m_apValue[0], 0, sizeof(m_apValue));	// 数値の情報
@@ -48,7 +48,7 @@ CTimer::CTimer() : CObject(CObject::LABEL_NUMBER, DEFAULT_PRIO)
 //============================================================
 //	デストラクタ
 //============================================================
-CTimer::~CTimer()
+CTimerManager::~CTimerManager()
 {
 
 }
@@ -56,7 +56,7 @@ CTimer::~CTimer()
 //============================================================
 //	初期化処理
 //============================================================
-HRESULT CTimer::Init(void)
+HRESULT CTimerManager::Init(void)
 {
 	// メンバ変数を初期化
 	memset(&m_apValue[0], 0, sizeof(m_apValue));	// 数値の情報
@@ -87,7 +87,7 @@ HRESULT CTimer::Init(void)
 //============================================================
 //	終了処理
 //============================================================
-void CTimer::Uninit(void)
+void CTimerManager::Uninit(void)
 {
 	// 数字オブジェクトを破棄
 	for (int nCntTimer = 0; nCntTimer < MAX_TIMER; nCntTimer++)
@@ -96,15 +96,12 @@ void CTimer::Uninit(void)
 		// 数字の終了
 		m_apValue[nCntTimer]->Uninit();
 	}
-
-	// 自身のオブジェクトを破棄
-	Release();
 }
 
 //============================================================
 //	更新処理
 //============================================================
-void CTimer::Update(void)
+void CTimerManager::Update(void)
 {
 #ifdef _DEBUG	// デバッグ処理
 
@@ -165,6 +162,8 @@ void CTimer::Update(void)
 
 	case STATE_END:
 
+		// 無し
+
 		break;
 
 	default:	// 例外処理
@@ -188,54 +187,67 @@ void CTimer::Update(void)
 }
 
 //============================================================
-//	描画処理
-//============================================================
-void CTimer::Draw(void)
-{
-
-}
-
-//============================================================
 //	生成処理
 //============================================================
-CTimer *CTimer::Create(void)
+CTimerManager *CTimerManager::Create(void)
 {
 	// ポインタを宣言
-	CTimer *pTimer = NULL;		// タイマー生成用
+	CTimerManager *pTimerManager = NULL;	// タイマーマネージャー生成用
 
-	if (UNUSED(pTimer))
+	if (UNUSED(pTimerManager))
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pTimer = new CTimer;	// タイマー
+		pTimerManager = new CTimerManager;	// タイマーマネージャー
 	}
 	else { assert(false); return NULL; }	// 使用中
 
-	if (USED(pTimer))
+	if (USED(pTimerManager))
 	{ // 確保に成功している場合
 
-		// タイマーの初期化
-		if (FAILED(pTimer->Init()))
+		// タイマーマネージャーの初期化
+		if (FAILED(pTimerManager->Init()))
 		{ // 初期化に失敗した場合
 
 			// メモリ開放
-			delete pTimer;
-			pTimer = NULL;
+			delete pTimerManager;
+			pTimerManager = NULL;
 
 			// 失敗を返す
 			return NULL;
 		}
 
 		// 確保したアドレスを返す
-		return pTimer;
+		return pTimerManager;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }
 
 //============================================================
+//	破棄処理
+//============================================================
+HRESULT CTimerManager::Release(CTimerManager *&prTimerManager)
+{
+	if (USED(prTimerManager))
+	{ // 使用中の場合
+
+		// タイマーマネージャーの終了
+		prTimerManager->Uninit();
+
+		// メモリ開放
+		delete prTimerManager;
+		prTimerManager = NULL;
+
+		// 成功を返す
+		return S_OK;
+	}
+	else { assert(false); return E_FAIL; }	// 非使用中
+}
+
+//============================================================
 //	計測開始処理
 //============================================================
-void CTimer::Start(void)
+void CTimerManager::Start(void)
 {
 	if (m_state != STATE_MEASURE)
 	{ // タイムの計測中ではない場合
@@ -254,7 +266,7 @@ void CTimer::Start(void)
 //============================================================
 //	計測終了処理
 //============================================================
-void CTimer::End(void)
+void CTimerManager::End(void)
 {
 	// 計測終了状態にする
 	m_state = STATE_END;
@@ -263,7 +275,7 @@ void CTimer::End(void)
 //============================================================
 //	計測停止の有効無効の設定処理
 //============================================================
-void CTimer::EnableStop(const bool bStop)
+void CTimerManager::EnableStop(const bool bStop)
 {
 	// 引数の停止状況を代入
 	m_bStop = bStop;
@@ -273,7 +285,7 @@ void CTimer::EnableStop(const bool bStop)
 //============================================================
 //	ミリ秒の加算処理
 //============================================================
-void CTimer::AddMSec(const int nMSec)
+void CTimerManager::AddMSec(const int nMSec)
 {
 	// 引数のミリ秒を加算
 	m_dwTime += nMSec;
@@ -288,7 +300,7 @@ void CTimer::AddMSec(const int nMSec)
 //============================================================
 //	秒の加算処理
 //============================================================
-void CTimer::AddSec(const int nSec)
+void CTimerManager::AddSec(const int nSec)
 {
 	// 引数の秒を加算
 	m_dwTime += nSec * 1000;	// ミリ秒に変換
@@ -303,7 +315,7 @@ void CTimer::AddSec(const int nSec)
 //============================================================
 //	分の加算処理
 //============================================================
-void CTimer::AddMin(const int nMin)
+void CTimerManager::AddMin(const int nMin)
 {
 	// 引数の分を加算
 	m_dwTime += nMin * 60000;	// ミリ秒に変換
@@ -319,7 +331,7 @@ void CTimer::AddMin(const int nMin)
 //============================================================
 //	ミリ秒の取得処理
 //============================================================
-int CTimer::GetMSec(void)
+int CTimerManager::GetMSec(void)
 {
 	// ミリ秒を返す
 	return m_dwTime % 1000;
@@ -328,7 +340,7 @@ int CTimer::GetMSec(void)
 //============================================================
 //	秒の取得処理
 //============================================================
-int CTimer::GetSec(void)
+int CTimerManager::GetSec(void)
 {
 	// 秒を返す
 	return (m_dwTime / 1000) % 60;
@@ -337,7 +349,7 @@ int CTimer::GetSec(void)
 //============================================================
 //	分の取得処理
 //============================================================
-int CTimer::GetMin(void)
+int CTimerManager::GetMin(void)
 {
 	// 分を返す
 	return m_dwTime / 60000;
@@ -346,7 +358,7 @@ int CTimer::GetMin(void)
 //============================================================
 //	数字のテクスチャ座標の設定処理
 //============================================================
-void CTimer::SetTexNum(void)
+void CTimerManager::SetTexNum(void)
 {
 	// 変数を宣言
 	int aNumDivide[MAX_TIMER];	// 分の桁数ごとの分解用

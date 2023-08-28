@@ -223,7 +223,7 @@
     <ClCompile Include="stage.cpp" />
     <ClCompile Include="target.cpp" />
     <ClCompile Include="texture.cpp" />
-    <ClCompile Include="timer.cpp" />
+    <ClCompile Include="timerManager.cpp" />
     <ClCompile Include="useful.cpp" />
     <ClCompile Include="value.cpp" />
     <ClCompile Include="valueUI.cpp" />
@@ -298,7 +298,7 @@
     <ClInclude Include="stage.h" />
     <ClInclude Include="target.h" />
     <ClInclude Include="texture.h" />
-    <ClInclude Include="timer.h" />
+    <ClInclude Include="timerManager.h" />
     <ClInclude Include="useful.h" />
     <ClInclude Include="value.h" />
     <ClInclude Include="valueUI.h" />

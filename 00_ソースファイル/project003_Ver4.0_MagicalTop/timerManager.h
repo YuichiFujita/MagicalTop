@@ -1,14 +1,14 @@
 //============================================================
 //
-//	タイマーヘッダー [timer.h]
+//	タイマーマネージャーヘッダー [timerManager.h]
 //	Author：藤田勇一
 //
 //============================================================
 //************************************************************
 //	二重インクルード防止
 //************************************************************
-#ifndef _TIMER_H_
-#define _TIMER_H_
+#ifndef _TIMERMANAGER_H_
+#define _TIMERMANAGER_H_
 
 //************************************************************
 //	インクルードファイル
@@ -33,15 +33,15 @@ class CValue;	// 数字クラス
 //************************************************************
 //	クラス定義
 //************************************************************
-// タイマークラス
-class CTimer : public CObject
+// タイマーマネージャークラス
+class CTimerManager
 {
 public:
 	// コンストラクタ
-	CTimer();
+	CTimerManager();
 
 	// デストラクタ
-	~CTimer();
+	~CTimerManager();
 
 	// 計測列挙
 	typedef enum
@@ -52,18 +52,13 @@ public:
 		STATE_MAX		// この列挙型の総数
 	}STATE;
 
-	// オーバーライド関数
+	// メンバ関数
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
-	void Draw(void);	// 描画
-
-	// 静的メンバ関数
-	static CTimer *Create(void);	// 生成
-
-	// メンバ関数
 	void Start(void);	// 計測開始
 	void End(void);		// 計測終了
+
 	void EnableStop(const bool bStop);	// 計測停止設定
 
 #if 0
@@ -76,6 +71,10 @@ public:
 	int GetSec(void);	// 秒取得
 	int GetMin(void);	// 分取得
 
+	// 静的メンバ関数
+	static CTimerManager *Create(void);	// 生成
+	static HRESULT Release(CTimerManager *&prTimerManager);	// 破棄
+
 private:
 	// メンバ関数
 	void SetTexNum(void);	// 数字のテクスチャ座標設定
@@ -85,10 +84,11 @@ private:
 	DWORD m_dwStartTime;	// 開始時間
 	DWORD m_dwTime;			// 経過時間
 	DWORD m_dwStopTime;		// 停止時間
+	DWORD m_dwTempTime;		// 経過時間の計算用
 	STATE m_state;			// 計測状態
 	bool  m_bStop;			// 計測停止状況
 };
 
-#endif	// _TIMER_H_
+#endif	// _TIMERMANAGER_H_
 
 // TODO：タイマー加減算できるようにする

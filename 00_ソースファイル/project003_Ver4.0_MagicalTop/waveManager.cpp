@@ -17,6 +17,7 @@
 #include "sceneGame.h"
 #include "target.h"
 #include "player.h"
+#include "timerManager.h"
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -623,7 +624,10 @@ void CWaveManager::UpdateWaveStart(void)
 		m_state = STATE_PROGRESSION;	// ウェーブ進行状態
 
 		// プレイヤーを再出現させる
-		CSceneGame::GetPlayer()->SetRespawn(D3DXVECTOR3(0.0f, 0.0f, -1000.0f));
+		CSceneGame::GetPlayer()->SetRespawn(D3DXVECTOR3(0.0f, 0.0f, -2000.0f));	// TODO：プレイヤー位置定数
+
+		// タイムを計測再開
+		CSceneGame::GetTimerManager()->EnableStop(false);
 	}
 
 	// 大きさを設定
@@ -682,6 +686,9 @@ void CWaveManager::UpdateProgression(void)
 
 			// プレイヤーを表示しない状態にする
 			CSceneGame::GetPlayer()->SetDisp(false);
+
+			// タイムを計測停止
+			CSceneGame::GetTimerManager()->EnableStop(true);
 
 			// 状態管理カウンターを初期化
 			m_nCounterState = 0;

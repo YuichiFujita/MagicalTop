@@ -13,12 +13,12 @@
 #include "camera.h"
 
 #include "waveManager.h"
+#include "timerManager.h"
 #include "stage.h"
 #include "pause.h"
 #include "target.h"
 #include "player.h"
 #include "score.h"
-#include "timer.h"
 
 #include "enemy.h"
 #include "magic.h"
@@ -32,14 +32,14 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
-CWaveManager *CSceneGame::m_pWaveManager = NULL;	// ウェーブマネージャー
-CPause	*CSceneGame::m_pPause	= NULL;				// ポーズ
-CStage	*CSceneGame::m_pStage	= NULL;				// ステージ
-CPlayer	*CSceneGame::m_pPlayer	= NULL;				// プレイヤーオブジェクト
-CField	*CSceneGame::m_pField	= NULL;				// 地面オブジェクト
-CTarget	*CSceneGame::m_pTarget	= NULL;				// ターゲットオブジェクト
-CScore	*CSceneGame::m_pScore	= NULL;				// スコアオブジェクト
-CTimer	*CSceneGame::m_pTimer	= NULL;				// タイマーオブジェクト
+CWaveManager	*CSceneGame::m_pWaveManager  = NULL;	// ウェーブマネージャー
+CTimerManager	*CSceneGame::m_pTimerManager = NULL;	// タイマーマネージャー
+CPause	*CSceneGame::m_pPause	= NULL;					// ポーズ
+CStage	*CSceneGame::m_pStage	= NULL;					// ステージ
+CPlayer	*CSceneGame::m_pPlayer	= NULL;					// プレイヤーオブジェクト
+CField	*CSceneGame::m_pField	= NULL;					// 地面オブジェクト
+CTarget	*CSceneGame::m_pTarget	= NULL;					// ターゲットオブジェクト
+CScore	*CSceneGame::m_pScore	= NULL;					// スコアオブジェクト
 
 //************************************************************
 //	子クラス [CSceneGame] のメンバ関数
@@ -68,6 +68,16 @@ HRESULT CSceneGame::Init(void)
 	// ウェーブマネージャーの生成
 	m_pWaveManager = CWaveManager::Create();
 	if (UNUSED(m_pWaveManager))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// タイマーマネージャーの生成
+	m_pTimerManager = CTimerManager::Create();
+	if (UNUSED(m_pTimerManager))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -136,7 +146,7 @@ HRESULT CSceneGame::Init(void)
 	}
 
 	// プレイヤーオブジェクトの生成
-	m_pPlayer = CPlayer::Create(D3DXVECTOR3(0.0f, 0.0f, -1000.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	m_pPlayer = CPlayer::Create(D3DXVECTOR3(0.0f, 0.0f, -2000.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 	if (UNUSED(m_pPlayer))
 	{ // 非使用中の場合
 
@@ -148,16 +158,6 @@ HRESULT CSceneGame::Init(void)
 	// スコアオブジェクトの生成
 	m_pScore = CScore::Create();
 	if (UNUSED(m_pScore))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// タイマーオブジェクトの生成
-	m_pTimer = CTimer::Create();
-	if (UNUSED(m_pTimer))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -177,13 +177,14 @@ HRESULT CSceneGame::Init(void)
 	// マナフラワーランダム生成
 	CFlower::RandomSpawn(30, CFlower::TYPE_NORMAL, D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);	// TODO：定数変更
 
+	// タイムを計測開始
+	m_pTimerManager->Start();
+	m_pTimerManager->EnableStop(true);
+
 	// TODO：初期設定
 #if 0
 	// カメラの初期位置を設定
 	CManager::GetCamera()->SetDestCamera();
-
-	// タイムを計測開始
-	m_pTimer->Start();
 
 	// BGMの再生
 	CManager::GetSound()->Play(CSound::LABEL_BGM_000);
@@ -200,6 +201,15 @@ HRESULT CSceneGame::Uninit(void)
 {
 	// ウェーブマネージャーの破棄
 	if (FAILED(CWaveManager::Release(m_pWaveManager)))
+	{ // 破棄に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// タイマーマネージャーの破棄
+	if (FAILED(CTimerManager::Release(m_pTimerManager)))
 	{ // 破棄に失敗した場合
 
 		// 失敗を返す
@@ -230,7 +240,6 @@ HRESULT CSceneGame::Uninit(void)
 	m_pTarget	= NULL;		// ターゲットオブジェクト
 	m_pField	= NULL;		// 地面オブジェクト
 	m_pScore	= NULL;		// スコアオブジェクト
-	m_pTimer	= NULL;		// タイマーオブジェクト
 
 	// 成功を返す
 	return S_OK;
@@ -241,6 +250,14 @@ HRESULT CSceneGame::Uninit(void)
 //============================================================
 void CSceneGame::Update(void)
 {
+	if (USED(m_pTimerManager))
+	{ // 使用中の場合
+
+		// タイマーマネージャーの更新
+		m_pTimerManager->Update();
+	}
+	else { assert(false); }	// 非使用中
+
 	if (USED(m_pPause))
 	{ // 使用中の場合
 
@@ -291,6 +308,15 @@ CWaveManager *CSceneGame::GetWaveManager(void)
 {
 	// ウェーブマネージャーのポインタを返す
 	return m_pWaveManager;
+}
+
+//============================================================
+//	タイマーマネージャー取得処理
+//============================================================
+CTimerManager *CSceneGame::GetTimerManager(void)
+{
+	// タイマーマネージャーのポインタを返す
+	return m_pTimerManager;
 }
 
 //============================================================
@@ -345,13 +371,4 @@ CScore *CSceneGame::GetScore(void)
 {
 	// スコアのポインタを返す
 	return m_pScore;
-}
-
-//============================================================
-//	タイマー取得処理
-//============================================================
-CTimer *CSceneGame::GetTimer(void)
-{
-	// タイマーのポインタを返す
-	return m_pTimer;
 }
