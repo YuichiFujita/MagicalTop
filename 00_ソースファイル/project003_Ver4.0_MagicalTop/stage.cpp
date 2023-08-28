@@ -22,6 +22,7 @@
 #define STAGE_SETUP_TXT	"data\\TXT\\stage.txt"	// セットアップテキスト相対パス
 #define AREA_PRIO	(2)			// エリア表示の優先順位
 #define AREA_ROT	(0.025f)	// エリアの回転量
+#define AREA_SUBROT	(0.003f)	// エリアの回転減算量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -163,13 +164,6 @@ void CStage::Update(void)
 	// 現在のエリアを初期化
 	m_area = AREA_NONE;
 
-	// エリア表示の位置を設定
-	m_pStageArea->SetPosition(posTarget);
-
-	// エリア表示の向きを設定
-	rotArea.y -= AREA_ROT;
-	m_pStageArea->SetRotation(rotArea);
-
 	for (int nCntArea = 0; nCntArea < AREA_MAX; nCntArea++)
 	{ // エリアの最大数分繰り返す
 
@@ -189,6 +183,13 @@ void CStage::Update(void)
 			break;
 		}
 	}
+
+	// エリア表示の位置を設定
+	m_pStageArea->SetPosition(posTarget);
+
+	// エリア表示の向きを設定
+	rotArea.y -= AREA_ROT - (AREA_SUBROT * m_area);
+	m_pStageArea->SetRotation(rotArea);
 
 	// 例外処理
 	assert(m_area != AREA_NONE);	// エリア外

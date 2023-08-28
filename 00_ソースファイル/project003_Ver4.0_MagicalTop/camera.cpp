@@ -35,6 +35,7 @@
 #define REV_CENTER	(1.0f)		// 中間位置の補正係数 (0.0f：ターゲット方向, 1.0f：プレイヤー方向)
 #define FIRST_DIS	(-800.0f)	// カメラ距離の最低値
 #define POSR_Y		(350.0f)	// カメラ注視点のy座標
+#define POSV_Y		(1200.0f)	// カメラ視点のy座標
 #define MIN_POSV_Y	(600.0f)	// カメラ視点位置の最低値
 #define REV_PULS_DIS	(0.85f)	// カメラ距離加算量の補正係数
 #define REV_PLUS_POSV_Y	(1.0f)	// カメラ視点y位置加算量の補正係数
@@ -147,7 +148,7 @@ void CCamera::Uninit(void)
 //============================================================
 void CCamera::Update(void)
 {
-#if 1
+#if 0
 #if 0
 	// カメラの更新 (追従)
 	Follow();
@@ -541,7 +542,7 @@ void CCamera::Bargaining(void)
 
 		// 目標の視点の位置を更新
 		m_aCamera[TYPE_MAIN].destPosV.x = m_aCamera[TYPE_MAIN].destPosR.x + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));
-		m_aCamera[TYPE_MAIN].destPosV.y = 1400.0f;
+		m_aCamera[TYPE_MAIN].destPosV.y = POSV_Y;
 		m_aCamera[TYPE_MAIN].destPosV.z = m_aCamera[TYPE_MAIN].destPosR.z + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));
 
 		// 目標の位置までの差分を計算
