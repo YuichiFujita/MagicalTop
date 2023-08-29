@@ -400,9 +400,7 @@ float collision::LineOuterProduct
 //============================================================
 //	三角柱の当たり判定
 //============================================================
-//	境界線から見て左右どちらにいるかの判定に使用
-//============================================================
-bool collision::TrianglePillar
+bool collision::TriangleOuterPillar
 (
 	D3DXVECTOR3 pos0,	// 三角の各頂点
 	D3DXVECTOR3 pos1,	// 三角の各頂点
@@ -413,6 +411,32 @@ bool collision::TrianglePillar
 	if (collision::LineOuterProduct(pos0, pos1, pos) <= 0.0f
 	&&  collision::LineOuterProduct(pos1, pos2, pos) <= 0.0f
 	&&  collision::LineOuterProduct(pos2, pos0, pos) <= 0.0f)
+	{ // 判定内の場合
+
+		// 真を返す
+		return true;
+	}
+
+	// 偽を返す
+	return false;
+}
+
+//============================================================
+//	四角柱の当たり判定
+//============================================================
+bool collision::BoxOuterPillar
+(
+	D3DXVECTOR3 pos0,	// 四角の各頂点
+	D3DXVECTOR3 pos1,	// 四角の各頂点
+	D3DXVECTOR3 pos2,	// 四角の各頂点
+	D3DXVECTOR3 pos3,	// 四角の各頂点
+	D3DXVECTOR3 pos		// 判定位置
+)
+{
+	if (collision::LineOuterProduct(pos0, pos1, pos) <= 0.0f
+	&&  collision::LineOuterProduct(pos1, pos2, pos) <= 0.0f
+	&&  collision::LineOuterProduct(pos2, pos3, pos) <= 0.0f
+	&&  collision::LineOuterProduct(pos3, pos0, pos) <= 0.0f)
 	{ // 判定内の場合
 
 		// 真を返す

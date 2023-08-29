@@ -39,7 +39,7 @@
 #define HEAL_SAFE_PLUS	(2)		// 回復状態移行カウンターのセーフエリア時の加算量
 #define HEALCNT_AREAMUL	(10)	// セーフエリア外での回復カウンター設定用係数
 #define SUB_TARGLIFE	(-2)	// セーフエリアでマナ回復時のターゲットへのダメージ量
-#define NUM_DEADZONE	(100)	// デッドゾーンの値
+#define SUB_SHOTROT		(0.3f)	// 発射向きの減算量
 
 //************************************************************
 //	親クラス [CMagicManager] のメンバ関数
@@ -113,105 +113,111 @@ void CMagicManager::Uninit(void)
 //============================================================
 void CMagicManager::Update(void)
 {
-	if (m_nCounterMagic > 0)
-	{ // カウンターが 0より大きい場合
+	if (CSceneGame::GetPlayer()->GetState() != CPlayer::STATE_NONE
+	&&  CSceneGame::GetPlayer()->GetState() != CPlayer::STATE_FADEIN
+	&&  CSceneGame::GetPlayer()->GetState() != CPlayer::STATE_FADEOUT)
+	{ // プレイヤーが何もしない状態ではない場合
 
-		// カウンターを減算
-		m_nCounterMagic--;
-	}
+		if (m_nCounterMagic > 0)
+		{ // カウンターが 0より大きい場合
 
-	switch (m_state)
-	{ // 状態ごとの処理
-	case STATE_NORMAL:	// 通常状態
-
-		if (m_nCounterState < HEAL_CNT)
-		{ // カウンターが一定値より小さい場合
-
-			if (CSceneGame::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
-			{ // セーフエリアにいる場合
-
-				// カウンターを加算
-				m_nCounterState += HEAL_SAFE_PLUS;
-			}
-			else
-			{ // セーフエリアにいない場合
-
-				// カウンターを加算
-				m_nCounterState++;
-			}
-		}
-		else
-		{ // カウンターが一定値以上の場合
-
-			// カウンターを初期化
-			m_nCounterState = 0;
-
-			// 状態を変更
-			m_state = STATE_HEAL;	// 回復状態
+			// カウンターを減算
+			m_nCounterMagic--;
 		}
 
-		break;
+		switch (m_state)
+		{ // 状態ごとの処理
+		case STATE_NORMAL:	// 通常状態
 
-	case STATE_ATTACK:	// 攻撃状態
-
-		if (m_nCounterState < NORMAL_CNT)
-		{ // カウンターが一定値より小さい場合
-
-			// カウンターを加算
-			m_nCounterState++;
-		}
-		else
-		{ // カウンターが一定値以上の場合
-
-			// カウンターを初期化
-			m_nCounterState = 0;
-
-			// 状態を変更
-			m_state = STATE_NORMAL;	// 通常状態
-		}
-
-		break;
-
-	case STATE_HEAL:	// 回復状態
-
-		if (CSceneGame::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
-		{ // セーフエリアにいる場合
-
-			if (m_pMana->GetNum() < MAX_MANA)
-			{ // マナが減っている場合
-
-				// マナを回復
-				m_pMana->AddNum(1);
-
-				// ターゲットの体力を減算
-				CSceneGame::GetTarget()->AddLife(SUB_TARGLIFE);
-			}
-		}
-		else
-		{ // セーフエリアにいない場合
-
-			if (m_nCounterHeal < HEALCNT_AREAMUL * CSceneGame::GetStage()->GetAreaPlayer())
+			if (m_nCounterState < HEAL_CNT)
 			{ // カウンターが一定値より小さい場合
 
-				// カウンターを加算
-				m_nCounterHeal++;
+				if (CSceneGame::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
+				{ // セーフエリアにいる場合
+
+					// カウンターを加算
+					m_nCounterState += HEAL_SAFE_PLUS;
+				}
+				else
+				{ // セーフエリアにいない場合
+
+					// カウンターを加算
+					m_nCounterState++;
+				}
 			}
 			else
 			{ // カウンターが一定値以上の場合
 
 				// カウンターを初期化
-				m_nCounterHeal = 0;
+				m_nCounterState = 0;
 
-				// マナを回復
-				m_pMana->AddNum(1);
+				// 状態を変更
+				m_state = STATE_HEAL;	// 回復状態
 			}
+
+			break;
+
+		case STATE_ATTACK:	// 攻撃状態
+
+			if (m_nCounterState < NORMAL_CNT)
+			{ // カウンターが一定値より小さい場合
+
+				// カウンターを加算
+				m_nCounterState++;
+			}
+			else
+			{ // カウンターが一定値以上の場合
+
+				// カウンターを初期化
+				m_nCounterState = 0;
+
+				// 状態を変更
+				m_state = STATE_NORMAL;	// 通常状態
+			}
+
+			break;
+
+		case STATE_HEAL:	// 回復状態
+
+			if (CSceneGame::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
+			{ // セーフエリアにいる場合
+
+				if (m_pMana->GetNum() < MAX_MANA)
+				{ // マナが減っている場合
+
+					// マナを回復
+					m_pMana->AddNum(1);
+
+					// ターゲットの体力を減算
+					CSceneGame::GetTarget()->AddLife(SUB_TARGLIFE);
+				}
+			}
+			else
+			{ // セーフエリアにいない場合
+
+				if (m_nCounterHeal < HEALCNT_AREAMUL * CSceneGame::GetStage()->GetAreaPlayer())
+				{ // カウンターが一定値より小さい場合
+
+					// カウンターを加算
+					m_nCounterHeal++;
+				}
+				else
+				{ // カウンターが一定値以上の場合
+
+					// カウンターを初期化
+					m_nCounterHeal = 0;
+
+					// マナを回復
+					m_pMana->AddNum(1);
+				}
+			}
+
+			break;
+
+		default:	// 例外処理
+			assert(false);
+			break;
 		}
-
-		break;
-
-	default:	// 例外処理
-		assert(false);
-		break;
 	}
 }
 
@@ -220,143 +226,68 @@ void CMagicManager::Update(void)
 //============================================================
 bool CMagicManager::ShotMagic(void)
 {
-	// 変数を宣言
-	CMagic::StatusInfo status = CMagic::GetStatusInfo();	// 魔法ステータス
-	D3DXVECTOR3 rot = CManager::GetCamera()->GetRotation();	// カメラの向き
-	float fRotVec = 0.0f;	// 発射方向
-	bool bShot = false;		// 発射状況
+	if (m_pMana->GetNum() > 0 && m_nCounterMagic <= 0)
+	{ // マナがある且つ、クールタイムが終了した場合
 
-	// ポインタを宣言
-	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
-	CInputPad		*pPad		= CManager::GetPad();		// パッド
-	CPlayer			*pPlayer	= CSceneGame::GetPlayer();	// プレイヤー
+		// ポインタを宣言
+		CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー
 
-	// 発射方向の設定
-	if (pKeyboard->GetPress(DIK_I))
-	{
-		// 発射した状態にする
-		bShot = true;
+		// 変数を宣言
+		CMagic::StatusInfo status = CMagic::GetStatusInfo();			// 魔法ステータス
+		D3DXVECTOR3 posPlayer = pPlayer->GetPosition();					// プレイヤー位置
+		D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 
-		if (pKeyboard->GetPress(DIK_J))
-		{
-			// 発射向きを設定
-			fRotVec = D3DXToRadian(315) + rot.y;
-		}
-		else if (pKeyboard->GetPress(DIK_L))
-		{
-			// 発射向きを設定
-			fRotVec = D3DXToRadian(45) + rot.y;
-		}
-		else
-		{
-			// 発射向きを設定
-			fRotVec = D3DXToRadian(0) + rot.y;
-		}
-	}
-	else if (pKeyboard->GetPress(DIK_K))
-	{
-		// 発射した状態にする
-		bShot = true;
-
-		if (pKeyboard->GetPress(DIK_J))
-		{
-			// 発射向きを設定
-			fRotVec = D3DXToRadian(225) + rot.y;
-		}
-		else if (pKeyboard->GetPress(DIK_L))
-		{
-			// 発射向きを設定
-			fRotVec = D3DXToRadian(135) + rot.y;
-		}
-		else
-		{
-			// 発射向きを設定
-			fRotVec = D3DXToRadian(180) + rot.y;
-		}
-	}
-	else if (pKeyboard->GetPress(DIK_J))
-	{
-		// 発射した状態にする
-		bShot = true;
+		D3DXVECTOR3 magicPos, vecMove;	// 発射位置・移動方向
+		D3DXMATRIX  mtxTrans, mtxWorld;	// 計算用マトリックス
+		float fRotVec = 0.0f;			// 発射方向
 
 		// 発射向きを設定
-		fRotVec = D3DXToRadian(270) + rot.y;
-	}
-	else if (pKeyboard->GetPress(DIK_L))
-	{
-		// 発射した状態にする
-		bShot = true;
+		fRotVec = atan2f(posPlayer.x - posTarget.x, posPlayer.z - posTarget.z) - SUB_SHOTROT;
 
-		// 発射向きを設定
-		fRotVec = D3DXToRadian(90) + rot.y;
-	}
-	else if (pPad->GetPressRStickX() >  NUM_DEADZONE
-		 ||  pPad->GetPressRStickX() < -NUM_DEADZONE
-		 ||  pPad->GetPressRStickY() >  NUM_DEADZONE
-		 ||  pPad->GetPressRStickY() < -NUM_DEADZONE)
-	{
-		// 発射した状態にする
-		bShot = true;
+		// 向きを補正
+		useful::NormalizeRot(fRotVec);
 
-		// 発射向きを設定
-		fRotVec = pPad->GetPressRStickRot() + D3DXToRadian(90) + rot.y;
-	}
+		// ワールドマトリックスの初期化
+		D3DXMatrixIdentity(&mtxWorld);
 
-	// 向きを補正
-	useful::NormalizeRot(fRotVec);
+		// 位置を反映
+		D3DXMatrixTranslation(&mtxTrans, status.shotPos.x, status.shotPos.y, status.shotPos.z);
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
-	if (bShot)
-	{ // 魔法を発射していた場合
+		// マトリックスを掛け合わせる
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &pPlayer->GetMultiModel(status.nShotParts)->GetMtxWorld());
 
-		if (m_pMana->GetNum() > 0 && m_nCounterMagic <= 0)
-		{ // マナがある且つ、クールタイムが終了した場合
+		// マトリックスから発射位置を求める
+		magicPos = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
 
-			// 変数を宣言
-			D3DXVECTOR3 magicPos, vecMove;	// 発射位置・移動方向
-			D3DXMATRIX  mtxTrans, mtxWorld;	// 計算用マトリックス
+		// 向きを正規化
+		useful::NormalizeRot(fRotVec);
 
-			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&mtxWorld);
+		// 移動方向を設定
+		vecMove = D3DXVECTOR3(sinf(fRotVec), 0.0f, cosf(fRotVec));
 
-			// 位置を反映
-			D3DXMatrixTranslation(&mtxTrans, status.shotPos.x, status.shotPos.y, status.shotPos.z);
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+		// 魔法オブジェクトの生成
+		CMagic::Create
+		( // 引数
+			magicPos,	// 位置
+			VEC3_ZERO,	// 向き
+			vecMove		// 移動方向
+		);
 
-			// マトリックスを掛け合わせる
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &pPlayer->GetMultiModel(status.nShotParts)->GetMtxWorld());
+		// カウンターを設定
+		m_nCounterMagic = status.nCoolTime;
 
-			// マトリックスから発射位置を求める
-			magicPos = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
+		// マナを消費
+		m_pMana->AddNum(-1);
 
-			// 向きを正規化
-			useful::NormalizeRot(fRotVec);
+		// カウンターを初期化
+		m_nCounterState = 0;
 
-			// 移動方向を設定
-			vecMove = D3DXVECTOR3(sinf(fRotVec), 0.0f, cosf(fRotVec));
+		// 状態を設定
+		m_state = STATE_ATTACK;	// 攻撃状態
 
-			// 魔法オブジェクトの生成
-			CMagic::Create
-			( // 引数
-				magicPos,	// 位置
-				VEC3_ZERO,	// 向き
-				vecMove		// 移動方向
-			);
-
-			// カウンターを設定
-			m_nCounterMagic = status.nCoolTime;
-
-			// マナを消費
-			m_pMana->AddNum(-1);
-
-			// カウンターを初期化
-			m_nCounterState = 0;
-
-			// 状態を設定
-			m_state = STATE_ATTACK;	// 攻撃状態
-
-			// 発射した状態を返す
-			return true;
-		}
+		// 発射した状態を返す
+		return true;
 	}
 
 	// 発射していない状態を返す

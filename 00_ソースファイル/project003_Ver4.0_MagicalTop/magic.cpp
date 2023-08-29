@@ -106,7 +106,7 @@ void CMagic::Uninit(void)
 void CMagic::Update(void)
 {
 	// 変数を宣言
-	D3DXVECTOR3 vecTarg;
+	D3DXVECTOR3 vecTarg;	// ターゲット位置
 
 	switch (m_state)
 	{ // 状態ごとの処理
@@ -117,6 +117,14 @@ void CMagic::Update(void)
 
 		// 位置に風速を加算
 		m_pos += CSceneGame::GetStage()->GetVecWind();
+
+		if (CSceneGame::GetField()->IsPositionRange(m_pos))
+		{ // 地面の範囲内の場合
+
+			// 縦座標を地形に添わせる
+			m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
+			m_pos.y += m_pBubble->GetMaxRadius();
+		}
 
 		// バブルレベルを加算
 		m_pBubble->AddLevel(1);
@@ -149,6 +157,14 @@ void CMagic::Update(void)
 		// 移動量を加算
 		m_pos += m_movePos;
 
+		if (CSceneGame::GetField()->IsPositionRange(m_pos))
+		{ // 地面の範囲内の場合
+
+			// 縦座標を地形に添わせる
+			m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
+			m_pos.y += m_pBubble->GetRadius();
+		}
+
 		break;
 
 	case STATE_DELETE:	// 消失状態
@@ -169,6 +185,14 @@ void CMagic::Update(void)
 
 		// 移動量を加算
 		m_pos += m_movePos;
+
+		if (CSceneGame::GetField()->IsPositionRange(m_pos))
+		{ // 地面の範囲内の場合
+
+			// 縦座標を地形に添わせる
+			m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
+			m_pos.y += m_pBubble->GetRadius();
+		}
 
 		// バブルレベルを減算
 		m_pBubble->AddLevel(-1);
@@ -191,9 +215,6 @@ void CMagic::Update(void)
 			m_state = STATE_DELETE;	// 消失状態
 		}
 	}
-
-	// 縦位置を補正
-	CSceneGame::GetField()->LandPosition(m_pos, VEC3_ZERO);
 
 	// バブルの更新
 	m_pBubble->Update();

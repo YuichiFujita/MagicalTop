@@ -993,6 +993,50 @@ D3DXVECTOR3 CObjectMeshField::GetMeshVertexPosition(const int nID)
 }
 
 //============================================================
+//	メッシュの範囲内取得処理 (回転考慮)
+//============================================================
+bool CObjectMeshField::IsPositionRange(const D3DXVECTOR3&rPos)
+{
+	// 変数配列を宣言
+	D3DXVECTOR3 aVtxPos[4];		// ポリゴンの頂点座標
+	D3DXVECTOR3 aVtxMtxPos[4];	// ポリゴンの位置・向き反映を行った頂点座標
+
+	// メッシュの頂点位置を設定
+	aVtxPos[0] = D3DXVECTOR3(m_meshField.pos.x - m_meshField.size.x * 0.5f, 0.0f, m_meshField.pos.z + m_meshField.size.y * 0.5f);	// 左上
+	aVtxPos[1] = D3DXVECTOR3(m_meshField.pos.x - m_meshField.size.x * 0.5f, 0.0f, m_meshField.pos.z - m_meshField.size.y * 0.5f);	// 左下
+	aVtxPos[2] = D3DXVECTOR3(m_meshField.pos.x + m_meshField.size.x * 0.5f, 0.0f, m_meshField.pos.z - m_meshField.size.y * 0.5f);	// 右下
+	aVtxPos[3] = D3DXVECTOR3(m_meshField.pos.x + m_meshField.size.x * 0.5f, 0.0f, m_meshField.pos.z + m_meshField.size.y * 0.5f);	// 右上
+
+	for (int nCntVtx = 0; nCntVtx < 4; nCntVtx++)
+	{ // 三角形ポリゴンの頂点数分繰り返す
+
+		// 変数を宣言
+		D3DXMATRIX mtxWorld, mtxRot, mtxTrans;	// 計算用マトリックス
+
+		// ワールドマトリックスの初期化
+		D3DXMatrixIdentity(&mtxWorld);
+
+		// 頂点位置を反映
+		D3DXMatrixTranslation(&mtxTrans, aVtxPos[nCntVtx].x, aVtxPos[nCntVtx].y, aVtxPos[nCntVtx].z);
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+
+		// ポリゴン向きを反映
+		D3DXMatrixRotationYawPitchRoll(&mtxRot, m_meshField.rot.y, m_meshField.rot.x, m_meshField.rot.z);
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxRot);
+
+		// ポリゴン位置を反映
+		D3DXMatrixTranslation(&mtxTrans, m_meshField.pos.x, m_meshField.pos.y, m_meshField.pos.z);
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+
+		// 計算したマトリックスから座標を設定
+		aVtxMtxPos[nCntVtx] = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
+	}
+
+	// 判定を返す
+	return collision::BoxOuterPillar(aVtxMtxPos[0], aVtxMtxPos[1], aVtxMtxPos[2], aVtxMtxPos[3], rPos);
+}
+
+//============================================================
 //	メッシュの着地位置の取得処理 (回転非考慮)
 //============================================================
 float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3& rPos)
@@ -1033,7 +1077,7 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3& rPos)
 				aVtxPos[2] = m_meshField.pos + GetMeshVertexPosition(aVtxNum[2]);
 				aVtxPos[3] = m_meshField.pos + GetMeshVertexPosition(aVtxNum[3]);
 
-				if (collision::TrianglePillar(aVtxPos[0], aVtxPos[2], aVtxPos[1], rPos))
+				if (collision::TriangleOuterPillar(aVtxPos[0], aVtxPos[2], aVtxPos[1], rPos))
 				{ // ポリゴンの範囲内にいる場合
 
 					// 法線を求める
@@ -1047,7 +1091,7 @@ float CObjectMeshField::GetPositionHeight(const D3DXVECTOR3& rPos)
 					}
 				}
 
-				if (collision::TrianglePillar(aVtxPos[3], aVtxPos[1], aVtxPos[2], rPos))
+				if (collision::TriangleOuterPillar(aVtxPos[3], aVtxPos[1], aVtxPos[2], rPos))
 				{ // ポリゴンの範囲内にいる場合
 
 					// 法線を求める
@@ -1137,7 +1181,7 @@ float CObjectMeshField::GetPositionRotateHeight(const D3DXVECTOR3&rPos)
 						aVtxMtxPos[nCntVtx] = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
 					}
 
-					if (collision::TrianglePillar(aVtxMtxPos[0], aVtxMtxPos[1], aVtxMtxPos[2], rPos))
+					if (collision::TriangleOuterPillar(aVtxMtxPos[0], aVtxMtxPos[1], aVtxMtxPos[2], rPos))
 					{ // ポリゴンの範囲内にいる場合
 
 						// 法線を求める

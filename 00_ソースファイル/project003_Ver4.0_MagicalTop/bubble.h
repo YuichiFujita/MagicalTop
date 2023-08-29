@@ -58,8 +58,9 @@ public:
 	// メンバ関数
 	void AddLevel(const int nAdd);	// レベル加算
 	void SetLevel(const int nNum);	// レベル設定
-	int  GetLevel(void) const;		// レベル取得
-	int  GetMaxLevel(void) const;	// 最大レベル取得
+	int GetLevel(void) const;		// レベル取得
+	float GetMaxRadius(void) const;	// 最大半径取得
+	int GetMaxLevel(void) const;	// 最大レベル取得
 	void SetPositionUp(const float fUp);	// Y位置加算量設定
 	float GetPositionUp(void) const;		// Y位置加算量取得
 

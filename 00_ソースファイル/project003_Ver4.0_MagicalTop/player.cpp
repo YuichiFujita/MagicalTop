@@ -877,9 +877,6 @@ CPlayer::MOTION CPlayer::Move(void)
 	if (pKeyboard->GetPress(DIK_W))
 	{ // 奥移動の操作が行われた場合
 
-		// 移動モーションを設定
-		currentMotion = MOTION_MOVE;
-
 		if (pKeyboard->GetPress(DIK_A))
 		{ // 左移動の操作も行われた場合 (左奥移動)
 
@@ -913,9 +910,6 @@ CPlayer::MOTION CPlayer::Move(void)
 	}
 	else if (pKeyboard->GetPress(DIK_S))
 	{ // 手前移動の操作が行われた場合
-
-		// 移動モーションを設定
-		currentMotion = MOTION_MOVE;
 
 		if (pKeyboard->GetPress(DIK_A))
 		{ // 左移動の操作も行われた場合 (左手前移動)
@@ -951,9 +945,6 @@ CPlayer::MOTION CPlayer::Move(void)
 	else if (pKeyboard->GetPress(DIK_A))
 	{ // 左移動の操作が行われた場合
 
-		// 移動モーションを設定
-		currentMotion = MOTION_MOVE;
-
 		// 移動量を更新
 		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * 2.0f;
 		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * 2.0f;
@@ -963,9 +954,6 @@ CPlayer::MOTION CPlayer::Move(void)
 	}
 	else if (pKeyboard->GetPress(DIK_D))
 	{ // 右移動の操作が行われた場合
-
-		// 移動モーションを設定
-		currentMotion = MOTION_MOVE;
 
 		// 移動量を更新
 		m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * 2.0f;
@@ -992,9 +980,10 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion, D3DXVECTOR3& rPos)
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
-	// 魔法の発射
-	if (m_pMagic->ShotMagic())
-	{ // 発射できた場合
+	if (pKeyboard->GetPress(DIK_SPACE) || pPad->GetPress(CInputPad::KEY_R1))
+	{
+		// 魔法の発射
+		m_pMagic->ShotMagic();
 
 		// アクションモーションを設定
 		currentMotion = MOTION_ACTION;

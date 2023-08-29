@@ -128,7 +128,8 @@ void CBubble::Draw(void)
 float CBubble::GetRadius(void) const
 {
 	// 変数を宣言
-	D3DXVECTOR3 size = GetScaling();	// 大きさ
+	D3DXVECTOR3 scale = GetScaling();	// 拡大率
+	D3DXVECTOR3 size = scale * GetModelData().fRadius;	// 大きさ
 
 	// バブルの大きさの平均サイズを返す
 	return (size.x + size.y + size.z) / 3;
@@ -230,6 +231,18 @@ int CBubble::GetLevel(void) const
 {
 	// レベルを返す
 	return m_nLevel;
+}
+
+//============================================================
+//	最大半径取得処理
+//============================================================
+float CBubble::GetMaxRadius(void) const
+{
+	// 変数を宣言
+	D3DXVECTOR3 size = m_maxScale * GetModelData().fRadius;	// 大きさ
+
+	// バブルの最大の大きさの平均サイズを返す
+	return (size.x + size.y + size.z) / 3;
 }
 
 //============================================================

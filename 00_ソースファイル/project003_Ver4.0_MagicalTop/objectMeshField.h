@@ -86,6 +86,7 @@ public:
 	int GetNumVertex(void) const;				// 頂点数取得
 	D3DXVECTOR3 GetGapPosition(const int nID);				// 座標のずれ取得
 	D3DXVECTOR3 GetMeshVertexPosition(const int nID);		// メッシュの頂点位置取得
+	bool IsPositionRange(const D3DXVECTOR3&rPos);			// メッシュの範囲内取得 (回転考慮)
 	float GetPositionHeight(const D3DXVECTOR3&rPos);		// メッシュの着地位置取得 (回転非考慮)
 	float GetPositionRotateHeight(const D3DXVECTOR3&rPos);	// メッシュの着地位置取得 (回転考慮)
 

@@ -96,11 +96,19 @@ namespace collision
 		D3DXVECTOR3 posRight,	// 境界線右座標
 		D3DXVECTOR3 pos			// 判定位置
 	);
-	bool TrianglePillar	// 三角柱の当たり判定
+	bool TriangleOuterPillar	// 三角柱の当たり判定
 	( // 引数
 		D3DXVECTOR3 pos0,	// 三角の各頂点
 		D3DXVECTOR3 pos1,	// 三角の各頂点
 		D3DXVECTOR3 pos2,	// 三角の各頂点
+		D3DXVECTOR3 pos		// 判定位置
+	);
+	bool BoxOuterPillar		// 四角柱の当たり判定
+	( // 引数
+		D3DXVECTOR3 pos0,	// 四角の各頂点
+		D3DXVECTOR3 pos1,	// 四角の各頂点
+		D3DXVECTOR3 pos2,	// 四角の各頂点
+		D3DXVECTOR3 pos3,	// 四角の各頂点
 		D3DXVECTOR3 pos		// 判定位置
 	);
 }
