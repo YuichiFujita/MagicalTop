@@ -119,7 +119,7 @@ void CMultiModel::Draw(void)
 	{ // 親が存在する場合
 
 		// 親のマトリックスを設定
-		mtxParent = *m_pParent->GetMtxWorld();
+		mtxParent = m_pParent->m_mtxWorld;
 	}
 
 	// ワールドマトリックスと親マトリックスを掛け合わせる

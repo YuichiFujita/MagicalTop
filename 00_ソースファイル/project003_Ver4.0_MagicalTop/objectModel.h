@@ -52,6 +52,7 @@ public:
 	void SetRotation(const D3DXVECTOR3& rRot);		// 向き設定
 	void SetScaling(const D3DXVECTOR3& rScale);		// 大きさ設定
 	void SetModelData(const CModel::Model& rModel);	// モデル情報設定
+	D3DXMATRIX *GetPtrMtxWorld(void);				// マトリックスポインタ取得
 	D3DXMATRIX GetMtxWorld(void) const;				// マトリックス取得
 	D3DXVECTOR3 GetPosition(void) const;			// 位置取得
 	D3DXVECTOR3 GetRotation(void) const;			// 向き取得

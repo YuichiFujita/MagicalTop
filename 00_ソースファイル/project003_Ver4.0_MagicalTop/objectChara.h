@@ -42,6 +42,7 @@ public:
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
 	void Draw(void);	// 描画
+	D3DXMATRIX *GetPtrMtxWorld(void);	// マトリックスポインタ取得
 
 	// メンバ関数
 	void SetPartsInfo	// パーツ情報設定

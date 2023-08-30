@@ -98,6 +98,7 @@ public:
 	virtual void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
 	virtual void SetEnableDraw(const bool bDraw);		// 描画状況設定
 	virtual void SetPriority(const int nPriority);		// 優先順位設定
+	virtual D3DXMATRIX *GetPtrMtxWorld(void);			// マトリックスポインタ取得
 	virtual D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
 	virtual D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	virtual D3DXVECTOR3 GetRotation(void) const;		// 向き取得
