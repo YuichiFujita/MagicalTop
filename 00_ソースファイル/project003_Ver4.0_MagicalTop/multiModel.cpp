@@ -119,7 +119,7 @@ void CMultiModel::Draw(void)
 	{ // 親が存在する場合
 
 		// 親のマトリックスを設定
-		mtxParent = m_pParent->GetMtxWorld();
+		mtxParent = *m_pParent->GetMtxWorld();
 	}
 
 	// ワールドマトリックスと親マトリックスを掛け合わせる
@@ -381,10 +381,10 @@ HRESULT CMultiModel::SetMaterial(const LPD3DXBUFFER pBuffMat, const int nNumMat)
 //============================================================
 //	マトリックス取得処理
 //============================================================
-D3DXMATRIX CMultiModel::GetMtxWorld(void) const
+D3DXMATRIX *CMultiModel::GetMtxWorld(void)
 {
-	// ワールドマトリックスを返す
-	return m_mtxWorld;
+	// ワールドマトリックスのポインタを返す
+	return &m_mtxWorld;
 }
 
 //============================================================

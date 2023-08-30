@@ -16,6 +16,7 @@
 #include "camera.h"
 #include "collision.h"
 
+#include "multiModel.h"
 #include "magicManager.h"
 #include "expManager.h"
 #include "levelupManager.h"
@@ -26,6 +27,8 @@
 #include "stage.h"
 #include "field.h"
 #include "particle3D.h"
+
+#include "objectOrbit.h"
 
 //************************************************************
 //	マクロ定義
@@ -90,6 +93,7 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 	m_pLevelup		= NULL;				// 強化マネージャーの情報
 	m_pLife			= NULL;				// 体力の情報
 	m_pShadow		= NULL;				// 影の情報
+	m_pOrbit		= NULL;				// 軌跡の情報
 	m_oldPos		= VEC3_ZERO;		// 過去位置
 	m_move			= VEC3_ZERO;		// 移動量
 	m_destRot		= VEC3_ZERO;		// 目標向き
@@ -120,6 +124,7 @@ HRESULT CPlayer::Init(void)
 	m_pLevelup		= NULL;				// 強化マネージャーの情報
 	m_pLife			= NULL;				// 体力の情報
 	m_pShadow		= NULL;				// 影の情報
+	m_pOrbit		= NULL;				// 軌跡の情報
 	m_oldPos		= VEC3_ZERO;		// 過去位置
 	m_move			= VEC3_ZERO;		// 移動量
 	m_destRot		= VEC3_ZERO;		// 目標向き
@@ -204,6 +209,19 @@ HRESULT CPlayer::Init(void)
 	// モデル情報の設定
 	SetModelInfo();
 
+	// 軌跡の生成
+	m_pOrbit = CObjectOrbit::Create(GetMultiModel(MODEL_ROD)->GetMtxWorld(), XCOL_WHITE, CObjectOrbit::OFFSET_ROD, CObjectOrbit::TYPE_NORMAL);
+	if (UNUSED(m_pOrbit))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// TODO：objectの仮想関数ポインタにする
+	//		 頂点数伸ばせるようにする
+
 	// 透明度を設定
 	SetAlpha(0.0f);
 
@@ -248,6 +266,9 @@ void CPlayer::Uninit(void)
 
 	// 影を破棄
 	m_pShadow->Uninit();
+
+	// 軌跡を破棄
+	m_pOrbit->Uninit();
 
 	// オブジェクトキャラクターの終了
 	CObjectChara::Uninit();
@@ -335,6 +356,9 @@ void CPlayer::Update(void)
 	// 影の更新
 	m_pShadow->Update();
 
+	// 軌跡の更新
+	m_pOrbit->Update();
+
 	// モーション・オブジェクトキャラクターの更新
 	Motion(nCurrentMotion);
 }
@@ -346,6 +370,9 @@ void CPlayer::Draw(void)
 {
 	// オブジェクトキャラクターの描画
 	CObjectChara::Draw();
+
+	// 軌跡の描画
+	m_pOrbit->Draw();
 }
 
 //============================================================
@@ -476,6 +503,9 @@ void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 
 	// 引数の位置を設定
 	SetPosition(rPos);
+
+	// 軌跡の初期化を行う状態にする
+	m_pOrbit->SetEnableInit(false);
 
 	// 表示する設定にする
 	SetDisp(true);

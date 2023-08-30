@@ -715,7 +715,7 @@ void CEnemy::Attack(const D3DXVECTOR3& rLookPos, const D3DXVECTOR3& rThisPos, co
 		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
 		// マトリックスを掛け合わせる
-		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &GetMultiModel(m_status.nBullParts)->GetMtxWorld());
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, GetMultiModel(m_status.nBullParts)->GetMtxWorld());
 
 		// マトリックスから位置を求める
 		posBull = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);

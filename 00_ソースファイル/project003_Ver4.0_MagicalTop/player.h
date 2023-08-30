@@ -30,6 +30,7 @@ class CExpManager;		// 経験値マネージャークラス
 class CLevelupManager;	// 強化マネージャークラス
 class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
 class CShadow;			// 影クラス
+class CObjectOrbit;		// オブジェクト軌跡クラス
 
 //************************************************************
 //	クラス定義
@@ -41,21 +42,24 @@ public:
 	// 種類列挙
 	typedef enum
 	{
-		MODEL_BODY = 0,	// 体
+		MODEL_WAIST,	// 腰
+		MODEL_BODY,		// 体
+		MODEL_CLOAK,	// マント
 		MODEL_HEAD,		// 頭
-		MODEL_SLEEVE_L,	// 左腕
-		MODEL_SLEEVE_R,	// 右腕
-		MODEL_WRIST_L,	// 左手首
-		MODEL_WRIST_R,	// 右手首
-		MODEL_HAND_L,	// 左手
-		MODEL_HAND_R,	// 右手
-		MODEL_PANTS_L,	// 左足
-		MODEL_PANTS_R,	// 右足
-		MODEL_LEG_L,	// 左腿
-		MODEL_LEG_R,	// 右腿
-		MODEL_SHOES_L,	// 左靴
-		MODEL_SHOES_R,	// 右靴
-		MODEL_KNIFE,	// ナイフ
+		MODEL_HAT,		// 帽子
+		MODEL_ARMUL,	// 左上腕
+		MODEL_ARMUR,	// 右上腕
+		MODEL_ARMDL,	// 左下腕
+		MODEL_ARMDR,	// 右下腕
+		MODEL_HANDL,	// 左手
+		MODEL_HANDR,	// 右手
+		MODEL_LEGUL,	// 左太もも
+		MODEL_LEGUR,	// 右太もも
+		MODEL_LEGDL,	// 左脛
+		MODEL_LEGDR,	// 右脛
+		MODEL_FOOTL,	// 左足
+		MODEL_FOOTR,	// 右足
+		MODEL_ROD,		// 杖
 		MODEL_MAX		// この列挙型の総数
 	}MODEL;
 
@@ -149,6 +153,7 @@ private:
 	CLevelupManager	*m_pLevelup;	// 強化マネージャーの情報
 	CObjectGauge2D	*m_pLife;		// 体力の情報
 	CShadow			*m_pShadow;		// 影の情報
+	CObjectOrbit	*m_pOrbit;		// 軌跡の情報
 
 	D3DXVECTOR3	m_oldPos;	// 過去位置
 	D3DXVECTOR3	m_move;		// 移動量

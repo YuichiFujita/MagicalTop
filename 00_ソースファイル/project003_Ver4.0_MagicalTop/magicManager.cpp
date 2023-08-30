@@ -255,7 +255,7 @@ bool CMagicManager::ShotMagic(void)
 		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
 		// マトリックスを掛け合わせる
-		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &pPlayer->GetMultiModel(status.nShotParts)->GetMtxWorld());
+		D3DXMatrixMultiply(&mtxWorld, &mtxWorld, pPlayer->GetMultiModel(status.nShotParts)->GetMtxWorld());
 
 		// マトリックスから発射位置を求める
 		magicPos = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
