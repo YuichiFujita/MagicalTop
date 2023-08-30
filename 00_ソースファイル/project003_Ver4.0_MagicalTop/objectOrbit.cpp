@@ -78,8 +78,12 @@ HRESULT CObjectOrbit::Init(void)
 
 	// 軌跡の情報を初期化
 	m_orbit.pMtxParent = NULL;	// 親のマトリックス
-	m_orbit.bInit = false;		// 初期化状況
+	m_orbit.pPosPoint = NULL;	// 各頂点座標
+	m_orbit.pColPoint = NULL;	// 各頂点カラー
+	m_orbit.nPart = 1;			// 分割数
 	m_orbit.nTexPart = 1;		// テクスチャ分割数
+	m_orbit.bAlpha = false;		// 透明化状況
+	m_orbit.bInit = false;		// 初期化状況
 
 	for (int nCntOff = 0; nCntOff < MAX_OFFSET; nCntOff++)
 	{ // オフセットの数分繰り返す
@@ -88,23 +92,13 @@ HRESULT CObjectOrbit::Init(void)
 		m_orbit.aCol[nCntOff] = XCOL_WHITE;		// 両端の基準色
 	}
 
-	for (int nCntVtx = 0; nCntVtx < MAX_VERTEX; nCntVtx++)
-	{ // 維持する頂点の最大数分繰り返す
-
-		m_orbit.aPosPoint[nCntVtx] = VEC3_ZERO;		// 計算後の各頂点座標
-		m_orbit.aColPoint[nCntVtx] = XCOL_WHITE;	// 各頂点カラー
-	}
-
 	// 長さを設定
-	if (FAILED(SetLength()))
+	if (FAILED(SetLength(1)))
 	{ // 長さの設定に失敗した場合
 
 		// 失敗を返す
 		return E_FAIL;
 	}
-
-	// 自動描画をしない設定にする
-	SetEnableDraw(false);
 
 	// 成功を返す
 	return S_OK;
@@ -115,6 +109,24 @@ HRESULT CObjectOrbit::Init(void)
 //============================================================
 void CObjectOrbit::Uninit(void)
 {
+	// 各頂点座標の破棄
+	if (USED(m_orbit.pPosPoint))
+	{ // 各頂点座標が使用中の場合
+
+		// メモリ開放
+		delete[] m_orbit.pPosPoint;
+		m_orbit.pPosPoint = NULL;
+	}
+
+	// 各頂点カラーの破棄
+	if (USED(m_orbit.pColPoint))
+	{ // 各頂点カラーが使用中の場合
+
+		// メモリ開放
+		delete[] m_orbit.pColPoint;
+		m_orbit.pColPoint = NULL;
+	}
+
 	// 頂点バッファの破棄
 	if (USED(m_pVtxBuff))
 	{ // 頂点バッファが使用中の場合
@@ -182,12 +194,12 @@ void CObjectOrbit::Draw(void)
 		//----------------------------------------------------
 		//	頂点座標と頂点カラーの情報をずらす
 		//----------------------------------------------------
-		for (int nCntVtx = MAX_VERTEX - 1; nCntVtx >= MAX_OFFSET; nCntVtx--)
+		for (int nCntVtx = m_nNumVtx - 1; nCntVtx >= MAX_OFFSET; nCntVtx--)
 		{ // 維持する頂点の最大数分繰り返す (オフセット分は含まない)
 
 			// 頂点情報をずらす
-			m_orbit.aPosPoint[nCntVtx] = m_orbit.aPosPoint[nCntVtx - MAX_OFFSET];
-			m_orbit.aColPoint[nCntVtx] = m_orbit.aColPoint[nCntVtx - MAX_OFFSET];
+			m_orbit.pPosPoint[nCntVtx] = m_orbit.pPosPoint[nCntVtx - MAX_OFFSET];
+			m_orbit.pColPoint[nCntVtx] = m_orbit.pColPoint[nCntVtx - MAX_OFFSET];
 		}
 
 		//----------------------------------------------------
@@ -197,7 +209,7 @@ void CObjectOrbit::Draw(void)
 		{ // オフセットの数分繰り返す
 
 			// 頂点座標の設定
-			m_orbit.aPosPoint[nCntOff] = D3DXVECTOR3
+			m_orbit.pPosPoint[nCntOff] = D3DXVECTOR3
 			( // 引数
 				m_orbit.aMtxWorldPoint[nCntOff]._41,	// x
 				m_orbit.aMtxWorldPoint[nCntOff]._42,	// y
@@ -205,7 +217,7 @@ void CObjectOrbit::Draw(void)
 			);
 
 			// 頂点カラーの設定
-			m_orbit.aColPoint[nCntOff] = m_orbit.aCol[nCntOff];
+			m_orbit.pColPoint[nCntOff] = m_orbit.aCol[nCntOff];
 		}
 	}
 
@@ -215,11 +227,11 @@ void CObjectOrbit::Draw(void)
 	if (m_orbit.bInit == false)
 	{ // 初期化済みではない場合
 
-		for (int nCntVtx = 0; nCntVtx < MAX_VERTEX; nCntVtx++)
+		for (int nCntVtx = 0; nCntVtx < m_nNumVtx; nCntVtx++)
 		{ // 維持する頂点の最大数分繰り返す
 
 			// 頂点座標の設定
-			m_orbit.aPosPoint[nCntVtx] = D3DXVECTOR3
+			m_orbit.pPosPoint[nCntVtx] = D3DXVECTOR3
 			( // 引数
 				m_orbit.aMtxWorldPoint[nCntVtx % MAX_OFFSET]._41,	// x
 				m_orbit.aMtxWorldPoint[nCntVtx % MAX_OFFSET]._42,	// y
@@ -227,7 +239,7 @@ void CObjectOrbit::Draw(void)
 			);
 
 			// 頂点カラーの設定
-			m_orbit.aColPoint[nCntVtx] = m_orbit.aCol[nCntVtx % MAX_OFFSET];
+			m_orbit.pColPoint[nCntVtx] = m_orbit.aCol[nCntVtx % MAX_OFFSET];
 		}
 
 		// 初期化済みにする
@@ -253,7 +265,7 @@ void CObjectOrbit::Draw(void)
 	pDevice->SetTexture(0, pTexture->GetTexture(m_nTextureID));
 
 	// ポリゴンの描画
-	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, MAX_VERTEX - 2);
+	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, m_nNumVtx - 2);
 
 	//--------------------------------------------------------
 	//	レンダーステートを元に戻す
@@ -274,7 +286,9 @@ CObjectOrbit *CObjectOrbit::Create
 	const D3DXCOLOR& rCol,	// 色
 	const OFFSET offset,	// オフセット
 	const TYPE type,		// 種類
-	const int nTexPart		// テクスチャ分割数
+	const int nPart,		// 分割数
+	const int nTexPart,		// テクスチャ分割数
+	const bool bAlpha		// 透明化状況
 )
 {
 	// 変数を宣言
@@ -325,8 +339,11 @@ CObjectOrbit *CObjectOrbit::Create
 		// テクスチャ分割数を設定
 		pObjectOrbit->SetTexPart(nTexPart);
 
+		// 透明化状況を設定
+		pObjectOrbit->SetEnableAlpha(bAlpha);
+
 		// 長さを設定
-		if (FAILED(pObjectOrbit->SetLength()))
+		if (FAILED(pObjectOrbit->SetLength(nPart)))
 		{ // 長さの設定に失敗した場合
 
 			// メモリ開放
@@ -400,6 +417,15 @@ void CObjectOrbit::SetTexPart(const int nTexPart)
 }
 
 //============================================================
+//	透明化状況の設定処理
+//============================================================
+void CObjectOrbit::SetEnableAlpha(const bool bAlpha)
+{
+	// 引数の透明化状況を設定
+	m_orbit.bAlpha = bAlpha;
+}
+
+//============================================================
 //	初期化状況の設定処理
 //============================================================
 void CObjectOrbit::SetEnableInit(const bool bInit)
@@ -411,14 +437,75 @@ void CObjectOrbit::SetEnableInit(const bool bInit)
 //============================================================
 //	長さの設定処理
 //============================================================
-HRESULT CObjectOrbit::SetLength(void)
+HRESULT CObjectOrbit::SetLength(const int nPart)
 {
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
 	// 必要頂点数を求める
-	m_nNumVtx = MAX_VERTEX;
+	m_nNumVtx = nPart * MAX_OFFSET;
 
+	//--------------------------------------------------------
+	//	各頂点座標の破棄・生成
+	//--------------------------------------------------------
+	// 各頂点座標の破棄
+	if (USED(m_orbit.pPosPoint))
+	{ // 各頂点座標が使用中の場合
+
+		// メモリ開放
+		delete[] m_orbit.pPosPoint;
+		m_orbit.pPosPoint = NULL;
+	}
+
+	// 各頂点座標の情報を設定
+	if (UNUSED(m_orbit.pPosPoint))
+	{ // 非使用中の場合
+
+		// 各頂点座標のメモリ確保
+		m_orbit.pPosPoint = new D3DXVECTOR3[m_nNumVtx];
+
+		if (USED(m_orbit.pPosPoint))
+		{ // 確保に成功した場合
+
+			// メモリクリア
+			memset(m_orbit.pPosPoint, 0, sizeof(D3DXVECTOR3) * m_nNumVtx);
+		}
+		else { assert(false); return E_FAIL; }	// 確保失敗
+	}
+	else { assert(false); return E_FAIL; }	// 使用中
+
+	//--------------------------------------------------------
+	//	各頂点カラーの破棄・生成
+	//--------------------------------------------------------
+	// 各頂点カラーの破棄
+	if (USED(m_orbit.pColPoint))
+	{ // 各頂点カラーが使用中の場合
+
+		// メモリ開放
+		delete[] m_orbit.pColPoint;
+		m_orbit.pColPoint = NULL;
+	}
+
+	// 各頂点カラーの情報を設定
+	if (UNUSED(m_orbit.pColPoint))
+	{ // 非使用中の場合
+
+		// 各頂点カラーのメモリ確保
+		m_orbit.pColPoint = new D3DXCOLOR[m_nNumVtx];
+
+		if (USED(m_orbit.pColPoint))
+		{ // 確保に成功した場合
+
+			// メモリクリア
+			memset(m_orbit.pColPoint, 0, sizeof(D3DXCOLOR) * m_nNumVtx);
+		}
+		else { assert(false); return E_FAIL; }	// 確保失敗
+	}
+	else { assert(false); return E_FAIL; }	// 使用中
+
+	//--------------------------------------------------------
+	//	頂点バッファの破棄・生成
+	//--------------------------------------------------------
 	// 頂点バッファの破棄
 	if (USED(m_pVtxBuff))
 	{ // 頂点バッファが使用中の場合
@@ -472,23 +559,32 @@ void CObjectOrbit::SetVtx(void)
 		// 頂点バッファをロックし、頂点情報へのポインタを取得
 		m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
-		for (int nCntVtx = 0; nCntVtx < MAX_VERTEX; nCntVtx++)
+		for (int nCntVtx = 0; nCntVtx < m_nNumVtx; nCntVtx++)
 		{ // 維持する頂点の最大数分繰り返す
 
 			// 頂点座標の設定
-			pVtx[0].pos = m_orbit.aPosPoint[nCntVtx];
+			pVtx[0].pos = m_orbit.pPosPoint[nCntVtx];
 
 			// 法線ベクトルの設定
 			pVtx[0].nor = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
 			// 頂点カラーの設定
-			pVtx[0].col = D3DXCOLOR
-			( // 引数
-				m_orbit.aColPoint[nCntVtx].r,	// r
-				m_orbit.aColPoint[nCntVtx].g,	// g
-				m_orbit.aColPoint[nCntVtx].b,	// b
-				1.0f - (1.0f / (MAX_VERTEX * 0.5f)) * (nCntVtx / 2)	// a
-			);
+			if (m_orbit.bAlpha)
+			{ // 透明にしていく場合
+
+				pVtx[0].col = D3DXCOLOR
+				( // 引数
+					m_orbit.pColPoint[nCntVtx].r,	// r
+					m_orbit.pColPoint[nCntVtx].g,	// g
+					m_orbit.pColPoint[nCntVtx].b,	// b
+					m_orbit.pColPoint[nCntVtx].a - (m_orbit.pColPoint[nCntVtx].a / (m_nNumVtx * 0.5f)) * (nCntVtx / 2)	// a
+				);
+			}
+			else
+			{ // 透明度を変えない場合
+
+				pVtx[0].col = m_orbit.pColPoint[nCntVtx];
+			}
 
 			// テクスチャ座標の設定
 			pVtx[0].tex = D3DXVECTOR2

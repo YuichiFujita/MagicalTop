@@ -19,8 +19,9 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define MAX_OFFSET	(2)		// オフセットの数
-#define MAX_VERTEX	(40)	// 維持する頂点の最大数
+#define MAX_OFFSET		(2)		// オフセットの数
+#define DEFAULT_PART	(10)	// デフォルトの分割数
+#define DEFAULT_TEXPART	(1)		// デフォルトのテクスチャ分割数
 
 //************************************************************
 //	クラス定義
@@ -57,10 +58,12 @@ public:
 		D3DXVECTOR3	aOffset[MAX_OFFSET];		// 両端のオフセット
 		D3DXCOLOR	aCol[MAX_OFFSET];			// 両端の基準色
 		D3DXMATRIX	aMtxWorldPoint[MAX_OFFSET];	// 両端のワールドマトリックス
-		D3DXVECTOR3	aPosPoint[MAX_VERTEX];		// 計算後の各頂点座標
-		D3DXCOLOR	aColPoint[MAX_VERTEX];		// 各頂点カラー
-		D3DXMATRIX	*pMtxParent;				// 親のマトリックス
+		D3DXVECTOR3	*pPosPoint;		// 各頂点座標
+		D3DXCOLOR	*pColPoint;		// 各頂点カラー
+		D3DXMATRIX	*pMtxParent;	// 親のマトリックス
+		int nPart;		// 分割数
 		int nTexPart;	// テクスチャ分割数
+		bool bAlpha;	// 透明化状況
 		bool bInit;		// 初期化状況
 	}Orbit;
 
@@ -77,7 +80,9 @@ public:
 		const D3DXCOLOR& rCol,	// 色
 		const OFFSET offset,	// オフセット
 		const TYPE type,		// 種類
-		const int nTexPart = 1	// テクスチャ分割数
+		const int nPart = DEFAULT_PART,			// 分割数
+		const int nTexPart = DEFAULT_TEXPART,	// テクスチャ分割数
+		const bool bAlpha = true				// 透明化状況
 	);
 
 	// メンバ関数
@@ -86,8 +91,9 @@ public:
 	void SetColor(const D3DXCOLOR& rCol);			// 色設定
 	void SetOffset(const OFFSET offset);			// オフセット設定
 	void SetTexPart(const int nTexPart);			// テクスチャ分割数設定
+	void SetEnableAlpha(const bool bAlpha);			// 透明化状況設定
 	void SetEnableInit(const bool bInit);			// 初期化状況設定
-	HRESULT SetLength(void);						// 長さ設定
+	HRESULT SetLength(const int nPart);				// 長さ設定
 
 protected:
 	// メンバ関数

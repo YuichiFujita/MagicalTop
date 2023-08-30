@@ -21,14 +21,13 @@
 #include "expManager.h"
 #include "levelupManager.h"
 #include "objectGauge2D.h"
+#include "objectOrbit.h"
 #include "shadow.h"
 #include "enemy.h"
 #include "target.h"
 #include "stage.h"
 #include "field.h"
 #include "particle3D.h"
-
-#include "objectOrbit.h"
 
 //************************************************************
 //	マクロ定義
@@ -210,7 +209,7 @@ HRESULT CPlayer::Init(void)
 	SetModelInfo();
 
 	// 軌跡の生成
-	m_pOrbit = CObjectOrbit::Create(GetMultiModel(MODEL_ROD)->GetMtxWorld(), XCOL_WHITE, CObjectOrbit::OFFSET_ROD, CObjectOrbit::TYPE_NORMAL);
+	m_pOrbit = CObjectOrbit::Create(GetMultiModel(MODEL_ROD)->GetPtrMtxWorld(), D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f), CObjectOrbit::OFFSET_ROD, CObjectOrbit::TYPE_NORMAL, 100, 50);	// 定数
 	if (UNUSED(m_pOrbit))
 	{ // 非使用中の場合
 
@@ -218,9 +217,6 @@ HRESULT CPlayer::Init(void)
 		assert(false);
 		return E_FAIL;
 	}
-
-	// TODO：objectの仮想関数ポインタにする
-	//		 頂点数伸ばせるようにする
 
 	// 透明度を設定
 	SetAlpha(0.0f);
@@ -370,9 +366,6 @@ void CPlayer::Draw(void)
 {
 	// オブジェクトキャラクターの描画
 	CObjectChara::Draw();
-
-	// 軌跡の描画
-	m_pOrbit->Draw();
 }
 
 //============================================================
@@ -544,6 +537,7 @@ void CPlayer::SetEnableUpdate(const bool bUpdate)
 	// 引数の更新状況を設定
 	CObject::SetEnableUpdate(bUpdate);		// 自身
 	m_pShadow->SetEnableUpdate(bUpdate);	// 影
+	m_pOrbit->SetEnableUpdate(bUpdate);		// 軌跡
 }
 
 //============================================================
@@ -554,6 +548,7 @@ void CPlayer::SetEnableDraw(const bool bDraw)
 	// 引数の描画状況を設定
 	CObject::SetEnableDraw(bDraw);		// 自身
 	m_pShadow->SetEnableDraw(bDraw);	// 影
+	m_pOrbit->SetEnableDraw(bDraw);		// 軌跡
 }
 
 //============================================================

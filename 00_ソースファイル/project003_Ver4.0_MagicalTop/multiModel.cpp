@@ -379,12 +379,21 @@ HRESULT CMultiModel::SetMaterial(const LPD3DXBUFFER pBuffMat, const int nNumMat)
 }
 
 //============================================================
-//	マトリックス取得処理
+//	マトリックスポインタ取得処理
 //============================================================
-D3DXMATRIX *CMultiModel::GetMtxWorld(void)
+D3DXMATRIX *CMultiModel::GetPtrMtxWorld(void)
 {
 	// ワールドマトリックスのポインタを返す
 	return &m_mtxWorld;
+}
+
+//============================================================
+//	マトリックス取得処理
+//============================================================
+D3DXMATRIX CMultiModel::GetMtxWorld(void) const
+{
+	// ワールドマトリックスを返す
+	return m_mtxWorld;
 }
 
 //============================================================
