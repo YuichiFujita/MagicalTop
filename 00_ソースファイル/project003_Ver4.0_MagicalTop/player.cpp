@@ -1253,7 +1253,7 @@ void CPlayer::CollisionEnemy(D3DXVECTOR3& rPos)
 				}
 
 				// “G‚Æ‚Ì“–‚½‚è”»’è
-				if (collision::Circle2D
+				if (collision::CirclePillar
 				( // ˆø”
 					rPos,						// ”»’èˆÊ’u
 					pObjCheck->GetPosition(),	// ”»’è–Ú•WˆÊ’u

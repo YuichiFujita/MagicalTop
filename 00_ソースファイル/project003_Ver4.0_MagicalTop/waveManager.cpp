@@ -684,6 +684,9 @@ void CWaveManager::UpdateProgression(void)
 		else
 		{ // カウンターが一定値より大きい場合
 
+			// 敵の全消失
+			CEnemy::SetAllVanish();
+
 			// プレイヤーを表示しない状態にする
 			CSceneGame::GetPlayer()->SetDisp(false);
 

@@ -25,6 +25,7 @@
 //************************************************************
 #define MAGIC_SETUP_TXT	"data\\TXT\\magic.txt"	// セットアップテキスト相対パス
 
+#define MAGIC_PRIO		(3)		// 魔法の優先順位
 #define PLUS_HIT_RADIUS	(10.0f)	// 当たり判定の拡張値
 #define MOVE_INHALE		(12.0f)	// 吸い込まれ時の魔法の移動量
 #define MOVE_DELETE		(3.0f)	// 消失時の魔法の移動量
@@ -83,6 +84,9 @@ HRESULT CMagic::Init(void)
 		assert(false);
 		return E_FAIL;
 	}
+
+	// 優先順位を設定
+	m_pBubble->SetPriority(MAGIC_PRIO);
 
 	// 成功を返す
 	return S_OK;

@@ -53,6 +53,7 @@ public:
 		STATE_NORMAL,		// 通常状態
 		STATE_DAMAGE,		// ダメージ状態
 		STATE_DEATH,		// 死亡状態
+		STATE_VANISH,		// 消失状態
 		STATE_MAX			// この列挙型の総数
 	}STATE;
 
@@ -124,13 +125,14 @@ public:
 		const int nNum,	// 生成数
 		const TYPE type	// 種類
 	);
+	static void SetAllVanish(void);	// 全消失
 	static int GetNumAll(void);		// 総数取得
 
 	// メンバ関数
 	void UpdateOldPosition(void);					// 過去位置更新
 	void SetMovePosition(const D3DXVECTOR3& rMove);	// 位置移動量設定
 	void SetMoveRotation(const D3DXVECTOR3& rMove);	// 向き変更量設定
-	void SetState(const STATE state);				// 状態設定
+	void SetState(const int nState);				// 状態設定
 	D3DXMATRIX GetMtxWorld(void) const;				// マトリックス取得
 	D3DXVECTOR3 GetOldPosition(void) const;			// 過去位置取得
 	D3DXVECTOR3 GetMovePosition(void) const;		// 位置移動量取得
@@ -151,6 +153,7 @@ protected:
 	virtual void Spawn(void);	// スポーン動作
 	virtual void Damage(void);	// ダメージ動作
 	virtual bool Death(void);	// 死亡動作
+	virtual bool Vanish(void);	// 消失動作
 
 	// メンバ関数
 	void Look	// 対象視認

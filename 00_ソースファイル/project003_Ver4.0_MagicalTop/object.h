@@ -96,6 +96,7 @@ public:
 	virtual void Hit(const int nDmg);					// ヒット
 	virtual void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
 	virtual void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
+	virtual void SetState(const int nState);			// 状態設定
 	virtual void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
 	virtual void SetEnableDraw(const bool bDraw);		// 描画状況設定
 	virtual void SetPriority(const int nPriority);		// 優先順位設定

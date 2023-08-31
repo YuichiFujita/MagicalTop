@@ -43,6 +43,7 @@
 #define ENE_BULL_LIMIT_Y	(0.1f)		// 弾の移動方向の制限値
 #define ENE_DEATH_ADD_POSY	(6.0f)		// 死亡時のY座標上昇量
 #define ENE_DEATH_POSY		(1300.0f)	// 死亡するY座標
+#define ENE_SUB_ALPHA		(0.02f)		// 消失時のα値減算量
 
 #define DAMAGE_CNT		(120)	// ダメージ状態維持カウント
 #define BUBBLE_SUB_CNT	(400)	// バブル消失カウント
@@ -413,6 +414,43 @@ void CEnemy::RandomSpawn
 }
 
 //============================================================
+//	全消失処理
+//============================================================
+void CEnemy::SetAllVanish(void)
+{
+	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
+	{ // 優先順位の総数分繰り返す
+
+		// ポインタを宣言
+		CObject *pObjectTop = CObject::GetTop(nCntPri);	// 先頭オブジェクト
+
+		if (USED(pObjectTop))
+		{ // 先頭が存在する場合
+
+			// ポインタを宣言
+			CObject *pObjCheck = pObjectTop;	// オブジェクト確認用
+
+			while (USED(pObjCheck))
+			{ // オブジェクトが使用されている場合繰り返す
+
+				// ポインタを宣言
+				CObject *pObjectNext = pObjCheck->GetNext();	// 次オブジェクト
+
+				if (pObjCheck->GetLabel() == CObject::LABEL_ENEMY)
+				{ // オブジェクトラベルが敵だった場合
+
+					// 状態を設定
+					pObjCheck->SetState(STATE_VANISH);	// 消失状態
+				}
+
+				// 次のオブジェクトへのポインタを代入
+				pObjCheck = pObjectNext;
+			}
+		}
+	}
+}
+
+//============================================================
 //	総数取得処理
 //============================================================
 int CEnemy::GetNumAll(void)
@@ -456,10 +494,10 @@ void CEnemy::SetMoveRotation(const D3DXVECTOR3& rMove)
 //============================================================
 //	状態の設定処理
 //============================================================
-void CEnemy::SetState(const STATE state)
+void CEnemy::SetState(const int nState)
 {
 	// 引数の状態を設定
-	m_state = state;
+	m_state = (STATE)nState;
 }
 
 //============================================================
@@ -584,6 +622,9 @@ void CEnemy::Spawn(void)
 	// スポーン状態の敵との当たり判定
 	CollisionSpawnEnemy(posEnemy);
 
+	// ステージ範囲外の補正
+	CSceneGame::GetStage()->LimitPosition(posEnemy, m_status.fRadius);
+
 	// 重力を加算
 	moveEnemy.y -= ENE_GRAVITY;
 
@@ -667,6 +708,34 @@ bool CEnemy::Death(void)
 	}
 
 	// 未死亡を返す
+	return false;
+}
+
+//============================================================
+//	消失動作
+//============================================================
+bool CEnemy::Vanish(void)
+{
+	// 変数を宣言
+	float fAlpha = GetAlpha();	// 透明度
+
+	if (fAlpha <= 0.0f)
+	{ // 透明度が下がり切った場合
+
+		// 敵オブジェクトの終了
+		Uninit();
+
+		// 消失を返す
+		return true;
+	}
+
+	// 透明度を下げる
+	fAlpha -= ENE_SUB_ALPHA;
+
+	// 透明度を設定
+	SetAlpha(fAlpha);
+
+	// 未消失を返す
 	return false;
 }
 
@@ -1042,6 +1111,18 @@ void CEnemyHuman::Update(void)
 
 		break;
 
+	case STATE_VANISH:
+
+		// 消失動作の更新
+		if (Vanish())
+		{ // 消失した場合
+
+			// 処理を抜ける
+			return;
+		}
+
+		break;
+
 	default:	// 例外処理
 		assert(false);
 		break;
@@ -1317,6 +1398,18 @@ void CEnemyCar::Update(void)
 
 		break;
 
+	case STATE_VANISH:
+
+		// 消失動作の更新
+		if (Vanish())
+		{ // 消失した場合
+
+			// 処理を抜ける
+			return;
+		}
+
+		break;
+
 	default:	// 例外処理
 		assert(false);
 		break;
@@ -1364,6 +1457,9 @@ void CEnemyCar::Spawn(void)
 
 	// スポーン状態の敵との当たり判定
 	CollisionSpawnEnemy(posEnemy);
+
+	// ステージ範囲外の補正
+	CSceneGame::GetStage()->LimitPosition(posEnemy, GetStatusInfo().fRadius);
 
 	switch (m_spawn)
 	{ // スポーン状態ごとの処理
