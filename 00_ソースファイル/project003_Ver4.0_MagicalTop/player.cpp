@@ -36,6 +36,7 @@
 #define PLAYER_SETUP_TXT	"data\\TXT\\player.txt"				// セットアップテキスト相対パス
 #define PLAY_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 #define PLAY_ORBIT_COL		(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f))	// 軌跡の色
+#define PLAY_ORBIT_PRIO		(5)		// 軌跡の優先順位
 
 #define MAX_MOVEX		(5.0f)		// 自動歩行時の速度割合用
 #define PULSROT_MOVEZ	(20)		// 前後移動時のプレイヤー向きの変更量
@@ -244,6 +245,9 @@ HRESULT CPlayer::Init(void)
 
 	// テクスチャを読込・割当
 	m_pOrbit->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_ORBIT]));
+
+	// 優先順位を設定
+	m_pOrbit->SetPriority(PLAY_ORBIT_PRIO);
 
 	// 透明度を設定
 	SetAlpha(0.0f);

@@ -21,12 +21,12 @@
 //	マクロ定義
 //************************************************************
 #define WIND_COL	(D3DXCOLOR(0.6f, 0.9f, 1.0f, 0.6f))	// 風のポリゴン色
-#define WIND_PRIO	(3)	// 風の優先順位
+#define WIND_PRIO	(5)	// 風の優先順位
 
-#define MOVE_BACK	(16.0f)	// 風の奥移動量
-#define MOVE_SIDE	(15.5f)	// 風の横移動量
-#define PLUS_POSY	(20.0f)	// 風の縦座標加算量
-#define COLL_RADIUS	(50.0f)	// 風の当たり判定の半径
+#define MOVE_BACK	(16.0f)		// 風の奥移動量
+#define MOVE_SIDE	(-15.5f)	// 風の横移動量
+#define PLUS_POSY	(20.0f)		// 風の縦座標加算量
+#define COLL_RADIUS	(50.0f)		// 風の当たり判定の半径
 
 #define WIND_TEXPART	(1)		// 風のテクスチャ分割数
 #define WIND_PART		(40)	// 風の分割数

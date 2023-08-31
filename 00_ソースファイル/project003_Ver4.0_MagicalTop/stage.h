@@ -18,6 +18,7 @@
 //************************************************************
 //	前方宣言
 //************************************************************
+class CHurricane;	// ハリケーンクラス
 class CObject3D;	// オブジェクト3Dクラス
 
 //************************************************************
@@ -118,12 +119,13 @@ private:
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 
 	// メンバ変数
-	CObject3D *m_pStageBarrier;			// バリア表示の情報
-	CObject3D *m_pStageArea;			// エリア表示の情報
-	StageWind  m_stageWind;				// 風速
-	StageArea  m_stageBarrier;			// バリア
-	StageArea  m_aStageArea[AREA_MAX];	// エリア
-	StageLimit m_stageLimit;			// 範囲
+	CHurricane	*m_pHurricane;			// ハリケーンの情報
+	CObject3D	*m_pStageBarrier;		// バリア表示の情報
+	CObject3D	*m_pStageArea;			// エリア表示の情報
+	StageWind	m_stageWind;			// 風速
+	StageArea	m_stageBarrier;			// バリア
+	StageArea	m_aStageArea[AREA_MAX];	// エリア
+	StageLimit	m_stageLimit;			// 範囲
 	AREA m_area;						// プレイヤーの現在エリア
 };
 

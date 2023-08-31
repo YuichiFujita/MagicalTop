@@ -13,6 +13,8 @@
 #include "sceneGame.h"
 #include "player.h"
 #include "target.h"
+#include "field.h"
+#include "hurricane.h"
 #include "object3D.h"
 #include "collision.h"
 #include "wind.h"
@@ -21,6 +23,8 @@
 //	マクロ定義
 //************************************************************
 #define STAGE_SETUP_TXT	"data\\TXT\\stage.txt"	// セットアップテキスト相対パス
+
+#define HURRICANE_PLUS_POSY	(-50.0f)	// ハリケーン生成位置の加算量
 
 #define AREA_PRIO	(2)			// エリア表示の優先順位
 #define AREA_ROT	(0.025f)	// エリアの回転量
@@ -34,8 +38,8 @@
 //************************************************************
 const char *CStage::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\area002.png",	// エリア表示テクスチャ
-	"data\\TEXTURE\\area002.png",	// エリア表示テクスチャ
+	"data\\TEXTURE\\area002.png",	// バリア表示テクスチャ
+	"data\\TEXTURE\\area000.png",	// エリア表示テクスチャ
 };
 
 //************************************************************
@@ -47,6 +51,7 @@ const char *CStage::mc_apTextureFile[] =	// テクスチャ定数
 CStage::CStage()
 {
 	// メンバ変数をクリア
+	m_pHurricane = NULL;	// ハリケーンの情報
 	m_pStageBarrier = NULL;	// バリア表示の情報
 	m_pStageArea = NULL;	// ステージエリア表示の情報
 	memset(&m_stageWind, 0, sizeof(m_stageWind));		// 風速
@@ -73,6 +78,7 @@ HRESULT CStage::Init(void)
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 
 	// メンバ変数を初期化
+	m_pHurricane = NULL;	// ハリケーンの情報
 	m_pStageBarrier = NULL;	// バリア表示の情報
 	m_pStageArea = NULL;	// ステージエリア表示の情報
 	memset(&m_stageWind, 0, sizeof(m_stageWind));		// 風速
@@ -80,6 +86,16 @@ HRESULT CStage::Init(void)
 	memset(&m_aStageArea[0], 0, sizeof(m_aStageArea));	// エリア
 	memset(&m_stageLimit, 0, sizeof(m_stageLimit));		// 範囲
 	m_area = AREA_NONE;		// プレイヤーの現在エリア
+
+	// ハリケーンの生成
+	m_pHurricane = CHurricane::Create(VEC3_ZERO);
+	if (UNUSED(m_pHurricane))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// ステージエリア表示の生成
 	m_pStageArea = CObject3D::Create
@@ -140,10 +156,13 @@ HRESULT CStage::Init(void)
 //============================================================
 void CStage::Uninit(void)
 {
-	// ステージバリア表示を破棄
+	// ハリケーンの終了
+	m_pHurricane->Uninit();
+
+	// ステージバリア表示の終了
 	m_pStageBarrier->Uninit();
 
-	// ステージエリア表示を破棄
+	// ステージエリア表示の終了
 	m_pStageArea->Uninit();
 }
 
@@ -153,18 +172,38 @@ void CStage::Uninit(void)
 void CStage::Update(void)
 {
 	// 変数を宣言
+	D3DXVECTOR3 posCenter;	// 世界の中心位置
 	D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 	D3DXVECTOR3 rotBarrier = m_pStageBarrier->GetRotation();		// バリア表示向き
 	float fRadiusPlayer = CSceneGame::GetPlayer()->GetRadius();		// プレイヤー半径
 
+	// 世界の中心位置を設定
+	posCenter = posTarget;	// ターゲットの位置を設定
+	posCenter.y = CSceneGame::GetField()->GetPosition().y;	// 地面の縦位置を設定
+
+	//--------------------------------------------------------
+	//	ハリケーンの更新
+	//--------------------------------------------------------
+	// ハリケーンの位置を設定
+	m_pHurricane->SetPosition(D3DXVECTOR3(posCenter.x, posCenter.y - HURRICANE_PLUS_POSY, posCenter.z));
+
+	// ハリケーンの更新
+	m_pHurricane->Update();
+
+	//--------------------------------------------------------
+	//	バリア表示の更新
+	//--------------------------------------------------------
 	// バリア表示の位置を設定
-	m_pStageBarrier->SetPosition(posTarget);
+	m_pStageBarrier->SetPosition(posCenter);
 
 	// バリア表示の向きを設定
 	rotBarrier.y -= AREA_ROT;
 	m_pStageBarrier->SetRotation(rotBarrier);
 
+	//--------------------------------------------------------
+	//	エリア表示の更新
+	//--------------------------------------------------------
 	// 現在のエリアを初期化
 	m_area = AREA_NONE;
 
@@ -189,7 +228,7 @@ void CStage::Update(void)
 	}
 
 	// エリア表示の位置を設定
-	m_pStageArea->SetPosition(posTarget);
+	m_pStageArea->SetPosition(posCenter);
 
 	// エリア表示の向きを設定
 	m_pStageArea->SetRotation(D3DXVECTOR3(0.0f, atan2f(posPlayer.x - posTarget.x, posPlayer.z - posTarget.z), 0.0f));
@@ -197,6 +236,9 @@ void CStage::Update(void)
 	// 例外処理
 	assert(m_area != AREA_NONE);	// エリア外
 
+	//--------------------------------------------------------
+	//	風の生成
+	//--------------------------------------------------------
 	if (m_stageWind.nCounter < WIND_CNT)
 	{ // カウンターが一定値より小さい場合
 
