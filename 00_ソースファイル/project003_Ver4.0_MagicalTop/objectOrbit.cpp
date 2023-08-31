@@ -17,15 +17,11 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
-const char *CObjectOrbit::mc_apTextureFile[] =	// テクスチャ定数
-{
-	"data\\TEXTURE\\orbit000.jpg",	// 軌跡のテクスチャ
-};
-
 const D3DXVECTOR3 CObjectOrbit::mc_aOffset[][MAX_OFFSET]	// オフセットの位置加減量
 {
-	{ D3DXVECTOR3(0.0f, 0.0f, 0.0f),	D3DXVECTOR3(0.0f, 100.0f, 0.0f) },	// 通常オフセット
-	{ D3DXVECTOR3(0.0f, 0.0f, -25.0f),	D3DXVECTOR3(0.0f, 0.0f, 25.0f) },	// 杖オフセット
+	{ D3DXVECTOR3(0.0f, -50.0f, 0.0f),	D3DXVECTOR3(0.0f, 50.0f, 0.0f) },	// 通常オフセット
+	{ D3DXVECTOR3(0.0f, 0.0f, -15.0f),	D3DXVECTOR3(0.0f, 0.0f, 15.0f) },	// 杖オフセット
+	{ D3DXVECTOR3(0.0f, 0.0f, -20.0f),	D3DXVECTOR3(0.0f, 0.0f, 20.0f) },	// 風オフセット
 };
 
 //************************************************************
@@ -37,9 +33,11 @@ const D3DXVECTOR3 CObjectOrbit::mc_aOffset[][MAX_OFFSET]	// オフセットの位置加減
 CObjectOrbit::CObjectOrbit()
 {
 	// メンバ変数をクリア
-	m_pVtxBuff = NULL;	// 頂点バッファ
-	m_nNumVtx = 0;		// 必要頂点数
-	m_nTextureID = 0;	// テクスチャインデックス
+	m_pVtxBuff = NULL;		// 頂点バッファ
+	m_state = STATE_NORMAL;	// 状態
+	m_nCounterState = 0;	// 状態管理カウンター
+	m_nNumVtx = 0;			// 必要頂点数
+	m_nTextureID = 0;		// テクスチャインデックス
 	memset(&m_orbit, 0, sizeof(m_orbit));	// 軌跡の情報
 }
 
@@ -49,9 +47,11 @@ CObjectOrbit::CObjectOrbit()
 CObjectOrbit::CObjectOrbit(const CObject::LABEL label, const int nPriority) : CObject(label, nPriority)
 {
 	// メンバ変数をクリア
-	m_pVtxBuff = NULL;	// 頂点バッファ
-	m_nNumVtx = 0;		// 必要頂点数
-	m_nTextureID = 0;	// テクスチャインデックス
+	m_pVtxBuff = NULL;		// 頂点バッファ
+	m_state = STATE_NORMAL;	// 状態
+	m_nCounterState = 0;	// 状態管理カウンター
+	m_nNumVtx = 0;			// 必要頂点数
+	m_nTextureID = 0;		// テクスチャインデックス
 	memset(&m_orbit, 0, sizeof(m_orbit));	// 軌跡の情報
 }
 
@@ -73,10 +73,13 @@ HRESULT CObjectOrbit::Init(void)
 
 	// メンバ変数を初期化
 	m_pVtxBuff = NULL;			// 頂点バッファ
+	m_state = STATE_NORMAL;		// 状態
+	m_nCounterState = 0;		// 状態管理カウンター
 	m_nNumVtx = 0;				// 必要頂点数
 	m_nTextureID = NONE_IDX;	// テクスチャインデックス
 
 	// 軌跡の情報を初期化
+	memset(&m_orbit.mtxVanish, 0, sizeof(m_orbit.mtxVanish));	// 消失開始時の親のマトリックス
 	m_orbit.pMtxParent = NULL;	// 親のマトリックス
 	m_orbit.pPosPoint = NULL;	// 各頂点座標
 	m_orbit.pColPoint = NULL;	// 各頂点カラー
@@ -155,6 +158,7 @@ void CObjectOrbit::Draw(void)
 {
 	// 変数を宣言
 	D3DXMATRIX mtxIdent;	// 単位マトリックス設定用
+	D3DXMATRIX mtxParent;	// 親のマトリックス
 
 	// 単位マトリックスの初期化
 	D3DXMatrixIdentity(&mtxIdent);
@@ -163,118 +167,172 @@ void CObjectOrbit::Draw(void)
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 	CTexture *pTexture = CManager::GetTexture();						// テクスチャへのポインタ
 	
-	//--------------------------------------------------------
-	//	レンダーステートを変更
-	//--------------------------------------------------------
-	// ライティングを無効にする
-	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
-
-	// ポリゴンの両面を表示状態にする
-	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-
-	//--------------------------------------------------------
-	//	オフセットの初期化
-	//--------------------------------------------------------
-	for (int nCntOff = 0; nCntOff < MAX_OFFSET; nCntOff++)
-	{ // オフセットの数分繰り返す
-
-		// ワールドマトリックスの初期化
-		D3DXMatrixIdentity(&m_orbit.aMtxWorldPoint[nCntOff]);
-
-		// 位置を反映
-		D3DXMatrixTranslation(&m_orbit.aMtxWorldPoint[nCntOff], m_orbit.aOffset[nCntOff].x, m_orbit.aOffset[nCntOff].y, m_orbit.aOffset[nCntOff].z);
-
-		// 親のマトリックスと掛け合わせる
-		D3DXMatrixMultiply(&m_orbit.aMtxWorldPoint[nCntOff], &m_orbit.aMtxWorldPoint[nCntOff], m_orbit.pMtxParent);
-	}
-
-	if (!CSceneGame::GetPause()->IsPause())
-	{ // ポーズ中ではない場合
+	if (m_state != STATE_NONE)
+	{ // 何もしない状態ではない場合
 
 		//----------------------------------------------------
-		//	頂点座標と頂点カラーの情報をずらす
+		//	レンダーステートを変更
 		//----------------------------------------------------
-		for (int nCntVtx = m_nNumVtx - 1; nCntVtx >= MAX_OFFSET; nCntVtx--)
-		{ // 維持する頂点の最大数分繰り返す (オフセット分は含まない)
+		// ライティングを無効にする
+		pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-			// 頂点情報をずらす
-			m_orbit.pPosPoint[nCntVtx] = m_orbit.pPosPoint[nCntVtx - MAX_OFFSET];
-			m_orbit.pColPoint[nCntVtx] = m_orbit.pColPoint[nCntVtx - MAX_OFFSET];
+		// ポリゴンの両面を表示状態にする
+		pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
+		//----------------------------------------------------
+		//	状態ごとの設定
+		//----------------------------------------------------
+		switch (m_state)
+		{ // 状態ごとの処理
+		case STATE_NORMAL:	// 通常状態
+
+			// 親マトリックスを設定
+			mtxParent = *m_orbit.pMtxParent;
+
+			break;
+
+		case STATE_VANISH:	// 消失状態
+
+			// 親マトリックスを設定
+			mtxParent = m_orbit.mtxVanish;
+
+			// カウンターを加算
+			if (m_nCounterState < (m_nNumVtx / MAX_OFFSET) + 1)
+			{ // カウンターが軌跡が伸び切る時間より小さい場合
+
+				// カウンターを加算
+				m_nCounterState++;
+			}
+			else
+			{ // カウンターが軌跡が伸び切る時間以上の場合
+
+				// カウンターを補正
+				m_nCounterState = 0;
+
+				// 状態を設定
+				m_state = STATE_NONE;	// 何もしない状態
+			}
+
+			break;
+
+		default:	// 例外状態
+			assert(false);
+			break;
 		}
 
 		//----------------------------------------------------
-		//	最新の頂点座標と頂点カラーの情報を設定
+		//	オフセットの初期化
 		//----------------------------------------------------
 		for (int nCntOff = 0; nCntOff < MAX_OFFSET; nCntOff++)
 		{ // オフセットの数分繰り返す
 
-			// 頂点座標の設定
-			m_orbit.pPosPoint[nCntOff] = D3DXVECTOR3
-			( // 引数
-				m_orbit.aMtxWorldPoint[nCntOff]._41,	// x
-				m_orbit.aMtxWorldPoint[nCntOff]._42,	// y
-				m_orbit.aMtxWorldPoint[nCntOff]._43		// z
-			);
+			// ワールドマトリックスの初期化
+			D3DXMatrixIdentity(&m_orbit.aMtxWorldPoint[nCntOff]);
 
-			// 頂点カラーの設定
-			m_orbit.pColPoint[nCntOff] = m_orbit.aCol[nCntOff];
-		}
-	}
+			// 位置を反映
+			D3DXMatrixTranslation(&m_orbit.aMtxWorldPoint[nCntOff], m_orbit.aOffset[nCntOff].x, m_orbit.aOffset[nCntOff].y, m_orbit.aOffset[nCntOff].z);
 
-	//--------------------------------------------------------
-	//	頂点座標と頂点カラーの情報を初期化
-	//--------------------------------------------------------
-	if (m_orbit.bInit == false)
-	{ // 初期化済みではない場合
-
-		for (int nCntVtx = 0; nCntVtx < m_nNumVtx; nCntVtx++)
-		{ // 維持する頂点の最大数分繰り返す
-
-			// 頂点座標の設定
-			m_orbit.pPosPoint[nCntVtx] = D3DXVECTOR3
-			( // 引数
-				m_orbit.aMtxWorldPoint[nCntVtx % MAX_OFFSET]._41,	// x
-				m_orbit.aMtxWorldPoint[nCntVtx % MAX_OFFSET]._42,	// y
-				m_orbit.aMtxWorldPoint[nCntVtx % MAX_OFFSET]._43	// z
-			);
-
-			// 頂点カラーの設定
-			m_orbit.pColPoint[nCntVtx] = m_orbit.aCol[nCntVtx % MAX_OFFSET];
+			// 親のマトリックスと掛け合わせる
+			D3DXMatrixMultiply(&m_orbit.aMtxWorldPoint[nCntOff], &m_orbit.aMtxWorldPoint[nCntOff], &mtxParent);
 		}
 
-		// 初期化済みにする
-		m_orbit.bInit = true;
+		if (!CSceneGame::GetPause()->IsPause())
+		{ // ポーズ中ではない場合
+
+			//------------------------------------------------
+			//	頂点座標と頂点カラーの情報をずらす
+			//------------------------------------------------
+			for (int nCntVtx = m_nNumVtx - 1; nCntVtx >= MAX_OFFSET; nCntVtx--)
+			{ // 維持する頂点の最大数分繰り返す (オフセット分は含まない)
+
+				// 頂点情報をずらす
+				m_orbit.pPosPoint[nCntVtx] = m_orbit.pPosPoint[nCntVtx - MAX_OFFSET];
+				m_orbit.pColPoint[nCntVtx] = m_orbit.pColPoint[nCntVtx - MAX_OFFSET];
+			}
+
+			//------------------------------------------------
+			//	最新の頂点座標と頂点カラーの情報を設定
+			//------------------------------------------------
+			for (int nCntOff = 0; nCntOff < MAX_OFFSET; nCntOff++)
+			{ // オフセットの数分繰り返す
+
+				// 頂点座標の設定
+				m_orbit.pPosPoint[nCntOff] = D3DXVECTOR3
+				( // 引数
+					m_orbit.aMtxWorldPoint[nCntOff]._41,	// x
+					m_orbit.aMtxWorldPoint[nCntOff]._42,	// y
+					m_orbit.aMtxWorldPoint[nCntOff]._43		// z
+				);
+
+				// 頂点カラーの設定
+				m_orbit.pColPoint[nCntOff] = m_orbit.aCol[nCntOff];
+			}
+		}
+
+		//----------------------------------------------------
+		//	頂点座標と頂点カラーの情報を初期化
+		//----------------------------------------------------
+		if (!m_orbit.bInit)
+		{ // 初期化済みではない場合
+
+			for (int nCntVtx = 0; nCntVtx < m_nNumVtx; nCntVtx++)
+			{ // 維持する頂点の最大数分繰り返す
+
+				// 頂点座標の設定
+				m_orbit.pPosPoint[nCntVtx] = D3DXVECTOR3
+				( // 引数
+					m_orbit.aMtxWorldPoint[nCntVtx % MAX_OFFSET]._41,	// x
+					m_orbit.aMtxWorldPoint[nCntVtx % MAX_OFFSET]._42,	// y
+					m_orbit.aMtxWorldPoint[nCntVtx % MAX_OFFSET]._43	// z
+				);
+
+				// 頂点カラーの設定
+				m_orbit.pColPoint[nCntVtx] = m_orbit.aCol[nCntVtx % MAX_OFFSET];
+			}
+
+			// 初期化済みにする
+			m_orbit.bInit = true;
+		}
+
+		//----------------------------------------------------
+		//	ポリゴンの描画
+		//----------------------------------------------------
+		// 頂点情報の設定
+		SetVtx();
+
+		// 単位マトリックスの設定
+		pDevice->SetTransform(D3DTS_WORLD, &mtxIdent);
+
+		// 頂点バッファをデータストリームに設定
+		pDevice->SetStreamSource(0, m_pVtxBuff, 0, sizeof(VERTEX_3D));
+
+		// 頂点フォーマットの設定
+		pDevice->SetFVF(FVF_VERTEX_3D);
+
+		// テクスチャの設定
+		pDevice->SetTexture(0, pTexture->GetTexture(m_nTextureID));
+
+		// ポリゴンの描画
+		pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, m_nNumVtx - 2);
+
+		//----------------------------------------------------
+		//	レンダーステートを元に戻す
+		//----------------------------------------------------
+		// ライティングを有効にする
+		pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+
+		// ポリゴンの表面のみを表示状態にする
+		pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 	}
+}
 
-	//--------------------------------------------------------
-	//	ポリゴンの描画
-	//--------------------------------------------------------
-	// 頂点情報の設定
-	SetVtx();
-
-	// 単位マトリックスの設定
-	pDevice->SetTransform(D3DTS_WORLD, &mtxIdent);
-
-	// 頂点バッファをデータストリームに設定
-	pDevice->SetStreamSource(0, m_pVtxBuff, 0, sizeof(VERTEX_3D));
-
-	// 頂点フォーマットの設定
-	pDevice->SetFVF(FVF_VERTEX_3D);
-
-	// テクスチャの設定
-	pDevice->SetTexture(0, pTexture->GetTexture(m_nTextureID));
-
-	// ポリゴンの描画
-	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, m_nNumVtx - 2);
-
-	//--------------------------------------------------------
-	//	レンダーステートを元に戻す
-	//--------------------------------------------------------
-	// ライティングを有効にする
-	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
-
-	// ポリゴンの表面のみを表示状態にする
-	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+//============================================================
+//	状態取得処理
+//============================================================
+int CObjectOrbit::GetState(void)
+{
+	// 状態を返す
+	return m_state;
 }
 
 //============================================================
@@ -285,18 +343,13 @@ CObjectOrbit *CObjectOrbit::Create
 	D3DXMATRIX *pMtxParent,	// 親マトリックス
 	const D3DXCOLOR& rCol,	// 色
 	const OFFSET offset,	// オフセット
-	const TYPE type,		// 種類
 	const int nPart,		// 分割数
 	const int nTexPart,		// テクスチャ分割数
 	const bool bAlpha		// 透明化状況
 )
 {
-	// 変数を宣言
-	int nTextureID;	// テクスチャインデックス
-
 	// ポインタを宣言
-	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
-	CObjectOrbit *pObjectOrbit = NULL;				// オブジェクト軌跡生成用
+	CObjectOrbit *pObjectOrbit = NULL;		// オブジェクト軌跡生成用
 
 	if (UNUSED(pObjectOrbit))
 	{ // 使用されていない場合
@@ -320,12 +373,6 @@ CObjectOrbit *CObjectOrbit::Create
 			// 失敗を返す
 			return NULL;
 		}
-
-		// テクスチャを登録
-		nTextureID = pTexture->Regist(mc_apTextureFile[type]);
-
-		// テクスチャを割当
-		pObjectOrbit->BindTexture(nTextureID);
 
 		// 親のマトリックスを設定
 		pObjectOrbit->SetMatrixParent(pMtxParent);
@@ -367,6 +414,49 @@ void CObjectOrbit::BindTexture(const int nTextureID)
 {
 	// テクスチャインデックスを代入
 	m_nTextureID = nTextureID;
+}
+
+//============================================================
+//	状態の設定処理
+//============================================================
+void CObjectOrbit::SetState(const STATE state)
+{
+	if (state == m_state && state != STATE_NORMAL)
+	{ // 設定する状態が現在の状態且つ、設定する状態が通常状態の場合
+
+		// 処理を抜ける
+		return;
+	}
+
+	// 引数の状態を設定
+	m_state = state;
+
+	switch (m_state)
+	{ // 状態ごとの処理
+	case STATE_NONE:	// 何もしない状態
+
+		// 無し
+
+		break;
+
+	case STATE_NORMAL:	// 通常状態
+
+		// 初期化していない状態にする
+		m_orbit.bInit = false;
+
+		break;
+
+	case STATE_VANISH:	// 消失状態
+
+		// 現在の親マトリックスを消失するマトリックスに設定
+		m_orbit.mtxVanish = *m_orbit.pMtxParent;
+
+		break;
+
+	default:	// 例外状態
+		assert(false);
+		break;
+	}
 }
 
 //============================================================

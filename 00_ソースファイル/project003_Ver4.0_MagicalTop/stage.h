@@ -66,7 +66,6 @@ public:
 	// ステージ風構造体
 	typedef struct
 	{
-		D3DXVECTOR3 vecWind;	// 風量
 		int nCounter;	// 風量変更カウンター
 	}StageWind;
 
@@ -106,7 +105,6 @@ public:
 	StageArea GetStageBarrier(void) const;						// ステージバリア取得
 	D3DXVECTOR3 GetStageBarrierPosition(void) const;			// ステージバリアの位置取得
 	AREA GetAreaPlayer(void) const;								// プレイヤーの現在エリア取得
-	D3DXVECTOR3 GetVecWind(void) const;							// 風の方向取得
 
 	// 静的メンバ関数
 	static CStage *Create(void);				// 生成

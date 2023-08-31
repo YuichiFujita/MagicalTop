@@ -14,6 +14,7 @@
 #include "input.h"
 #include "sound.h"
 #include "camera.h"
+#include "texture.h"
 #include "collision.h"
 
 #include "multiModel.h"
@@ -34,6 +35,7 @@
 //************************************************************
 #define PLAYER_SETUP_TXT	"data\\TXT\\player.txt"				// セットアップテキスト相対パス
 #define PLAY_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
+#define PLAY_ORBIT_COL		(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f))	// 軌跡の色
 
 #define MAX_MOVEX		(5.0f)		// 自動歩行時の速度割合用
 #define PULSROT_MOVEZ	(20)		// 前後移動時のプレイヤー向きの変更量
@@ -53,9 +55,20 @@
 #define AWAY_UP_MOVE	(30.0f)		// 吹っ飛び時の上移動量
 #define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
 
+#define MOVE_INSIDE			(2.0f)	// 内側への移動量
+#define MOVE_OUTSIDE		(3.0f)	// 外側への移動量
+#define MOVE_LEFT			(0.5f)	// 左側への移動量
+#define MOVE_LEFT_ACCELE	(1.5f)	// 左移動量の加速
+#define MOVE_LEFT_DECELE	(0.25f)	// 左移動量の減速
+
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
+const char *CPlayer::mc_apTextureFile[] =	// テクスチャ定数
+{
+	"data\\TEXTURE\\orbit000.jpg",	// 軌跡のテクスチャ
+};
+
 const char *CPlayer::mc_apModelFile[] =	// モデル定数
 {
 	"data\\MODEL\\PLAYER\\00_waist.x",	// 腰
@@ -102,6 +115,10 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 	m_nNumModel		= 0;				// パーツの総数
 	m_fDisTarget	= 0.0f;				// ターゲットとの距離
 	m_bJump			= false;			// ジャンプ状況
+
+	m_fSideMove = MOVE_LEFT;		// 横移動量
+	m_fAddMove  = MOVE_LEFT_ACCELE;	// 横移動の加速量
+	m_fSubMove  = MOVE_LEFT_DECELE;	// 横移動の減速量
 }
 
 //============================================================
@@ -117,6 +134,9 @@ CPlayer::~CPlayer()
 //============================================================
 HRESULT CPlayer::Init(void)
 {
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
 	// メンバ変数を初期化
 	m_pMagic		= NULL;				// 魔法マネージャーの情報
 	m_pExp			= NULL;				// 経験値マネージャーの情報
@@ -133,6 +153,10 @@ HRESULT CPlayer::Init(void)
 	m_nNumModel		= 0;				// パーツの総数
 	m_fDisTarget	= 0.0f;				// ターゲットとの距離
 	m_bJump			= true;				// ジャンプ状況
+
+	m_fSideMove = MOVE_LEFT;		// 横移動量
+	m_fAddMove  = MOVE_LEFT_ACCELE;	// 横移動の加速量
+	m_fSubMove  = MOVE_LEFT_DECELE;	// 横移動の減速量
 
 	// 魔法マネージャーの生成
 	m_pMagic = CMagicManager::Create();
@@ -209,7 +233,7 @@ HRESULT CPlayer::Init(void)
 	SetModelInfo();
 
 	// 軌跡の生成
-	m_pOrbit = CObjectOrbit::Create(GetMultiModel(MODEL_ROD)->GetPtrMtxWorld(), D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f), CObjectOrbit::OFFSET_ROD, CObjectOrbit::TYPE_NORMAL, 100, 50);	// 定数
+	m_pOrbit = CObjectOrbit::Create(GetMultiModel(MODEL_ROD)->GetPtrMtxWorld(), PLAY_ORBIT_COL, CObjectOrbit::OFFSET_ROD);
 	if (UNUSED(m_pOrbit))
 	{ // 非使用中の場合
 
@@ -217,6 +241,9 @@ HRESULT CPlayer::Init(void)
 		assert(false);
 		return E_FAIL;
 	}
+
+	// テクスチャを読込・割当
+	m_pOrbit->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_ORBIT]));
 
 	// 透明度を設定
 	SetAlpha(0.0f);
@@ -517,6 +544,9 @@ void CPlayer::SetDisp(const bool bDisp)
 
 		// 影を描画する設定にする
 		m_pShadow->SetEnableDraw(true);
+
+		// 軌跡を描画する設定にする
+		m_pOrbit->SetEnableDraw(true);
 	}
 	else
 	{ // 表示しない状態の場合
@@ -526,6 +556,9 @@ void CPlayer::SetDisp(const bool bDisp)
 
 		// 影を描画しない設定にする
 		m_pShadow->SetEnableDraw(false);
+
+		// 軌跡を描画しない設定にする
+		m_pOrbit->SetEnableDraw(false);
 	}
 }
 
@@ -794,7 +827,8 @@ void CPlayer::UpdateFadeIn(void)
 CPlayer::MOTION CPlayer::Move(void)
 {
 	// 変数を宣言
-	D3DXVECTOR3 rot = CManager::GetCamera()->GetRotation();			// カメラの向き
+	D3DXVECTOR3 vecTarg, vecSide;	// ターゲット方向ベクトル・横方向ベクトル
+	D3DXVECTOR3 rot = CManager::GetCamera()->GetRotation();	// カメラの向き
 	CStage::AREA area = CSceneGame::GetStage()->GetAreaPlayer();	// プレイヤーの現在エリア
 
 	// ポインタを宣言
@@ -803,62 +837,6 @@ CPlayer::MOTION CPlayer::Move(void)
 
 #if 1
 
-#if 0
-
-	if (pKeyboard->GetPress(DIK_W) || pPad->GetPressLStickY() > 0.0f)
-	{
-		// 移動量を更新
-		m_move.x += sinf(rot.y) * 1.5f;
-		m_move.z += cosf(rot.y) * 1.5f;
-
-		// 移動量を更新
-		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (0.6f / (float)CStage::AREA_MAX));
-		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (0.6f / (float)CStage::AREA_MAX));
-
-		// 目標向きを更新
-		m_destRot.y = D3DXToRadian(180) + rot.y;
-	}
-	else if (pKeyboard->GetPress(DIK_S) || pPad->GetPressLStickY() < 0.0f)
-	{
-		// 移動量を更新
-		m_move.x -= sinf(rot.y) * 1.5f;
-		m_move.z -= cosf(rot.y) * 1.5f;
-
-		// 移動量を更新
-		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (0.6f / (float)CStage::AREA_MAX));
-		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (0.6f / (float)CStage::AREA_MAX));
-
-		// 目標向きを更新
-		m_destRot.y = D3DXToRadian(0) + rot.y;
-	}
-	else
-	{
-		// 移動量を更新
-		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * (((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX));
-
-		// 目標向きを更新
-		m_destRot.y = D3DXToRadian(90) + rot.y;
-
-		if (pKeyboard->GetPress(DIK_A) || pPad->GetPressLStickX() < 0.0f)
-		{
-			// 移動量を更新
-			m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * 1.2f;
-			m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * 1.2f;
-		}
-		else if (pKeyboard->GetPress(DIK_D) || pPad->GetPressLStickX() > 0.0f)
-		{
-			// 移動量を更新
-			m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * ((((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX))) * 0.8f;
-			m_move.z -= cosf(rot.y - (D3DX_PI * 0.5f)) * ((((int)area + 1) * (MAX_SPEED_WIDTH / (float)CStage::AREA_MAX))) * 0.8f;
-		}
-	}
-
-#else
-
-	// 変数を宣言
-	D3DXVECTOR3 vecTarg, vecSide;	// ターゲット方向ベクトル・横方向ベクトル
-
 	// ターゲット方向のベクトルを計算
 	vecTarg = CSceneGame::GetTarget()->GetPosition() - GetPosition();
 	vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
@@ -866,38 +844,95 @@ CPlayer::MOTION CPlayer::Move(void)
 
 	// 横方向ベクトルを計算
 	vecSide = D3DXVECTOR3(vecTarg.z, 0.0f, -vecTarg.x);
-
-
 	
-	// 縦移動量を加算
-	m_move += vecTarg * 2.0f;
+	// 内側への移動量を設定
+	m_move += vecTarg * MOVE_INSIDE;
 
 	if (pKeyboard->GetPress(DIK_W) || pPad->GetPress(CInputPad::KEY_L1))
 	{
-		m_move -= vecTarg * 3.0f;
+		// 外側への移動量を追加
+		m_move -= vecTarg * MOVE_OUTSIDE;
 	}
 
-	// 横移動量を加算
-	m_move += vecSide * 1.5f;
+#if 0
+
+	// 左側への移動量を設定
+	m_move += vecSide * MOVE_LEFT;
 
 	if (pKeyboard->GetPress(DIK_A) || pPad->GetPressLStickX() < 0.0f)
 	{
-		// 移動量を更新
-		m_move += vecSide * 1.4f;
+		// 左移動量を加速
+		m_move += vecSide * MOVE_LEFT_ACCELE;
 	}
 	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPressLStickX() > 0.0f)
 	{
-		// 移動量を更新
-		m_move -= vecSide * 1.0;
+		// 左移動量を減速
+		m_move -= vecSide * MOVE_LEFT_DECELE;
 	}
 
-	// 目標向きを更新
-	m_destRot.y = atan2f(m_move.x, m_move.z);
-	m_destRot.y += D3DX_PI;
+#else
+
+	// 左側への移動量を設定
+	m_move += vecSide * m_fSideMove;
+
+	if (pKeyboard->GetPress(DIK_A) || pPad->GetPressLStickX() < 0.0f)
+	{
+		// 左移動量を加速
+		m_move += vecSide * m_fAddMove;
+	}
+	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPressLStickX() > 0.0f)
+	{
+		// 左移動量を減速
+		m_move -= vecSide * m_fSubMove;
+	}
+
+	// TODO：速度決める
+	if (pKeyboard->GetPress(DIK_T))
+	{
+		m_fSideMove += 0.1f;
+	}
+	else if (pKeyboard->GetPress(DIK_G))
+	{
+		m_fSideMove -= 0.1f;
+	}
+	if (pKeyboard->GetPress(DIK_Y))
+	{
+		m_fAddMove += 0.1f;
+	}
+	else if (pKeyboard->GetPress(DIK_H))
+	{
+		m_fAddMove -= 0.1f;
+	}
+	if (pKeyboard->GetPress(DIK_U))
+	{
+		m_fSubMove += 0.1f;
+	}
+	else if (pKeyboard->GetPress(DIK_J))
+	{
+		m_fSubMove -= 0.1f;
+	}
+
+	useful::LimitNum(m_fSideMove, 0.1f, 100.0f);
+	useful::LimitNum(m_fAddMove, 0.1f, 100.0f);
+	useful::LimitNum(m_fSubMove, 0.1f, 100.0f);
+
+	CManager::GetDebugProc()->Print("----------------------------------\n");
+	CManager::GetDebugProc()->Print("横移動量   加減操作：[T/G]\n");
+	CManager::GetDebugProc()->Print("加速移動量 加減操作：[Y/H]\n");
+	CManager::GetDebugProc()->Print("減速移動量 加減操作：[U/J]\n");
+	CManager::GetDebugProc()->Print("----------------------------------\n");
+	CManager::GetDebugProc()->Print("横移動量  ：%f\n", m_fSideMove);
+	CManager::GetDebugProc()->Print("加速移動量：%f\n", m_fAddMove);
+	CManager::GetDebugProc()->Print("減速移動量：%f\n", m_fSubMove);
 
 #endif
 
+	// 目標向きを設定
+	m_destRot.y = atan2f(m_move.x, m_move.z);
+	m_destRot.y += D3DX_PI;
+
 #else	// デバッグ用歩行
+
 	// 移動操作
 	if (pKeyboard->GetPress(DIK_W))
 	{ // 奥移動の操作が行われた場合
@@ -987,6 +1022,7 @@ CPlayer::MOTION CPlayer::Move(void)
 		// 目標向きを更新
 		m_destRot.y = D3DXToRadian(270) + rot.y;
 	}
+
 #endif
 
 	// 歩行モーションを返す
@@ -1090,7 +1126,7 @@ void CPlayer::Motion(int nMotion)
 
 		case MOTION_BLOW_AWAY:	// 吹っ飛び状態
 
-			// 
+			// 無し
 
 			// 処理を抜ける
 			break;

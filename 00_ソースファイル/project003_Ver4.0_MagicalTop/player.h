@@ -39,7 +39,14 @@ class CObjectOrbit;		// オブジェクト軌跡クラス
 class CPlayer : public CObjectChara
 {
 public:
-	// 種類列挙
+	// テクスチャ列挙
+	typedef enum
+	{
+		TEXTURE_ORBIT = 0,	// 軌跡テクスチャ
+		TEXTURE_MAX,		// この列挙型の総数
+	}TEXTURE;
+
+	// モデル列挙
 	typedef enum
 	{
 		MODEL_WAIST,	// 腰
@@ -145,6 +152,7 @@ private:
 	void LoadSetup(void);							// セットアップ
 
 	// 静的メンバ変数
+	static const char *mc_apTextureFile[];	// テクスチャ定数
 	static const char *mc_apModelFile[];	// モデル定数
 
 	// メンバ変数
@@ -164,6 +172,11 @@ private:
 	int   m_nNumModel;		// パーツの総数
 	float m_fDisTarget;		// ターゲットとの距離
 	bool  m_bJump;			// ジャンプ状況
+
+	// TODO：デバッグ用
+	float m_fSideMove;	// 横移動量
+	float m_fAddMove;	// 横移動の加速量
+	float m_fSubMove;	// 横移動の減速量
 };
 
 #endif	// _PLAYER_H_

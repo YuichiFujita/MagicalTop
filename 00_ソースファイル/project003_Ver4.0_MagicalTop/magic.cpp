@@ -115,9 +115,6 @@ void CMagic::Update(void)
 		// ˆÚ“®—Ê‚ð‰ÁŽZ
 		m_pos += m_movePos;
 
-		// ˆÊ’u‚É•—‘¬‚ð‰ÁŽZ
-		m_pos += CSceneGame::GetStage()->GetVecWind();
-
 		if (CSceneGame::GetField()->IsPositionRange(m_pos))
 		{ // ’n–Ê‚Ì”ÍˆÍ“à‚Ìê‡
 

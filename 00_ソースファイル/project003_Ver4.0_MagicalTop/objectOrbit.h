@@ -35,14 +35,17 @@ public:
 	{
 		OFFSET_NORMAL = 0,	// 通常オフセット
 		OFFSET_ROD,			// 杖オフセット
-		OFFSET_MAX,			// この列挙型の総数
+		OFFSET_WIND,		// 風オフセット
+		OFFSET_MAX			// この列挙型の総数
 	};
 
-	// 種類列挙
-	enum TYPE
+	// 状態列挙
+	enum STATE
 	{
-		TYPE_NORMAL = 0,	// 通常テクスチャ
-		TYPE_MAX,			// この列挙型の総数
+		STATE_NONE = 0,	// 何もしない状態
+		STATE_NORMAL,	// 通常状態
+		STATE_VANISH,	// 消失状態
+		STATE_MAX		// この列挙型の総数
 	};
 
 	// コンストラクタ
@@ -61,6 +64,7 @@ public:
 		D3DXVECTOR3	*pPosPoint;		// 各頂点座標
 		D3DXCOLOR	*pColPoint;		// 各頂点カラー
 		D3DXMATRIX	*pMtxParent;	// 親のマトリックス
+		D3DXMATRIX	mtxVanish;		// 消失開始時の親のマトリックス
 		int nPart;		// 分割数
 		int nTexPart;	// テクスチャ分割数
 		bool bAlpha;	// 透明化状況
@@ -72,6 +76,7 @@ public:
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
 	void Draw(void);	// 描画
+	int GetState(void);	// 状態取得
 
 	// 静的メンバ関数
 	static CObjectOrbit *Create	// 生成
@@ -79,7 +84,6 @@ public:
 		D3DXMATRIX *pMtxParent,	// 親マトリックス
 		const D3DXCOLOR& rCol,	// 色
 		const OFFSET offset,	// オフセット
-		const TYPE type,		// 種類
 		const int nPart = DEFAULT_PART,			// 分割数
 		const int nTexPart = DEFAULT_TEXPART,	// テクスチャ分割数
 		const bool bAlpha = true				// 透明化状況
@@ -87,6 +91,7 @@ public:
 
 	// メンバ関数
 	void BindTexture(const int nTextureID);			// テクスチャ割当
+	void SetState(const STATE state);				// 状態設定
 	void SetMatrixParent(D3DXMATRIX *pMtxParent);	// 親のマトリックス設定
 	void SetColor(const D3DXCOLOR& rCol);			// 色設定
 	void SetOffset(const OFFSET offset);			// オフセット設定
@@ -101,14 +106,15 @@ protected:
 
 private:
 	// 静的メンバ変数
-	static const char *mc_apTextureFile[];	// テクスチャ定数
 	static const D3DXVECTOR3 mc_aOffset[][MAX_OFFSET];	// オフセットの位置加減量
 
 	// メンバ変数
 	LPDIRECT3DVERTEXBUFFER9 m_pVtxBuff;	// 頂点バッファへのポインタ
-	Orbit m_orbit;		// 軌跡の情報
-	int m_nNumVtx;		// 必要頂点数
-	int m_nTextureID;	// テクスチャインデックス
+	Orbit m_orbit;			// 軌跡の情報
+	STATE m_state;			// 状態
+	int m_nCounterState;	// 状態管理カウンター
+	int m_nNumVtx;			// 必要頂点数
+	int m_nTextureID;		// テクスチャインデックス
 };
 
 #endif	// _OBJECT_ORBIT_H_

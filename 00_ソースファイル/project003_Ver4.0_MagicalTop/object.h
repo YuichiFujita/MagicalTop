@@ -66,6 +66,7 @@ public:
 		LABEL_EXP,			// 経験値
 		LABEL_BULLET,		// 弾
 		LABEL_FLOWER,		// マナフラワー
+		LABEL_WIND,			// 風
 		LABEL_FIELD,		// 地面
 		LABEL_WALL,			// 壁
 		LABEL_SCENERY,		// 景色

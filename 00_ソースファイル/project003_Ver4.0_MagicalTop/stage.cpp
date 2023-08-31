@@ -15,14 +15,19 @@
 #include "target.h"
 #include "object3D.h"
 #include "collision.h"
+#include "wind.h"
 
 //************************************************************
 //	マクロ定義
 //************************************************************
 #define STAGE_SETUP_TXT	"data\\TXT\\stage.txt"	// セットアップテキスト相対パス
+
 #define AREA_PRIO	(2)			// エリア表示の優先順位
 #define AREA_ROT	(0.025f)	// エリアの回転量
 #define AREA_SUBROT	(0.003f)	// エリアの回転減算量
+
+#define WIND_CNT	(60)	// 風生成カウント
+#define WIND_SPAWN	(4)		// 風生成数
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -150,7 +155,6 @@ void CStage::Update(void)
 	// 変数を宣言
 	D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
-	D3DXVECTOR3 rotArea = m_pStageArea->GetRotation();				// エリア表示向き
 	D3DXVECTOR3 rotBarrier = m_pStageBarrier->GetRotation();		// バリア表示向き
 	float fRadiusPlayer = CSceneGame::GetPlayer()->GetRadius();		// プレイヤー半径
 
@@ -188,47 +192,39 @@ void CStage::Update(void)
 	m_pStageArea->SetPosition(posTarget);
 
 	// エリア表示の向きを設定
-	rotArea.y -= AREA_ROT - (AREA_SUBROT * m_area);
-	m_pStageArea->SetRotation(rotArea);
+	m_pStageArea->SetRotation(D3DXVECTOR3(0.0f, atan2f(posPlayer.x - posTarget.x, posPlayer.z - posTarget.z), 0.0f));
 
 	// 例外処理
 	assert(m_area != AREA_NONE);	// エリア外
 
-	// TODO：風速
-#if 0
-	if (m_stageWind.nCounter < 60)
-	{
+	if (m_stageWind.nCounter < WIND_CNT)
+	{ // カウンターが一定値より小さい場合
+
 		// カウンターを加算
 		m_stageWind.nCounter++;
 	}
 	else
-	{
+	{ // カウンターが一定値以上の場合
 
 		// 変数を宣言
+		D3DXVECTOR3 spawnPos;	// 生成位置
 		float fRot = (float)(rand() % 629 - 314) * 0.01f;	// 向き
-		float fScale = (float)(rand() % 8 + 1);				// 大きさ
-
-#if 0
-		int nRRRRot = rand() % 4;
-		float fRot = 0.0f;
-
-		for (int nCnt = 0; nCnt <= nRRRRot; nCnt++)
-		{
-			fRot += D3DX_PI * 0.5f;
-		}
-#endif
 
 		// カウンターを初期化
 		m_stageWind.nCounter = 0;
 
-		// 風のベクトルを設定
-		m_stageWind.vecWind.x = sinf(fRot) * fScale;
-		m_stageWind.vecWind.y = 0.0f;
-		m_stageWind.vecWind.z = cosf(fRot) * fScale;
-	}
+		for (int nCntWind = 0; nCntWind < WIND_SPAWN; nCntWind++)
+		{ // 風の生成数分繰り返す
 
-	CManager::GetDebugProc()->Print("%f %f %f\n", m_stageWind.vecWind.x, m_stageWind.vecWind.y, m_stageWind.vecWind.z);
-#endif
+			// 生成位置を設定
+			spawnPos.x = sinf(fRot + ((D3DX_PI * 0.5f) * nCntWind)) * m_stageLimit.fRadius;
+			spawnPos.y = 0.0f;
+			spawnPos.z = cosf(fRot + ((D3DX_PI * 0.5f) * nCntWind)) * m_stageLimit.fRadius;
+
+			// 風の生成
+			CWind::Create(spawnPos);
+		}
+	}
 }
 
 //============================================================
@@ -391,15 +387,6 @@ D3DXVECTOR3 CStage::GetStageBarrierPosition(void) const
 {
 	// バリアの位置を返す
 	return m_pStageBarrier->GetPosition();
-}
-
-//============================================================
-//	風の方向取得処理
-//============================================================
-D3DXVECTOR3 CStage::GetVecWind(void) const
-{
-	// 風の方向を返す
-	return m_stageWind.vecWind;
 }
 
 //============================================================
