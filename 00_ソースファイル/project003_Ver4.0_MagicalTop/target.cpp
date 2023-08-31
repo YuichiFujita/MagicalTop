@@ -35,9 +35,9 @@
 
 #define TARG_LIFE	(1000)		// ターゲットの体力
 #define TARG_POSUP	(160.0f)	// ターゲットのY位置の加算量
-#define STATE_HEAL_CNT	(240)	// 回復状態に移行するまでのカウンター
+#define STATE_HEAL_CNT	(480)	// 回復状態に移行するまでのカウンター
 #define NORMAL_CNT		(60)	// 通常状態に移行するまでのカウンター
-#define WAIT_HEAL_CNT	(60)	// 回復までのカウンター
+#define WAIT_HEAL_CNT	(180)	// 回復までのカウンター
 
 //************************************************************
 //	静的メンバ変数宣言

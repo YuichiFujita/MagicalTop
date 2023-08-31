@@ -26,7 +26,7 @@
 #define MAGIC_SETUP_TXT	"data\\TXT\\magic.txt"	// セットアップテキスト相対パス
 
 #define PLUS_HIT_RADIUS	(10.0f)	// 当たり判定の拡張値
-#define MOVE_INHALE		(10.0f)	// 吸い込まれ時の魔法の移動量
+#define MOVE_INHALE		(12.0f)	// 吸い込まれ時の魔法の移動量
 #define MOVE_DELETE		(3.0f)	// 消失時の魔法の移動量
 
 //************************************************************
