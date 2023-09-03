@@ -36,7 +36,7 @@ const char *CShadow::mc_apTextureFile[] =	// テクスチャ定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CShadow::CShadow(const D3DXVECTOR3& rSize, const float fMinAlpha, const float fMaxAlpha) : CObject3D(CObject::LABEL_NONE, SHADOW_PRIO), m_sizeOrigin(rSize), m_fMinAlpha(fMinAlpha), m_fMaxAlpha(fMaxAlpha)
+CShadow::CShadow(const float fMinAlpha, const float fMaxAlpha) : CObject3D(CObject::LABEL_NONE, SHADOW_PRIO), m_fMinAlpha(fMinAlpha), m_fMaxAlpha(fMaxAlpha)
 {
 	// メンバ変数をクリア
 	m_pParentObject = NULL;	// 親オブジェクト
@@ -151,7 +151,7 @@ CShadow *CShadow::Create
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pShadow = new CShadow(rSize, fMinAlpha, fMaxAlpha);	// 影
+		pShadow = new CShadow(fMinAlpha, fMaxAlpha);	// 影
 	}
 	else { assert(false); return NULL; }	// 使用中
 
@@ -173,6 +173,9 @@ CShadow *CShadow::Create
 		// テクスチャを割当
 		pShadow->BindTexture(nTextureID);
 
+		// 元の大きさを設定
+		pShadow->SetScalingOrigin(rSize);
+
 		// 親オブジェクトを設定
 		pShadow->SetParentObject(pObject);
 
@@ -193,6 +196,18 @@ CShadow *CShadow::Create
 		return pShadow;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	元の大きさの設定処理
+//============================================================
+void CShadow::SetScalingOrigin(const D3DXVECTOR3& rSize)
+{
+	// 引数の大きさを代入
+	m_sizeOrigin = rSize;
+
+	// 大きさの設定
+	CObject3D::SetScaling(rSize);
 }
 
 //============================================================

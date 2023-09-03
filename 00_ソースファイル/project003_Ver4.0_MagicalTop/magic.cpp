@@ -19,16 +19,23 @@
 #include "field.h"
 #include "stage.h"
 #include "bubble.h"
+#include "shadow.h"
 
 //************************************************************
 //	マクロ定義
 //************************************************************
 #define MAGIC_SETUP_TXT	"data\\TXT\\magic.txt"	// セットアップテキスト相対パス
 
+#define SHADOW_SIZE		(D3DXVECTOR3(10.0f, 0.0f, 10.0f))	// 影の大きさ
+#define SHADOW_ALPHA	(0.2f)	// 影のα値
+
+#define BUBBLE_POSY_UP	(20.0f)	// バブルの縦位置上昇量
 #define MAGIC_PRIO		(3)		// 魔法の優先順位
 #define PLUS_HIT_RADIUS	(10.0f)	// 当たり判定の拡張値
-#define MOVE_INHALE		(12.0f)	// 吸い込まれ時の魔法の移動量
-#define MOVE_DELETE		(3.0f)	// 消失時の魔法の移動量
+
+#define MOVE_INHALE_INSIDE	(8.0f)	// 吸い込まれ時の魔法の内側への移動量
+#define MOVE_INHALE_LEFT	(12.0f)	// 吸い込まれ時の魔法の左側への移動量
+#define MOVE_DELETE			(3.0f)	// 消失時の魔法の移動量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -46,6 +53,7 @@ CMagic::CMagic() : CObject(CObject::LABEL_MAGIC)
 	// メンバ変数をクリア
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
 	m_pBubble	= NULL;			// バブル情報
+	m_pShadow	= NULL;			// 影情報
 	m_pos		= VEC3_ZERO;	// 現在位置
 	m_movePos	= VEC3_ZERO;	// 位置移動量
 	m_rot		= VEC3_ZERO;	// 向き
@@ -69,6 +77,7 @@ HRESULT CMagic::Init(void)
 	// メンバ変数を初期化
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
 	m_pBubble	= NULL;			// バブル情報
+	m_pShadow	= NULL;			// 影情報
 	m_pos		= VEC3_ZERO;	// 現在位置
 	m_movePos	= VEC3_ZERO;	// 位置移動量
 	m_rot		= VEC3_ZERO;	// 向き
@@ -88,6 +97,16 @@ HRESULT CMagic::Init(void)
 	// 優先順位を設定
 	m_pBubble->SetPriority(MAGIC_PRIO);
 
+	// 影の生成
+	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, SHADOW_SIZE, this, SHADOW_ALPHA, SHADOW_ALPHA);
+	if (UNUSED(m_pShadow))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// 成功を返す
 	return S_OK;
 }
@@ -99,6 +118,9 @@ void CMagic::Uninit(void)
 {
 	// バブルの終了
 	m_pBubble->Uninit();
+
+	// 影の終了
+	m_pShadow->Uninit();
 
 	// 魔法を破棄
 	Release();
@@ -124,7 +146,7 @@ void CMagic::Update(void)
 
 			// 縦座標を地形に添わせる
 			m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
-			m_pos.y += m_pBubble->GetMaxRadius();
+			m_pos.y += m_pBubble->GetRadius() + BUBBLE_POSY_UP;
 		}
 
 		// バブルレベルを加算
@@ -147,13 +169,13 @@ void CMagic::Update(void)
 		D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトル正規化
 		
 		// 移動量を設定
-		m_movePos = vecTarg * MOVE_INHALE;
+		m_movePos = vecTarg * MOVE_INHALE_INSIDE;
 
 		// ベクトルを90度回転
 		vecTarg = D3DXVECTOR3(-vecTarg.z, 0.0f, vecTarg.x);
 
 		// 移動量を加算
-		m_movePos += vecTarg * MOVE_INHALE;
+		m_movePos += vecTarg * MOVE_INHALE_LEFT;
 
 		// 移動量を加算
 		m_pos += m_movePos;
@@ -163,7 +185,7 @@ void CMagic::Update(void)
 
 			// 縦座標を地形に添わせる
 			m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
-			m_pos.y += m_pBubble->GetRadius();
+			m_pos.y += m_pBubble->GetRadius() + BUBBLE_POSY_UP;
 		}
 
 		break;
@@ -192,11 +214,21 @@ void CMagic::Update(void)
 
 			// 縦座標を地形に添わせる
 			m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
-			m_pos.y += m_pBubble->GetRadius();
+			m_pos.y += m_pBubble->GetRadius() + BUBBLE_POSY_UP;
 		}
 
 		// バブルレベルを減算
 		m_pBubble->AddLevel(-1);
+
+		if (m_pBubble->GetLevel() <= 0)
+		{ // レベルが下がり切った場合
+
+			// オブジェクトの終了
+			Uninit();
+
+			// 関数を抜ける
+			return;
+		}
 
 		break;
 
@@ -219,6 +251,12 @@ void CMagic::Update(void)
 
 	// バブルの更新
 	m_pBubble->Update();
+
+	// 影の大きさを設定
+	m_pShadow->SetScalingOrigin(SHADOW_SIZE + (D3DXVECTOR3(1.0f, 0.0f, 1.0f) * m_pBubble->GetRadius()));
+
+	// 影の更新
+	m_pShadow->Update();
 
 	if (CollisionEnemy())
 	{ // 敵に当たっていた場合
@@ -371,36 +409,6 @@ D3DXVECTOR3 CMagic::GetRotation(void) const
 }
 
 //============================================================
-//	ターゲットとの当たり判定
-//============================================================
-bool CMagic::CollisionTarget(void)
-{
-	// ポインタを宣言
-	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
-
-	if (pTarget->GetState() != CTarget::STATE_DESTROY)
-	{ // ターゲットが破壊されていない場合
-
-		// ターゲットとの当たり判定
-		if (collision::Circle2D
-		( // 引数
-			m_pos,										// 判定位置
-			pTarget->GetPosition(),						// 判定目標位置
-			m_pBubble->GetRadius() + PLUS_HIT_RADIUS,	// 判定半径
-			pTarget->GetRadius()						// 判定目標半径
-		))
-		{ // 魔法に当たっていた場合
-
-			// 当たった判定を返す
-			return true;
-		}
-	}
-
-	// 当たっていない判定を返す
-	return false;
-}
-
-//============================================================
 //	敵との当たり判定
 //============================================================
 bool CMagic::CollisionEnemy(void)
@@ -447,15 +455,25 @@ bool CMagic::CollisionEnemy(void)
 				// 魔法判定
 				if (collision::Circle3D
 				( // 引数
-					m_pos,										// 判定位置
-					pObjCheck->GetPosition(),					// 判定目標位置
-					m_pBubble->GetRadius() + PLUS_HIT_RADIUS,	// 判定半径
-					pObjCheck->GetRadius()						// 判定目標半径
+					m_pos,	// 判定位置
+					pObjCheck->GetPosition(),	// 判定目標位置
+					m_pBubble->GetRadius(),		// 判定半径
+					CEnemy::GetStatusInfo(pObjCheck->GetType()).fCollRadius	// 判定目標半径
 				))
 				{ // 魔法に当たっていた場合
 
-					// 敵のヒット処理
-					pObjCheck->Hit((m_pBubble->GetLevel() / (m_pBubble->GetMaxLevel() / 2)) + 1);
+					if (m_state == STATE_NORMAL)
+					{ // 状態が通常の場合
+
+						// 敵のヒット処理
+						pObjCheck->Hit(2 * ((m_pBubble->GetLevel() / (m_pBubble->GetMaxLevel() / 2)) + 1));
+					}
+					else
+					{ // 状態が通常ではない場合
+
+						// 敵のヒット処理
+						pObjCheck->Hit(1);
+					}
 
 					// 当たった判定を返す
 					return true;

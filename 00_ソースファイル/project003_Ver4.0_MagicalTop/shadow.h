@@ -37,7 +37,7 @@ public:
 	}TEXTURE;
 
 	// コンストラクタ
-	CShadow(const D3DXVECTOR3& rSize, const float fMinAlpha, const float fMaxAlpha);
+	CShadow(const float fMinAlpha, const float fMaxAlpha);
 
 	// デストラクタ
 	~CShadow();
@@ -59,6 +59,7 @@ public:
 	);
 
 	// メンバ関数
+	void SetScalingOrigin(const D3DXVECTOR3& rSize);	// 元の大きさ設定
 	HRESULT SetDrawInfo(void);	// 描画情報設定
 
 private:
@@ -69,10 +70,10 @@ private:
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 
 	// メンバ変数
-	CObject *m_pParentObject;		// 親オブジェクト
-	const D3DXVECTOR3 m_sizeOrigin;	// 大きさ定数
-	const float m_fMinAlpha;		// 透明度の最小値定数
-	const float m_fMaxAlpha;		// 透明度の最大値定数
+	CObject *m_pParentObject;	// 親オブジェクト
+	D3DXVECTOR3 m_sizeOrigin;	// 元の大きさ
+	const float m_fMinAlpha;	// 透明度の最小値定数
+	const float m_fMaxAlpha;	// 透明度の最大値定数
 };
 
 #endif	// _SHADOW_H_

@@ -98,7 +98,7 @@ void CCamera::Uninit(void)
 //============================================================
 void CCamera::Update(void)
 {
-#if 0
+#if 1
 	// カメラの位置の更新 (追従)
 	MoveFollowCamera();
 #else

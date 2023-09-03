@@ -21,6 +21,7 @@
 //	前方宣言
 //************************************************************
 class CBubble;	// バブルクラス
+class CShadow;	// 影クラス
 
 //************************************************************
 //	クラス定義
@@ -80,7 +81,6 @@ public:
 
 private:
 	// メンバ関数
-	bool CollisionTarget(void);	// ターゲットとの当たり判定
 	bool CollisionEnemy(void);	// 敵との当たり判定
 
 	// 静的メンバ変数
@@ -88,6 +88,7 @@ private:
 
 	// メンバ変数
 	CBubble *m_pBubble;		// バブル情報
+	CShadow *m_pShadow;		// 影の情報
 	D3DXMATRIX	m_mtxWorld;	// ワールドマトリックス
 	D3DXVECTOR3	m_pos;		// 現在位置
 	D3DXVECTOR3	m_movePos;	// 位置移動量

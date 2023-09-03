@@ -24,9 +24,9 @@
 #define HURRICANE_NUMAROUND		(4)			// ハリケーンの渦の周回数
 #define HURRICANE_PATTERN		(32)		// ハリケーンの渦の分割数
 #define HURRICANE_MOVEROT		(-0.5f)		// ハリケーンの向きの変更量
-#define HURRICANE_THICKNESS		(19.5f)		// ハリケーンのポリゴンの太さ
+#define HURRICANE_THICKNESS		(22.5f)		// ハリケーンのポリゴンの太さ
 #define HURRICANE_OUTERPLUS		(3.5f)		// ハリケーンのポリゴン外周のY座標加算量
-#define HURRICANE_SETWIDTH		(15.0f)		// ハリケーンの生成時の横ずれ量
+#define HURRICANE_SETWIDTH		(100.0f)	// ハリケーンの生成時の横ずれ量
 #define HURRICANE_SETALPHA		(1.0f)		// ハリケーンの生成時の透明度
 #define HURRICANE_ADDWIDTH		(3.0f)		// ハリケーンの横ずれの加算量
 #define HURRICANE_ADDHEIGHT		(3.8f)		// ハリケーンの縦ずれの加算量

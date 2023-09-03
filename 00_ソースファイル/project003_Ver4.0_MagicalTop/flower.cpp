@@ -25,8 +25,8 @@
 //************************************************************
 #define FLOWER_PRIO	(4)	// マナフラワーの優先順位
 
+#define SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 #define SHADOW_ALPHA	(0.2f)	// 影のα値
-#define FLOWER_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -73,7 +73,7 @@ HRESULT CFlower::Init(void)
 	m_nLife = 0;			// 寿命
 
 	// 影の生成
-	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, FLOWER_SHADOW_SIZE, this, SHADOW_ALPHA, SHADOW_ALPHA);
+	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, SHADOW_SIZE, this, SHADOW_ALPHA, SHADOW_ALPHA);
 	if (UNUSED(m_pShadow))
 	{ // 非使用中の場合
 

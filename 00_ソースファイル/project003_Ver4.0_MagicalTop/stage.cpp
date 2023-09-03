@@ -24,8 +24,6 @@
 //************************************************************
 #define STAGE_SETUP_TXT	"data\\TXT\\stage.txt"	// セットアップテキスト相対パス
 
-#define HURRICANE_PLUS_POSY	(-50.0f)	// ハリケーン生成位置の加算量
-
 #define AREA_PRIO	(2)			// エリア表示の優先順位
 #define AREA_ROT	(0.025f)	// エリアの回転量
 #define AREA_SUBROT	(0.003f)	// エリアの回転減算量
@@ -186,7 +184,7 @@ void CStage::Update(void)
 	//	ハリケーンの更新
 	//--------------------------------------------------------
 	// ハリケーンの位置を設定
-	m_pHurricane->SetPosition(D3DXVECTOR3(posCenter.x, posCenter.y - HURRICANE_PLUS_POSY, posCenter.z));
+	m_pHurricane->SetPosition(posCenter);
 
 	// ハリケーンの更新
 	m_pHurricane->Update();

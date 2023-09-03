@@ -56,8 +56,8 @@
 #define AWAY_UP_MOVE	(30.0f)		// 吹っ飛び時の上移動量
 #define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
 
-#define MOVE_INSIDE			(2.0f)	// 内側への移動量
-#define MOVE_OUTSIDE		(3.0f)	// 外側への移動量
+#define MOVE_INSIDE			(1.5f)	// 内側への移動量
+#define MOVE_OUTSIDE		(2.5f)	// 外側への移動量
 #define MOVE_LEFT			(0.5f)	// 左側への移動量
 #define MOVE_LEFT_ACCELE	(1.5f)	// 左移動量の加速
 #define MOVE_LEFT_DECELE	(0.25f)	// 左移動量の減速

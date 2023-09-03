@@ -106,6 +106,7 @@ public:
 	virtual D3DXVECTOR3 GetRotation(void) const;		// Œü‚«æ“¾
 	virtual D3DXVECTOR3 GetScaling(void) const;			// ‘å‚«‚³æ“¾
 	virtual int GetState(void) const;					// ó‘Ôæ“¾
+	virtual int GetType(void) const;					// í—Şæ“¾
 	virtual float GetRadius(void) const;				// ”¼Œaæ“¾
 	virtual float GetHeight(void) const;				// c•æ“¾
 

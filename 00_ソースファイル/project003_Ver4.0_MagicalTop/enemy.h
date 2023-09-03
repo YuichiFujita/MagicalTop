@@ -94,6 +94,7 @@ public:
 		float	fBullMove;			// 弾の移動量
 		float	fShadowRadius;		// 影の半径
 		float	fSpawnHeight;		// 生成するY座標
+		float	fCollRadius;		// 当たり判定の半径
 		float	fRadius;			// 半径
 		float	fHeight;			// 縦幅
 		float	fForwardMove;		// 前進の移動量
@@ -125,6 +126,7 @@ public:
 		const int nNum,	// 生成数
 		const TYPE type	// 種類
 	);
+	static StatusInfo GetStatusInfo(const int nType);	// ステータス情報取得
 	static void SetAllVanish(void);	// 全消失
 	static int GetNumAll(void);		// 総数取得
 
@@ -137,6 +139,7 @@ public:
 	D3DXVECTOR3 GetOldPosition(void) const;			// 過去位置取得
 	D3DXVECTOR3 GetMovePosition(void) const;		// 位置移動量取得
 	D3DXVECTOR3 GetMoveRotation(void) const;		// 向き変更量取得
+	int GetType(void) const;						// 種類取得
 	int GetState(void) const;						// 状態取得
 	float GetRadius(void) const;					// 半径取得
 	float GetHeight(void) const;					// 縦幅取得
@@ -190,6 +193,7 @@ private:
 	int m_nCounterBubble;			// バブル管理カウンター
 	int m_nCounterState;			// 状態管理カウンター
 	int m_nCounterAtk;				// 攻撃管理カウンター
+	const TYPE m_type;				// 種類定数
 	const StatusInfo m_status;		// ステータス定数
 	const PartsInfo m_parts;		// パーツ定数
 	const CMotion::Info m_motion;	// モーション定数

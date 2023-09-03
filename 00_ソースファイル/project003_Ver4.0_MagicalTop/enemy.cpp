@@ -111,16 +111,16 @@ const char *CEnemyCar::mc_apModelFile[] =	// 戦車モデル定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_status(m_aStatusInfo[type]), m_parts(m_aPartsInfo[type]), m_motion(m_aMotionInfo[type])
+CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_type(type), m_status(m_aStatusInfo[type]), m_parts(m_aPartsInfo[type]), m_motion(m_aMotionInfo[type])
 {
 	// メンバ変数をクリア
-	m_pShadow  = NULL;			// 影の情報
-	m_pWarning = NULL;			// 警告の情報
-	m_pBubble  = NULL;			// バブルの情報
-	m_oldPos   = VEC3_ZERO;		// 過去位置
-	m_movePos  = VEC3_ZERO;		// 位置移動量
-	m_moveRot  = VEC3_ZERO;		// 向き変更量
-	m_state    = STATE_SPAWN;	// 状態
+	m_pShadow	= NULL;			// 影の情報
+	m_pWarning	= NULL;			// 警告の情報
+	m_pBubble	= NULL;			// バブルの情報
+	m_oldPos	= VEC3_ZERO;	// 過去位置
+	m_movePos	= VEC3_ZERO;	// 位置移動量
+	m_moveRot	= VEC3_ZERO;	// 向き変更量
+	m_state		= STATE_SPAWN;	// 状態
 	m_nCounterBubble = 0;		// バブル管理カウンター
 	m_nCounterState = 0;		// 状態管理カウンター
 	m_nCounterAtk = 0;			// 攻撃管理カウンター
@@ -414,6 +414,15 @@ void CEnemy::RandomSpawn
 }
 
 //============================================================
+//	ステータス情報取得処理
+//============================================================
+CEnemy::StatusInfo CEnemy::GetStatusInfo(const int nType)
+{
+	// 引数の種類のステータス情報を返す
+	return m_aStatusInfo[nType];
+}
+
+//============================================================
 //	全消失処理
 //============================================================
 void CEnemy::SetAllVanish(void)
@@ -559,6 +568,15 @@ int CEnemy::GetState(void) const
 {
 	// 状態を返す
 	return m_state;
+}
+
+//============================================================
+//	種類取得処理
+//============================================================
+int CEnemy::GetType(void) const
+{
+	// 種類を返す
+	return m_type;
 }
 
 //============================================================
@@ -1819,6 +1837,12 @@ void CEnemy::LoadSetup(void)
 
 								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
 								fscanf(pFile, "%d", &m_aStatusInfo[nType].nExp);	// 経験値生成量を読み込む
+							}
+							else if (strcmp(&aString[0], "COLL_RADIUS") == 0)
+							{ // 読み込んだ文字列が COLL_RADIUS の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fCollRadius);	// 当たり判定の半径を読み込む
 							}
 							else if (strcmp(&aString[0], "RADIUS") == 0)
 							{ // 読み込んだ文字列が RADIUS の場合
