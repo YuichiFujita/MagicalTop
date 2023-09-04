@@ -56,10 +56,10 @@
 #define AWAY_UP_MOVE	(30.0f)		// 吹っ飛び時の上移動量
 #define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
 
-#define MOVE_INSIDE			(1.5f)	// 内側への移動量
-#define MOVE_OUTSIDE		(2.5f)	// 外側への移動量
-#define MOVE_LEFT			(0.5f)	// 左側への移動量
-#define MOVE_LEFT_ACCELE	(1.5f)	// 左移動量の加速
+#define MOVE_INSIDE			(1.2f)	// 内側への移動量
+#define MOVE_OUTSIDE		(2.2f)	// 外側への移動量
+#define MOVE_LEFT			(0.4f)	// 左側への移動量
+#define MOVE_LEFT_ACCELE	(1.2f)	// 左移動量の加速
 #define MOVE_LEFT_DECELE	(0.25f)	// 左移動量の減速
 
 //************************************************************
@@ -117,9 +117,11 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 	m_fDisTarget	= 0.0f;				// ターゲットとの距離
 	m_bJump			= false;			// ジャンプ状況
 
-	m_fSideMove = MOVE_LEFT;		// 横移動量
-	m_fAddMove  = MOVE_LEFT_ACCELE;	// 横移動の加速量
-	m_fSubMove  = MOVE_LEFT_DECELE;	// 横移動の減速量
+	m_fInSideMove	= MOVE_INSIDE;		// 内側移動量
+	m_fOutSideMove	= MOVE_OUTSIDE;		// 外側移動量
+	m_fSideMove		= MOVE_LEFT;		// 横移動量
+	m_fAddMove		= MOVE_LEFT_ACCELE;	// 横移動の加速量
+	m_fSubMove		= MOVE_LEFT_DECELE;	// 横移動の減速量
 }
 
 //============================================================
@@ -155,9 +157,11 @@ HRESULT CPlayer::Init(void)
 	m_fDisTarget	= 0.0f;				// ターゲットとの距離
 	m_bJump			= true;				// ジャンプ状況
 
-	m_fSideMove = MOVE_LEFT;		// 横移動量
-	m_fAddMove  = MOVE_LEFT_ACCELE;	// 横移動の加速量
-	m_fSubMove  = MOVE_LEFT_DECELE;	// 横移動の減速量
+	m_fInSideMove	= MOVE_INSIDE;		// 内側移動量
+	m_fOutSideMove	= MOVE_OUTSIDE;		// 外側移動量
+	m_fSideMove		= MOVE_LEFT;		// 横移動量
+	m_fAddMove		= MOVE_LEFT_ACCELE;	// 横移動の加速量
+	m_fSubMove		= MOVE_LEFT_DECELE;	// 横移動の減速量
 
 	// 魔法マネージャーの生成
 	m_pMagic = CMagicManager::Create();
@@ -841,6 +845,8 @@ CPlayer::MOTION CPlayer::Move(void)
 
 #if 1
 
+#if 0
+
 	// ターゲット方向のベクトルを計算
 	vecTarg = CSceneGame::GetTarget()->GetPosition() - GetPosition();
 	vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
@@ -858,8 +864,6 @@ CPlayer::MOTION CPlayer::Move(void)
 		m_move -= vecTarg * MOVE_OUTSIDE;
 	}
 
-#if 0
-
 	// 左側への移動量を設定
 	m_move += vecSide * MOVE_LEFT;
 
@@ -875,6 +879,23 @@ CPlayer::MOTION CPlayer::Move(void)
 	}
 
 #else
+
+	// ターゲット方向のベクトルを計算
+	vecTarg = CSceneGame::GetTarget()->GetPosition() - GetPosition();
+	vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
+	D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトルの正規化
+
+	// 横方向ベクトルを計算
+	vecSide = D3DXVECTOR3(vecTarg.z, 0.0f, -vecTarg.x);
+	
+	// 内側への移動量を設定
+	m_move += vecTarg * m_fInSideMove;
+
+	if (pKeyboard->GetPress(DIK_W) || pPad->GetPress(CInputPad::KEY_L1))
+	{
+		// 外側への移動量を追加
+		m_move -= vecTarg * m_fOutSideMove;
+	}
 
 	// 左側への移動量を設定
 	m_move += vecSide * m_fSideMove;
@@ -915,19 +936,41 @@ CPlayer::MOTION CPlayer::Move(void)
 	{
 		m_fSubMove -= 0.1f;
 	}
+	if (pKeyboard->GetPress(DIK_I))
+	{
+		m_fInSideMove += 0.1f;
+	}
+	else if (pKeyboard->GetPress(DIK_K))
+	{
+		m_fInSideMove -= 0.1f;
+	}
+	if (pKeyboard->GetPress(DIK_O))
+	{
+		m_fOutSideMove += 0.1f;
+	}
+	else if (pKeyboard->GetPress(DIK_L))
+	{
+		m_fOutSideMove -= 0.1f;
+	}
 
 	useful::LimitNum(m_fSideMove, 0.1f, 100.0f);
 	useful::LimitNum(m_fAddMove, 0.1f, 100.0f);
 	useful::LimitNum(m_fSubMove, 0.1f, 100.0f);
+	useful::LimitNum(m_fInSideMove, 0.1f, 100.0f);
+	useful::LimitNum(m_fOutSideMove, 0.1f, 100.0f);
 
 	CManager::GetDebugProc()->Print("----------------------------------\n");
 	CManager::GetDebugProc()->Print("横移動量   加減操作：[T/G]\n");
 	CManager::GetDebugProc()->Print("加速移動量 加減操作：[Y/H]\n");
 	CManager::GetDebugProc()->Print("減速移動量 加減操作：[U/J]\n");
+	CManager::GetDebugProc()->Print("内側移動量 加減操作：[I/K]\n");
+	CManager::GetDebugProc()->Print("外側移動量 加減操作：[O/L]\n");
 	CManager::GetDebugProc()->Print("----------------------------------\n");
 	CManager::GetDebugProc()->Print("横移動量  ：%f\n", m_fSideMove);
 	CManager::GetDebugProc()->Print("加速移動量：%f\n", m_fAddMove);
 	CManager::GetDebugProc()->Print("減速移動量：%f\n", m_fSubMove);
+	CManager::GetDebugProc()->Print("内側移動量：%f\n", m_fInSideMove);
+	CManager::GetDebugProc()->Print("外側移動量：%f\n", m_fOutSideMove);
 
 #endif
 

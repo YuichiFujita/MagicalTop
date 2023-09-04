@@ -165,10 +165,10 @@ void CObjectTornado::Draw(void)
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 	CTexture *pTexture = CManager::GetTexture();						// テクスチャへのポインタ
 
-	// ポリゴンの裏面のみを表示状態にする
+	// ポリゴンの表示状態を設定
 	pDevice->SetRenderState(D3DRS_CULLMODE, m_tornado.cull);
 
-	// ライティングを無効にする
+	// ライティングを設定
 	pDevice->SetRenderState(D3DRS_LIGHTING, m_tornado.bLight);
 
 	// αテストを有効にする

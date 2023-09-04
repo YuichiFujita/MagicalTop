@@ -174,9 +174,11 @@ private:
 	bool  m_bJump;			// ジャンプ状況
 
 	// TODO：デバッグ用
-	float m_fSideMove;	// 横移動量
-	float m_fAddMove;	// 横移動の加速量
-	float m_fSubMove;	// 横移動の減速量
+	float m_fInSideMove;	// 内側移動量
+	float m_fOutSideMove;	// 外側移動量
+	float m_fSideMove;		// 横移動量
+	float m_fAddMove;		// 横移動の加速量
+	float m_fSubMove;		// 横移動の減速量
 };
 
 #endif	// _PLAYER_H_

@@ -28,15 +28,18 @@ CObject3D::CObject3D()
 {
 	// メンバ変数をクリア
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
-	m_pVtxBuff = NULL;			// 頂点バッファへのポインタ
-	m_pos	= VEC3_ZERO;		// 位置
-	m_rot	= VEC3_ZERO;		// 向き
-	m_size	= VEC3_ZERO;		// 大きさ
-	m_col	= XCOL_WHITE;		// 色
-	m_func	= D3DCMP_ALWAYS;	// Zテスト設定
-	m_bZEnable	= false;		// Zバッファの使用状況
-	m_bLight	= false;		// ライティング状況
-	m_nTextureID = 0;			// テクスチャインデックス
+	m_pVtxBuff		= NULL;			// 頂点バッファへのポインタ
+	m_pPosGapBuff	= NULL;			// 座標のずれバッファ
+	m_pos		= VEC3_ZERO;		// 位置
+	m_rot		= VEC3_ZERO;		// 向き
+	m_size		= VEC3_ZERO;		// 大きさ
+	m_col		= XCOL_WHITE;		// 色
+	m_origin	= ORIGIN_CENTER;	// 原点
+	m_cull		= D3DCULL_CCW;		// カリング状況
+	m_func		= D3DCMP_ALWAYS;	// Zテスト設定
+	m_bZEnable	= false;			// Zバッファの使用状況
+	m_bLight	= false;			// ライティング状況
+	m_nTextureID = 0;				// テクスチャインデックス
 }
 
 //============================================================
@@ -46,15 +49,18 @@ CObject3D::CObject3D(const CObject::LABEL label, const int nPriority) : CObject(
 {
 	// メンバ変数をクリア
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
-	m_pVtxBuff = NULL;			// 頂点バッファへのポインタ
-	m_pos	= VEC3_ZERO;		// 位置
-	m_rot	= VEC3_ZERO;		// 向き
-	m_size	= VEC3_ZERO;		// 大きさ
-	m_col	= XCOL_WHITE;		// 色
-	m_func	= D3DCMP_ALWAYS;	// Zテスト設定
-	m_bZEnable	= false;		// Zバッファの使用状況
-	m_bLight	= false;		// ライティング状況
-	m_nTextureID = 0;			// テクスチャインデックス
+	m_pVtxBuff		= NULL;			// 頂点バッファへのポインタ
+	m_pPosGapBuff	= NULL;			// 座標のずれバッファ
+	m_pos		= VEC3_ZERO;		// 位置
+	m_rot		= VEC3_ZERO;		// 向き
+	m_size		= VEC3_ZERO;		// 大きさ
+	m_col		= XCOL_WHITE;		// 色
+	m_origin	= ORIGIN_CENTER;	// 原点
+	m_cull		= D3DCULL_CCW;		// カリング状況
+	m_func		= D3DCMP_ALWAYS;	// Zテスト設定
+	m_bZEnable	= false;			// Zバッファの使用状況
+	m_bLight	= false;			// ライティング状況
+	m_nTextureID = 0;				// テクスチャインデックス
 }
 
 //============================================================
@@ -75,15 +81,17 @@ HRESULT CObject3D::Init(void)
 
 	// メンバ変数を初期化
 	memset(&m_mtxWorld, 0, sizeof(m_mtxWorld));	// ワールドマトリックス
-	m_pVtxBuff = NULL;			// 頂点バッファへのポインタ
-	m_pos	= VEC3_ZERO;		// 位置
-	m_rot	= VEC3_ZERO;		// 向き
-	m_size	= VEC3_ZERO;		// 大きさ
-	m_col	= XCOL_WHITE;		// 色
-	m_func	= D3DCMP_LESSEQUAL;	// Zテスト設定
-	m_bZEnable	= true;			// Zバッファの使用状況
-	m_bLight	= true;			// ライティング状況
-	m_nTextureID = NONE_IDX;	// テクスチャインデックス
+	m_pVtxBuff		= NULL;			// 頂点バッファへのポインタ
+	m_pPosGapBuff	= NULL;			// 座標のずれバッファ
+	m_pos		= VEC3_ZERO;		// 位置
+	m_rot		= VEC3_ZERO;		// 向き
+	m_size		= VEC3_ZERO;		// 大きさ
+	m_col		= XCOL_WHITE;		// 色
+	m_origin	= ORIGIN_CENTER;	// 原点
+	m_func		= D3DCMP_LESSEQUAL;	// Zテスト設定
+	m_bZEnable	= true;				// Zバッファの使用状況
+	m_bLight	= true;				// ライティング状況
+	m_nTextureID = NONE_IDX;		// テクスチャインデックス
 
 	if (UNUSED(m_pVtxBuff))
 	{ // 非使用中の場合
@@ -107,6 +115,22 @@ HRESULT CObject3D::Init(void)
 	}
 	else { assert(false); return E_FAIL; }	// 使用中
 
+	if (UNUSED(m_pPosGapBuff))
+	{ // 非使用中の場合
+
+		// 座標のずれバッファのメモリ確保
+		m_pPosGapBuff = new D3DXVECTOR3[MAX_VERTEX];
+
+		if (USED(m_pPosGapBuff))
+		{ // 確保に成功した場合
+
+			// メモリクリア
+			memset(m_pPosGapBuff, 0, sizeof(D3DXVECTOR3) * MAX_VERTEX);
+		}
+		else { assert(false); return E_FAIL; }	// 確保失敗
+	}
+	else { assert(false); return E_FAIL; }	// 使用中
+
 	// 頂点情報の設定
 	SetVtx();
 
@@ -126,6 +150,15 @@ void CObject3D::Uninit(void)
 		// メモリ開放
 		m_pVtxBuff->Release();
 		m_pVtxBuff = NULL;
+	}
+
+	// 座標のずれバッファの破棄
+	if (USED(m_pPosGapBuff))
+	{ // 座標のずれバッファが使用中の場合
+
+		// メモリ開放
+		delete[] m_pPosGapBuff;
+		m_pPosGapBuff = NULL;
 	}
 
 	// オブジェクト3Dを破棄
@@ -151,6 +184,9 @@ void CObject3D::Draw(void)
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 	CTexture *pTexture = CManager::GetTexture();						// テクスチャへのポインタ
+
+	// ポリゴンの表示状態を設定
+	pDevice->SetRenderState(D3DRS_CULLMODE, m_cull);
 
 	// ライティングを設定する
 	pDevice->SetRenderState(D3DRS_LIGHTING, m_bLight);
@@ -185,6 +221,9 @@ void CObject3D::Draw(void)
 	// ポリゴンの描画
 	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
 
+	// ポリゴンの表面のみを表示状態にする
+	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+
 	// ライティングを有効にする
 	pDevice->SetRenderState(D3DRS_LIGHTING, true);
 
@@ -202,6 +241,8 @@ CObject3D *CObject3D::Create
 	const D3DXVECTOR3& rSize,	// 大きさ
 	const D3DXVECTOR3& rRot,	// 向き
 	const D3DXCOLOR& rCol,		// 色
+	const ORIGIN origin,		// 原点
+	const D3DCULL cull,			// カリング状況
 	const bool bLight,			// ライティング状況
 	const D3DCMPFUNC func,		// Zテスト設定
 	const bool bZEnable			// Zバッファの使用状況
@@ -233,6 +274,9 @@ CObject3D *CObject3D::Create
 			return NULL;
 		}
 
+		// 原点を設定
+		pObject3D->SetOrigin(origin);
+
 		// 位置を設定
 		pObject3D->SetPosition(rPos);
 
@@ -244,6 +288,9 @@ CObject3D *CObject3D::Create
 
 		// 色を設定
 		pObject3D->SetColor(rCol);
+
+		// カリングを設定
+		pObject3D->SetCulling(cull);
 
 		// ライティングを設定
 		pObject3D->SetLighting(bLight);
@@ -323,7 +370,28 @@ void CObject3D::SetColor(const D3DXCOLOR& rCol)
 }
 
 //============================================================
-//	ライティング設定処理
+//	原点の設定処理
+//============================================================
+void CObject3D::SetOrigin(const ORIGIN origin)
+{
+	// 引数の原点を設定
+	m_origin = origin;
+
+	// 頂点情報の設定
+	SetVtx();
+}
+
+//============================================================
+//	カリング設定処理
+//============================================================
+void CObject3D::SetCulling(const D3DCULL cull)
+{
+	// 引数のカリング状況を設定
+	m_cull = cull;
+}
+
+//============================================================
+//	ライティングの設定処理
 //============================================================
 void CObject3D::SetLighting(const bool bLight)
 {
@@ -382,6 +450,29 @@ void CObject3D::SetVertexPosition(const int nID, const D3DXVECTOR3& rPos)
 }
 
 //============================================================
+//	座標のずれの設定処理
+//============================================================
+void CObject3D::SetGapPosition(const int nID, const D3DXVECTOR3& rPos)
+{
+	if (USED(m_pPosGapBuff))
+	{ // 使用中の場合
+
+		if (nID < MAX_VERTEX)
+		{ // インデックスが使用可能な場合
+
+			// 頂点のずれを設定
+			m_pPosGapBuff[nID] = rPos;
+		}
+		else
+		{ // インデックスが使用不可な場合
+
+			// 例外処理
+			assert(false);
+		}
+	}
+}
+
+//============================================================
 //	位置取得処理
 //============================================================
 D3DXVECTOR3 CObject3D::GetPosition(void) const
@@ -415,6 +506,24 @@ D3DXCOLOR CObject3D::GetColor(void) const
 {
 	// 色を返す
 	return m_col;
+}
+
+//============================================================
+//	原点取得処理
+//============================================================
+CObject3D::ORIGIN CObject3D::GetOrigin(void) const
+{
+	// 原点を返す
+	return m_origin;
+}
+
+//============================================================
+//	カリング取得処理
+//============================================================
+D3DCULL CObject3D::GetCulling(void) const
+{
+	// カリング状況を返す
+	return m_cull;
 }
 
 //============================================================
@@ -476,6 +585,35 @@ D3DXVECTOR3 CObject3D::GetVertexPosition(const int nID)
 	}
 
 	// 引数のインデックスの頂点座標を返す
+	return pos;
+}
+
+//============================================================
+//	座標のずれ取得処理
+//============================================================
+D3DXVECTOR3 CObject3D::GetGapPosition(const int nID)
+{
+	// 変数を宣言
+	D3DXVECTOR3 pos = VEC3_ZERO;	// 頂点のずれの代入用
+
+	if (USED(m_pPosGapBuff))
+	{ // 使用中の場合
+
+		if (nID < MAX_VERTEX)
+		{ // インデックスが使用可能な場合
+
+			// 頂点のずれを設定
+			pos = m_pPosGapBuff[nID];
+		}
+		else
+		{ // インデックスが使用不可な場合
+
+			// 例外処理
+			assert(false);
+		}
+	}
+
+	// 引数のインデックスの頂点のずれを返す
 	return pos;
 }
 
@@ -559,11 +697,39 @@ void CObject3D::SetVtx(void)
 	// 頂点バッファをロックし、頂点情報へのポインタを取得
 	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
-	// 頂点座標の設定
-	pVtx[0].pos = D3DXVECTOR3(-m_size.x * 0.5f,  m_size.y * 0.5f,  m_size.z * 0.5f);
-	pVtx[1].pos = D3DXVECTOR3( m_size.x * 0.5f,  m_size.y * 0.5f,  m_size.z * 0.5f);
-	pVtx[2].pos = D3DXVECTOR3(-m_size.x * 0.5f, -m_size.y * 0.5f, -m_size.z * 0.5f);
-	pVtx[3].pos = D3DXVECTOR3( m_size.x * 0.5f, -m_size.y * 0.5f, -m_size.z * 0.5f);
+	switch (m_origin)
+	{ // 原点ごとの処理
+	case ORIGIN_CENTER:	// 中央
+
+		// 頂点座標の設定
+		pVtx[0].pos = D3DXVECTOR3(-m_size.x * 0.5f,  m_size.y * 0.5f,  m_size.z * 0.5f);
+		pVtx[1].pos = D3DXVECTOR3( m_size.x * 0.5f,  m_size.y * 0.5f,  m_size.z * 0.5f);
+		pVtx[2].pos = D3DXVECTOR3(-m_size.x * 0.5f, -m_size.y * 0.5f, -m_size.z * 0.5f);
+		pVtx[3].pos = D3DXVECTOR3( m_size.x * 0.5f, -m_size.y * 0.5f, -m_size.z * 0.5f);
+
+		break;
+
+	case ORIGIN_DOWN:	// 下
+
+		// 頂点座標の設定
+		pVtx[0].pos = D3DXVECTOR3(-m_size.x * 0.5f, m_size.y,  m_size.z * 0.5f);
+		pVtx[1].pos = D3DXVECTOR3( m_size.x * 0.5f, m_size.y,  m_size.z * 0.5f);
+		pVtx[2].pos = D3DXVECTOR3(-m_size.x * 0.5f,     0.0f, -m_size.z * 0.5f);
+		pVtx[3].pos = D3DXVECTOR3( m_size.x * 0.5f,     0.0f, -m_size.z * 0.5f);
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
+
+	// 頂点からのずれ量を加算
+	for (int nCntVtx = 0; nCntVtx < MAX_VERTEX; nCntVtx++)
+	{ // 頂点数分繰り返す
+
+		pVtx[0].pos += m_pPosGapBuff[nCntVtx];
+	}
 
 	// 法線の設定・正規化
 	NormalizeNormal();

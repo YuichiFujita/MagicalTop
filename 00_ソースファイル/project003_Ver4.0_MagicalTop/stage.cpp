@@ -98,13 +98,15 @@ HRESULT CStage::Init(void)
 	// ステージエリア表示の生成
 	m_pStageArea = CObject3D::Create
 	( // 引数
-		VEC3_ZERO,		// 位置
-		VEC3_ZERO,		// 大きさ
-		VEC3_ZERO,		// 向き
-		XCOL_WHITE,		// 色
-		false,			// ライティング状況
-		D3DCMP_ALWAYS,	// Zテスト設定
-		false			// Zバッファの使用状況
+		VEC3_ZERO,					// 位置
+		VEC3_ZERO,					// 大きさ
+		VEC3_ZERO,					// 向き
+		XCOL_WHITE,					// 色
+		CObject3D::ORIGIN_CENTER,	// 原点
+		D3DCULL_CCW,				// カリング状況
+		false,						// ライティング状況
+		D3DCMP_ALWAYS,				// Zテスト設定
+		false						// Zバッファの使用状況
 	);
 	if (UNUSED(m_pStageArea))
 	{ // 非使用中の場合
@@ -123,13 +125,15 @@ HRESULT CStage::Init(void)
 	// ステージバリア表示の生成
 	m_pStageBarrier = CObject3D::Create
 	( // 引数
-		VEC3_ZERO,		// 位置
-		VEC3_ZERO,		// 大きさ
-		VEC3_ZERO,		// 向き
-		XCOL_WHITE,		// 色
-		false,			// ライティング状況
-		D3DCMP_ALWAYS,	// Zテスト設定
-		false			// Zバッファの使用状況
+		VEC3_ZERO,					// 位置
+		VEC3_ZERO,					// 大きさ
+		VEC3_ZERO,					// 向き
+		XCOL_WHITE,					// 色
+		CObject3D::ORIGIN_CENTER,	// 原点
+		D3DCULL_CCW,				// カリング状況
+		false,						// ライティング状況
+		D3DCMP_ALWAYS,				// Zテスト設定
+		false						// Zバッファの使用状況
 	);
 	if (UNUSED(m_pStageBarrier))
 	{ // 非使用中の場合

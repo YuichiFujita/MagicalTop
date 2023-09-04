@@ -230,6 +230,7 @@
     <ClCompile Include="valueUI.cpp" />
     <ClCompile Include="wall.cpp" />
     <ClCompile Include="waveManager.cpp" />
+    <ClCompile Include="weed.cpp" />
     <ClCompile Include="wind.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -307,6 +308,7 @@
     <ClInclude Include="valueUI.h" />
     <ClInclude Include="wall.h" />
     <ClInclude Include="waveManager.h" />
+    <ClInclude Include="weed.h" />
     <ClInclude Include="wind.h" />
   </ItemGroup>
   <ItemGroup>

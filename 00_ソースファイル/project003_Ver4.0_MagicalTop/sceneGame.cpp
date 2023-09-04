@@ -28,6 +28,7 @@
 #include "scenery.h"
 #include "sky.h"
 #include "flower.h"
+#include "weed.h"
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -176,6 +177,9 @@ HRESULT CSceneGame::Init(void)
 
 	// マナフラワーランダム生成
 	CFlower::RandomSpawn(30, CFlower::TYPE_NORMAL, D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);	// TODO：定数変更
+
+	// 草ランダム生成
+	CWeed::RandomSpawn(100, CWeed::TYPE_NORMAL, D3DXVECTOR3(40.0f, 60.0f, 0.0f));	// TODO：定数変更
 
 	// タイムを計測開始
 	m_pTimerManager->Start();

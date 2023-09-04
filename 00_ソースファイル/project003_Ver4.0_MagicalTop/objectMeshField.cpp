@@ -75,15 +75,15 @@ HRESULT CObjectMeshField::Init(void)
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
 	// メンバ変数を初期化
-	m_pVtxBuff = NULL;		// 頂点バッファ
-	m_pIdxBuff = NULL;		// インデックスバッファ
-	m_pPosGapBuff = NULL;	// 座標のずれバッファ
-	m_pNorBuff = NULL;		// 法線バッファ
-	m_pNumNorBuff = NULL;	// 法線の使用数バッファ
-	m_part = GRID2_ZERO;	// 分割数
-	m_nNumVtx = 0;			// 必要頂点数
-	m_nNumIdx = 0;			// 必要インデックス数
-	m_nTextureID = -1;		// テクスチャインデックス
+	m_pVtxBuff = NULL;			// 頂点バッファ
+	m_pIdxBuff = NULL;			// インデックスバッファ
+	m_pPosGapBuff = NULL;		// 座標のずれバッファ
+	m_pNorBuff = NULL;			// 法線バッファ
+	m_pNumNorBuff = NULL;		// 法線の使用数バッファ
+	m_part = GRID2_ZERO;		// 分割数
+	m_nNumVtx = 0;				// 必要頂点数
+	m_nNumIdx = 0;				// 必要インデックス数
+	m_nTextureID = NONE_IDX;	// テクスチャインデックス
 
 	m_meshField.pos = VEC3_ZERO;	// 位置
 	m_meshField.rot = VEC3_ZERO;	// 向き
@@ -801,6 +801,12 @@ void CObjectMeshField::SetGapPosition(const int nID, const D3DXVECTOR3& rPos)
 			// 頂点のずれを設定
 			m_pPosGapBuff[nID] = rPos;
 		}
+		else
+		{ // インデックスが使用不可な場合
+
+			// 例外処理
+			assert(false);
+		}
 	}
 }
 
@@ -940,7 +946,7 @@ int CObjectMeshField::GetNumVertex(void) const
 D3DXVECTOR3 CObjectMeshField::GetGapPosition(const int nID)
 {
 	// 変数を宣言
-	D3DXVECTOR3 pos;	// 頂点のずれの代入用
+	D3DXVECTOR3 pos = VEC3_ZERO;	// 頂点のずれの代入用
 
 	if (USED(m_pPosGapBuff))
 	{ // 使用中の場合
@@ -950,6 +956,12 @@ D3DXVECTOR3 CObjectMeshField::GetGapPosition(const int nID)
 
 			// 頂点のずれを設定
 			pos = m_pPosGapBuff[nID];
+		}
+		else
+		{ // インデックスが使用不可な場合
+
+			// 例外処理
+			assert(false);
 		}
 	}
 

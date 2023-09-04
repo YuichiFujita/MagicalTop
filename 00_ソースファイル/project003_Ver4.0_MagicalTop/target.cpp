@@ -33,7 +33,7 @@
 #define ADD_SIN_ROT	(D3DXToRadian(1))	// 浮遊向きの加算量
 #define ADD_CUBEROT	(D3DXVECTOR3(0.01f, 0.001f, 0.01f))	// キューブの回転量
 
-#define TARG_LIFE	(1000)		// ターゲットの体力
+#define TARG_LIFE	(3000)		// ターゲットの体力
 #define TARG_POSUP	(160.0f)	// ターゲットのY位置の加算量
 #define STATE_HEAL_CNT	(480)	// 回復状態に移行するまでのカウンター
 #define NORMAL_CNT		(60)	// 通常状態に移行するまでのカウンター

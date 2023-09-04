@@ -29,9 +29,9 @@
 #define SHADOW_SIZE		(D3DXVECTOR3(10.0f, 0.0f, 10.0f))	// 影の大きさ
 #define SHADOW_ALPHA	(0.2f)	// 影のα値
 
-#define BUBBLE_POSY_UP	(20.0f)	// バブルの縦位置上昇量
-#define MAGIC_PRIO		(3)		// 魔法の優先順位
-#define PLUS_HIT_RADIUS	(10.0f)	// 当たり判定の拡張値
+#define BUBBLE_POSY_UP	(20.0f)		// バブルの縦位置上昇量
+#define MAGIC_PRIO		(3)			// 魔法の優先順位
+#define MAGIC_DELETE	(350.0f)	// 魔法の削除範囲の半径
 
 #define MOVE_INHALE_INSIDE	(8.0f)	// 吸い込まれ時の魔法の内側への移動量
 #define MOVE_INHALE_LEFT	(12.0f)	// 吸い込まれ時の魔法の左側への移動量
@@ -240,8 +240,8 @@ void CMagic::Update(void)
 	if (m_state != STATE_DELETE)
 	{ // 消失状態ではない場合
 
-		// バリアとの当たり判定
-		if (CSceneGame::GetStage()->CollisionBarrier(m_pos, m_pBubble->GetRadius()))
+		// 消失範囲との当たり判定
+		if (collision::Circle2D(CSceneGame::GetTarget()->GetPosition(), m_pos, MAGIC_DELETE, m_pBubble->GetRadius()))
 		{ // 当たっていた場合
 
 			// 状態を設定
