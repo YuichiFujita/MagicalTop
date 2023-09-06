@@ -17,11 +17,6 @@
 #include "object.h"
 
 //************************************************************
-//	マクロ定義
-//************************************************************
-#define SEA_PRIO	(0)	// 海の優先順位
-
-//************************************************************
 //	前方宣言
 //************************************************************
 class CScrollMeshField;	// スクロールメッシュフィールドクラス
@@ -57,12 +52,12 @@ public:
 	static CSea *Create(void);	// 生成
 
 private:
-	// メンバ変数
-	float m_fSinRot;	// 波打ち向き
-
 	// 静的メンバ変数
-	CScrollMeshField *m_apScrollMeshField[TEXTURE_MAX];	// スクロールメッシュフィールドの情報
 	static const char *mc_apTextureFile[];	// テクスチャ定数
+
+	// メンバ変数
+	CScrollMeshField *m_apScrollMeshField[TEXTURE_MAX];	// スクロールメッシュフィールドの情報
+	float m_fSinRot;	// 波打ち向き
 };
 
 #endif	// _SEA_H_

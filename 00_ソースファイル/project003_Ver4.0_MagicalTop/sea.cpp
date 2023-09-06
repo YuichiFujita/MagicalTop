@@ -16,18 +16,20 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define SEA_DOWN	(D3DXVECTOR2(-0.0f, 0.002f))		// 海(下)の移動量
-#define SEA_UP		(D3DXVECTOR2(-0.0f, 0.0001f))		// 海(上)の移動量
+#define SEA_PRIO	(0)		// 海の優先順位
+#define ADD_ROT		(50)	// 頂点ごとのカーブ加算量
+#define ADD_UP		(40.0f)	// 波の最高点
+
+#define ADD_SINROT	(D3DXToRadian(0.5f))	// 毎フレームの波打ち向き加算量
+
+#define SEA_DOWN	(D3DXVECTOR2(-0.0f, 0.002f))	// 海(下)の移動量
+#define SEA_UP		(D3DXVECTOR2(-0.0f, 0.0001f))	// 海(上)の移動量
 
 #define SEA_ROT		(D3DXVECTOR3(0.0f, D3DXToRadian(45), 0.0f))	// 向き
 #define SEA_SIZE	(D3DXVECTOR2(24000.0f, 24000.0f))			// 大きさ
 
 #define SEA_COL		(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	// 色
 #define SEA_PART	(POSGRID2(128, 128))				// 分割数
-
-#define ADD_ROT		(50)	// 頂点ごとのカーブ加算量
-#define ADD_UP		(40.0f)	// 波の最高点
-#define ADD_SINROT	(D3DXToRadian(0.5f))	// 毎フレームの波打ち向き加算量
 
 //************************************************************
 //	静的メンバ変数宣言

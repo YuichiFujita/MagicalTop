@@ -22,8 +22,9 @@
 #include "expManager.h"
 #include "levelupManager.h"
 #include "objectGauge2D.h"
-#include "objectOrbit.h"
+#include "gaugeStar.h"
 #include "shadow.h"
+#include "objectOrbit.h"
 #include "enemy.h"
 #include "target.h"
 #include "stage.h"
@@ -36,7 +37,7 @@
 #define PLAYER_SETUP_TXT	"data\\TXT\\player.txt"				// セットアップテキスト相対パス
 #define PLAY_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 #define PLAY_ORBIT_COL		(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f))	// 軌跡の色
-#define PLAY_ORBIT_PRIO		(5)		// 軌跡の優先順位
+#define PLAY_ORBIT_PRIO		(4)		// 軌跡の優先順位
 
 #define MAX_MOVEX		(5.0f)		// 自動歩行時の速度割合用
 #define PULSROT_MOVEZ	(20)		// 前後移動時のプレイヤー向きの変更量
@@ -56,11 +57,12 @@
 #define AWAY_UP_MOVE	(30.0f)		// 吹っ飛び時の上移動量
 #define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
 
-#define MOVE_INSIDE			(1.2f)	// 内側への移動量
-#define MOVE_OUTSIDE		(2.2f)	// 外側への移動量
-#define MOVE_LEFT			(0.4f)	// 左側への移動量
-#define MOVE_LEFT_ACCELE	(1.2f)	// 左移動量の加速
-#define MOVE_LEFT_DECELE	(0.25f)	// 左移動量の減速
+#define MOVE_INSIDE			(0.55f)	// 内側への移動量
+#define MOVE_OUTSIDE		(2.55f)	// 外側への移動量
+#define MOVE_OUTSIDE_ACCELE	(1.0f)	// 外側移動の加速量
+#define MOVE_LEFT			(0.55f)	// 左側への移動量
+#define MOVE_LEFT_ACCELE	(1.2f)	// 左移動の加速量
+#define MOVE_LEFT_DECELE	(0.25f)	// 左移動の減速量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -105,6 +107,7 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 	m_pExp			= NULL;				// 経験値マネージャーの情報
 	m_pLevelup		= NULL;				// 強化マネージャーの情報
 	m_pLife			= NULL;				// 体力の情報
+	m_pDash			= NULL;				// ダッシュの情報
 	m_pShadow		= NULL;				// 影の情報
 	m_pOrbit		= NULL;				// 軌跡の情報
 	m_oldPos		= VEC3_ZERO;		// 過去位置
@@ -117,11 +120,12 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 	m_fDisTarget	= 0.0f;				// ターゲットとの距離
 	m_bJump			= false;			// ジャンプ状況
 
-	m_fInSideMove	= MOVE_INSIDE;		// 内側移動量
-	m_fOutSideMove	= MOVE_OUTSIDE;		// 外側移動量
-	m_fSideMove		= MOVE_LEFT;		// 横移動量
-	m_fAddMove		= MOVE_LEFT_ACCELE;	// 横移動の加速量
-	m_fSubMove		= MOVE_LEFT_DECELE;	// 横移動の減速量
+	m_fInSideMove		= MOVE_INSIDE;			// 内側移動量
+	m_fOutSideMove		= MOVE_OUTSIDE;			// 外側移動量
+	m_fAddOutSideMove	= MOVE_OUTSIDE_ACCELE;	// 外側移動の加速量
+	m_fSideMove			= MOVE_LEFT;			// 横移動量
+	m_fAddMove			= MOVE_LEFT_ACCELE;		// 横移動の加速量
+	m_fSubMove			= MOVE_LEFT_DECELE;		// 横移動の減速量
 }
 
 //============================================================
@@ -145,6 +149,7 @@ HRESULT CPlayer::Init(void)
 	m_pExp			= NULL;				// 経験値マネージャーの情報
 	m_pLevelup		= NULL;				// 強化マネージャーの情報
 	m_pLife			= NULL;				// 体力の情報
+	m_pDash			= NULL;				// ダッシュの情報
 	m_pShadow		= NULL;				// 影の情報
 	m_pOrbit		= NULL;				// 軌跡の情報
 	m_oldPos		= VEC3_ZERO;		// 過去位置
@@ -157,11 +162,12 @@ HRESULT CPlayer::Init(void)
 	m_fDisTarget	= 0.0f;				// ターゲットとの距離
 	m_bJump			= true;				// ジャンプ状況
 
-	m_fInSideMove	= MOVE_INSIDE;		// 内側移動量
-	m_fOutSideMove	= MOVE_OUTSIDE;		// 外側移動量
-	m_fSideMove		= MOVE_LEFT;		// 横移動量
-	m_fAddMove		= MOVE_LEFT_ACCELE;	// 横移動の加速量
-	m_fSubMove		= MOVE_LEFT_DECELE;	// 横移動の減速量
+	m_fInSideMove		= MOVE_INSIDE;			// 内側移動量
+	m_fOutSideMove		= MOVE_OUTSIDE;			// 外側移動量
+	m_fAddOutSideMove	= MOVE_OUTSIDE_ACCELE;	// 外側移動の加速量
+	m_fSideMove			= MOVE_LEFT;			// 横移動量
+	m_fAddMove			= MOVE_LEFT_ACCELE;		// 横移動の加速量
+	m_fSubMove			= MOVE_LEFT_DECELE;		// 横移動の減速量
 
 	// 魔法マネージャーの生成
 	m_pMagic = CMagicManager::Create();
@@ -205,6 +211,16 @@ HRESULT CPlayer::Init(void)
 		D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 裏ゲージ色
 	);
 	if (UNUSED(m_pLife))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// ダッシュの生成
+	m_pDash = CGaugeStar::Create(80, 40.0f, 4, 120, this, D3DXVECTOR3(0.0f, 50.0f, 0.0f), 45.0f, 8.0f);	// TODO：定数
+	if (UNUSED(m_pDash))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -256,8 +272,8 @@ HRESULT CPlayer::Init(void)
 	// 透明度を設定
 	SetAlpha(0.0f);
 
-	// 影を描画しない設定にする
-	m_pShadow->SetEnableDraw(false);
+	// 表示の設定
+	SetDisp(false);
 
 	// モーションの設定
 	SetMotion(MOTION_MOVE);
@@ -555,6 +571,9 @@ void CPlayer::SetDisp(const bool bDisp)
 
 		// 軌跡を描画する設定にする
 		m_pOrbit->SetEnableDraw(true);
+
+		// ダッシュを描画する設定にする
+		m_pDash->SetEnableDraw(true);
 	}
 	else
 	{ // 表示しない状態の場合
@@ -567,6 +586,9 @@ void CPlayer::SetDisp(const bool bDisp)
 
 		// 軌跡を描画しない設定にする
 		m_pOrbit->SetEnableDraw(false);
+
+		// ダッシュを描画しない設定にする
+		m_pDash->SetEnableDraw(false);
 	}
 }
 
@@ -845,10 +867,13 @@ CPlayer::MOTION CPlayer::Move(void)
 
 #if 1
 
-#if 0
+	// 変数を宣言
+	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
+	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+	float fDisTargRate = (1.0f / CSceneGame::GetStage()->GetStageLimit().fRadius) * m_fDisTarget;	// ターゲット距離の割合
 
 	// ターゲット方向のベクトルを計算
-	vecTarg = CSceneGame::GetTarget()->GetPosition() - GetPosition();
+	vecTarg = posTarget - posPlayer;
 	vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
 	D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトルの正規化
 
@@ -856,45 +881,17 @@ CPlayer::MOTION CPlayer::Move(void)
 	vecSide = D3DXVECTOR3(vecTarg.z, 0.0f, -vecTarg.x);
 	
 	// 内側への移動量を設定
-	m_move += vecTarg * MOVE_INSIDE;
+	m_move += vecTarg * (m_fInSideMove + (fDisTargRate * 3.0f));
 
-	if (pKeyboard->GetPress(DIK_W) || pPad->GetPress(CInputPad::KEY_L1))
+	if (pKeyboard->GetPress(DIK_W) || pPad->GetPressLStickY() < 0.0f)
 	{
 		// 外側への移動量を追加
-		m_move -= vecTarg * MOVE_OUTSIDE;
+		m_move -= vecTarg * (m_fOutSideMove + (fDisTargRate * 1.5f));
 	}
-
-	// 左側への移動量を設定
-	m_move += vecSide * MOVE_LEFT;
-
-	if (pKeyboard->GetPress(DIK_A) || pPad->GetPressLStickX() < 0.0f)
+	else if (pKeyboard->GetPress(DIK_S) || pPad->GetPressLStickY() < 0.0f)
 	{
-		// 左移動量を加速
-		m_move += vecSide * MOVE_LEFT_ACCELE;
-	}
-	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPressLStickX() > 0.0f)
-	{
-		// 左移動量を減速
-		m_move -= vecSide * MOVE_LEFT_DECELE;
-	}
-
-#else
-
-	// ターゲット方向のベクトルを計算
-	vecTarg = CSceneGame::GetTarget()->GetPosition() - GetPosition();
-	vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
-	D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトルの正規化
-
-	// 横方向ベクトルを計算
-	vecSide = D3DXVECTOR3(vecTarg.z, 0.0f, -vecTarg.x);
-	
-	// 内側への移動量を設定
-	m_move += vecTarg * m_fInSideMove;
-
-	if (pKeyboard->GetPress(DIK_W) || pPad->GetPress(CInputPad::KEY_L1))
-	{
-		// 外側への移動量を追加
-		m_move -= vecTarg * m_fOutSideMove;
+		// 内側への移動量を追加
+		m_move += vecTarg * m_fAddOutSideMove;
 	}
 
 	// 左側への移動量を設定
@@ -902,8 +899,12 @@ CPlayer::MOTION CPlayer::Move(void)
 
 	if (pKeyboard->GetPress(DIK_A) || pPad->GetPressLStickX() < 0.0f)
 	{
-		// 左移動量を加速
-		m_move += vecSide * m_fAddMove;
+		if (m_pDash->UseGauge())
+		{ // ゲージが使用できた場合
+
+			// 左移動量を加速
+			m_move += vecSide * m_fAddMove;
+		}
 	}
 	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPressLStickX() > 0.0f)
 	{
@@ -911,7 +912,29 @@ CPlayer::MOTION CPlayer::Move(void)
 		m_move -= vecSide * m_fSubMove;
 	}
 
+	// TODO：定数マクロ化
+
+	// 目標向きを設定
+	m_destRot.y = atan2f(posTarget.x - posPlayer.x, posTarget.z - posPlayer.z);
+	m_destRot.y -= 0.2f;
+	m_destRot.y -= D3DX_PI * 0.5f;
+
+	if (pKeyboard->GetPress(DIK_W) || pPad->GetPress(CInputPad::KEY_L1))
+	{
+		m_destRot.y += 0.5f;
+	}
+
+#if 0
+
 	// TODO：速度決める
+	if (pKeyboard->GetPress(DIK_R))
+	{
+		m_fAddOutSideMove += 0.1f;
+	}
+	else if (pKeyboard->GetPress(DIK_F))
+	{
+		m_fAddOutSideMove -= 0.1f;
+	}
 	if (pKeyboard->GetPress(DIK_T))
 	{
 		m_fSideMove += 0.1f;
@@ -953,6 +976,7 @@ CPlayer::MOTION CPlayer::Move(void)
 		m_fOutSideMove -= 0.1f;
 	}
 
+	useful::LimitNum(m_fAddOutSideMove, 0.1f, 100.0f);
 	useful::LimitNum(m_fSideMove, 0.1f, 100.0f);
 	useful::LimitNum(m_fAddMove, 0.1f, 100.0f);
 	useful::LimitNum(m_fSubMove, 0.1f, 100.0f);
@@ -960,12 +984,14 @@ CPlayer::MOTION CPlayer::Move(void)
 	useful::LimitNum(m_fOutSideMove, 0.1f, 100.0f);
 
 	CManager::GetDebugProc()->Print("----------------------------------\n");
+	CManager::GetDebugProc()->Print("内側加速量 加減操作：[R/F]\n");
 	CManager::GetDebugProc()->Print("横移動量   加減操作：[T/G]\n");
 	CManager::GetDebugProc()->Print("加速移動量 加減操作：[Y/H]\n");
 	CManager::GetDebugProc()->Print("減速移動量 加減操作：[U/J]\n");
 	CManager::GetDebugProc()->Print("内側移動量 加減操作：[I/K]\n");
 	CManager::GetDebugProc()->Print("外側移動量 加減操作：[O/L]\n");
 	CManager::GetDebugProc()->Print("----------------------------------\n");
+	CManager::GetDebugProc()->Print("内側加速量：%f\n", m_fAddOutSideMove);
 	CManager::GetDebugProc()->Print("横移動量  ：%f\n", m_fSideMove);
 	CManager::GetDebugProc()->Print("加速移動量：%f\n", m_fAddMove);
 	CManager::GetDebugProc()->Print("減速移動量：%f\n", m_fSubMove);
@@ -973,10 +999,6 @@ CPlayer::MOTION CPlayer::Move(void)
 	CManager::GetDebugProc()->Print("外側移動量：%f\n", m_fOutSideMove);
 
 #endif
-
-	// 目標向きを設定
-	m_destRot.y = atan2f(m_move.x, m_move.z);
-	m_destRot.y += D3DX_PI;
 
 #else	// デバッグ用歩行
 
@@ -1088,10 +1110,9 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion, D3DXVECTOR3& rPos)
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
-	if (pKeyboard->GetPress(DIK_SPACE) || pPad->GetPress(CInputPad::KEY_R1))
-	{
-		// 魔法の発射
-		m_pMagic->ShotMagic();
+	// 魔法の発射
+	if (m_pMagic->ShotMagic())
+	{ // 発射していた場合
 
 		// アクションモーションを設定
 		currentMotion = MOTION_ACTION;

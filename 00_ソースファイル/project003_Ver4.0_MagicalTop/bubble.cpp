@@ -17,7 +17,8 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define BUBBLE_PRIO	(4)	// バブル表示の優先順位
+#define BUBBLE_PRIO	(4)		// バブル表示の優先順位
+#define REV_SIZE	(0.25f)	// バブル拡大率の補正係数
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -36,8 +37,11 @@ const char *CBubble::mc_apModelFile[] =	// モデル定数
 CBubble::CBubble(const int nMaxLevel, const D3DXVECTOR3& rMaxScale) : CObjectModel(CObject::LABEL_NONE, BUBBLE_PRIO), m_maxScale(rMaxScale), m_nMaxLevel(nMaxLevel)
 {
 	// メンバ変数をクリア
-	m_pParentObject = NULL;	// 親オブジェクト
-	m_nLevel = 0;			// 大きさレベル
+	m_currentScale	= VEC3_ZERO;	// 現在の拡大率
+	m_destScale		= VEC3_ZERO;	// 目標の拡大率
+	m_pParentObject	= NULL;			// 親オブジェクト
+	m_fPosUp	= 0.0f;				// バブルのY位置加算量
+	m_nLevel	= 0;				// 大きさレベル
 }
 
 //============================================================
@@ -54,8 +58,11 @@ CBubble::~CBubble()
 HRESULT CBubble::Init(void)
 {
 	// メンバ変数を初期化
-	m_pParentObject = NULL;	// 親オブジェクト
-	m_nLevel = 0;			// 大きさレベル
+	m_currentScale	= VEC3_ZERO;	// 現在の拡大率
+	m_destScale		= VEC3_ZERO;	// 目標の拡大率
+	m_pParentObject	= NULL;			// 親オブジェクト
+	m_fPosUp	= 0.0f;				// バブルのY位置加算量
+	m_nLevel	= 0;				// 大きさレベル
 
 	// オブジェクトモデルの初期化
 	if (FAILED(CObjectModel::Init()))
@@ -84,6 +91,15 @@ void CBubble::Uninit(void)
 //============================================================
 void CBubble::Update(void)
 {
+	// 変数を宣言
+	D3DXVECTOR3 diffScale = VEC3_ZERO;	// 差分拡大率
+
+	// 差分拡大率を設定
+	diffScale = m_destScale - m_currentScale;
+
+	// 拡大率を設定
+	m_currentScale += diffScale * REV_SIZE;
+
 	// TODO：ポインタの確認もっときれいに
 	if (CObject::CheckUse(m_pParentObject))
 	{ // 親オブジェクトが使用されていた場合
@@ -97,10 +113,8 @@ void CBubble::Update(void)
 		posBubble = posParent;		// 親オブジェクトの座標代入
 		posBubble.y += m_fPosUp;	// Y位置上昇量を加算
 
-		// バブルの拡大率を求める
-		scaleBubble.x = m_nLevel * (m_maxScale.x / (float)m_nMaxLevel);
-		scaleBubble.y = m_nLevel * (m_maxScale.y / (float)m_nMaxLevel);
-		scaleBubble.z = m_nLevel * (m_maxScale.z / (float)m_nMaxLevel);
+		// バブルの拡大率を設定
+		scaleBubble = m_currentScale;
 
 		// 位置を設定
 		SetPosition(posBubble);
@@ -210,6 +224,11 @@ void CBubble::AddLevel(const int nAdd)
 
 	// 範囲内制限
 	useful::LimitNum(m_nLevel, 0, m_nMaxLevel);
+
+	// バブルの目標拡大率を設定
+	m_destScale.x = m_nLevel * (m_maxScale.x / (float)m_nMaxLevel);
+	m_destScale.y = m_nLevel * (m_maxScale.y / (float)m_nMaxLevel);
+	m_destScale.z = m_nLevel * (m_maxScale.z / (float)m_nMaxLevel);
 }
 
 //============================================================
@@ -222,6 +241,11 @@ void CBubble::SetLevel(const int nNum)
 
 	// 範囲内制限
 	useful::LimitNum(m_nLevel, 0, m_nMaxLevel);
+
+	// バブルの拡大率を設定
+	m_currentScale.x = m_nLevel * (m_maxScale.x / (float)m_nMaxLevel);
+	m_currentScale.y = m_nLevel * (m_maxScale.y / (float)m_nMaxLevel);
+	m_currentScale.z = m_nLevel * (m_maxScale.z / (float)m_nMaxLevel);
 }
 
 //============================================================

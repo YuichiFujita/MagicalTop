@@ -169,6 +169,7 @@
     <ClCompile Include="fade.cpp" />
     <ClCompile Include="field.cpp" />
     <ClCompile Include="flower.cpp" />
+    <ClCompile Include="gaugeStar.cpp" />
     <ClCompile Include="hurricane.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="levelupManager.cpp" />
@@ -249,6 +250,7 @@
     <ClInclude Include="fade.h" />
     <ClInclude Include="field.h" />
     <ClInclude Include="flower.h" />
+    <ClInclude Include="gaugeStar.h" />
     <ClInclude Include="hurricane.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="levelupManager.h" />

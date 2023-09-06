@@ -569,6 +569,9 @@ void CWaveManager::InitWaveStart(void)
 	// 大きさを設定
 	m_pObject2D->SetScaling(sizeWave);
 	m_pValue->SetScaling(sizeNum);
+
+	// プレイヤーのモーションを初期化
+	CSceneGame::GetPlayer()->SetMotion(CPlayer::MOTION_MOVE);
 }
 
 //============================================================

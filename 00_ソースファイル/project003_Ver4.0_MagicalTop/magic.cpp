@@ -33,6 +33,7 @@
 #define MAGIC_PRIO		(3)			// 魔法の優先順位
 #define MAGIC_DELETE	(350.0f)	// 魔法の削除範囲の半径
 
+#define MOVE_NORMAL			(0.1f)	// 通常時の魔法の移動量
 #define MOVE_INHALE_INSIDE	(8.0f)	// 吸い込まれ時の魔法の内側への移動量
 #define MOVE_INHALE_LEFT	(12.0f)	// 吸い込まれ時の魔法の左側への移動量
 #define MOVE_DELETE			(3.0f)	// 消失時の魔法の移動量
@@ -132,27 +133,38 @@ void CMagic::Uninit(void)
 void CMagic::Update(void)
 {
 	// 変数を宣言
-	D3DXVECTOR3 vecTarg;	// ターゲット位置
+	D3DXVECTOR3 vecTarg, vecSide;	// 吸い込み方向ベクトル
+
+	// ターゲット方向のベクトルを計算
+	vecTarg = CSceneGame::GetTarget()->GetPosition() - m_pos;
+	vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
+	D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトル正規化
+
+	// ターゲット横方向ベクトルを計算
+	vecSide = D3DXVECTOR3(-vecTarg.z, 0.0f, vecTarg.x);
 
 	switch (m_state)
 	{ // 状態ごとの処理
 	case STATE_NORMAL:	// 通常状態
 
 		// 移動量を加算
+		m_movePos += vecTarg * MOVE_NORMAL;
+		m_movePos += vecSide * MOVE_NORMAL;
+
+		// 移動量を加算
 		m_pos += m_movePos;
-
-		if (CSceneGame::GetField()->IsPositionRange(m_pos))
-		{ // 地面の範囲内の場合
-
-			// 縦座標を地形に添わせる
-			m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
-			m_pos.y += m_pBubble->GetRadius() + BUBBLE_POSY_UP;
-		}
 
 		// バブルレベルを加算
 		m_pBubble->AddLevel(1);
 
-		if (m_pBubble->GetLevel() >= m_statusInfo.nLife)
+		// 消失範囲との当たり判定
+		if (collision::Circle2D(CSceneGame::GetTarget()->GetPosition(), m_pos, MAGIC_DELETE, m_pBubble->GetRadius()))
+		{ // 当たっていた場合
+
+			// 状態を設定
+			m_state = STATE_DELETE;	// 消失状態
+		}
+		else if (m_pBubble->GetLevel() >= m_statusInfo.nLife)
 		{ // 寿命が来た場合
 
 			// 状態を設定
@@ -163,59 +175,31 @@ void CMagic::Update(void)
 
 	case STATE_INHALE:	// 吸い込まれ状態
 
-		// ターゲット方向のベクトルを計算
-		vecTarg = CSceneGame::GetTarget()->GetPosition() - m_pos;
-		vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
-		D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトル正規化
-		
 		// 移動量を設定
 		m_movePos = vecTarg * MOVE_INHALE_INSIDE;
-
-		// ベクトルを90度回転
-		vecTarg = D3DXVECTOR3(-vecTarg.z, 0.0f, vecTarg.x);
-
-		// 移動量を加算
-		m_movePos += vecTarg * MOVE_INHALE_LEFT;
+		m_movePos += vecSide * MOVE_INHALE_LEFT;
 
 		// 移動量を加算
 		m_pos += m_movePos;
 
-		if (CSceneGame::GetField()->IsPositionRange(m_pos))
-		{ // 地面の範囲内の場合
+		// 消失範囲との当たり判定
+		if (collision::Circle2D(CSceneGame::GetTarget()->GetPosition(), m_pos, MAGIC_DELETE, m_pBubble->GetRadius()))
+		{ // 当たっていた場合
 
-			// 縦座標を地形に添わせる
-			m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
-			m_pos.y += m_pBubble->GetRadius() + BUBBLE_POSY_UP;
+			// 状態を設定
+			m_state = STATE_DELETE;	// 消失状態
 		}
 
 		break;
 
 	case STATE_DELETE:	// 消失状態
-
-		// ターゲット方向のベクトルを計算
-		vecTarg = CSceneGame::GetTarget()->GetPosition() - m_pos;
-		vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
-		D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトル正規化
 		
 		// 移動量を設定
 		m_movePos = vecTarg * MOVE_DELETE;
-
-		// ベクトルを90度回転
-		vecTarg = D3DXVECTOR3(-vecTarg.z, 0.0f, vecTarg.x);
-
-		// 移動量を加算
-		m_movePos += vecTarg * MOVE_DELETE;
+		m_movePos += vecSide * MOVE_DELETE;
 
 		// 移動量を加算
 		m_pos += m_movePos;
-
-		if (CSceneGame::GetField()->IsPositionRange(m_pos))
-		{ // 地面の範囲内の場合
-
-			// 縦座標を地形に添わせる
-			m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
-			m_pos.y += m_pBubble->GetRadius() + BUBBLE_POSY_UP;
-		}
 
 		// バブルレベルを減算
 		m_pBubble->AddLevel(-1);
@@ -237,16 +221,12 @@ void CMagic::Update(void)
 		break;
 	}
 
-	if (m_state != STATE_DELETE)
-	{ // 消失状態ではない場合
+	if (CSceneGame::GetField()->IsPositionRange(m_pos))
+	{ // 地面の範囲内の場合
 
-		// 消失範囲との当たり判定
-		if (collision::Circle2D(CSceneGame::GetTarget()->GetPosition(), m_pos, MAGIC_DELETE, m_pBubble->GetRadius()))
-		{ // 当たっていた場合
-
-			// 状態を設定
-			m_state = STATE_DELETE;	// 消失状態
-		}
+		// 縦座標を地形に添わせる
+		m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
+		m_pos.y += m_pBubble->GetRadius() + BUBBLE_POSY_UP;
 	}
 
 	// バブルの更新

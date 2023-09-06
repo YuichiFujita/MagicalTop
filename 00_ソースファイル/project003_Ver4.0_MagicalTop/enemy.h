@@ -172,7 +172,8 @@ protected:
 	void CollisionNormalEnemy(D3DXVECTOR3& rPos);		// 通常時の敵との当たり判定
 	void SetDrawWarning(const bool bDraw);				// 警告の描画状況設定
 	void SetPositionWarning(const D3DXVECTOR3& rPos);	// 警告の位置設定
-	void SubBubble(void);	// バブル削除
+	void RandomRotation(void);	// ランダム回転
+	void SubBubble(void);		// バブル削除
 
 private:
 	// 静的メンバ変数

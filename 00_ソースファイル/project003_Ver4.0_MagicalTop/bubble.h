@@ -30,6 +30,14 @@ public:
 		MODEL_MAX			// この列挙型の総数
 	}MODEL;
 
+	// 状態列挙
+	typedef enum
+	{
+		STATE_NORMAL = 0,	// 通常状態
+		STATE_CHANGE,		// サイズ変動状態
+		STATE_MAX			// この列挙型の総数
+	}STATE;
+
 	// コンストラクタ
 	CBubble(const int nMaxLevel, const D3DXVECTOR3& rMaxScale);
 
@@ -72,11 +80,14 @@ private:
 	static const char *mc_apModelFile[];	// モデル定数
 
 	// メンバ変数
-	CObject *m_pParentObject;		// 親オブジェクト
+	D3DXVECTOR3 m_currentScale;	// 現在の拡大率
+	D3DXVECTOR3 m_destScale;	// 目標の拡大率
+	CObject *m_pParentObject;	// 親オブジェクト
+	float m_fPosUp;	// バブルのY位置加算量
+	int m_nLevel;	// 大きさレベル
+
 	const D3DXVECTOR3 m_maxScale;	// 最大拡大率定数
-	float m_fPosUp;			// バブルのY位置加算量
-	int m_nLevel;			// 大きさレベル
-	const int m_nMaxLevel;	// 最大レベル定数
+	const int m_nMaxLevel;			// 最大レベル定数
 };
 
 #endif	// _BUBBLE_H_

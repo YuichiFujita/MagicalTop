@@ -29,6 +29,7 @@ class CMagicManager;	// 魔法マネージャークラス
 class CExpManager;		// 経験値マネージャークラス
 class CLevelupManager;	// 強化マネージャークラス
 class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
+class CGaugeStar;		// 星ゲージクラス
 class CShadow;			// 影クラス
 class CObjectOrbit;		// オブジェクト軌跡クラス
 
@@ -160,6 +161,7 @@ private:
 	CExpManager		*m_pExp;		// 経験値マネージャーの情報
 	CLevelupManager	*m_pLevelup;	// 強化マネージャーの情報
 	CObjectGauge2D	*m_pLife;		// 体力の情報
+	CGaugeStar		*m_pDash;		// ダッシュの情報
 	CShadow			*m_pShadow;		// 影の情報
 	CObjectOrbit	*m_pOrbit;		// 軌跡の情報
 
@@ -174,11 +176,12 @@ private:
 	bool  m_bJump;			// ジャンプ状況
 
 	// TODO：デバッグ用
-	float m_fInSideMove;	// 内側移動量
-	float m_fOutSideMove;	// 外側移動量
-	float m_fSideMove;		// 横移動量
-	float m_fAddMove;		// 横移動の加速量
-	float m_fSubMove;		// 横移動の減速量
+	float m_fInSideMove;		// 内側移動量
+	float m_fOutSideMove;		// 外側移動量
+	float m_fAddOutSideMove;	// 外側移動の加速量
+	float m_fSideMove;			// 横移動量
+	float m_fAddMove;			// 横移動の加速量
+	float m_fSubMove;			// 横移動の減速量
 };
 
 #endif	// _PLAYER_H_

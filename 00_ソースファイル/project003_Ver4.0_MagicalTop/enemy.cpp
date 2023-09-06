@@ -45,8 +45,8 @@
 #define ENE_DEATH_POSY		(1300.0f)	// 死亡するY座標
 #define ENE_SUB_ALPHA		(0.02f)		// 消失時のα値減算量
 
-#define DAMAGE_CNT		(120)	// ダメージ状態維持カウント
-#define BUBBLE_SUB_CNT	(400)	// バブル消失カウント
+#define DAMAGE_CNT		(10)	// ダメージ状態維持カウント
+#define BUBBLE_SUB_CNT	(420)	// バブル消失カウント
 
 // 歩兵マクロ
 #define HUMAN_FALL	(5.5f)	// 歩兵生成時の落下速度
@@ -274,7 +274,7 @@ void CEnemy::Hit(const int nDmg)
 	// 変数を宣言
 	D3DXVECTOR3 pos = GetPosition();	// 敵位置
 
-	if (IsDeath() != true)
+	if (IsDeath() != true && m_state == STATE_NORMAL)
 	{ // 死亡フラグが立っていない場合
 
 		// レベルを加算
@@ -997,6 +997,25 @@ void CEnemy::SetPositionWarning(const D3DXVECTOR3& rPos)
 }
 
 //============================================================
+//	ランダム回転処理
+//============================================================
+void CEnemy::RandomRotation(void)
+{
+	// 変数を宣言
+	D3DXVECTOR3 rotEnemy = GetRotation();	// 敵向き
+
+	// TODO：randomどうすっぺ
+
+	// 向きを加算
+	rotEnemy.x += rand() % 5 * 0.001f;
+	rotEnemy.y += rand() % 5 * 0.001f;
+	rotEnemy.z += rand() % 5 * 0.001f;
+
+	// 向きを設定
+	SetRotation(rotEnemy);
+}
+
+//============================================================
 //	バブル削除処理
 //============================================================
 void CEnemy::SubBubble(void)
@@ -1126,6 +1145,9 @@ void CEnemyHuman::Update(void)
 			// 処理を抜ける
 			return;
 		}
+
+		// ランダム回転
+		RandomRotation();
 
 		break;
 
@@ -1413,6 +1435,9 @@ void CEnemyCar::Update(void)
 			// 処理を抜ける
 			return;
 		}
+
+		// ランダム回転
+		RandomRotation();
 
 		break;
 
