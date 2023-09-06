@@ -383,6 +383,7 @@ void CCamera::Follow(void)
 //============================================================
 void CCamera::Bargaining(void)
 {
+#if 1
 	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
 	{ // プレイヤー・ターゲットが使用されている場合
 
@@ -437,6 +438,26 @@ void CCamera::Bargaining(void)
 		m_aCamera[TYPE_MAIN].posR.y += diffPosR.y * REV_POS_R.y;
 		m_aCamera[TYPE_MAIN].posR.z += diffPosR.z * REV_POS_R.x;
 	}
+#else
+	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
+	{ // プレイヤー・ターゲットが使用されている場合
+
+		// カメラのY軸を回転
+		m_aCamera[TYPE_MAIN].rot.y += mouseMove.x * REV_ROT_MOUSE;
+
+		// カメラのX軸を回転
+		m_aCamera[TYPE_MAIN].rot.x += mouseMove.y * REV_ROT_MOUSE;
+	}
+
+	// 向きの補正
+	useful::LimitNum(m_aCamera[TYPE_MAIN].rot.x, LIMIT_ROT_LOW, LIMIT_ROT_HIGH);
+	useful::NormalizeRot(m_aCamera[TYPE_MAIN].rot.y);
+
+	// 注視点の更新
+	m_aCamera[TYPE_MAIN].posR.x = m_aCamera[TYPE_MAIN].posV.x + ((-m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));
+	m_aCamera[TYPE_MAIN].posR.y = m_aCamera[TYPE_MAIN].posV.y + ((-m_aCamera[TYPE_MAIN].fDis * cosf(m_aCamera[TYPE_MAIN].rot.x)));
+	m_aCamera[TYPE_MAIN].posR.z = m_aCamera[TYPE_MAIN].posV.z + ((-m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));
+#endif
 }
 
 //============================================================

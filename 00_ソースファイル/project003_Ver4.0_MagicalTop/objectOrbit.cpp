@@ -68,9 +68,6 @@ CObjectOrbit::~CObjectOrbit()
 //============================================================
 HRESULT CObjectOrbit::Init(void)
 {
-	// ポインタを宣言
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
-
 	// メンバ変数を初期化
 	m_pVtxBuff = NULL;			// 頂点バッファ
 	m_state = STATE_NORMAL;		// 状態

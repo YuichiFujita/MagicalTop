@@ -33,7 +33,7 @@
 #define MAGIC_PRIO		(3)			// 魔法の優先順位
 #define MAGIC_DELETE	(350.0f)	// 魔法の削除範囲の半径
 
-#define MOVE_NORMAL			(0.1f)	// 通常時の魔法の移動量
+#define MOVE_NORMAL			(0.05f)	// 通常時の魔法の移動量
 #define MOVE_INHALE_INSIDE	(8.0f)	// 吸い込まれ時の魔法の内側への移動量
 #define MOVE_INHALE_LEFT	(12.0f)	// 吸い込まれ時の魔法の左側への移動量
 #define MOVE_DELETE			(3.0f)	// 消失時の魔法の移動量
@@ -141,7 +141,7 @@ void CMagic::Update(void)
 	D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトル正規化
 
 	// ターゲット横方向ベクトルを計算
-	vecSide = D3DXVECTOR3(-vecTarg.z, 0.0f, vecTarg.x);
+	vecSide = D3DXVECTOR3(vecTarg.z, 0.0f, -vecTarg.x);
 
 	switch (m_state)
 	{ // 状態ごとの処理
@@ -476,7 +476,7 @@ void CMagic::LoadSetup(void)
 {
 	// 変数を宣言
 	int nType	= 0;	// 種類の代入用
-	int nHoming	= 0;	// ホーミングのON/OFFの変換用
+	//int nHoming	= 0;	// ホーミングのON/OFFの変換用
 	int nEnd	= 0;	// テキスト読み込み終了の確認用
 
 	// 変数配列を宣言

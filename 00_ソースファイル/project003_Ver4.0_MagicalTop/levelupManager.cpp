@@ -130,7 +130,6 @@ void CLevelupManager::Uninit(void)
 void CLevelupManager::Update(void)
 {
 	// ポインタを宣言
-	CTexture		*pTexture	= CManager::GetTexture();	// テクスチャ
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
@@ -155,7 +154,7 @@ void CLevelupManager::Update(void)
 
 	case STATE_SELECT:	// 強化選択状態
 
-		if (pKeyboard->GetTrigger(DIK_1) || CManager::GetPad()->GetTrigger(CInputPad::KEY_X))
+		if (pKeyboard->GetTrigger(DIK_1) || pPad->GetTrigger(CInputPad::KEY_X))
 		{ // 強化終了の操作が行われた場合
 
 			// ショップを非表示

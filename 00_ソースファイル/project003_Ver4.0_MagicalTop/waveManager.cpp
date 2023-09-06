@@ -627,7 +627,7 @@ void CWaveManager::UpdateWaveStart(void)
 		m_state = STATE_PROGRESSION;	// ウェーブ進行状態
 
 		// プレイヤーを再出現させる
-		CSceneGame::GetPlayer()->SetRespawn(D3DXVECTOR3(0.0f, 0.0f, -2000.0f));	// TODO：プレイヤー位置定数
+		CSceneGame::GetPlayer()->SetRespawn(PLAY_SPAWN_POS);
 
 		// タイムを計測再開
 		CSceneGame::GetTimerManager()->EnableStop(false);

@@ -39,7 +39,6 @@
 #define HEAL_SAFE_PLUS	(2)		// 回復状態移行カウンターのセーフエリア時の加算量
 #define HEALCNT_AREAMUL	(10)	// セーフエリア外での回復カウンター設定用係数
 #define SUB_TARGLIFE	(-2)	// セーフエリアでマナ回復時のターゲットへのダメージ量
-#define SUB_SHOTROT		(0.1f)	// 発射向きの減算量
 #define NUM_DEADZONE	(100)	// デッドゾーンの値
 
 //************************************************************

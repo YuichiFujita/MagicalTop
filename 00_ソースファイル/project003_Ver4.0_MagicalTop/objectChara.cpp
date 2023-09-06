@@ -277,6 +277,24 @@ void CObjectChara::SetAlpha(const float fAlpha)
 }
 
 //============================================================
+//	パーツ位置の設定処理
+//============================================================
+void CObjectChara::SetPartsPosition(const int nID, const D3DXVECTOR3& rPos)
+{
+	// 引数のインデックスの位置を設定
+	m_apMultiModel[nID]->SetPosition(rPos);
+}
+
+//============================================================
+//	パーツ向きの設定処理
+//============================================================
+void CObjectChara::SetPartsRotation(const int nID, const D3DXVECTOR3& rRot)
+{
+	// 引数のインデックスの向きを設定
+	m_apMultiModel[nID]->SetRotation(rRot);
+}
+
+//============================================================
 //	モーション種類取得処理
 //============================================================
 int CObjectChara::GetMotionType(void) const

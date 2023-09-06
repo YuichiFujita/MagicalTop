@@ -49,9 +49,6 @@ CTexture::~CTexture()
 //============================================================
 HRESULT CTexture::Load(void)
 {
-	// ポインタを宣言
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
-
 	// テクスチャへのポインタを初期化
 	for (int nCntTexture = 0; nCntTexture < MAX_TEXTURE; nCntTexture++)
 	{ // テクスチャの最大数分繰り返す

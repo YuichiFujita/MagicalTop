@@ -44,9 +44,6 @@ public:
 		AREA_1,			// 第1エリア
 		AREA_2,			// 第2エリア
 		AREA_3,			// 第3エリア
-		AREA_4,			// 第4エリア
-		AREA_5,			// 第5エリア
-		AREA_6,			// 第6エリア
 		AREA_MAX		// エリアの総数
 	}AREA;
 

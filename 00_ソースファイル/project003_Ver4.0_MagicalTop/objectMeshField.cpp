@@ -71,9 +71,6 @@ CObjectMeshField::~CObjectMeshField()
 //============================================================
 HRESULT CObjectMeshField::Init(void)
 {
-	// ポインタを宣言
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
-
 	// メンバ変数を初期化
 	m_pVtxBuff = NULL;			// 頂点バッファ
 	m_pIdxBuff = NULL;			// インデックスバッファ
@@ -1168,7 +1165,7 @@ float CObjectMeshField::GetPositionRotateHeight(const D3DXVECTOR3&rPos)
 					aVtxPos[1] = GetMeshVertexPosition(nNumVtx - (1 * nNumCul));
 					aVtxPos[2] = GetMeshVertexPosition(nNumVtx + ((m_part.x + 1) * nNumCul));
 
-					for (int nCntVtx = 0; nCntVtx < NUM_VTX_TRIANGLE; nCntVtx++)
+					for (int nCntTriangle = 0; nCntTriangle < NUM_VTX_TRIANGLE; nCntTriangle++)
 					{ // 三角形ポリゴンの頂点数分繰り返す
 
 						// 変数を宣言
@@ -1178,7 +1175,7 @@ float CObjectMeshField::GetPositionRotateHeight(const D3DXVECTOR3&rPos)
 						D3DXMatrixIdentity(&mtxWorld);
 
 						// 頂点位置を反映
-						D3DXMatrixTranslation(&mtxTrans, aVtxPos[nCntVtx].x, aVtxPos[nCntVtx].y, aVtxPos[nCntVtx].z);
+						D3DXMatrixTranslation(&mtxTrans, aVtxPos[nCntTriangle].x, aVtxPos[nCntTriangle].y, aVtxPos[nCntTriangle].z);
 						D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
 						// ポリゴン向きを反映
@@ -1190,7 +1187,7 @@ float CObjectMeshField::GetPositionRotateHeight(const D3DXVECTOR3&rPos)
 						D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
 						// 計算したマトリックスから座標を設定
-						aVtxMtxPos[nCntVtx] = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
+						aVtxMtxPos[nCntTriangle] = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
 					}
 
 					if (collision::TriangleOuterPillar(aVtxMtxPos[0], aVtxMtxPos[1], aVtxMtxPos[2], rPos))

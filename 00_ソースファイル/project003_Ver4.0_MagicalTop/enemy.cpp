@@ -1002,17 +1002,17 @@ void CEnemy::SetPositionWarning(const D3DXVECTOR3& rPos)
 void CEnemy::RandomRotation(void)
 {
 	// 変数を宣言
-	D3DXVECTOR3 rotEnemy = GetRotation();	// 敵向き
+	D3DXVECTOR3 rotEnemy = GetPartsRotation(0);	// 敵向き
 
 	// TODO：randomどうすっぺ
 
 	// 向きを加算
-	rotEnemy.x += rand() % 5 * 0.001f;
-	rotEnemy.y += rand() % 5 * 0.001f;
-	rotEnemy.z += rand() % 5 * 0.001f;
+	rotEnemy.x += (rand() % 15 + 10) * 0.001f;
+	rotEnemy.y += (rand() % 15 + 10) * 0.001f;
+	rotEnemy.z += (rand() % 15 + 10) * 0.001f;
 
 	// 向きを設定
-	SetRotation(rotEnemy);
+	SetPartsRotation(0, rotEnemy);
 }
 
 //============================================================
@@ -1169,7 +1169,7 @@ void CEnemyHuman::Update(void)
 	}
 
 	// 敵の更新
-	CEnemy::Update();
+	//CEnemy::Update();
 }
 
 //============================================================
@@ -1718,7 +1718,7 @@ void CEnemy::LoadSetup(void)
 	D3DXVECTOR3 rot = VEC3_ZERO;	// 向きの代入用
 	int nType		= 0;			// 種類の代入用
 	int nID			= 0;			// インデックスの代入用
-	int nParentID	= 0;			// 親インデックスの代入用
+	//int nParentID	= 0;			// 親インデックスの代入用
 	int nNowPose	= 0;			// 現在のポーズ番号
 	int nNowKey		= 0;			// 現在のキー番号
 	int nLoop		= 0;			// ループのON/OFFの変換用

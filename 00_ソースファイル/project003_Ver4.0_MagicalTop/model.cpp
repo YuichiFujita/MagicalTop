@@ -57,7 +57,7 @@ CModel::~CModel()
 HRESULT CModel::Load(void)
 {
 	// ポインタを宣言
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
+	//LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
 	// モデルへのポインタを初期化
 	memset(&m_aModel[0], 0, sizeof(m_aModel));
@@ -119,9 +119,6 @@ int CModel::Regist(const char *pFileName)
 {
 	// 変数を宣言
 	int nID = m_nNumAll;	// モデル読込番号
-
-	// ポインタを宣言
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
 	for (int nCntModel = 0; nCntModel < m_nNumAll; nCntModel++)
 	{ // モデルの総数分繰り返す
@@ -298,7 +295,6 @@ HRESULT CModel::LoadXFileModel(const int nID, const char *pFileName)
 HRESULT CModel::LoadTextureModel(const int nID)
 {
 	// ポインタを宣言
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 	D3DXMATERIAL *pMat;		// マテリアルへのポインタ
 

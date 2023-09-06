@@ -487,6 +487,9 @@ void CPlayer::Hit(const int nDmg)
 //============================================================
 CPlayer *CPlayer::Create(D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 {
+	// 変数を宣言
+	D3DXVECTOR3 pos = rPos;		// 座標設定用
+
 	// ポインタを宣言
 	CPlayer *pPlayer = NULL;	// プレイヤー生成用
 
@@ -514,7 +517,9 @@ CPlayer *CPlayer::Create(D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 		}
 
 		// 位置を設定
-		pPlayer->SetPosition(rPos);
+		CSceneGame::GetStage()->LimitPosition(pos, PLAY_RADIUS);	// ステージ範囲外補正
+		pos.y = CSceneGame::GetField()->GetPositionHeight(pos);		// 高さを地面に設定
+		pPlayer->SetPosition(pos);
 
 		// 向きを設定
 		pPlayer->SetRotation(rRot);
@@ -859,7 +864,6 @@ CPlayer::MOTION CPlayer::Move(void)
 	// 変数を宣言
 	D3DXVECTOR3 vecTarg, vecSide;	// ターゲット方向ベクトル・横方向ベクトル
 	D3DXVECTOR3 rot = CManager::GetCamera()->GetRotation();	// カメラの向き
-	CStage::AREA area = CSceneGame::GetStage()->GetAreaPlayer();	// プレイヤーの現在エリア
 
 	// ポインタを宣言
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
@@ -883,7 +887,7 @@ CPlayer::MOTION CPlayer::Move(void)
 	// 内側への移動量を設定
 	m_move += vecTarg * (m_fInSideMove + (fDisTargRate * 3.0f));
 
-	if (pKeyboard->GetPress(DIK_W) || pPad->GetPressLStickY() < 0.0f)
+	if (pKeyboard->GetPress(DIK_W) || pPad->GetPressLStickY() > 0.0f)
 	{
 		// 外側への移動量を追加
 		m_move -= vecTarg * (m_fOutSideMove + (fDisTargRate * 1.5f));
@@ -1105,10 +1109,6 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion, D3DXVECTOR3& rPos)
 {
 	// 変数を宣言
 	MOTION currentMotion = motion;	// 現在のモーション
-
-	// ポインタを宣言
-	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
-	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
 	// 魔法の発射
 	if (m_pMagic->ShotMagic())

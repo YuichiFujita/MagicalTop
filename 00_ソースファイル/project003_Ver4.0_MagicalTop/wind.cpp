@@ -24,7 +24,7 @@
 #define WIND_PRIO	(4)	// •—‚Ì—Dæ‡ˆÊ
 
 #define MOVE_BACK	(16.0f)		// •—‚Ì‰œˆÚ“®—Ê
-#define MOVE_SIDE	(-15.5f)	// •—‚Ì‰¡ˆÚ“®—Ê
+#define MOVE_SIDE	(15.5f)		// •—‚Ì‰¡ˆÚ“®—Ê
 #define PLUS_POSY	(20.0f)		// •—‚ÌcÀ•W‰ÁŽZ—Ê
 #define COLL_RADIUS	(50.0f)		// •—‚Ì“–‚½‚è”»’è‚Ì”¼Œa
 
