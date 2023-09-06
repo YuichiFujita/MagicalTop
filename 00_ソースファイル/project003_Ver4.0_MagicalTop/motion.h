@@ -79,9 +79,10 @@ public:
 	void Update(void);			// 更新
 	void Set(const int nType);	// 設定
 	void SetInfo(const MotionInfo info);					// モーション情報設定
+	void SetEnableUpdate(const bool bUpdate);				// 更新状況設定
 	void SetModel(CMultiModel **ppModel, const int nNum);	// モデル情報設定
-	int  GetType(void) const;	// 種類取得
-	bool IsFinish(void) const;	// 終了取得
+	int  GetType(void) const;			// 種類取得
+	bool IsFinish(void) const;			// 終了取得
 	bool IsLoop(const int nType) const;	// ループ取得
 
 	// 静的メンバ関数
@@ -90,9 +91,11 @@ public:
 
 private:
 	// メンバ変数
-	Info m_info;	// モーション情報
+	Info m_info;				// モーション情報
 	CMultiModel **m_ppModel;	// モデル情報
 	int m_nNumModel;			// モデルのパーツ数
+	bool m_bUpdate;				// 更新状況
+
 };
 
 #endif	// _MOTION_H_

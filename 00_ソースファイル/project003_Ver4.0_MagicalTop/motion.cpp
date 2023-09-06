@@ -27,6 +27,7 @@ CMotion::CMotion()
 	memset(&m_info, 0, sizeof(m_info));	// モーション情報
 	m_ppModel = NULL;	// モデル情報
 	m_nNumModel = 0;	// モデルのパーツ数
+	m_bUpdate = true;	// 更新状況
 }
 
 //============================================================
@@ -46,6 +47,7 @@ HRESULT CMotion::Init(void)
 	memset(&m_info, 0, sizeof(m_info));	// モーション情報
 	m_ppModel = NULL;	// モデル情報
 	m_nNumModel = 0;	// モデルのパーツ数
+	m_bUpdate = true;	// 更新状況
 
 	// モーションを終了状態にする
 	m_info.bFinish = true;
@@ -76,69 +78,73 @@ void CMotion::Update(void)
 	int nPose = m_info.nPose;	// モーションポーズ番号
 	int nNextPose;				// 次のモーションポーズ番号
 
-	if (m_info.aMotionInfo[nType].nNumKey > 0)
-	{ // キーが設定されている場合
+	if (m_bUpdate)
+	{ // 更新する状況の場合
 
-		// 次のモーションポーズ番号を求める
-		nNextPose = (nPose + 1) % m_info.aMotionInfo[nType].nNumKey;
+		if (m_info.aMotionInfo[nType].nNumKey > 0)
+		{ // キーが設定されている場合
 
-		// パーツの位置の更新
-		for (int nCntKey = 0; nCntKey < m_nNumModel; nCntKey++)
-		{ // モデルのパーツ数分繰り返す
+			// 次のモーションポーズ番号を求める
+			nNextPose = (nPose + 1) % m_info.aMotionInfo[nType].nNumKey;
 
-			// 位置・向きの差分を求める
-			diffPos = m_info.aMotionInfo[nType].aKeyInfo[nNextPose].aKey[nCntKey].pos - m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].pos;
-			diffRot = m_info.aMotionInfo[nType].aKeyInfo[nNextPose].aKey[nCntKey].rot - m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].rot;
+			// パーツの位置の更新
+			for (int nCntKey = 0; nCntKey < m_nNumModel; nCntKey++)
+			{ // モデルのパーツ数分繰り返す
 
-			// 差分向きの正規化
-			useful::NormalizeRot(diffRot.x);
-			useful::NormalizeRot(diffRot.y);
-			useful::NormalizeRot(diffRot.z);
+				// 位置・向きの差分を求める
+				diffPos = m_info.aMotionInfo[nType].aKeyInfo[nNextPose].aKey[nCntKey].pos - m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].pos;
+				diffRot = m_info.aMotionInfo[nType].aKeyInfo[nNextPose].aKey[nCntKey].rot - m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].rot;
 
-			// 現在のパーツの位置・向きを更新
-			m_ppModel[nCntKey]->SetPosition(m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].pos + diffPos * ((float)m_info.nCounter / (float)m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame));
-			m_ppModel[nCntKey]->SetRotation(m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].rot + diffRot * ((float)m_info.nCounter / (float)m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame));
-		}
+				// 差分向きの正規化
+				useful::NormalizeRot(diffRot.x);
+				useful::NormalizeRot(diffRot.y);
+				useful::NormalizeRot(diffRot.z);
 
-		// モーションの遷移の更新
-		if (m_info.nCounter >= m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame)
-		{ // 現在のモーションカウンターが現在のポーズの再生フレーム数を超えている場合
-
-			// 次のポーズに移行
-			if (m_info.aMotionInfo[nType].bLoop == true)
-			{ // モーションがループする設定の場合
-
-				// モーションカウンターを初期化
-				m_info.nCounter = 0;
-
-				// ポーズカウントを加算 (総数に達した場合 0に戻す)
-				m_info.nPose = (m_info.nPose + 1) % m_info.aMotionInfo[nType].nNumKey;
+				// 現在のパーツの位置・向きを更新
+				m_ppModel[nCntKey]->SetPosition(m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].pos + diffPos * ((float)m_info.nCounter / (float)m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame));
+				m_ppModel[nCntKey]->SetRotation(m_info.aMotionInfo[nType].aKeyInfo[nPose].aKey[nCntKey].rot + diffRot * ((float)m_info.nCounter / (float)m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame));
 			}
-			else
-			{ // モーションがループしない設定の場合
 
-				if (m_info.nPose < m_info.aMotionInfo[nType].nNumKey - SUB_STOP)
-				{ // 現在のポーズが最終のポーズではない場合
+			// モーションの遷移の更新
+			if (m_info.nCounter >= m_info.aMotionInfo[nType].aKeyInfo[nPose].nFrame)
+			{ // 現在のモーションカウンターが現在のポーズの再生フレーム数を超えている場合
+
+				// 次のポーズに移行
+				if (m_info.aMotionInfo[nType].bLoop == true)
+				{ // モーションがループする設定の場合
 
 					// モーションカウンターを初期化
 					m_info.nCounter = 0;
 
-					// ポーズカウントを加算
-					m_info.nPose++;
+					// ポーズカウントを加算 (総数に達した場合 0に戻す)
+					m_info.nPose = (m_info.nPose + 1) % m_info.aMotionInfo[nType].nNumKey;
 				}
 				else
-				{ // 現在のポーズが最終のポーズの場合
+				{ // モーションがループしない設定の場合
 
-					// モーションを終了状態にする
-					m_info.bFinish = true;
+					if (m_info.nPose < m_info.aMotionInfo[nType].nNumKey - SUB_STOP)
+					{ // 現在のポーズが最終のポーズではない場合
+
+						// モーションカウンターを初期化
+						m_info.nCounter = 0;
+
+						// ポーズカウントを加算
+						m_info.nPose++;
+					}
+					else
+					{ // 現在のポーズが最終のポーズの場合
+
+						// モーションを終了状態にする
+						m_info.bFinish = true;
+					}
 				}
 			}
-		}
-		else
-		{ // 現在のモーションカウンターが現在のポーズの再生フレーム数を超えていない場合
+			else
+			{ // 現在のモーションカウンターが現在のポーズの再生フレーム数を超えていない場合
 
-			// モーションカウンターを加算
-			m_info.nCounter++;
+				// モーションカウンターを加算
+				m_info.nCounter++;
+			}
 		}
 	}
 }
@@ -182,6 +188,15 @@ void CMotion::SetInfo(const MotionInfo info)
 
 	// 例外処理
 	assert(m_info.nNumMotion <= MAX_MOTION);	// モーション数オーバー
+}
+
+//============================================================
+//	更新状況の設定処理
+//============================================================
+void CMotion::SetEnableUpdate(const bool bUpdate)
+{
+	// 引数の更新状況を設定
+	m_bUpdate = bUpdate;
 }
 
 //============================================================

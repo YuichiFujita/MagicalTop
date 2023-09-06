@@ -120,10 +120,11 @@ CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_type(typ
 	m_oldPos	= VEC3_ZERO;	// 過去位置
 	m_movePos	= VEC3_ZERO;	// 位置移動量
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
-	m_state		= STATE_SPAWN;	// 状態
-	m_nCounterBubble = 0;		// バブル管理カウンター
-	m_nCounterState = 0;		// 状態管理カウンター
-	m_nCounterAtk = 0;			// 攻撃管理カウンター
+	m_deathMoveRot		= VEC3_ZERO;	// 死亡時の向き変更量
+	m_state				= STATE_SPAWN;	// 状態
+	m_nCounterBubble	= 0;			// バブル管理カウンター
+	m_nCounterState		= 0;			// 状態管理カウンター
+	m_nCounterAtk		= 0;			// 攻撃管理カウンター
 
 	// 敵の総数を加算
 	m_nNumAll++;
@@ -147,16 +148,21 @@ HRESULT CEnemy::Init(void)
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 
 	// メンバ変数を初期化
-	m_pShadow  = NULL;			// 影の情報
-	m_pWarning = NULL;			// 警告の情報
-	m_pBubble  = NULL;			// バブルの情報
-	m_oldPos   = VEC3_ZERO;		// 過去位置
-	m_movePos  = VEC3_ZERO;		// 位置移動量
-	m_moveRot  = VEC3_ZERO;		// 向き変更量
-	m_state    = STATE_SPAWN;	// 状態
-	m_nCounterBubble = 0;		// バブル管理カウンター
-	m_nCounterState = 0;		// 状態管理カウンター
-	m_nCounterAtk = 0;			// 攻撃管理カウンター
+	m_pShadow	= NULL;			// 影の情報
+	m_pWarning	= NULL;			// 警告の情報
+	m_pBubble	= NULL;			// バブルの情報
+	m_oldPos	= VEC3_ZERO;	// 過去位置
+	m_movePos	= VEC3_ZERO;	// 位置移動量
+	m_moveRot	= VEC3_ZERO;	// 向き変更量
+	m_state		= STATE_SPAWN;	// 状態
+	m_nCounterBubble	= 0;	// バブル管理カウンター
+	m_nCounterState		= 0;	// 状態管理カウンター
+	m_nCounterAtk		= 0;	// 攻撃管理カウンター
+
+	// 死亡時の向き変更量
+	m_deathMoveRot.x += (rand() % 31 - 15) * 0.001f;
+	m_deathMoveRot.y += (rand() % 31 - 15) * 0.001f;
+	m_deathMoveRot.z += (rand() % 31 - 15) * 0.001f;
 
 	// 影の生成
 	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, D3DXVECTOR3(m_status.fShadowRadius, 0.0f, m_status.fShadowRadius), this);
@@ -295,6 +301,9 @@ void CEnemy::Hit(const int nDmg)
 		}
 		else
 		{ // 死んでいる場合
+
+			// モーションを更新しない状態にする
+			SetEnableMotionUpdate(false);
 
 			// パーティクル3Dオブジェクトを生成
 			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
@@ -1002,16 +1011,12 @@ void CEnemy::SetPositionWarning(const D3DXVECTOR3& rPos)
 void CEnemy::RandomRotation(void)
 {
 	// 変数を宣言
-	D3DXVECTOR3 rotEnemy = GetPartsRotation(0);	// 敵向き
-
-	// TODO：randomどうすっぺ
+	D3DXVECTOR3 rotEnemy = GetPartsRotation(0);	// 敵の親パーツ向き
 
 	// 向きを加算
-	rotEnemy.x += (rand() % 15 + 10) * 0.001f;
-	rotEnemy.y += (rand() % 15 + 10) * 0.001f;
-	rotEnemy.z += (rand() % 15 + 10) * 0.001f;
+	rotEnemy += m_deathMoveRot;
 
-	// 向きを設定
+	// 敵の親パーツ向きを設定
 	SetPartsRotation(0, rotEnemy);
 }
 
@@ -1169,7 +1174,7 @@ void CEnemyHuman::Update(void)
 	}
 
 	// 敵の更新
-	//CEnemy::Update();
+	CEnemy::Update();
 }
 
 //============================================================
@@ -1718,7 +1723,6 @@ void CEnemy::LoadSetup(void)
 	D3DXVECTOR3 rot = VEC3_ZERO;	// 向きの代入用
 	int nType		= 0;			// 種類の代入用
 	int nID			= 0;			// インデックスの代入用
-	//int nParentID	= 0;			// 親インデックスの代入用
 	int nNowPose	= 0;			// 現在のポーズ番号
 	int nNowKey		= 0;			// 現在のキー番号
 	int nLoop		= 0;			// ループのON/OFFの変換用

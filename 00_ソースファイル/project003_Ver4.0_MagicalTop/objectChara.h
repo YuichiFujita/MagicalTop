@@ -56,6 +56,7 @@ public:
 	void SetModelInfo(void);	// モデル情報設定
 	void SetMotionInfo(CMotion::MotionInfo info);	// モーション情報設定
 	void SetMotion(const int nType);				// モーション設定
+	void SetEnableMotionUpdate(const bool bUpdate);	// 更新状況設定
 	void SetPosition(const D3DXVECTOR3& rPos);		// 位置設定
 	void SetRotation(const D3DXVECTOR3& rRot);		// 向き設定
 	void SetAlpha(const float fAlpha);				// 透明度設定

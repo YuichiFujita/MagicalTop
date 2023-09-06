@@ -241,6 +241,15 @@ void CObjectChara::SetMotion(const int nType)
 }
 
 //============================================================
+//	モーションの更新状況の設定処理
+//============================================================
+void CObjectChara::SetEnableMotionUpdate(const bool bUpdate)
+{
+	// 引数の更新状況をモーションの更新状況に設定
+	m_pMotion->SetEnableUpdate(bUpdate);
+}
+
+//============================================================
 //	位置の設定処理
 //============================================================
 void CObjectChara::SetPosition(const D3DXVECTOR3& rPos)

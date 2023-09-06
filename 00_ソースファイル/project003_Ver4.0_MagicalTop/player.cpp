@@ -606,6 +606,7 @@ void CPlayer::SetEnableUpdate(const bool bUpdate)
 	CObject::SetEnableUpdate(bUpdate);		// 自身
 	m_pShadow->SetEnableUpdate(bUpdate);	// 影
 	m_pOrbit->SetEnableUpdate(bUpdate);		// 軌跡
+	m_pDash->SetEnableUpdate(bUpdate);		// ダッシュ
 }
 
 //============================================================
@@ -617,6 +618,7 @@ void CPlayer::SetEnableDraw(const bool bDraw)
 	CObject::SetEnableDraw(bDraw);		// 自身
 	m_pShadow->SetEnableDraw(bDraw);	// 影
 	m_pOrbit->SetEnableDraw(bDraw);		// 軌跡
+	m_pDash->SetEnableDraw(bDraw);		// ダッシュ
 }
 
 //============================================================
