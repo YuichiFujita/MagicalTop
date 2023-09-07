@@ -21,7 +21,7 @@
 //	マクロ定義
 //************************************************************
 #define WIND_COL	(D3DXCOLOR(0.6f, 0.9f, 1.0f, 0.6f))	// 風のポリゴン色
-#define WIND_PRIO	(4)	// 風の優先順位
+#define WIND_PRIO	(5)	// 風の優先順位
 
 #define MOVE_BACK	(16.0f)		// 風の奥移動量
 #define MOVE_SIDE	(15.5f)		// 風の横移動量

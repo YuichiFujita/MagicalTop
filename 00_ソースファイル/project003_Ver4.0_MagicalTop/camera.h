@@ -25,9 +25,9 @@ public:
 	// カメラ列挙
 	enum TYPE
 	{
-		TYPE_MAIN,	// メインカメラ
-		TYPE_FONT,	// フォントモデル表示カメラ
-		TYPE_MAX	// この列挙型の総数
+		TYPE_MAIN,		// メインカメラ
+		TYPE_MODELUI,	// モデルUI表示カメラ
+		TYPE_MAX		// この列挙型の総数
 	};
 
 	// コンストラクタ
@@ -46,7 +46,8 @@ public:
 		D3DXVECTOR3		vecU;			// 上方向ベクトル
 		D3DXVECTOR3		rot;			// 現在の向き
 		D3DXVECTOR3		destRot;		// 目標の向き
-		float			fDis;			// 視点と注視点の距離
+		float			fDis;			// 現在の視点と注視点の距離
+		float			fDestDis;		// 目標の視点と注視点の距離
 		D3DXMATRIX		mtxProjection;	// プロジェクションマトリックス
 		D3DXMATRIX		mtxView;		// ビューマトリックス
 		D3DVIEWPORT9	viewport;		// ビューポート
@@ -58,7 +59,7 @@ public:
 	void Update(void);	// 更新
 	void SetCamera(const TYPE type);	// カメラ設定
 	Camera GetCamera(const TYPE type);	// カメラ取得
-	void SetDestCamera(void);			// カメラ目標位置設定
+	void SetDestBargainingCamera(void);	// カメラ目標位置設定 (寄り引き)
 	void SetRotation(const D3DXVECTOR3& rRot);		// 現在向き設定
 	void SetDestRotation(const D3DXVECTOR3& rRot);	// 目標向き設定
 	D3DXVECTOR3 GetRotation(void) const;			// 現在向き取得

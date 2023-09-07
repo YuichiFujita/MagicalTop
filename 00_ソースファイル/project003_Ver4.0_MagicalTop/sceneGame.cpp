@@ -147,7 +147,7 @@ HRESULT CSceneGame::Init(void)
 	}
 
 	// プレイヤーオブジェクトの生成
-	m_pPlayer = CPlayer::Create(PLAY_SPAWN_POS, VEC3_ZERO);
+	m_pPlayer = CPlayer::Create(VEC3_ZERO, VEC3_ZERO);
 	if (UNUSED(m_pPlayer))
 	{ // 非使用中の場合
 
@@ -185,14 +185,8 @@ HRESULT CSceneGame::Init(void)
 	m_pTimerManager->Start();
 	m_pTimerManager->EnableStop(true);
 
-	// TODO：初期設定
-#if 0
-	// カメラの初期位置を設定
-	CManager::GetCamera()->SetDestCamera();
-
 	// BGMの再生
-	CManager::GetSound()->Play(CSound::LABEL_BGM_000);
-#endif
+	//CManager::GetSound()->Play(CSound::LABEL_BGM_000);
 
 	// 成功を返す
 	return S_OK;

@@ -57,6 +57,12 @@
 #define AWAY_UP_MOVE	(30.0f)		// 吹っ飛び時の上移動量
 #define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
 
+#define ALWAYS_ADDROT		(0.3f)	// 常時内側に向かせる量
+#define PLUS_INSIDE_MOVE	(3.0f)	// ターゲットからの距離に応じた外側への移動加算量
+#define PLUS_OUTSIDE_MOVE	(1.5f)	// ターゲットからの距離に応じた内側への移動加算量
+#define INSIDE_ADDROT		(0.8f)	// 外側移動時の向き変動量
+#define OUTSIDE_SUBROT		(0.5f)	// 内側移動時の向き変動量
+
 #define MOVE_INSIDE			(0.55f)	// 内側への移動量
 #define MOVE_OUTSIDE		(2.55f)	// 外側への移動量
 #define MOVE_OUTSIDE_ACCELE	(1.0f)	// 外側移動の加速量
@@ -544,6 +550,9 @@ void CPlayer::AddExp(const int nAdd)
 //============================================================
 void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 {
+	// 変数を宣言
+	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+
 	// ステージ範囲外の補正
 	CSceneGame::GetStage()->LimitPosition(rPos, PLAY_RADIUS);
 
@@ -558,6 +567,12 @@ void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 
 	// 表示する設定にする
 	SetDisp(true);
+
+	// ターゲットとの距離を設定
+	m_fDisTarget = sqrtf((rPos.x - posTarget.x) * (rPos.x - posTarget.x) + (rPos.z - posTarget.z) * (rPos.z - posTarget.z)) * 0.5f;
+
+	// カメラ目標位置設定
+	CManager::GetCamera()->SetDestBargainingCamera();
 }
 
 //============================================================
@@ -693,7 +708,7 @@ CPlayer::MOTION CPlayer::UpdateNormal(void)
 	D3DXVECTOR3 rotPlayer = GetRotation();	// プレイヤー向き
 
 	// 移動操作
-	Move();
+	currentMotion = Move();
 
 	// 向き更新
 	Rot(rotPlayer);
@@ -708,7 +723,7 @@ CPlayer::MOTION CPlayer::UpdateNormal(void)
 	Land(posPlayer);
 
 	// 魔法発射操作
-	currentMotion = Magic(currentMotion, posPlayer);
+	currentMotion = Magic(currentMotion);
 
 	// 当たり判定
 	CollisionTarget(posPlayer);	// ターゲット
@@ -885,25 +900,36 @@ CPlayer::MOTION CPlayer::Move(void)
 
 	// 横方向ベクトルを計算
 	vecSide = D3DXVECTOR3(vecTarg.z, 0.0f, -vecTarg.x);
-	
+
+	// 目標向きを設定
+	m_destRot.y = atan2f(posTarget.x - posPlayer.x, posTarget.z - posPlayer.z);
+	m_destRot.y -= D3DX_PI * 0.5f;	// 左を向かせる
+	m_destRot.y -= ALWAYS_ADDROT;	// 内側を向かせる
+
 	// 内側への移動量を設定
-	m_move += vecTarg * (m_fInSideMove + (fDisTargRate * 3.0f));
+	m_move += vecTarg * (m_fInSideMove + (fDisTargRate * PLUS_INSIDE_MOVE));
 
 	if (pKeyboard->GetPress(DIK_W) || pPad->GetPressLStickY() > 0.0f)
 	{
 		// 外側への移動量を追加
-		m_move -= vecTarg * (m_fOutSideMove + (fDisTargRate * 1.5f));
+		m_move -= vecTarg * (m_fOutSideMove + (fDisTargRate * PLUS_OUTSIDE_MOVE));
+
+		// 外側を向かせる
+		m_destRot.y += INSIDE_ADDROT;
 	}
 	else if (pKeyboard->GetPress(DIK_S) || pPad->GetPressLStickY() < 0.0f)
 	{
 		// 内側への移動量を追加
 		m_move += vecTarg * m_fAddOutSideMove;
+
+		// 内側を向かせる
+		m_destRot.y -= OUTSIDE_SUBROT;
 	}
 
 	// 左側への移動量を設定
 	m_move += vecSide * m_fSideMove;
 
-	if (pKeyboard->GetPress(DIK_A) || pPad->GetPressLStickX() < 0.0f)
+	if (pKeyboard->GetPress(DIK_A) || pPad->GetPress(CInputPad::KEY_L1))
 	{
 		if (m_pDash->UseGauge())
 		{ // ゲージが使用できた場合
@@ -912,22 +938,10 @@ CPlayer::MOTION CPlayer::Move(void)
 			m_move += vecSide * m_fAddMove;
 		}
 	}
-	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPressLStickX() > 0.0f)
+	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPress(CInputPad::KEY_R1))
 	{
 		// 左移動量を減速
 		m_move -= vecSide * m_fSubMove;
-	}
-
-	// TODO：定数マクロ化
-
-	// 目標向きを設定
-	m_destRot.y = atan2f(posTarget.x - posPlayer.x, posTarget.z - posPlayer.z);
-	m_destRot.y -= 0.2f;
-	m_destRot.y -= D3DX_PI * 0.5f;
-
-	if (pKeyboard->GetPress(DIK_W) || pPad->GetPress(CInputPad::KEY_L1))
-	{
-		m_destRot.y += 0.5f;
 	}
 
 #if 0
@@ -1107,7 +1121,7 @@ CPlayer::MOTION CPlayer::Move(void)
 //============================================================
 //	魔法処理
 //============================================================
-CPlayer::MOTION CPlayer::Magic(MOTION motion, D3DXVECTOR3& rPos)
+CPlayer::MOTION CPlayer::Magic(MOTION motion)
 {
 	// 変数を宣言
 	MOTION currentMotion = motion;	// 現在のモーション

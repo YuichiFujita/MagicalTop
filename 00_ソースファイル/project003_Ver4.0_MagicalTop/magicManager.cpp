@@ -244,17 +244,17 @@ bool CMagicManager::ShotMagic(void)
 		if (pKeyboard->GetPress(DIK_J))
 		{
 			// ”­ËŒü‚«‚ğİ’è
-			fRotVec = D3DXToRadian(315) + rotCamera.y;
+			fRotVec = D3DXToRadian(135) + rotCamera.y;
 		}
 		else if (pKeyboard->GetPress(DIK_L))
 		{
 			// ”­ËŒü‚«‚ğİ’è
-			fRotVec = D3DXToRadian(45) + rotCamera.y;
+			fRotVec = D3DXToRadian(225) + rotCamera.y;
 		}
 		else
 		{
 			// ”­ËŒü‚«‚ğİ’è
-			fRotVec = D3DXToRadian(0) + rotCamera.y;
+			fRotVec = D3DXToRadian(180) + rotCamera.y;
 		}
 	}
 	else if (pKeyboard->GetPress(DIK_K))
@@ -265,17 +265,17 @@ bool CMagicManager::ShotMagic(void)
 		if (pKeyboard->GetPress(DIK_J))
 		{
 			// ”­ËŒü‚«‚ğİ’è
-			fRotVec = D3DXToRadian(225) + rotCamera.y;
+			fRotVec = D3DXToRadian(45) + rotCamera.y;
 		}
 		else if (pKeyboard->GetPress(DIK_L))
 		{
 			// ”­ËŒü‚«‚ğİ’è
-			fRotVec = D3DXToRadian(135) + rotCamera.y;
+			fRotVec = D3DXToRadian(315) + rotCamera.y;
 		}
 		else
 		{
 			// ”­ËŒü‚«‚ğİ’è
-			fRotVec = D3DXToRadian(180) + rotCamera.y;
+			fRotVec = D3DXToRadian(0) + rotCamera.y;
 		}
 	}
 	else if (pKeyboard->GetPress(DIK_J))
@@ -284,7 +284,7 @@ bool CMagicManager::ShotMagic(void)
 		bShot = true;
 
 		// ”­ËŒü‚«‚ğİ’è
-		fRotVec = D3DXToRadian(270) + rotCamera.y;
+		fRotVec = D3DXToRadian(90) + rotCamera.y;
 	}
 	else if (pKeyboard->GetPress(DIK_L))
 	{
@@ -292,7 +292,7 @@ bool CMagicManager::ShotMagic(void)
 		bShot = true;
 
 		// ”­ËŒü‚«‚ğİ’è
-		fRotVec = D3DXToRadian(90) + rotCamera.y;
+		fRotVec = D3DXToRadian(270) + rotCamera.y;
 	}
 	else if (pPad->GetPressRStickX() >  NUM_DEADZONE
 	||		 pPad->GetPressRStickX() < -NUM_DEADZONE
@@ -303,7 +303,7 @@ bool CMagicManager::ShotMagic(void)
 		bShot = true;
 
 		// ”­ËŒü‚«‚ğİ’è
-		fRotVec = pPad->GetPressRStickRot() + D3DXToRadian(90) + rotCamera.y;
+		fRotVec = pPad->GetPressRStickRot() + D3DXToRadian(270) + rotCamera.y;
 	}
 
 	// Œü‚«‚ğ•â³

@@ -88,7 +88,7 @@ void CModelUI::Draw(void)
 	pDevice->GetViewport(&viewportDef);
 
 	// カメラの設定
-	CManager::GetCamera()->SetCamera(CCamera::TYPE_FONT);
+	CManager::GetCamera()->SetCamera(CCamera::TYPE_MODELUI);
 
 	// オブジェクトモデルの描画
 	CObjectModel::Draw();

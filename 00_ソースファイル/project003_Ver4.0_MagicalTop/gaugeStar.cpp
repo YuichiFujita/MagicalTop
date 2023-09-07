@@ -16,13 +16,10 @@
 #include "objectBillboard.h"
 #include "target.h"
 
-// TODOFƒCƒ‰ƒ“ƒCƒ“ƒNƒ‹[ƒh
-#include "input.h"
-
 //************************************************************
 //	ƒ}ƒNƒ’è‹`
 //************************************************************
-#define GAUGE_PRIO	(5)	// ¯ƒQ[ƒW‚Ì—Dæ‡ˆÊ
+#define GAUGE_PRIO	(4)	// ¯ƒQ[ƒW‚Ì—Dæ‡ˆÊ
 #define ADD_ROT	(0.05f)	// ‹——£‰ÁŽZ—pŒü‚«‚Ì‰ÁŽZ—Ê
 #define REV_ROT	(0.1f)	// ‰ÁŽZŒü‚«‚Ì•â³ŒW”
 
@@ -531,8 +528,8 @@ HRESULT CGaugeStar::SetDrawInfo(void)
 		{ // ¯‚ÌÅ‘å”•ªŒJ‚è•Ô‚·
 
 			// •Ï”‚ðéŒ¾
-			D3DXVECTOR3 posStar = posParent + m_posGap;		// •\Ž¦ˆÊ’u
-			float fRot = (fPartRot * nCntStar) - D3DX_PI;	// •\Ž¦•ûŒü
+			D3DXVECTOR3 posStar = posParent + m_posGap;	// •\Ž¦ˆÊ’u
+			float fRot = (fPartRot * nCntStar);			// •\Ž¦•ûŒü
 
 			// ƒJƒƒ‰‚ÌŒü‚«‚ð‰ÁŽZ
 			fRot += CManager::GetCamera()->GetRotation().y;
