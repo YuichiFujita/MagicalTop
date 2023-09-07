@@ -143,12 +143,12 @@ private:
 	void UpdateFadeOut(void);	// フェードアウト状態時の更新
 	void UpdateFadeIn(void);	// フェードイン状態時の更新
 
-	MOTION Move(void);							// 移動
-	MOTION Magic(MOTION motion);				// 魔法
-	bool Land(D3DXVECTOR3& rPos);				// 着地
-	void Motion(int nMotion);					// モーション
-	void Pos(D3DXVECTOR3& rPos);				// 位置
-	void Rot(D3DXVECTOR3& rRot);				// 向き
+	MOTION Move(void);				// 移動
+	MOTION Magic(MOTION motion);	// 魔法
+	bool Land(D3DXVECTOR3& rPos);	// 着地
+	void Motion(int nMotion);		// モーション
+	void Pos(D3DXVECTOR3& rPos);	// 位置
+	void Rot(D3DXVECTOR3& rRot);	// 向き
 	void CollisionTarget(D3DXVECTOR3& rPos);	// ターゲットとの当たり判定
 	void CollisionEnemy(D3DXVECTOR3& rPos);		// 敵との当たり判定
 	void LoadSetup(void);						// セットアップ

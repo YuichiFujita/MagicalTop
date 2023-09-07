@@ -181,6 +181,9 @@ HRESULT CSceneGame::Init(void)
 	// 草ランダム生成
 	CWeed::RandomSpawn(100, CWeed::TYPE_NORMAL, D3DXVECTOR3(40.0f, 60.0f, 0.0f));	// TODO：定数変更
 
+	// カメラ目標位置設定
+	CManager::GetCamera()->SetDestBargainingCamera();
+
 	// タイムを計測開始
 	m_pTimerManager->Start();
 	m_pTimerManager->EnableStop(true);

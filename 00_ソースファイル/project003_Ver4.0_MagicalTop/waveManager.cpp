@@ -214,6 +214,9 @@ HRESULT CWaveManager::Init(void)
 	// ”Žš‚ðÝ’è
 	m_pValue->SetNumber(0);
 
+	// —Dæ‡ˆÊ‚ðÝ’è
+	m_pValue->SetPriority(WAVE_PRIO);
+
 	// •`‰æ‚ð‚µ‚È‚¢Ý’è‚É‚·‚é
 	m_pValue->SetEnableDraw(false);
 

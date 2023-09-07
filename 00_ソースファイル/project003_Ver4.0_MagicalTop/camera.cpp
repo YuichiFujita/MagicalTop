@@ -43,13 +43,13 @@
 
 #define INIT_DESTDIS	(-500.0f)	// 初期のカメラ距離
 #define REV_DESTDIS		(4000.0f)	// カメラ距離加算時のターゲット距離補正値
-#define MIN_DESTDIS		(-2800.0f)	// カメラ距離の最低値
-#define MAX_DESTDIS		(0.0f)		// カメラ距離の最高値
+#define MIN_DESTDIS		(-1800.0f)	// カメラ距離の最低値
+#define MAX_DESTDIS		(-950.0f)	// カメラ距離の最高値
 #define REV_BARG_DIS	(0.25f)		// カメラ距離の補正係数
 
 #define REV_LENGTH	(0.8f)	// カメラ注視点設定用の割合のターゲット距離補正値
 #define MIN_LENGTH	(0.0f)	// カメラ注視点設定用の割合の最低値
-#define MAX_LENGTH	(0.2f)	// カメラ注視点設定用の割合の最高値
+#define MAX_LENGTH	(0.15f)	// カメラ注視点設定用の割合の最高値
 
 #define INIT_DESTPOS_Y	(400.0f)	// 初期のカメラ位置
 #define REV_DESTPOS_Y	(200.0f)	// カメラ位置加算時のターゲット距離補正値
