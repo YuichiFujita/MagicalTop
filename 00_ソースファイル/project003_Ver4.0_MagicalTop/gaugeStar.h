@@ -80,13 +80,14 @@ public:
 		const int nHealWait,		// 回復待機カウント
 		CObject *pObject,			// 親オブジェクト
 		const D3DXVECTOR3& rGap,	// 表示位置の加算量
+		const float fFrameRadius,	// 枠の半径
 		const float fDistance,		// 中心からの距離
 		const float fFlicker		// 揺らめき量
 	);
 
 	// メンバ関数
 	bool UseGauge(void);	// ゲージ使用
-	void SetStar(const int nNumGauge, const float fRadius);	// 星情報設定
+	void SetStar(const int nNumGauge, const float fRadius, const float fFrameRadius);	// 星情報設定
 	void SetGapPosition(const D3DXVECTOR3& rGap);	// 表示位置の加算量設定
 	void SetDistance(const float fDistance);		// 中心からの距離設定
 	void SetFlicker(const float fFlicker);			// 揺らめき量設定
@@ -100,7 +101,8 @@ private:
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 
 	// メンバ変数
-	CObjectBillboard *m_apStarBG[MAX_STAR];	// 星の背景情報
+	CObjectBillboard *m_apStarFrame[MAX_STAR];	// 星の枠情報
+	CObjectBillboard *m_apStarBG[MAX_STAR];		// 星の背景情報
 	Star m_aStar[MAX_STAR];		// 星の情報
 	STATE m_state;				// 状態
 	int m_nCounterState;		// 状態管理カウンター

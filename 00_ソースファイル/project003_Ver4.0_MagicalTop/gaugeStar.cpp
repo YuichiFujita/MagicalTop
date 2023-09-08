@@ -19,7 +19,10 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define GAUGE_PRIO	(4)	// 星ゲージの優先順位
+#define GAUGE_PRIO	(3)	// 星ゲージの優先順位
+
+#define GAUGE_BG_COL	(D3DXCOLOR(0.25f, 0.25f, 0.25f, 1.0f))	// ゲージ背景色
+
 #define ADD_ROT	(0.05f)	// 距離加算用向きの加算量
 #define REV_ROT	(0.1f)	// 加算向きの補正係数
 
@@ -41,8 +44,9 @@ CGaugeStar::CGaugeStar(const int nHealNumGauge, const int nHealWait, const int n
 m_nHealNumGauge(nHealNumGauge), m_nHealWait(nHealWait), m_nMaxNumGauge(nMaxNumGauge), m_fMaxRadius(fMaxRadius)
 {
 	// メンバ変数をクリア
-	memset(&m_apStarBG[0], 0, sizeof(m_apStarBG));	// 星の背景情報
-	memset(&m_aStar[0], 0, sizeof(m_aStar));		// 星の情報
+	memset(&m_apStarFrame[0], 0, sizeof(m_apStarFrame));	// 星の枠情報
+	memset(&m_apStarBG[0], 0, sizeof(m_apStarBG));			// 星の背景情報
+	memset(&m_aStar[0], 0, sizeof(m_aStar));				// 星の情報
 
 	m_state			= STATE_NORMAL;	// 状態
 	m_nCounterState	= 0;			// 状態管理カウンター
@@ -73,8 +77,9 @@ HRESULT CGaugeStar::Init(void)
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 
 	// メンバ変数を初期化
-	memset(&m_apStarBG[0], 0, sizeof(m_apStarBG));	// 星の背景情報
-	memset(&m_aStar[0], 0, sizeof(m_aStar));		// 星の情報
+	memset(&m_apStarFrame[0], 0, sizeof(m_apStarFrame));	// 星の枠情報
+	memset(&m_apStarBG[0], 0, sizeof(m_apStarBG));			// 星の背景情報
+	memset(&m_aStar[0], 0, sizeof(m_aStar));				// 星の情報
 
 	m_state			= STATE_NORMAL;	// 状態
 	m_nCounterState = 0;			// 状態管理カウンター
@@ -86,6 +91,36 @@ HRESULT CGaugeStar::Init(void)
 	m_fSinRot		= 0.0f;			// 距離加減量
 	m_fAddRot		= 0.0f;			// 消費中の星方向への現在加算量
 	m_fDestAddRot	= 0.0f;			// 消費中の星方向への目標加算量
+
+	for (int nCntStar = 0; nCntStar < MAX_STAR; nCntStar++)
+	{ // 星の最大数分繰り返す
+
+		// 星の枠の生成
+		m_apStarFrame[nCntStar] = CObjectBillboard::Create
+		( // 引数
+			VEC3_ZERO,	// 位置
+			VEC3_ZERO	// 大きさ
+		);
+		if (UNUSED(m_apStarFrame[nCntStar]))
+		{ // 生成に失敗した場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// テクスチャを登録・割当
+		m_apStarFrame[nCntStar]->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_STAR]));
+
+		// 優先順位を設定
+		m_apStarFrame[nCntStar]->SetPriority(GAUGE_PRIO);
+
+		// 色を設定
+		m_apStarFrame[nCntStar]->SetColor(XCOL_BLACK);
+
+		// Zテストを設定
+		m_apStarFrame[nCntStar]->SetFunc(D3DCMP_LESSEQUAL);
+	}
 
 	for (int nCntStar = 0; nCntStar < MAX_STAR; nCntStar++)
 	{ // 星の最大数分繰り返す
@@ -111,7 +146,7 @@ HRESULT CGaugeStar::Init(void)
 		m_apStarBG[nCntStar]->SetPriority(GAUGE_PRIO);
 
 		// 色を設定
-		m_apStarBG[nCntStar]->SetColor(XCOL_BLACK);
+		m_apStarBG[nCntStar]->SetColor(GAUGE_BG_COL);
 
 		// Zテストを設定
 		m_apStarBG[nCntStar]->SetFunc(D3DCMP_LESSEQUAL);
@@ -157,6 +192,9 @@ void CGaugeStar::Uninit(void)
 
 		// 星の背景の終了
 		m_apStarBG[nCntStar]->Uninit();
+
+		// 星の枠の終了
+		m_apStarFrame[nCntStar]->Uninit();
 	}
 
 	// 自身のオブジェクトを破棄
@@ -328,6 +366,9 @@ void CGaugeStar::Update(void)
 
 		// 星の背景の更新
 		m_apStarBG[nCntStar]->Update();
+
+		// 星の枠の更新
+		m_apStarFrame[nCntStar]->Update();
 	}
 }
 
@@ -355,6 +396,9 @@ void CGaugeStar::SetEnableUpdate(const bool bUpdate)
 
 		// 星の背景の更新状況を設定
 		m_apStarBG[nCntStar]->SetEnableUpdate(bUpdate);
+
+		// 星の枠の更新状況を設定
+		m_apStarFrame[nCntStar]->SetEnableUpdate(bUpdate);
 	}
 }
 
@@ -374,6 +418,9 @@ void CGaugeStar::SetEnableDraw(const bool bDraw)
 
 		// 星の背景の描画状況を設定
 		m_apStarBG[nCntStar]->SetEnableDraw(bDraw);
+
+		// 星の枠の描画状況を設定
+		m_apStarFrame[nCntStar]->SetEnableDraw(bDraw);
 	}
 }
 
@@ -388,6 +435,7 @@ CGaugeStar *CGaugeStar::Create
 	const int nHealWait,		// 回復待機カウント
 	CObject *pObject,			// 親オブジェクト
 	const D3DXVECTOR3& rGap,	// 表示位置の加算量
+	const float fFrameRadius,	// 枠の半径
 	const float fDistance,		// 中心からの距離
 	const float fFlicker		// 揺らめき量
 )
@@ -421,7 +469,7 @@ CGaugeStar *CGaugeStar::Create
 		pGaugeStar->SetGapPosition(rGap);
 
 		// 星情報を設定
-		pGaugeStar->SetStar(nMaxNumGauge, fMaxRadius);
+		pGaugeStar->SetStar(nMaxNumGauge, fMaxRadius, fFrameRadius);
 
 		// 中心からの距離を設定
 		pGaugeStar->SetDistance(fDistance);
@@ -463,7 +511,7 @@ bool CGaugeStar::UseGauge(void)
 //============================================================
 //	星情報の設定処理
 //============================================================
-void CGaugeStar::SetStar(const int nNumGauge, const float fRadius)
+void CGaugeStar::SetStar(const int nNumGauge, const float fRadius, const float fFrameRadius)
 {
 	for (int nCntStar = 0; nCntStar < MAX_STAR; nCntStar++)
 	{ // 星の最大数分繰り返す
@@ -479,6 +527,9 @@ void CGaugeStar::SetStar(const int nNumGauge, const float fRadius)
 
 		// 星の背景の大きさを設定
 		m_apStarBG[nCntStar]->SetScaling(D3DXVECTOR3(fRadius, fRadius, 0.0f));
+
+		// 星の枠の大きさを設定
+		m_apStarFrame[nCntStar]->SetScaling(D3DXVECTOR3(fFrameRadius, fFrameRadius, 0.0f));
 	}
 }
 
@@ -545,8 +596,8 @@ HRESULT CGaugeStar::SetDrawInfo(void)
 
 			// 星の位置設定
 			m_aStar[nCntStar].pBillboard->SetPosition(posStar);
-
 			m_apStarBG[nCntStar]->SetPosition(posStar);
+			m_apStarFrame[nCntStar]->SetPosition(posStar);
 		}
 
 		// 成功を返す

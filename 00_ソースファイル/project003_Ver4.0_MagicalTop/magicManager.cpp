@@ -31,7 +31,7 @@
 #define GAUGE_PLUS_Y	(120.0f)	// ゲージY位置加算量
 #define GAUGE_GAUGESIZE	(D3DXVECTOR3(110.0f, 15.0f, 0.0f))	// ゲージ大きさ
 #define GAUGE_FRONTCOL	(D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f))	// 表ゲージ色
-#define GAUGE_BACKCOL	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	// 裏ゲージ色
+#define GAUGE_BACKCOL	(D3DXCOLOR(0.0f, 0.0f, 0.5f, 1.0f))	// 裏ゲージ色
 
 #define HEAL_CNT	(120)	// 回復状態に移行するまでのカウンター
 #define NORMAL_CNT	(40)	// 通常状態に移行するまでのカウンター

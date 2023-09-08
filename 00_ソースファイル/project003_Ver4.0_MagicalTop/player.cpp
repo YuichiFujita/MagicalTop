@@ -49,6 +49,7 @@
 #define STAR_RADIUS		(40.0f)	// 半径
 #define STAR_HEAL		(4)		// ゲージ回復量
 #define STAR_WAIT_HEAL	(120)	// 回復待機カウント
+#define STAR_BG_RADIUS	(55.0f)	// 枠の半径
 #define STAR_DIS_CENTER	(45.0f)	// 中心からの距離
 #define STAR_FLICKER	(8.0f)	// 揺らめき量
 
@@ -250,6 +251,7 @@ HRESULT CPlayer::Init(void)
 		STAR_WAIT_HEAL,		// 回復待機カウント
 		this,				// 親オブジェクト
 		STAR_ADDPOS,		// 表示位置の加算量
+		STAR_BG_RADIUS,		// 枠の半径
 		STAR_DIS_CENTER,	// 中心からの距離
 		STAR_FLICKER		// 揺らめき量
 	);
