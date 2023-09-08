@@ -48,6 +48,7 @@ public:
 	void Uninit(void);		// 終了
 	void Update(void);		// 更新
 	bool ShotMagic(void);	// 魔法発射
+	void SetEnableManaDraw(const bool bDraw);	// マナ描画状況設定
 
 	// 静的メンバ関数
 	static CMagicManager *Create(CObject *pPlayer);			// 生成

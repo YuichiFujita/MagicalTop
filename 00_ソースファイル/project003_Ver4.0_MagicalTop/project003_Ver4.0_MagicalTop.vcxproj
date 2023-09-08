@@ -179,7 +179,6 @@
     <ClCompile Include="hurricane.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="levelupManager.cpp" />
-    <ClCompile Include="lifeGauge3D.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="lockCursor.cpp" />
     <ClCompile Include="magic.cpp" />
@@ -263,7 +262,6 @@
     <ClInclude Include="hurricane.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="levelupManager.h" />
-    <ClInclude Include="lifeGauge3D.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="lockCursor.h" />
     <ClInclude Include="magic.h" />

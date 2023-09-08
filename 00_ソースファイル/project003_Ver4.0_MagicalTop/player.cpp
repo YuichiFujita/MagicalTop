@@ -613,14 +613,9 @@ void CPlayer::SetDisp(const bool bDisp)
 		// ó‘Ô‚ðÝ’è
 		m_state = STATE_FADEOUT;	// ƒtƒF[ƒhƒAƒEƒgó‘Ô
 
-		// ‰e‚ð•`‰æ‚·‚éÝ’è‚É‚·‚é
-		m_pShadow->SetEnableDraw(true);
-
-		// ‹OÕ‚ð•`‰æ‚·‚éÝ’è‚É‚·‚é
-		m_pOrbit->SetEnableDraw(true);
-
-		// ƒ_ƒbƒVƒ…‚ð•`‰æ‚·‚éÝ’è‚É‚·‚é
-		m_pDash->SetEnableDraw(true);
+		// •`‰æ‚·‚éÝ’è‚É‚·‚é
+		SetEnableDraw(true);
+		CObject::SetEnableDraw(true);	// ƒvƒŒƒCƒ„[‚Ì•`‰æ‚ÍON‚É‚·‚é
 	}
 	else
 	{ // •\Ž¦‚µ‚È‚¢ó‘Ô‚Ìê‡
@@ -628,14 +623,9 @@ void CPlayer::SetDisp(const bool bDisp)
 		// ó‘Ô‚ðÝ’è
 		m_state = STATE_FADEIN;		// ƒtƒF[ƒhƒCƒ“ó‘Ô
 
-		// ‰e‚ð•`‰æ‚µ‚È‚¢Ý’è‚É‚·‚é
-		m_pShadow->SetEnableDraw(false);
-
-		// ‹OÕ‚ð•`‰æ‚µ‚È‚¢Ý’è‚É‚·‚é
-		m_pOrbit->SetEnableDraw(false);
-
-		// ƒ_ƒbƒVƒ…‚ð•`‰æ‚µ‚È‚¢Ý’è‚É‚·‚é
-		m_pDash->SetEnableDraw(false);
+		// •`‰æ‚µ‚È‚¢Ý’è‚É‚·‚é
+		SetEnableDraw(false);
+		CObject::SetEnableDraw(true);	// ƒvƒŒƒCƒ„[‚Ì•`‰æ‚ÍON‚É‚·‚é
 	}
 }
 
@@ -661,6 +651,8 @@ void CPlayer::SetEnableDraw(const bool bDraw)
 	m_pShadow->SetEnableDraw(bDraw);	// ‰e
 	m_pOrbit->SetEnableDraw(bDraw);		// ‹OÕ
 	m_pDash->SetEnableDraw(bDraw);		// ƒ_ƒbƒVƒ…
+	m_pLife->SetEnableDraw(bDraw);		// ‘Ì—Í
+	m_pMagic->SetEnableManaDraw(bDraw);	// ƒ}ƒi
 }
 
 //============================================================

@@ -13,7 +13,6 @@
 #include "renderer.h"
 #include "texture.h"
 #include "multiModel.h"
-#include "lifeGauge3D.h"
 #include "shadow.h"
 #include "objectBillboard.h"
 #include "bubble.h"
