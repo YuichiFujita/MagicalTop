@@ -29,7 +29,7 @@
 class CMagicManager;	// 魔法マネージャークラス
 class CExpManager;		// 経験値マネージャークラス
 class CLevelupManager;	// 強化マネージャークラス
-class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
+class CObjectGauge3D;	// オブジェクトゲージ3Dクラス
 class CGaugeStar;		// 星ゲージクラス
 class CShadow;			// 影クラス
 class CObjectOrbit;		// オブジェクト軌跡クラス
@@ -161,7 +161,7 @@ private:
 	CMagicManager	*m_pMagic;		// 魔法マネージャーの情報
 	CExpManager		*m_pExp;		// 経験値マネージャーの情報
 	CLevelupManager	*m_pLevelup;	// 強化マネージャーの情報
-	CObjectGauge2D	*m_pLife;		// 体力の情報
+	CObjectGauge3D	*m_pLife;		// 体力の情報
 	CGaugeStar		*m_pDash;		// ダッシュの情報
 	CShadow			*m_pShadow;		// 影の情報
 	CObjectOrbit	*m_pOrbit;		// 軌跡の情報

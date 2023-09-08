@@ -21,7 +21,7 @@
 //	前方宣言
 //************************************************************
 class CObjectMeshCube;	// オブジェクトメッシュキューブクラス
-class CLifeGauge3D;		// 体力ゲージ3Dクラス
+class CObjectGauge3D;	// オブジェクトゲージ3Dクラス
 class CShadow;			// 影クラス
 
 //************************************************************
@@ -84,7 +84,8 @@ private:
 
 	// メンバ変数
 	CObjectMeshCube *m_pMeshCube;	// メッシュキューブの情報
-	CLifeGauge3D *m_pLifeGauge;		// 体力の情報
+	CObjectGauge3D *m_pLife;		// 体力の情報
+
 	CShadow *m_pShadow;		// 影の情報
 	STATE m_state;			// 状態
 	float m_fSinRot;		// 浮遊向き

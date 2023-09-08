@@ -14,7 +14,7 @@
 #include "sceneGame.h"
 #include "object.h"
 #include "lockCursor.h"
-#include "objectGauge2D.h"
+#include "objectGauge3D.h"
 #include "multiModel.h"
 #include "player.h"
 #include "target.h"
@@ -28,8 +28,8 @@
 #define MAX_MANA	(100)	// 最大マナ
 #define MANA_FRAME	(10)	// マナ変動フレーム
 
-#define GAUGE_POS		(D3DXVECTOR3(260.0f, 540.0f, 0.0f))	// 位置
-#define GAUGE_GAUGESIZE	(D3DXVECTOR3(200.0f, 30.0f, 0.0f))	// ゲージ大きさ
+#define GAUGE_PLUS_Y	(120.0f)	// ゲージY位置加算量
+#define GAUGE_GAUGESIZE	(D3DXVECTOR3(110.0f, 15.0f, 0.0f))	// ゲージ大きさ
 #define GAUGE_FRONTCOL	(D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f))	// 表ゲージ色
 #define GAUGE_BACKCOL	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	// 裏ゲージ色
 
@@ -78,15 +78,19 @@ HRESULT CMagicManager::Init(void)
 	m_nCounterHeal = 0;		// 回復管理カウンター
 
 	// マナの生成
-	m_pMana = CObjectGauge2D::Create
+	m_pMana = CObjectGauge3D::Create
 	( // 引数
-		CObject::LABEL_GAUGE,	// オブジェクトラベル
-		MAX_MANA,				// 最大マナ
-		MANA_FRAME,				// マナ変動フレーム
-		GAUGE_POS,				// 位置
-		GAUGE_GAUGESIZE,		// ゲージ大きさ
-		GAUGE_FRONTCOL,			// 表ゲージ色
-		GAUGE_BACKCOL			// 裏ゲージ色
+		CObject::LABEL_GAUGE,			// オブジェクトラベル
+		NULL,							// ゲージ表示オブジェクト
+		MAX_MANA,						// 最大マナ
+		MANA_FRAME,						// マナ変動フレーム
+		GAUGE_PLUS_Y,					// 表示Y位置の加算量
+		GAUGE_GAUGESIZE,				// ゲージ大きさ
+		GAUGE_FRONTCOL,					// 表ゲージ色
+		GAUGE_BACKCOL,					// 裏ゲージ色
+		true,							// 枠描画状況
+		CObjectGauge3D::TYPE_PLAYER,	// 枠種類
+		GAUGE_GAUGESIZE					// 枠大きさ
 	);
 	if (UNUSED(m_pMana))
 	{ // 非使用中の場合
@@ -374,7 +378,7 @@ bool CMagicManager::ShotMagic(void)
 //============================================================
 //	生成処理
 //============================================================
-CMagicManager *CMagicManager::Create()
+CMagicManager *CMagicManager::Create(CObject *pPlayer)
 {
 	// ポインタを宣言
 	CMagicManager *pMagicManager = NULL;	// 魔法マネージャー生成用
@@ -401,6 +405,9 @@ CMagicManager *CMagicManager::Create()
 			// 失敗を返す
 			return NULL;
 		}
+
+		// マナ表示オブジェクトを設定
+		pMagicManager->m_pMana->SetGaugeObject(pPlayer);
 
 		// 確保したアドレスを返す
 		return pMagicManager;

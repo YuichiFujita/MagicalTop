@@ -19,7 +19,7 @@
 //************************************************************
 //	前方宣言
 //************************************************************
-class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
+class CObjectGauge3D;	// オブジェクトゲージ3Dクラス
 
 //************************************************************
 //	クラス定義
@@ -50,12 +50,12 @@ public:
 	bool ShotMagic(void);	// 魔法発射
 
 	// 静的メンバ関数
-	static CMagicManager *Create(void);	// 生成
+	static CMagicManager *Create(CObject *pPlayer);			// 生成
 	static HRESULT Release(CMagicManager *&prMagicManager);	// 破棄
 
 private:
 	// メンバ変数
-	CObjectGauge2D *m_pMana;	// マナの情報
+	CObjectGauge3D *m_pMana;	// マナの情報
 	STATE m_state;				// 状態
 	int m_nCounterMagic;		// 魔法管理カウンター
 	int m_nCounterState;		// 状態管理カウンター

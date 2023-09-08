@@ -1,13 +1,13 @@
 //============================================================
 //
-//	オブジェクトゲージ2D処理 [objectGauge2D.cpp]
+//	オブジェクトゲージ3D処理 [objectGauge3D.cpp]
 //	Author：藤田勇一
 //
 //============================================================
 //************************************************************
 //	インクルードファイル
 //************************************************************
-#include "objectGauge2D.h"
+#include "objectGauge3D.h"
 #include "manager.h"
 #include "renderer.h"
 #include "texture.h"
@@ -16,15 +16,25 @@
 //	マクロ定義
 //************************************************************
 #define MAX_VERTEX	(12)	// 頂点数
-#define GAUGE_PRIO	(5)		// ゲージ2Dの優先順位
+#define GAUGE_PRIO	(5)		// ゲージ3Dの優先順位
 
 //************************************************************
-//	子クラス [CObjectGauge2D] のメンバ関数
+//	静的メンバ変数宣言
+//************************************************************
+const char *CObjectGauge3D::mc_apTextureFile[] =	// テクスチャ定数
+{
+	NULL,	// フレーム無し
+	"data\\TEXTURE\\lifeGauge000.png",	// プレイヤーフレーム
+	"data\\TEXTURE\\lifeGauge001.png",	// ターゲットフレーム
+};
+
+//************************************************************
+//	子クラス [CObjectGauge3D] のメンバ関数
 //************************************************************
 //============================================================
 //	コンストラクタ
 //============================================================
-CObjectGauge2D::CObjectGauge2D() : m_nMaxNumGauge(0), m_nFrame(0)
+CObjectGauge3D::CObjectGauge3D() : m_nMaxNumGauge(0), m_nFrame(0)
 {
 	// メンバ変数をクリア
 	m_pVtxBuff	= NULL;			// 頂点バッファへのポインタ
@@ -52,7 +62,7 @@ CObjectGauge2D::CObjectGauge2D() : m_nMaxNumGauge(0), m_nFrame(0)
 //============================================================
 //	オーバーロードコンストラクタ
 //============================================================
-CObjectGauge2D::CObjectGauge2D(const int nMax, const int nFrame, const CObject::LABEL label, const int nPriority) : CObject(label, nPriority), m_nMaxNumGauge(nMax), m_nFrame(nFrame)
+CObjectGauge3D::CObjectGauge3D(const int nMax, const int nFrame, const CObject::LABEL label, const int nPriority) : CObject(label, nPriority), m_nMaxNumGauge(nMax), m_nFrame(nFrame)
 {
 	// メンバ変数をクリア
 	m_pVtxBuff	= NULL;			// 頂点バッファへのポインタ
@@ -80,7 +90,7 @@ CObjectGauge2D::CObjectGauge2D(const int nMax, const int nFrame, const CObject::
 //============================================================
 //	デストラクタ
 //============================================================
-CObjectGauge2D::~CObjectGauge2D()
+CObjectGauge3D::~CObjectGauge3D()
 {
 
 }
@@ -88,7 +98,7 @@ CObjectGauge2D::~CObjectGauge2D()
 //============================================================
 //	初期化処理
 //============================================================
-HRESULT CObjectGauge2D::Init(void)
+HRESULT CObjectGauge3D::Init(void)
 {
 	// メンバ変数を初期化
 	m_pVtxBuff	= NULL;				// 頂点バッファへのポインタ
@@ -121,9 +131,9 @@ HRESULT CObjectGauge2D::Init(void)
 		// 頂点バッファの生成
 		if (FAILED(pDevice->CreateVertexBuffer
 		( // 引数
-			sizeof(VERTEX_2D) * MAX_VERTEX,	// 必要頂点数
+			sizeof(VERTEX_3D) * MAX_VERTEX,	// 必要頂点数
 			D3DUSAGE_WRITEONLY,				// 使用方法
-			FVF_VERTEX_2D,					// 頂点フォーマット
+			FVF_VERTEX_3D,					// 頂点フォーマット
 			D3DPOOL_MANAGED,				// メモリの指定
 			&m_pVtxBuff,					// 頂点バッファへのポインタ
 			NULL
@@ -147,7 +157,7 @@ HRESULT CObjectGauge2D::Init(void)
 //============================================================
 //	終了処理
 //============================================================
-void CObjectGauge2D::Uninit(void)
+void CObjectGauge3D::Uninit(void)
 {
 	// 頂点バッファの破棄
 	if (USED(m_pVtxBuff))
@@ -158,15 +168,18 @@ void CObjectGauge2D::Uninit(void)
 		m_pVtxBuff = NULL;
 	}
 
-	// オブジェクトゲージ2Dを破棄
+	// オブジェクトゲージ3Dを破棄
 	Release();
 }
 
 //============================================================
 //	更新処理
 //============================================================
-void CObjectGauge2D::Update(void)
+void CObjectGauge3D::Update(void)
 {
+	// 変数を宣言
+	D3DXMATRIX mtxGauge;	// ゲージ表示オブジェクトのマトリックス
+
 	// ゲージの設定
 	if (m_state == STATE_CHANGE)
 	{ // 体力が変動中の場合
@@ -193,22 +206,82 @@ void CObjectGauge2D::Update(void)
 			m_state = STATE_NONE;
 		}
 	}
+
+	// 位置の設定
+	for (int nCntGauge = 0; nCntGauge < POLYGON_MAX; nCntGauge++)
+	{ // 使用する四角形ポリゴン数分繰り返す
+
+		// TODO：ポインタの確認もっときれいに
+		if (CObject::CheckUse(m_pGauge))
+		{ // ゲージ表示対象が使用されていた場合
+
+			// ワールドマトリックスを取得
+			mtxGauge = m_pGauge->GetMtxWorld();
+
+			// 位置を設定
+			m_pos = D3DXVECTOR3(mtxGauge._41, mtxGauge._42 + m_fPosUp, mtxGauge._43);
+		}
+		else
+		{ // ゲージ表示対象が使用されていなかった場合
+
+			// ゲージ表示しているオブジェクトの情報を初期化
+			m_pGauge = NULL;
+
+			// オブジェクトの終了
+			Uninit();
+
+			// 関数を抜ける
+			return;
+		}
+	}
 }
 
 //============================================================
 //	描画処理
 //============================================================
-void CObjectGauge2D::Draw(void)
+void CObjectGauge3D::Draw(void)
 {
+	// 変数を宣言
+	D3DXMATRIX mtxTrans;	// 計算用マトリックス
+	D3DXMATRIX mtxView;		// ビューマトリックス
+
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 	CTexture *pTexture = CManager::GetTexture();						// テクスチャへのポインタ
 
+	// ライティングを無効にする
+	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+
+	// Zテストを無効にする
+	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);	// Zテストの設定
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);		// Zバッファ更新の有効 / 無効の設定
+
+	// ワールドマトリックスの初期化
+	D3DXMatrixIdentity(&m_mtxWorld);
+
+	// ビューマトリックスを取得
+	pDevice->GetTransform(D3DTS_VIEW, &mtxView);
+
+	// ポリゴンをカメラに対して正面に向ける
+	D3DXMatrixInverse(&m_mtxWorld, NULL, &mtxView);	// 逆行列を求める
+
+	// マトリックスのワールド座標を原点にする
+	m_mtxWorld._41 = 0.0f;
+	m_mtxWorld._42 = 0.0f;
+	m_mtxWorld._43 = 0.0f;
+
+	// 位置を反映
+	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
+	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxTrans);
+
+	// ワールドマトリックスの設定
+	pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
+
 	// 頂点バッファをデータストリームに設定
-	pDevice->SetStreamSource(0, m_pVtxBuff, 0, sizeof(VERTEX_2D));
+	pDevice->SetStreamSource(0, m_pVtxBuff, 0, sizeof(VERTEX_3D));
 
 	// 頂点フォーマットの設定
-	pDevice->SetFVF(FVF_VERTEX_2D);
+	pDevice->SetFVF(FVF_VERTEX_3D);
 
 	for (int nCntGauge = 0; nCntGauge < POLYGON_MAX; nCntGauge++)
 	{ // 使用する四角形ポリゴン数分繰り返す
@@ -236,66 +309,82 @@ void CObjectGauge2D::Draw(void)
 			pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, nCntGauge * 4, 2);
 		}
 	}
+
+	// ライティングを有効にする
+	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+
+	// Zテストを有効にする
+	pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);	// Zテストの設定
+	pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);		// Zバッファ更新の有効 / 無効の設定
 }
 
 //============================================================
 //	生成処理
 //============================================================
-CObjectGauge2D *CObjectGauge2D::Create
+CObjectGauge3D *CObjectGauge3D::Create
 (
 	const CObject::LABEL label,		// オブジェクトラベル
+	CObject *pObject,				// ゲージ表示オブジェクト
 	const int nMax,					// 最大表示値
 	const int nFrame,				// 表示値変動フレーム
-	const D3DXVECTOR3& rPos,		// 位置
+	const float fPosUp,				// 表示Y位置の加算量
 	const D3DXVECTOR3& rSizeGauge,	// ゲージ大きさ
 	const D3DXCOLOR& rColFront,		// 表表ゲージ色
 	const D3DXCOLOR& rColBack,		// 裏表ゲージ色
 	const bool bDrawFrame,			// 枠描画状況
+	const TYPE frameType,			// 枠種類
 	const D3DXVECTOR3& rSizeFrame	// 枠大きさ
 )
 {
 	// ポインタを宣言
-	CObjectGauge2D *pObjectGauge2D = NULL;	// オブジェクトゲージ2D生成用
+	CObjectGauge3D *pObjectGauge3D = NULL;	// オブジェクトゲージ3D生成用
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 
-	if (UNUSED(pObjectGauge2D))
+	if (UNUSED(pObjectGauge3D))
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pObjectGauge2D = new CObjectGauge2D(nMax, nFrame, label, GAUGE_PRIO);	// オブジェクトゲージ2D
+		pObjectGauge3D = new CObjectGauge3D(nMax, nFrame, label, GAUGE_PRIO);	// オブジェクトゲージ3D
 	}
 	else { assert(false); return NULL; }	// 使用中
 
-	if (USED(pObjectGauge2D))
+	if (USED(pObjectGauge3D))
 	{ // 確保に成功している場合
 
-		// オブジェクトゲージ2Dの初期化
-		if (FAILED(pObjectGauge2D->Init()))
+		// オブジェクトゲージ3Dの初期化
+		if (FAILED(pObjectGauge3D->Init()))
 		{ // 初期化に失敗した場合
 
 			// メモリ開放
-			delete pObjectGauge2D;
-			pObjectGauge2D = NULL;
+			delete pObjectGauge3D;
+			pObjectGauge3D = NULL;
 
 			// 失敗を返す
 			return NULL;
 		}
 
-		// 位置を設定
-		pObjectGauge2D->SetPosition(rPos);
+		// テクスチャを登録・割当
+		pObjectGauge3D->BindTexture(POLYGON_FRAME, pTexture->Regist(mc_apTextureFile[frameType]));
+
+		// ゲージ表示オブジェクトを設定
+		pObjectGauge3D->SetGaugeObject(pObject);
+
+		// Y位置加算量を設定
+		pObjectGauge3D->SetPositionUp(fPosUp);
 
 		// 大きさを設定
-		pObjectGauge2D->SetScalingGauge(rSizeGauge);	// ゲージ大きさ
-		pObjectGauge2D->SetScalingFrame(rSizeFrame);	// 枠大きさ
+		pObjectGauge3D->SetScalingGauge(rSizeGauge);	// ゲージ大きさ
+		pObjectGauge3D->SetScalingFrame(rSizeFrame);	// 枠大きさ
 
 		// 色を設定
-		pObjectGauge2D->SetColorFront(rColFront);	// 表ゲージ色
-		pObjectGauge2D->SetColorBack(rColBack);		// 裏ゲージ色
+		pObjectGauge3D->SetColorFront(rColFront);	// 表ゲージ色
+		pObjectGauge3D->SetColorBack(rColBack);		// 裏ゲージ色
 
 		// 枠の表示状況を設定
-		pObjectGauge2D->SetEnableDrawFrame(bDrawFrame);
+		pObjectGauge3D->SetEnableDrawFrame(bDrawFrame);
 
 		// 確保したアドレスを返す
-		return pObjectGauge2D;
+		return pObjectGauge3D;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
 }
@@ -303,7 +392,7 @@ CObjectGauge2D *CObjectGauge2D::Create
 //============================================================
 //	ゲージの加算処理
 //============================================================
-void CObjectGauge2D::AddNum(const int nAdd)
+void CObjectGauge3D::AddNum(const int nAdd)
 {
 	// 現在の表示値を設定
 	m_fCurrentNumGauge = (float)m_nNumGauge;
@@ -325,7 +414,7 @@ void CObjectGauge2D::AddNum(const int nAdd)
 //============================================================
 //	ゲージの設定処理
 //============================================================
-void CObjectGauge2D::SetNum(const int nNum)
+void CObjectGauge3D::SetNum(const int nNum)
 {
 	// 引数の表示値を設定
 	m_nNumGauge = nNum;
@@ -343,7 +432,7 @@ void CObjectGauge2D::SetNum(const int nNum)
 //============================================================
 //	ゲージ取得処理
 //============================================================
-int CObjectGauge2D::GetNum(void) const
+int CObjectGauge3D::GetNum(void) const
 {
 	// 表示値を返す
 	return m_nNumGauge;
@@ -352,7 +441,7 @@ int CObjectGauge2D::GetNum(void) const
 //============================================================
 //	テクスチャ割当処理
 //============================================================
-void CObjectGauge2D::BindTexture(const int nPolygonID, const int nTextureID)
+void CObjectGauge3D::BindTexture(const int nPolygonID, const int nTextureID)
 {
 	if (nPolygonID < POLYGON_MAX)
 	{ // インデックスが使用する四角形ポリゴン数より小さい場合
@@ -363,9 +452,18 @@ void CObjectGauge2D::BindTexture(const int nPolygonID, const int nTextureID)
 }
 
 //============================================================
+//	ゲージ表示オブジェクトの設定処理
+//============================================================
+void CObjectGauge3D::SetGaugeObject(CObject *pObject)
+{
+	// 引数のオブジェクトを設定
+	m_pGauge = pObject;
+}
+
+//============================================================
 //	位置の設定処理
 //============================================================
-void CObjectGauge2D::SetPosition(const D3DXVECTOR3& rPos)
+void CObjectGauge3D::SetPosition(const D3DXVECTOR3& rPos)
 {
 	// 引数の位置を設定
 	m_pos = rPos;
@@ -375,9 +473,18 @@ void CObjectGauge2D::SetPosition(const D3DXVECTOR3& rPos)
 }
 
 //============================================================
+//	Y位置加算量の設定処理
+//============================================================
+void CObjectGauge3D::SetPositionUp(const float fUp)
+{
+	// 引数のY位置加算量を設定
+	m_fPosUp = fUp;
+}
+
+//============================================================
 //	ゲージ大きさの設定処理
 //============================================================
-void CObjectGauge2D::SetScalingGauge(const D3DXVECTOR3& rSize)
+void CObjectGauge3D::SetScalingGauge(const D3DXVECTOR3& rSize)
 {
 	// 引数のゲージ大きさを代入
 	m_sizeGauge = rSize;
@@ -392,7 +499,7 @@ void CObjectGauge2D::SetScalingGauge(const D3DXVECTOR3& rSize)
 //============================================================
 //	背景大きさの設定処理
 //============================================================
-void CObjectGauge2D::SetScalingFrame(const D3DXVECTOR3& rSize)
+void CObjectGauge3D::SetScalingFrame(const D3DXVECTOR3& rSize)
 {
 	// 引数の背景大きさを代入
 	m_sizeFrame = rSize;
@@ -404,7 +511,7 @@ void CObjectGauge2D::SetScalingFrame(const D3DXVECTOR3& rSize)
 //============================================================
 //	表ゲージ色の設定処理
 //============================================================
-void CObjectGauge2D::SetColorFront(const D3DXCOLOR& rCol)
+void CObjectGauge3D::SetColorFront(const D3DXCOLOR& rCol)
 {
 	// 引数の表ゲージ色を代入
 	m_colFront = rCol;
@@ -416,7 +523,7 @@ void CObjectGauge2D::SetColorFront(const D3DXCOLOR& rCol)
 //============================================================
 //	裏ゲージ色の設定処理
 //============================================================
-void CObjectGauge2D::SetColorBack(const D3DXCOLOR& rCol)
+void CObjectGauge3D::SetColorBack(const D3DXCOLOR& rCol)
 {
 	// 引数の裏ゲージ色を代入
 	m_colBack = rCol;
@@ -428,25 +535,43 @@ void CObjectGauge2D::SetColorBack(const D3DXCOLOR& rCol)
 //============================================================
 //	枠表示状況設定処理
 //============================================================
-void CObjectGauge2D::SetEnableDrawFrame(const bool bDraw)
+void CObjectGauge3D::SetEnableDrawFrame(const bool bDraw)
 {
 	// 引数の枠の表示状況を設定
 	m_bDrawFrame = bDraw;
 }
 
 //============================================================
+//	ゲージ表示オブジェクト取得処理
+//============================================================
+const CObject *CObjectGauge3D::GetGaugeObject(void) const
+{
+	// ゲージ表示中のオブジェクトを返す
+	return m_pGauge;
+}
+
+//============================================================
 //	位置取得処理
 //============================================================
-D3DXVECTOR3 CObjectGauge2D::GetPosition(void) const
+D3DXVECTOR3 CObjectGauge3D::GetPosition(void) const
 {
 	// 位置を返す
 	return m_pos;
 }
 
 //============================================================
+//	Y位置加算量取得処理
+//============================================================
+float CObjectGauge3D::GetPositionUp(void) const
+{
+	// Y位置加算量を返す
+	return m_fPosUp;
+}
+
+//============================================================
 //	ゲージ大きさ取得処理
 //============================================================
-D3DXVECTOR3 CObjectGauge2D::GetScalingGauge(void) const
+D3DXVECTOR3 CObjectGauge3D::GetScalingGauge(void) const
 {
 	// ゲージ大きさを返す
 	return m_sizeGauge;
@@ -455,7 +580,7 @@ D3DXVECTOR3 CObjectGauge2D::GetScalingGauge(void) const
 //============================================================
 //	背景大きさ取得処理
 //============================================================
-D3DXVECTOR3 CObjectGauge2D::GetScalingFrame(void) const
+D3DXVECTOR3 CObjectGauge3D::GetScalingFrame(void) const
 {
 	// 背景大きさを返す
 	return m_sizeFrame;
@@ -464,7 +589,7 @@ D3DXVECTOR3 CObjectGauge2D::GetScalingFrame(void) const
 //============================================================
 //	表ゲージ色取得処理
 //============================================================
-D3DXCOLOR CObjectGauge2D::GetColorFront(void) const
+D3DXCOLOR CObjectGauge3D::GetColorFront(void) const
 {
 	// 表ゲージ色を返す
 	return m_colFront;
@@ -473,7 +598,7 @@ D3DXCOLOR CObjectGauge2D::GetColorFront(void) const
 //============================================================
 //	裏ゲージ色取得処理
 //============================================================
-D3DXCOLOR CObjectGauge2D::GetColorBack(void) const
+D3DXCOLOR CObjectGauge3D::GetColorBack(void) const
 {
 	// 裏ゲージ色を返す
 	return m_colBack;
@@ -482,7 +607,7 @@ D3DXCOLOR CObjectGauge2D::GetColorBack(void) const
 //============================================================
 //	枠表示状況取得処理
 //============================================================
-bool CObjectGauge2D::GetEnableDrawFrame(void) const
+bool CObjectGauge3D::GetEnableDrawFrame(void) const
 {
 	// 枠表示状況を返す
 	return m_bDrawFrame;
@@ -491,10 +616,10 @@ bool CObjectGauge2D::GetEnableDrawFrame(void) const
 //============================================================
 //	頂点情報の設定処理
 //============================================================
-void CObjectGauge2D::SetVtx(void)
+void CObjectGauge3D::SetVtx(void)
 {
 	// ポインタを宣言
-	VERTEX_2D *pVtx;	// 頂点情報へのポインタ
+	VERTEX_3D *pVtx;	// 頂点情報へのポインタ
 
 	if (USED(m_pVtxBuff))
 	{ // 使用中の場合
@@ -510,10 +635,10 @@ void CObjectGauge2D::SetVtx(void)
 			case POLYGON_BACK:	// 背景
 
 				// 頂点座標を設定
-				pVtx[0].pos = D3DXVECTOR3(m_pos.x - m_sizeGauge.x, m_pos.y - m_sizeGauge.y, 0.0f);
-				pVtx[1].pos = D3DXVECTOR3(m_pos.x + m_sizeGauge.x, m_pos.y - m_sizeGauge.y, 0.0f);
-				pVtx[2].pos = D3DXVECTOR3(m_pos.x - m_sizeGauge.x, m_pos.y + m_sizeGauge.y, 0.0f);
-				pVtx[3].pos = D3DXVECTOR3(m_pos.x + m_sizeGauge.x, m_pos.y + m_sizeGauge.y, 0.0f);
+				pVtx[0].pos = D3DXVECTOR3(-m_sizeGauge.x * 0.5f,  m_sizeGauge.y * 0.5f, 0.0f);
+				pVtx[1].pos = D3DXVECTOR3( m_sizeGauge.x * 0.5f,  m_sizeGauge.y * 0.5f, 0.0f);
+				pVtx[2].pos = D3DXVECTOR3(-m_sizeGauge.x * 0.5f, -m_sizeGauge.y * 0.5f, 0.0f);
+				pVtx[3].pos = D3DXVECTOR3( m_sizeGauge.x * 0.5f, -m_sizeGauge.y * 0.5f, 0.0f);
 
 				// 頂点カラーの設定
 				pVtx[0].col = m_colBack;
@@ -526,10 +651,10 @@ void CObjectGauge2D::SetVtx(void)
 			case POLYGON_FRONT:	// ゲージ
 
 				// 頂点座標を設定
-				pVtx[0].pos = D3DXVECTOR3(m_pos.x - m_sizeGauge.x, m_pos.y - m_sizeGauge.y, 0.0f);
-				pVtx[1].pos = D3DXVECTOR3(m_pos.x + m_fAddRight,   m_pos.y - m_sizeGauge.y, 0.0f);
-				pVtx[2].pos = D3DXVECTOR3(m_pos.x - m_sizeGauge.x, m_pos.y + m_sizeGauge.y, 0.0f);
-				pVtx[3].pos = D3DXVECTOR3(m_pos.x + m_fAddRight,   m_pos.y + m_sizeGauge.y, 0.0f);
+				pVtx[0].pos = D3DXVECTOR3(-m_sizeGauge.x * 0.5f,  m_sizeGauge.y * 0.5f, 0.0f);
+				pVtx[1].pos = D3DXVECTOR3( m_fAddRight   * 0.5f,  m_sizeGauge.y * 0.5f, 0.0f);
+				pVtx[2].pos = D3DXVECTOR3(-m_sizeGauge.x * 0.5f, -m_sizeGauge.y * 0.5f, 0.0f);
+				pVtx[3].pos = D3DXVECTOR3( m_fAddRight   * 0.5f, -m_sizeGauge.y * 0.5f, 0.0f);
 
 				// 頂点カラーの設定
 				pVtx[0].col = m_colFront;
@@ -542,10 +667,10 @@ void CObjectGauge2D::SetVtx(void)
 			case POLYGON_FRAME:	// 枠
 
 				// 頂点座標を設定
-				pVtx[0].pos = D3DXVECTOR3(m_pos.x - m_sizeFrame.x, m_pos.y - m_sizeFrame.y, 0.0f);
-				pVtx[1].pos = D3DXVECTOR3(m_pos.x + m_sizeFrame.x, m_pos.y - m_sizeFrame.y, 0.0f);
-				pVtx[2].pos = D3DXVECTOR3(m_pos.x - m_sizeFrame.x, m_pos.y + m_sizeFrame.y, 0.0f);
-				pVtx[3].pos = D3DXVECTOR3(m_pos.x + m_sizeFrame.x, m_pos.y + m_sizeFrame.y, 0.0f);
+				pVtx[0].pos = D3DXVECTOR3(-m_sizeFrame.x * 0.5f,  m_sizeFrame.y * 0.5f, 0.0f);
+				pVtx[1].pos = D3DXVECTOR3( m_sizeFrame.x * 0.5f,  m_sizeFrame.y * 0.5f, 0.0f);
+				pVtx[2].pos = D3DXVECTOR3(-m_sizeFrame.x * 0.5f, -m_sizeFrame.y * 0.5f, 0.0f);
+				pVtx[3].pos = D3DXVECTOR3( m_sizeFrame.x * 0.5f, -m_sizeFrame.y * 0.5f, 0.0f);
 
 				// 頂点カラーの設定
 				pVtx[0].col = XCOL_WHITE;
@@ -560,11 +685,11 @@ void CObjectGauge2D::SetVtx(void)
 				break;
 			}
 
-			// rhw の設定
-			pVtx[0].rhw = 1.0f;
-			pVtx[1].rhw = 1.0f;
-			pVtx[2].rhw = 1.0f;
-			pVtx[3].rhw = 1.0f;
+			// 法線ベクトルの設定
+			pVtx[0].nor = VEC3_ZERO;
+			pVtx[1].nor = VEC3_ZERO;
+			pVtx[2].nor = VEC3_ZERO;
+			pVtx[3].nor = VEC3_ZERO;
 
 			// テクスチャ座標の設定
 			pVtx[0].tex = D3DXVECTOR2(0.0f, 0.0f);

@@ -21,7 +21,7 @@
 #include "magicManager.h"
 #include "expManager.h"
 #include "levelupManager.h"
-#include "objectGauge2D.h"
+#include "objectGauge3D.h"
 #include "gaugeStar.h"
 #include "shadow.h"
 #include "objectOrbit.h"
@@ -38,6 +38,19 @@
 #define PLAY_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 #define PLAY_ORBIT_COL		(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f))	// 軌跡の色
 #define PLAY_ORBIT_PRIO		(4)		// 軌跡の優先順位
+
+#define GAUGE_PLUS_Y	(140.0f)	// ゲージY位置加算量
+#define GAUGE_GAUGESIZE	(D3DXVECTOR3(110.0f, 15.0f, 0.0f))	// ゲージ大きさ
+#define GAUGE_FRONTCOL	(D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f))	// 表ゲージ色
+#define GAUGE_BACKCOL	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	// 裏ゲージ色
+
+#define STAR_ADDPOS		(D3DXVECTOR3(0.0f, 50.0f, 0.0f))	// 表示位置の加算量
+#define STAR_MAX_GAUGE	(60)	// 最大ゲージ量
+#define STAR_RADIUS		(40.0f)	// 半径
+#define STAR_HEAL		(4)		// ゲージ回復量
+#define STAR_WAIT_HEAL	(120)	// 回復待機カウント
+#define STAR_DIS_CENTER	(45.0f)	// 中心からの距離
+#define STAR_FLICKER	(8.0f)	// 揺らめき量
 
 #define MAX_MOVEX		(5.0f)		// 自動歩行時の速度割合用
 #define PULSROT_MOVEZ	(20)		// 前後移動時のプレイヤー向きの変更量
@@ -176,7 +189,7 @@ HRESULT CPlayer::Init(void)
 	m_fSubMove			= MOVE_LEFT_DECELE;		// 横移動の減速量
 
 	// 魔法マネージャーの生成
-	m_pMagic = CMagicManager::Create();
+	m_pMagic = CMagicManager::Create(this);
 	if (UNUSED(m_pMagic))
 	{ // 非使用中の場合
 
@@ -206,15 +219,19 @@ HRESULT CPlayer::Init(void)
 	}
 
 	// 体力の生成
-	m_pLife = CObjectGauge2D::Create	// TODO：定数
+	m_pLife = CObjectGauge3D::Create
 	( // 引数
-		CObject::LABEL_GAUGE,				// オブジェクトラベル
-		PLAY_LIFE,							// 最大体力
-		(int)(NORMAL_CNT * 0.25f),			// 体力変動フレーム
-		D3DXVECTOR3(260.0f, 640.0f, 0.0f),	// 位置
-		D3DXVECTOR3(200.0f, 30.0f, 0.0f),	// ゲージ大きさ
-		D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f),	// 表ゲージ色
-		D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f)	// 裏ゲージ色
+		CObject::LABEL_GAUGE,			// オブジェクトラベル
+		this,							// ゲージ表示オブジェクト
+		PLAY_LIFE,						// 最大表示値
+		(int)(NORMAL_CNT * 0.25f),		// 表示値変動フレーム
+		GAUGE_PLUS_Y,					// 表示Y位置の加算量
+		GAUGE_GAUGESIZE,				// ゲージ大きさ
+		GAUGE_FRONTCOL,					// 表ゲージ色
+		GAUGE_BACKCOL,					// 裏ゲージ色
+		true,							// 枠描画状況
+		CObjectGauge3D::TYPE_PLAYER,	// 枠種類
+		GAUGE_GAUGESIZE					// 枠大きさ
 	);
 	if (UNUSED(m_pLife))
 	{ // 非使用中の場合
@@ -225,7 +242,17 @@ HRESULT CPlayer::Init(void)
 	}
 
 	// ダッシュの生成
-	m_pDash = CGaugeStar::Create(80, 40.0f, 4, 120, this, D3DXVECTOR3(0.0f, 50.0f, 0.0f), 45.0f, 8.0f);	// TODO：定数
+	m_pDash = CGaugeStar::Create
+	( // 引数
+		STAR_MAX_GAUGE,		// 最大ゲージ量
+		STAR_RADIUS,		// 半径
+		STAR_HEAL,			// ゲージ回復量
+		STAR_WAIT_HEAL,		// 回復待機カウント
+		this,				// 親オブジェクト
+		STAR_ADDPOS,		// 表示位置の加算量
+		STAR_DIS_CENTER,	// 中心からの距離
+		STAR_FLICKER		// 揺らめき量
+	);
 	if (UNUSED(m_pDash))
 	{ // 非使用中の場合
 

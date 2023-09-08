@@ -14,7 +14,7 @@
 #include "sceneGame.h"
 #include "waveManager.h"
 #include "objectMeshCube.h"
-#include "lifeGauge3D.h"
+#include "objectGauge3D.h"
 #include "shadow.h"
 #include "flower.h"
 #include "particle3D.h"
@@ -33,8 +33,13 @@
 #define ADD_SIN_ROT	(D3DXToRadian(1))	// 浮遊向きの加算量
 #define ADD_CUBEROT	(D3DXVECTOR3(0.01f, 0.001f, 0.01f))	// キューブの回転量
 
-#define TARG_LIFE	(3000)		// ターゲットの体力
-#define TARG_POSUP	(160.0f)	// ターゲットのY位置の加算量
+#define TARG_LIFE		(3000)		// ターゲットの体力
+#define GAUGE_PLUS_Y	(160.0f)	// ターゲットのY位置の加算量
+#define GAUGE_GAUGESIZE	(D3DXVECTOR3(100.0f, 20.0f, 0.0f))	// ゲージサイズ
+#define GAUGE_FRAMESIZE	(D3DXVECTOR3(102.5f, 22.5f, 0.0f))	// ゲージフレームサイズ
+#define GAUGE_FRONTCOL	(D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f))	// 表ゲージ色
+#define GAUGE_BACKCOL	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	// 裏ゲージ色
+
 #define STATE_HEAL_CNT	(480)	// 回復状態に移行するまでのカウンター
 #define NORMAL_CNT		(60)	// 通常状態に移行するまでのカウンター
 #define WAIT_HEAL_CNT	(180)	// 回復までのカウンター
@@ -57,7 +62,7 @@ CTarget::CTarget() : CObjectModel(CObject::LABEL_TARGET)
 {
 	// メンバ変数をクリア
 	m_pMeshCube		= NULL;			// メッシュキューブの情報
-	m_pLifeGauge	= NULL;			// 体力の情報
+	m_pLife			= NULL;			// 体力の情報
 	m_pShadow		= NULL;			// 影の情報
 	m_state			= STATE_NORMAL;	// 状態
 	m_fSinRot		= 0.0f;			// 浮遊向き
@@ -80,7 +85,7 @@ HRESULT CTarget::Init(void)
 {
 	// メンバ変数を初期化
 	m_pMeshCube		= NULL;			// メッシュキューブの情報
-	m_pLifeGauge	= NULL;			// 体力の情報
+	m_pLife			= NULL;			// 体力の情報
 	m_pShadow		= NULL;			// 影の情報
 	m_state			= STATE_NORMAL;	// 状態
 	m_fSinRot		= 0.0f;			// 浮遊向き
@@ -123,8 +128,21 @@ HRESULT CTarget::Init(void)
 	}
 
 	// 体力ゲージ3Dの生成
-	m_pLifeGauge = CLifeGauge3D::Create(TARG_LIFE, TARG_LIFE, (int)(NORMAL_CNT * 0.5f), TARG_POSUP, this);
-	if (UNUSED(m_pLifeGauge))
+	m_pLife = CObjectGauge3D::Create
+	( // 引数
+		CObject::LABEL_GAUGE,			// オブジェクトラベル
+		this,							// ゲージ表示オブジェクト
+		TARG_LIFE,						// 最大表示値
+		(int)(NORMAL_CNT * 0.5f),		// 表示値変動フレーム
+		GAUGE_PLUS_Y,					// 表示Y位置の加算量
+		GAUGE_GAUGESIZE,				// ゲージ大きさ
+		GAUGE_FRONTCOL,					// 表ゲージ色
+		GAUGE_BACKCOL,					// 裏ゲージ色
+		true,							// 枠描画状況
+		CObjectGauge3D::TYPE_TARGET,	// 枠種類
+		GAUGE_FRAMESIZE					// 枠大きさ
+	);
+	if (UNUSED(m_pLife))
 	{ // 生成に失敗した場合
 
 		// 失敗を返す
@@ -154,9 +172,6 @@ void CTarget::Uninit(void)
 	// オブジェクトメッシュキューブを破棄
 	m_pMeshCube->Uninit();
 
-	// 体力ゲージ3Dを破棄
-	m_pLifeGauge->Uninit();
-
 	// 影を破棄
 	m_pShadow->Uninit();
 
@@ -179,7 +194,7 @@ void CTarget::Update(void)
 	{ // 状態ごとの処理
 	case STATE_NORMAL:	// 通常状態
 
-		if (m_pLifeGauge->GetLife() < TARG_LIFE && nNumFlower > 0)
+		if (m_pLife->GetNum() < TARG_LIFE && nNumFlower > 0)
 		{ // 体力が減少している且つ、マナフラワーが一本でも生えている場合
 
 			if (CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
@@ -227,7 +242,7 @@ void CTarget::Update(void)
 
 	case STATE_HEAL:	// 回復状態
 
-		if (m_pLifeGauge->GetLife() < TARG_LIFE
+		if (m_pLife->GetNum() < TARG_LIFE
 		&&  CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
 		{ // 体力が最大値より少ない且つ、ウェーブ進行状態の場合
 
@@ -244,7 +259,7 @@ void CTarget::Update(void)
 				m_nCounterHeal = 0;
 
 				// 体力を回復
-				m_pLifeGauge->AddLife(nNumFlower);	// マナフラワー量に応じて回復量増加
+				m_pLife->AddNum(nNumFlower);	// マナフラワー量に応じて回復量増加
 			}
 		}
 		else
@@ -278,9 +293,6 @@ void CTarget::Update(void)
 	// メッシュキューブの更新
 	m_pMeshCube->Update();
 
-	// 体力ゲージ3Dの更新
-	m_pLifeGauge->Update();
-
 	// 影の更新
 	m_pShadow->Update();
 
@@ -312,9 +324,9 @@ void CTarget::Hit(const int nDmg)
 		{ // 通常状態または回復状態の場合
 
 			// 体力からダメージ分減算
-			m_pLifeGauge->AddLife(-nDmg);
+			m_pLife->AddNum(-nDmg);
 
-			if (m_pLifeGauge->GetLife() > 0)
+			if (m_pLife->GetNum() > 0)
 			{ // 生きている場合
 
 				// パーティクル3Dオブジェクトを生成
@@ -418,7 +430,7 @@ CTarget *CTarget::Create
 void CTarget::AddLife(const int nAdd)
 {
 	// 変数を宣言
-	int nLife = m_pLifeGauge->GetLife();	// 現在の体力
+	int nLife = m_pLife->GetNum();	// 現在の体力
 
 	// 体力に引数の値を加算
 	nLife += nAdd;
@@ -431,7 +443,7 @@ void CTarget::AddLife(const int nAdd)
 	}
 
 	// 体力を設定
-	m_pLifeGauge->SetLife(nLife);
+	m_pLife->SetNum(nLife);
 }
 
 //============================================================
@@ -442,7 +454,7 @@ void CTarget::SetEnableUpdate(const bool bUpdate)
 	// 引数の更新状況を設定
 	CObject::SetEnableUpdate(bUpdate);		// 自身
 	m_pMeshCube->SetEnableUpdate(bUpdate);	// メッシュキューブ
-	m_pLifeGauge->SetEnableUpdate(bUpdate);	// 体力ゲージ
+	m_pLife->SetEnableUpdate(bUpdate);		// 体力
 	m_pShadow->SetEnableUpdate(bUpdate);	// 影
 }
 
@@ -452,10 +464,10 @@ void CTarget::SetEnableUpdate(const bool bUpdate)
 void CTarget::SetEnableDraw(const bool bDraw)
 {
 	// 引数の描画状況を設定
-	CObject::SetEnableDraw(bDraw);			// 自身
-	m_pMeshCube->SetEnableDraw(bDraw);		// メッシュキューブ
-	m_pLifeGauge->SetEnableDraw(bDraw);		// 体力ゲージ
-	m_pShadow->SetEnableDraw(bDraw);		// 影
+	CObject::SetEnableDraw(bDraw);		// 自身
+	m_pMeshCube->SetEnableDraw(bDraw);	// メッシュキューブ
+	m_pLife->SetEnableDraw(bDraw);		// 体力
+	m_pShadow->SetEnableDraw(bDraw);	// 影
 }
 
 //============================================================
@@ -464,7 +476,7 @@ void CTarget::SetEnableDraw(const bool bDraw)
 int CTarget::GetLife(void) const
 {
 	// 体力を返す
-	return m_pLifeGauge->GetLife();
+	return m_pLife->GetNum();
 }
 
 //============================================================
