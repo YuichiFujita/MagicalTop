@@ -615,7 +615,6 @@ void CPlayer::SetDisp(const bool bDisp)
 
 		// 描画する設定にする
 		SetEnableDraw(true);
-		CObject::SetEnableDraw(true);	// プレイヤーの描画はONにする
 	}
 	else
 	{ // 表示しない状態の場合
