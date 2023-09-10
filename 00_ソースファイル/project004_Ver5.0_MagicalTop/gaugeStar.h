@@ -107,6 +107,7 @@ private:
 	STATE m_state;				// 状態
 	int m_nCounterState;		// 状態管理カウンター
 	int m_nCurrentStar;			// 現在消費中の星
+	bool m_bOverheat;			// オーバーヒート状況
 	const int m_nHealNumGauge;	// ゲージ回復量定数
 	const int m_nHealWait;		// 回復待機カウント定数
 	const int m_nMaxNumGauge;	// 最大ゲージ量定数

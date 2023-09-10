@@ -22,6 +22,7 @@
 #define GAUGE_PRIO	(3)	// 星ゲージの優先順位
 
 #define GAUGE_BG_COL	(D3DXCOLOR(0.25f, 0.25f, 0.25f, 1.0f))	// ゲージ背景色
+#define GAUGE_OVER_COL	(D3DXCOLOR(0.8f, 0.0f, 0.0f, 1.0f))		// ゲージオーバーヒート色
 
 #define ADD_ROT	(0.05f)	// 距離加算用向きの加算量
 #define REV_ROT	(0.1f)	// 加算向きの補正係数
@@ -51,6 +52,7 @@ m_nHealNumGauge(nHealNumGauge), m_nHealWait(nHealWait), m_nMaxNumGauge(nMaxNumGa
 	m_state			= STATE_NORMAL;	// 状態
 	m_nCounterState	= 0;			// 状態管理カウンター
 	m_nCurrentStar	= 0;			// 現在消費中の星
+	m_bOverheat		= false;		// オーバーヒート状況
 	m_pParentObject = NULL;			// 親オブジェクト
 	m_posGap		= VEC3_ZERO;	// 表示位置の加算量
 	m_fDistance		= 0.0f;			// 中心からの距離
@@ -84,6 +86,7 @@ HRESULT CGaugeStar::Init(void)
 	m_state			= STATE_NORMAL;	// 状態
 	m_nCounterState = 0;			// 状態管理カウンター
 	m_nCurrentStar	= 0;			// 現在消費中の星
+	m_bOverheat		= false;		// オーバーヒート状況
 	m_pParentObject = NULL;			// 親オブジェクト
 	m_posGap		= VEC3_ZERO;	// 表示位置の加算量
 	m_fDistance		= 0.0f;			// 中心からの距離
@@ -290,6 +293,19 @@ void CGaugeStar::Update(void)
 					m_fDestAddRot = ((D3DX_PI * 2) / MAX_STAR) * m_nCurrentStar;
 					useful::NormalizeRot(m_fDestAddRot);	// 向きを補正
 				}
+				else
+				{ // 消費しきった場合
+
+					// オーバーヒートした状態にする
+					m_bOverheat = true;
+
+					for (int nCntStar = 0; nCntStar < MAX_STAR; nCntStar++)
+					{ // 星の最大数分繰り返す
+
+						// 色を設定
+						m_aStar[nCntStar].pBillboard->SetColor(GAUGE_OVER_COL);
+					}
+				}
 			}
 		}
 
@@ -333,6 +349,16 @@ void CGaugeStar::Update(void)
 
 					// 状態を設定
 					m_state = STATE_NORMAL;	// 通常状態
+
+					// オーバーヒートしていない状態にする
+					m_bOverheat = false;
+
+					for (int nCntStar = 0; nCntStar < MAX_STAR; nCntStar++)
+					{ // 星の最大数分繰り返す
+
+						// 色を設定
+						m_aStar[nCntStar].pBillboard->SetColor(XCOL_WHITE);
+					}
 				}
 			}
 		}
@@ -488,20 +514,30 @@ CGaugeStar *CGaugeStar::Create
 //============================================================
 bool CGaugeStar::UseGauge(void)
 {
-	if (m_aStar[MAX_STAR - 1].nNumGauge > 0)
-	{ // ゲージ残量がある場合
+	if (!m_bOverheat)
+	{ // オーバーヒートしていない場合
 
-		// カウンターを初期化
-		m_nCounterState = 0;
+		if (m_aStar[MAX_STAR - 1].nNumGauge > 0)
+		{ // ゲージ残量がある場合
 
-		// 状態を設定
-		m_state = STATE_USAGE;	// ゲージ使用状態
+			// カウンターを初期化
+			m_nCounterState = 0;
 
-		// 使用した状態を返す
-		return true;
+			// 状態を設定
+			m_state = STATE_USAGE;	// ゲージ使用状態
+
+			// 使用した状態を返す
+			return true;
+		}
+		else
+		{ // ゲージ残量がない場合
+
+			// 使用していない状態を返す
+			return false;
+		}
 	}
 	else
-	{ // ゲージ残量がない場合
+	{ // オーバーヒートしていた場合
 
 		// 使用していない状態を返す
 		return false;
