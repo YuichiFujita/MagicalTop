@@ -50,7 +50,7 @@
 #define STAR_HEAL		(4)		// ゲージ回復量
 #define STAR_WAIT_HEAL	(120)	// 回復待機カウント
 #define STAR_BG_RADIUS	(55.0f)	// 枠の半径
-#define STAR_DIS_CENTER	(45.0f)	// 中心からの距離
+#define STAR_DIS_CENTER	(65.0f)	// 中心からの距離
 #define STAR_FLICKER	(8.0f)	// 揺らめき量
 
 #define MAX_MOVEX		(5.0f)		// 自動歩行時の速度割合用
@@ -82,7 +82,7 @@
 #define MOVE_OUTSIDE_ACCELE	(1.0f)	// 外側移動の加速量
 #define MOVE_LEFT			(0.55f)	// 左側への移動量
 #define MOVE_LEFT_ACCELE	(1.2f)	// 左移動の加速量
-#define MOVE_LEFT_DECELE	(0.25f)	// 左移動の減速量
+#define MOVE_LEFT_DECELE	(0.4f)	// 左移動の減速量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -723,7 +723,7 @@ float CPlayer::GetRadius(void) const
 CPlayer::MOTION CPlayer::UpdateNormal(void)
 {
 	// 変数を宣言
-	MOTION currentMotion = MOTION_MOVE;		// 現在のモーション
+	MOTION currentMotion;	// 現在のモーション
 	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 rotPlayer = GetRotation();	// プレイヤー向き
 
@@ -899,7 +899,8 @@ void CPlayer::UpdateFadeIn(void)
 CPlayer::MOTION CPlayer::Move(void)
 {
 	// 変数を宣言
-	D3DXVECTOR3 vecTarg, vecSide;	// ターゲット方向ベクトル・横方向ベクトル
+	MOTION currentMotion = MOTION_MOVE;	// 現在のモーション
+	D3DXVECTOR3 vecTarg, vecSide;		// ターゲット方向ベクトル・横方向ベクトル
 	D3DXVECTOR3 rot = CManager::GetCamera()->GetRotation();	// カメラの向き
 
 	// ポインタを宣言
@@ -956,12 +957,18 @@ CPlayer::MOTION CPlayer::Move(void)
 
 			// 左移動量を加速
 			m_move += vecSide * m_fAddMove;
+
+			// 現在のモーションを設定
+			currentMotion = MOTION_ACCELE;	// 加速モーション
 		}
 	}
 	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPress(CInputPad::KEY_R1))
 	{
 		// 左移動量を減速
 		m_move -= vecSide * m_fSubMove;
+
+		// 現在のモーションを設定
+		currentMotion = MOTION_DECELE;	// 減速モーション
 	}
 
 #if 0
@@ -1134,8 +1141,8 @@ CPlayer::MOTION CPlayer::Move(void)
 
 #endif
 
-	// 歩行モーションを返す
-	return MOTION_MOVE;
+	// 現在のモーションを返す
+	return currentMotion;
 }
 
 //============================================================
@@ -1147,8 +1154,8 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion)
 	MOTION currentMotion = motion;	// 現在のモーション
 
 	// 魔法の発射
-	if (m_pMagic->ShotMagic())
-	{ // 発射していた場合
+	if (m_pMagic->ShotMagic().bControl && m_pMagic->GetMana() > 0)
+	{ // 発射操作をしている且つ、マナ残量がある場合
 
 		// アクションモーションを設定
 		currentMotion = MOTION_ACTION;
@@ -1358,7 +1365,7 @@ void CPlayer::CollisionEnemy(D3DXVECTOR3& rPos)
 					rPos,						// 判定位置
 					pObjCheck->GetPosition(),	// 判定目標位置
 					PLAY_RADIUS,				// 判定半径
-					pObjCheck->GetRadius()		// 判定目標半径
+					CEnemy::GetStatusInfo(pObjCheck->GetType()).fRadius	// 判定目標半径
 				))
 				{ // 当たっていた場合
 

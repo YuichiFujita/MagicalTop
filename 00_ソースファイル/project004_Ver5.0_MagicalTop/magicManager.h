@@ -43,12 +43,20 @@ public:
 	// デストラクタ
 	~CMagicManager();
 
+	// 射撃状況構造体
+	typedef struct
+	{
+		bool bControl;	// 射撃操作が行われているか
+		bool bShot;		// 実際に射撃できているか
+	}Shot;
+
 	// メンバ関数
 	HRESULT Init(void);		// 初期化
 	void Uninit(void);		// 終了
 	void Update(void);		// 更新
-	bool ShotMagic(void);	// 魔法発射
+	Shot ShotMagic(void);	// 魔法発射
 	void SetEnableManaDraw(const bool bDraw);	// マナ描画状況設定
+	int GetMana(void) const;	// マナ残量取得
 
 	// 静的メンバ関数
 	static CMagicManager *Create(CObject *pPlayer);			// 生成

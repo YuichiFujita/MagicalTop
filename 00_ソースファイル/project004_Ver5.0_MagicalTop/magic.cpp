@@ -30,8 +30,10 @@
 #define SHADOW_ALPHA	(0.2f)	// ‰e‚Ìƒ¿’l
 
 #define BUBBLE_POSY_UP	(20.0f)		// ƒoƒuƒ‹‚ÌcˆÊ’uã¸—Ê
-#define MAGIC_PRIO		(3)			// –‚–@‚Ì—Dæ‡ˆÊ
-#define MAGIC_DELETE	(350.0f)	// –‚–@‚Ìíœ”ÍˆÍ‚Ì”¼Œa
+#define BUBBLE_INIT_LEVEL	(10)	// ƒŒƒxƒ‹‚Ì‰Šú’l
+
+#define MAGIC_PRIO		(3)	// –‚–@‚Ì—Dæ‡ˆÊ
+#define MAGIC_TRICK_DMG	(3)	// ƒgƒŠƒbƒNƒVƒ‡ƒbƒgŽž‚ÌUŒ‚—Í
 
 #define MOVE_NORMAL			(0.05f)	// ’ÊíŽž‚Ì–‚–@‚ÌˆÚ“®—Ê
 #define MOVE_INHALE_INSIDE	(8.0f)	// ‹z‚¢ž‚Ü‚êŽž‚Ì–‚–@‚Ì“à‘¤‚Ö‚ÌˆÚ“®—Ê
@@ -86,7 +88,7 @@ HRESULT CMagic::Init(void)
 	m_state		= STATE_NORMAL;	// ó‘Ô
 
 	// ƒoƒuƒ‹î•ñ‚Ì¶¬
-	m_pBubble = CBubble::Create(this, m_statusInfo.nLife, VEC3_ALL(m_statusInfo.bubbleRadius), VEC3_ZERO, 0.0f);
+	m_pBubble = CBubble::Create(this, m_statusInfo.nLife + BUBBLE_INIT_LEVEL, VEC3_ALL(m_statusInfo.bubbleRadius), VEC3_ZERO, 0.0f);
 	if (UNUSED(m_pBubble))
 	{ // ”ñŽg—p’†‚Ìê‡
 
@@ -97,6 +99,9 @@ HRESULT CMagic::Init(void)
 
 	// —Dæ‡ˆÊ‚ðÝ’è
 	m_pBubble->SetPriority(MAGIC_PRIO);
+
+	// ‰ŠúƒŒƒxƒ‹‚ðÝ’è
+	m_pBubble->SetLevel(BUBBLE_INIT_LEVEL);
 
 	// ‰e‚Ì¶¬
 	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, SHADOW_SIZE, this, SHADOW_ALPHA, SHADOW_ALPHA);
@@ -157,34 +162,9 @@ void CMagic::Update(void)
 		// ƒoƒuƒ‹ƒŒƒxƒ‹‚ð‰ÁŽZ
 		m_pBubble->AddLevel(1);
 
-		// ÁŽ¸”ÍˆÍ‚Æ‚Ì“–‚½‚è”»’è
-		if (collision::Circle2D(CSceneGame::GetTarget()->GetPosition(), m_pos, MAGIC_DELETE, m_pBubble->GetRadius()))
-		{ // “–‚½‚Á‚Ä‚¢‚½ê‡
-
-			// ó‘Ô‚ðÝ’è
-			m_state = STATE_DELETE;	// ÁŽ¸ó‘Ô
-		}
-		else if (m_pBubble->GetLevel() >= m_statusInfo.nLife)
-		{ // Žõ–½‚ª—ˆ‚½ê‡
-
-			// ó‘Ô‚ðÝ’è
-			m_state = STATE_INHALE;	// ‹z‚¢ž‚Ü‚êó‘Ô
-		}
-
-		break;
-
-	case STATE_INHALE:	// ‹z‚¢ž‚Ü‚êó‘Ô
-
-		// ˆÚ“®—Ê‚ðÝ’è
-		m_movePos = vecTarg * MOVE_INHALE_INSIDE;
-		m_movePos += vecSide * MOVE_INHALE_LEFT;
-
-		// ˆÚ“®—Ê‚ð‰ÁŽZ
-		m_pos += m_movePos;
-
-		// ÁŽ¸”ÍˆÍ‚Æ‚Ì“–‚½‚è”»’è
-		if (collision::Circle2D(CSceneGame::GetTarget()->GetPosition(), m_pos, MAGIC_DELETE, m_pBubble->GetRadius()))
-		{ // “–‚½‚Á‚Ä‚¢‚½ê‡
+		if (CSceneGame::GetStage()->CollisionBarrier(m_pos, m_pBubble->GetRadius())
+		||  m_pBubble->GetLevel() >= m_statusInfo.nLife)
+		{ // ÁŽ¸”ÍˆÍ‚É“–‚½‚Á‚Ä‚¢‚é‚Ü‚½‚ÍŽõ–½‚ª—ˆ‚½ê‡
 
 			// ó‘Ô‚ðÝ’è
 			m_state = STATE_DELETE;	// ÁŽ¸ó‘Ô
@@ -194,9 +174,20 @@ void CMagic::Update(void)
 
 	case STATE_DELETE:	// ÁŽ¸ó‘Ô
 		
-		// ˆÚ“®—Ê‚ðÝ’è
-		m_movePos = vecTarg * MOVE_DELETE;
-		m_movePos += vecSide * MOVE_DELETE;
+		if (CSceneGame::GetStage()->CollisionBarrier(m_pos, m_pBubble->GetRadius()))
+		{ // ƒoƒŠƒA‚Ì”»’è“à‚Ìê‡
+
+			// ˆÚ“®—Ê‚ðÝ’è
+			m_movePos = vecTarg * MOVE_DELETE;
+			m_movePos += vecSide * MOVE_DELETE;
+		}
+		else
+		{ // ƒoƒŠƒA‚Ì”»’èŠO‚Ìê‡
+
+			// ˆÚ“®—Ê‚ðÝ’è
+			m_movePos = vecTarg * MOVE_INHALE_INSIDE;
+			m_movePos += vecSide * MOVE_INHALE_LEFT;
+		}
 
 		// ˆÚ“®—Ê‚ð‰ÁŽZ
 		m_pos += m_movePos;
@@ -435,10 +426,10 @@ bool CMagic::CollisionEnemy(void)
 				// –‚–@”»’è
 				if (collision::Circle3D
 				( // ˆø”
-					m_pos,	// ”»’èˆÊ’u
+					m_pos,						// ”»’èˆÊ’u
 					pObjCheck->GetPosition(),	// ”»’è–Ú•WˆÊ’u
 					m_pBubble->GetRadius(),		// ”»’è”¼Œa
-					CEnemy::GetStatusInfo(pObjCheck->GetType()).fCollRadius	// ”»’è–Ú•W”¼Œa
+					pObjCheck->GetRadius()		// ”»’è–Ú•W”¼Œa
 				))
 				{ // –‚–@‚É“–‚½‚Á‚Ä‚¢‚½ê‡
 
@@ -446,13 +437,13 @@ bool CMagic::CollisionEnemy(void)
 					{ // ó‘Ô‚ª’Êí‚Ìê‡
 
 						// “G‚Ìƒqƒbƒgˆ—
-						pObjCheck->Hit(2 * ((m_pBubble->GetLevel() / (m_pBubble->GetMaxLevel() / 2)) + 1));
+						pObjCheck->Hit((m_pBubble->GetLevel() / (m_pBubble->GetMaxLevel() / 2)) + 1);
 					}
 					else
 					{ // ó‘Ô‚ª’Êí‚Å‚Í‚È‚¢ê‡
 
 						// “G‚Ìƒqƒbƒgˆ—
-						pObjCheck->Hit(1);
+						pObjCheck->Hit(MAGIC_TRICK_DMG);
 					}
 
 					// “–‚½‚Á‚½”»’è‚ð•Ô‚·

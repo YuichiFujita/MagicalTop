@@ -592,8 +592,24 @@ int CEnemy::GetType(void) const
 //============================================================
 float CEnemy::GetRadius(void) const
 {
+	// 変数を宣言
+	float fRadius = 0.0f;	// 半径
+
+	if (m_status.fCollRadius < m_pBubble->GetRadius())
+	{ // 当たり判定用半径がバブルの半径より小さい場合
+
+		// バブルの半径を設定
+		fRadius = m_pBubble->GetRadius();
+	}
+	else
+	{ // 当たり判定用半径がバブルの半径より大きい場合
+
+		// 当たり判定用半径を設定
+		fRadius = m_status.fCollRadius;
+	}
+
 	// 半径を返す
-	return m_status.fRadius;
+	return fRadius;
 }
 
 //============================================================
@@ -916,7 +932,7 @@ void CEnemy::CollisionSpawnEnemy(D3DXVECTOR3& rPos)
 					rPos,						// 判定位置
 					pObjCheck->GetPosition(),	// 判定目標位置
 					m_status.fRadius,			// 判定半径
-					pObjCheck->GetRadius()		// 判定目標半径
+					CEnemy::GetStatusInfo(pObjCheck->GetType()).fRadius	// 判定目標半径
 				);
 
 				// 次のオブジェクトへのポインタを代入
@@ -976,7 +992,7 @@ void CEnemy::CollisionNormalEnemy(D3DXVECTOR3& rPos)
 					rPos,						// 判定位置
 					pObjCheck->GetPosition(),	// 判定目標位置
 					m_status.fRadius,			// 判定半径
-					pObjCheck->GetRadius()		// 判定目標半径
+					CEnemy::GetStatusInfo(pObjCheck->GetType()).fRadius	// 判定目標半径
 				);
 
 				// 次のオブジェクトへのポインタを代入

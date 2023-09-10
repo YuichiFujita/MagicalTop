@@ -34,7 +34,6 @@ public:
 	typedef enum
 	{
 		STATE_NORMAL = 0,	// ’Êíó‘Ô
-		STATE_INHALE,		// ‹z‚¢ž‚Ü‚êó‘Ô
 		STATE_DELETE,		// ÁŽ¸ó‘Ô
 		STATE_MAX			// ‚±‚Ì—ñ‹“Œ^‚Ì‘”
 	}STATE;

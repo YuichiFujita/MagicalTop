@@ -228,12 +228,12 @@ void CMagicManager::Update(void)
 //============================================================
 //	魔法の発射処理
 //============================================================
-bool CMagicManager::ShotMagic(void)
+CMagicManager::Shot CMagicManager::ShotMagic(void)
 {
 	// 変数を宣言
 	D3DXVECTOR3 rotCamera = CManager::GetCamera()->GetRotation();	// カメラ向き
-	float fRotVec = 0.0f;	// 発射方向
-	bool bShot = false;		// 発射状況
+	Shot bShot = { false, false };	// 射撃状況
+	float fRotVec = 0.0f;			// 発射方向
 
 	// ポインタを宣言
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
@@ -242,8 +242,8 @@ bool CMagicManager::ShotMagic(void)
 	// 発射方向の設定
 	if (pKeyboard->GetPress(DIK_I))
 	{
-		// 発射した状態にする
-		bShot = true;
+		// 発射操作をした状態にする
+		bShot.bControl = true;
 
 		if (pKeyboard->GetPress(DIK_J))
 		{
@@ -263,8 +263,8 @@ bool CMagicManager::ShotMagic(void)
 	}
 	else if (pKeyboard->GetPress(DIK_K))
 	{
-		// 発射した状態にする
-		bShot = true;
+		// 発射操作をした状態にする
+		bShot.bControl = true;
 
 		if (pKeyboard->GetPress(DIK_J))
 		{
@@ -284,16 +284,16 @@ bool CMagicManager::ShotMagic(void)
 	}
 	else if (pKeyboard->GetPress(DIK_J))
 	{
-		// 発射した状態にする
-		bShot = true;
+		// 発射操作をした状態にする
+		bShot.bControl = true;
 
 		// 発射向きを設定
 		fRotVec = D3DXToRadian(90) + rotCamera.y;
 	}
 	else if (pKeyboard->GetPress(DIK_L))
 	{
-		// 発射した状態にする
-		bShot = true;
+		// 発射操作をした状態にする
+		bShot.bControl = true;
 
 		// 発射向きを設定
 		fRotVec = D3DXToRadian(270) + rotCamera.y;
@@ -303,8 +303,8 @@ bool CMagicManager::ShotMagic(void)
 	||		 pPad->GetPressRStickY() >  NUM_DEADZONE
 	||		 pPad->GetPressRStickY() < -NUM_DEADZONE)
 	{
-		// 発射した状態にする
-		bShot = true;
+		// 発射操作をした状態にする
+		bShot.bControl = true;
 
 		// 発射向きを設定
 		fRotVec = pPad->GetPressRStickRot() + D3DXToRadian(270) + rotCamera.y;
@@ -313,8 +313,8 @@ bool CMagicManager::ShotMagic(void)
 	// 向きを補正
 	useful::NormalizeRot(fRotVec);
 
-	if (bShot)
-	{ // 魔法を発射していた場合
+	if (bShot.bControl)
+	{ // 魔法の発射操作していた場合
 
 		if (m_pMana->GetNum() > 0 && m_nCounterMagic <= 0)
 		{ // マナがある且つ、クールタイムが終了した場合
@@ -366,13 +366,13 @@ bool CMagicManager::ShotMagic(void)
 			// 状態を設定
 			m_state = STATE_ATTACK;	// 攻撃状態
 
-			// 発射した状態を返す
-			return true;
+			// 発射した状態にする
+			bShot.bShot = true;
 		}
 	}
 
-	// 発射していない状態を返す
-	return false;
+	// 射撃状況を返す
+	return bShot;
 }
 
 //============================================================
@@ -382,6 +382,15 @@ void CMagicManager::SetEnableManaDraw(const bool bDraw)
 {
 	// 引数の描画状況をマナの描画状況に設定
 	m_pMana->SetEnableDraw(bDraw);
+}
+
+//============================================================
+//	マナ残量取得処理
+//============================================================
+int CMagicManager::GetMana(void) const
+{
+	// マナの残量を返す
+	return m_pMana->GetNum();
 }
 
 //============================================================

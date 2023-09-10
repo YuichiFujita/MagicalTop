@@ -75,7 +75,9 @@ public:
 	// モーション列挙
 	typedef enum
 	{
-		MOTION_MOVE = 0,	// 歩行モーション
+		MOTION_MOVE = 0,	// 浮遊モーション
+		MOTION_ACCELE,		// 加速モーション
+		MOTION_DECELE,		// 減速モーション
 		MOTION_ACTION,		// アクションモーション
 		MOTION_BLOW_AWAY,	// 吹っ飛びモーション
 		MOTION_LANDING,		// 着地モーション
