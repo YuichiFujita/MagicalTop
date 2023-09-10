@@ -60,6 +60,7 @@ public:
 	void SetCamera(const TYPE type);	// カメラ設定
 	Camera GetCamera(const TYPE type);	// カメラ取得
 	void SetDestBargainingCamera(void);	// カメラ目標位置設定 (寄り引き)
+	void SetEnableUpdate(const bool bUpdate);		// 更新状況設定
 	void SetRotation(const D3DXVECTOR3& rRot);		// 現在向き設定
 	void SetDestRotation(const D3DXVECTOR3& rRot);	// 目標向き設定
 	D3DXVECTOR3 GetRotation(void) const;			// 現在向き取得
@@ -80,6 +81,7 @@ private:
 
 	// メンバ変数
 	Camera m_aCamera[TYPE_MAX];	// カメラの情報
+	bool m_bUpdate;	// 更新状況
 };
 
 #endif	// _CAMERA_H_

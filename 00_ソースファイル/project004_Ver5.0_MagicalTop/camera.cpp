@@ -75,6 +75,7 @@ CCamera::CCamera()
 {
 	// メンバ変数をクリア
 	memset(&m_aCamera[0], 0, sizeof(m_aCamera));	// カメラの情報
+	m_bUpdate = false;	// 更新状況
 }
 
 //============================================================
@@ -134,6 +135,9 @@ HRESULT CCamera::Init(void)
 	m_aCamera[TYPE_MODELUI].viewport.MinZ	= 0.0f;
 	m_aCamera[TYPE_MODELUI].viewport.MaxZ	= 0.5f;
 
+	// カメラ更新をONにする
+	m_bUpdate = true;
+
 	// 成功を返す
 	return S_OK;
 }
@@ -151,18 +155,22 @@ void CCamera::Uninit(void)
 //============================================================
 void CCamera::Update(void)
 {
+	if (m_bUpdate)
+	{ // 更新する状況の場合
+
 #if 1
 #if 0
-	// カメラの更新 (追従)
-	Follow();
+		// カメラの更新 (追従)
+		Follow();
 #else
-	// カメラの更新 (寄り引き)
-	Bargaining();
+		// カメラの更新 (寄り引き)
+		Bargaining();
 #endif
 #else
-	// カメラの更新 (操作)
-	Control();
+		// カメラの更新 (操作)
+		Control();
 #endif
+	}
 
 	// デバッグ表示
 	CManager::GetDebugProc()->Print(" 視点 ：%f %f %f\n", m_aCamera[TYPE_MAIN].posV.x, m_aCamera[TYPE_MAIN].posV.y, m_aCamera[TYPE_MAIN].posV.z);
@@ -278,6 +286,15 @@ void CCamera::SetDestBargainingCamera(void)
 		// 視点の現在位置を更新
 		m_aCamera[TYPE_MAIN].posV = m_aCamera[TYPE_MAIN].destPosV;
 	}
+}
+
+//============================================================
+//	更新状況の設定処理
+//============================================================
+void CCamera::SetEnableUpdate(const bool bUpdate)
+{
+	// 引数の更新状況を設定
+	m_bUpdate = bUpdate;
 }
 
 //============================================================

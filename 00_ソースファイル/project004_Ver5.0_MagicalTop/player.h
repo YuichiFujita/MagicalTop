@@ -99,10 +99,13 @@ public:
 		STATE_NORMAL,		// 通常状態
 		STATE_DAMAGE,		// ダメージ状態
 		STATE_BLOW_AWAY,	// 吹っ飛び状態
+		STATE_VORTEX,		// 渦巻きこまれ状態
 		STATE_FADEIN,		// フェードイン状態
 		STATE_DEATH,		// 死亡状態
 		STATE_MAX			// この列挙型の総数
 	}STATE;
+
+	// TODO：無敵時間の実装
 
 	// コンストラクタ
 	CPlayer();
@@ -125,6 +128,17 @@ public:
 	);
 
 	// メンバ関数
+	void HitBlowAway	// 吹っ飛びヒット
+	( // 引数
+		const D3DXVECTOR3& rPlayerPos,	// プレイヤー位置
+		const D3DXVECTOR3& rHitObjPos,	// オブジェクト位置
+		const int nDmg					// ダメージ量
+	);
+	void HitVortex	// 渦巻きこまれヒット
+	( // 引数
+		D3DXVECTOR3& rPlayerPos,	// プレイヤー位置
+		const D3DXVECTOR3& rHitPos	// 当たり判定位置
+	);
 	void AddExp(const int nAdd);				// 経験値加算
 	void SetRespawn(D3DXVECTOR3& rPos);			// 再出現設定
 	void SetDisp(const bool bDisp);				// 表示設定
@@ -141,6 +155,7 @@ private:
 	MOTION UpdateNormal(void);	// 通常状態時の更新
 	MOTION UpdateDamage(void);	// ダメージ状態時の更新
 	void UpdateBlowAway(void);	// 吹っ飛び状態時の更新
+	void UpdateVortex(void);	// 渦巻きこまれ状態時の更新
 	void UpdateFadeOut(void);	// フェードアウト状態時の更新
 	void UpdateFadeIn(void);	// フェードイン状態時の更新
 
@@ -175,6 +190,8 @@ private:
 	int   m_nCounterState;	// 状態管理カウンター
 	int   m_nNumModel;		// パーツの総数
 	float m_fDisTarget;		// ターゲットとの距離
+	float m_fVortexRot;		// 渦巻き方向
+	float m_fVortexDis;		// 渦巻との距離
 	bool  m_bJump;			// ジャンプ状況
 
 	// TODO：デバッグ用
