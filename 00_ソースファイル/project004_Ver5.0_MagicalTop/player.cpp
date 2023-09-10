@@ -828,15 +828,11 @@ void CPlayer::UpdateBlowAway(void)
 	if (Land(posPlayer))
 	{ // 着地していた場合
 
-		if (GetMotionType() != MOTION_LANDING)
-		{ // モーションが着地ではない場合
+		// 浮遊モーションに移行
+		SetMotion(MOTION_MOVE);
 
-			// 着地モーションに移行
-			SetMotion(MOTION_LANDING);
-
-			// 状態を設定
-			m_state = STATE_DAMAGE;	// ダメージ状態
-		}
+		// 状態を設定
+		m_state = STATE_DAMAGE;	// ダメージ状態
 	}
 
 	// 位置を反映
@@ -1238,14 +1234,6 @@ void CPlayer::Motion(int nMotion)
 		case MOTION_BLOW_AWAY:	// 吹っ飛び状態
 
 			// 無し
-
-			// 処理を抜ける
-			break;
-
-		case MOTION_LANDING:	// 着地状態
-
-			// 待機モーションに移行
-			SetMotion(MOTION_MOVE);
 
 			// 処理を抜ける
 			break;

@@ -80,7 +80,6 @@ public:
 		MOTION_DECELE,		// 減速モーション
 		MOTION_ACTION,		// アクションモーション
 		MOTION_BLOW_AWAY,	// 吹っ飛びモーション
-		MOTION_LANDING,		// 着地モーション
 		MOTION_MAX			// この列挙型の総数
 	}MOTION;
 
