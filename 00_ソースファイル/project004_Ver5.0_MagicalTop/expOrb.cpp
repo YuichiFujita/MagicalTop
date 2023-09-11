@@ -264,7 +264,7 @@ bool CExpOrb::CollisionPlayer(void)
 	{ // プレイヤーが使用されている場合
 
 		// プレイヤーとの当たり判定
-		bHit = collision::Circle3D
+		bHit = collision::Circle2D
 		( // 引数
 			GetPosition(),				// 経験値位置
 			pPlayer->GetPosition(),		// プレイヤー位置

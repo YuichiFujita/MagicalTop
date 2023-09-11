@@ -293,6 +293,38 @@ void CMultiModel::SetScaling(const D3DXVECTOR3& rScale)
 }
 
 //============================================================
+//	マテリアルの設定処理
+//============================================================
+void CMultiModel::SetMaterial(const D3DXMATERIAL& rMat)
+{
+	// 引数のマテリアルを全マテリアルに設定
+	for (int nCntMat = 0; nCntMat < (int)m_modelData.dwNumMat; nCntMat++)
+	{ // マテリアルの数分繰り返す
+
+		m_pMat[nCntMat] = rMat;
+	}
+}
+
+//============================================================
+//	マテリアルの再設定処理
+//============================================================
+void CMultiModel::ResetMaterial(void)
+{
+	// ポインタを宣言
+	D3DXMATERIAL *pOriginMat;	// マテリアルデータへのポインタ
+
+	// マテリアルデータへのポインタを取得
+	pOriginMat = (D3DXMATERIAL*)m_modelData.pBuffMat->GetBufferPointer();
+
+	// 全マテリアルに初期マテリアルを再設定
+	for (int nCntMat = 0; nCntMat < (int)m_modelData.dwNumMat; nCntMat++)
+	{ // マテリアルの数分繰り返す
+
+		m_pMat[nCntMat] = pOriginMat[nCntMat];
+	}
+}
+
+//============================================================
 //	透明度の設定処理
 //============================================================
 void CMultiModel::SetAlpha(const float fAlpha)
@@ -421,6 +453,34 @@ D3DXVECTOR3 CMultiModel::GetScaling(void) const
 {
 	// 大きさを返す
 	return m_scale;
+}
+
+//============================================================
+//	マテリアル取得処理
+//============================================================
+D3DXMATERIAL CMultiModel::GetMaterial(const int nID) const
+{
+	// 変数を宣言
+	D3DXMATERIAL mat;	// 例外時のマテリアル
+
+	// マテリアルのメモリをクリア
+	ZeroMemory(&mat, sizeof(mat));
+
+	if (nID < (int)m_modelData.dwNumMat)
+	{ // 引数インデックスがマテリアルの最大数を超えていない場合
+
+		// 引数インデックスのマテリアルを返す
+		return m_pMat[nID];
+	}
+	else
+	{ // 引数インデックスがマテリアルの最大数を超えている場合
+
+		// 例外処理
+		assert(false);
+
+		// 例外時のマテリアルを返す
+		return mat;
+	}
 }
 
 //============================================================

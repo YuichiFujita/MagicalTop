@@ -69,12 +69,17 @@
 #define PLAY_GRAVITY	(1.0f)		// プレイヤー重力
 #define PLAY_RADIUS		(20.0f)		// プレイヤー半径
 #define PLAY_LIFE		(250)		// プレイヤー体力
-#define NORMAL_CNT		(180)		// 通常状態に移行するまでのカウンター
 #define BARRIER_DMG		(50)		// バリアのダメージ量
 #define ENE_HIT_DMG		(20)		// 敵ヒット時のダメージ量
 #define AWAY_SIDE_MOVE	(75.0f)		// 吹っ飛び時の横移動量
 #define AWAY_UP_MOVE	(28.0f)		// 吹っ飛び時の上移動量
 #define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
+#define INVULN_CNT		(16)		// 無敵状態に移行するまでのカウンター
+#define NORMAL_CNT		(180)		// 通常状態に移行するまでのカウンター
+
+#define CHANGE_ALPHA_CNT	(15)	// 透明度変更カウント
+#define INVULN_MIN_ALPHA	(0.55f)	// 最小透明度
+#define INVULN_MAX_ALPHA	(1.0f)	// 最大透明度
 
 #define ALWAYS_ADDROT		(0.3f)	// 常時内側に向かせる量
 #define PLUS_INSIDE_MOVE	(3.0f)	// ターゲットからの距離に応じた外側への移動加算量
@@ -410,6 +415,13 @@ void CPlayer::Update(void)
 
 		break;
 
+	case STATE_INVULN:		// 無敵状態
+
+		// 無敵状態時の更新
+		nCurrentMotion = UpdateInvuln();
+
+		break;
+
 	case STATE_BLOW_AWAY:	// 吹っ飛び状態
 
 		// 吹っ飛び状態時の更新
@@ -680,6 +692,9 @@ void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 	// 表示する設定にする
 	SetDisp(true);
 
+	// カメラ更新をONにする
+	CManager::GetCamera()->SetEnableUpdate(true);
+
 	// カメラ目標位置設定
 	CManager::GetCamera()->SetDestBargainingCamera();
 }
@@ -858,17 +873,74 @@ CPlayer::MOTION CPlayer::UpdateDamage(void)
 	// 通常状態時の更新
 	currentMotion = UpdateNormal();
 
-	if (m_nCounterState < NORMAL_CNT)
+	if (m_nCounterState < INVULN_CNT)
 	{ // カウンターが一定値より小さい場合
 
 		// カウンターを加算
 		m_nCounterState++;
+
+		// マテリアルを設定
+		SetMaterial(material::Red());	// 赤
 	}
 	else
 	{ // カウンターが一定値以上の場合
 
 		// カウンターを初期化
 		m_nCounterState = 0;
+
+		// マテリアル再設定
+		ResetMaterial();
+
+		// 状態を変更
+		m_state = STATE_INVULN;	// 無敵状態
+	}
+
+	// 現在のモーションを返す
+	return currentMotion;
+}
+
+//============================================================
+//	無敵状態時の更新処理
+//============================================================
+CPlayer::MOTION CPlayer::UpdateInvuln(void)
+{
+	// 変数を宣言
+	MOTION currentMotion;	// 現在のモーション
+
+	// 通常状態時の更新
+	currentMotion = UpdateNormal();
+
+	if (m_nCounterState < NORMAL_CNT)
+	{ // カウンターが一定値より小さい場合
+
+		// カウンターを加算
+		m_nCounterState++;
+
+		if (m_nCounterState % CHANGE_ALPHA_CNT == 0)
+		{ // 透明度の変更タイミングだった場合
+
+			if (GetAlpha() > INVULN_MIN_ALPHA)
+			{ // 透明度が上がっていない場合
+
+				// 透明度を上げる
+				SetAlpha(INVULN_MIN_ALPHA);
+			}
+			else
+			{ // 透明度が上がっている場合
+
+				// 透明度を下げる
+				SetAlpha(INVULN_MAX_ALPHA);
+			}
+		}
+	}
+	else
+	{ // カウンターが一定値以上の場合
+
+		// カウンターを初期化
+		m_nCounterState = 0;
+
+		// 透明度を不透明に設定
+		SetAlpha(1.0f);
 
 		// 状態を変更
 		m_state = STATE_NORMAL;	// 通常状態
@@ -938,9 +1010,6 @@ void CPlayer::UpdateVortex(void)
 
 	if (m_state == STATE_NONE)
 	{ // 透明になり切った場合
-
-		// カメラ更新をONにする
-		CManager::GetCamera()->SetEnableUpdate(true);
 
 		// プレイヤーを再出現させる
 		SetRespawn(PLAY_SPAWN_POS);

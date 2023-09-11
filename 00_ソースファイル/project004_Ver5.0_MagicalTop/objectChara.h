@@ -59,6 +59,8 @@ public:
 	void SetEnableMotionUpdate(const bool bUpdate);	// 更新状況設定
 	void SetPosition(const D3DXVECTOR3& rPos);		// 位置設定
 	void SetRotation(const D3DXVECTOR3& rRot);		// 向き設定
+	void SetMaterial(const D3DXMATERIAL& rMat);		// マテリアル設定
+	void ResetMaterial(void);						// マテリアル再設定
 	void SetAlpha(const float fAlpha);				// 透明度設定
 	void SetPartsPosition(const int nID, const D3DXVECTOR3& rPos);	// パーツ位置設定
 	void SetPartsRotation(const int nID, const D3DXVECTOR3& rRot);	// パーツ向き設定

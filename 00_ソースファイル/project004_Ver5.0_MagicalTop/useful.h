@@ -44,6 +44,12 @@
 #define XCOL_BLACK	(D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f))	// 黒(不透明)
 #define XCOL_AWHITE	(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f))	// 白(透明)
 #define XCOL_WHITE	(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	// 白(不透明)
+#define XCOL_ARED	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 0.0f))	// 赤(透明)
+#define XCOL_RED	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	// 赤(不透明)
+#define XCOL_AGREEN	(D3DXCOLOR(0.0f, 1.0f, 0.0f, 0.0f))	// 緑(透明)
+#define XCOL_GREEN	(D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f))	// 緑(不透明)
+#define XCOL_ABLUE	(D3DXCOLOR(0.0f, 0.0f, 1.0f, 0.0f))	// 青(透明)
+#define XCOL_BLUE	(D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f))	// 青(不透明)
 
 // ポインタ使用判定
 #define USED(p)		((p) != NULL)	// 使用中
@@ -139,8 +145,17 @@ namespace useful
 	);
 }
 
+// マテリアル空間
+namespace material
+{
+	// 通常関数
+	D3DXMATERIAL Red(void);	// 赤マテリアル取得
+}
+
 //************************************************************
 //	テンプレート関数
+//************************************************************
+//	便利関数空間
 //************************************************************
 //============================================================
 //	値の範囲内制限処理

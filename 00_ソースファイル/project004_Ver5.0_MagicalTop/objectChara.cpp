@@ -273,6 +273,32 @@ void CObjectChara::SetRotation(const D3DXVECTOR3& rRot)
 }
 
 //============================================================
+//	マテリアルの設定処理
+//============================================================
+void CObjectChara::SetMaterial(const D3DXMATERIAL& rMat)
+{
+	for (int nCntObjectChara = 0; nCntObjectChara < m_nNumModel; nCntObjectChara++)
+	{ // パーツの総数分繰り返す
+
+		// 引数のマテリアルを全マテリアルに設定
+		m_apMultiModel[nCntObjectChara]->SetMaterial(rMat);
+	}
+}
+
+//============================================================
+//	マテリアルの再設定処理
+//============================================================
+void CObjectChara::ResetMaterial(void)
+{
+	for (int nCntObjectChara = 0; nCntObjectChara < m_nNumModel; nCntObjectChara++)
+	{ // パーツの総数分繰り返す
+
+		// 全マテリアルに初期マテリアルを再設定
+		m_apMultiModel[nCntObjectChara]->ResetMaterial();
+	}
+}
+
+//============================================================
 //	透明度の設定処理
 //============================================================
 void CObjectChara::SetAlpha(const float fAlpha)

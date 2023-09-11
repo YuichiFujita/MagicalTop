@@ -98,14 +98,13 @@ public:
 		STATE_FADEOUT,		// フェードアウト状態
 		STATE_NORMAL,		// 通常状態
 		STATE_DAMAGE,		// ダメージ状態
+		STATE_INVULN,		// 無敵状態
 		STATE_BLOW_AWAY,	// 吹っ飛び状態
 		STATE_VORTEX,		// 渦巻きこまれ状態
 		STATE_FADEIN,		// フェードイン状態
 		STATE_DEATH,		// 死亡状態
 		STATE_MAX			// この列挙型の総数
 	}STATE;
-
-	// TODO：無敵時間の実装
 
 	// コンストラクタ
 	CPlayer();
@@ -154,6 +153,7 @@ private:
 	// メンバ関数
 	MOTION UpdateNormal(void);	// 通常状態時の更新
 	MOTION UpdateDamage(void);	// ダメージ状態時の更新
+	MOTION UpdateInvuln(void);	// 無敵状態時の更新
 	void UpdateBlowAway(void);	// 吹っ飛び状態時の更新
 	void UpdateVortex(void);	// 渦巻きこまれ状態時の更新
 	void UpdateFadeOut(void);	// フェードアウト状態時の更新
