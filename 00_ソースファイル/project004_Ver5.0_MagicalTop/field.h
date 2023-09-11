@@ -15,6 +15,7 @@
 //************************************************************
 #include "main.h"
 #include "objectMeshField.h"
+#include "waveManager.h"
 
 //************************************************************
 //	クラス定義
@@ -26,7 +27,10 @@ public:
 	// テクスチャ列挙
 	typedef enum
 	{
-		TEXTURE_NORMAL = 0,	// 通常テクスチャ
+		TEXTURE_SPRING = 0,	// 春地面テクスチャ
+		TEXTURE_SUMMER,		// 夏地面テクスチャ
+		TEXTURE_AUTUMN,		// 秋地面テクスチャ
+		TEXTURE_WINTER,		// 冬地面テクスチャ
 		TEXTURE_MAX			// この列挙型の総数
 	}TEXTURE;
 
@@ -72,6 +76,7 @@ public:
 
 	// メンバ関数
 	void SetTerrain(const TERRAIN terrain);	// 地形設定
+	void SetSeason(const CWaveManager::SEASON season);	// 季節設定
 
 private:
 	// 静的メンバ変数

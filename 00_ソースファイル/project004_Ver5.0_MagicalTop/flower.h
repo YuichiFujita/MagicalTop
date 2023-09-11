@@ -15,6 +15,7 @@
 //************************************************************
 #include "main.h"
 #include "objectBillboard.h"
+#include "waveManager.h"
 
 //************************************************************
 //	前方宣言
@@ -31,7 +32,10 @@ public:
 	// 種類列挙
 	typedef enum
 	{
-		TYPE_NORMAL = 0,	// 通常
+		TYPE_SPRING = 0,	// 春マナフラワーテクスチャ
+		TYPE_SUMMER,		// 夏マナフラワーテクスチャ
+		TYPE_AUTUMN,		// 秋マナフラワーテクスチャ
+		TYPE_WINTER,		// 冬マナフラワーテクスチャ
 		TYPE_MAX			// この列挙型の総数
 	}TYPE;
 
@@ -62,6 +66,7 @@ public:
 		const D3DXVECTOR3& rSize,	// 大きさ
 		const int nLife				// 体力
 	);
+	static void SetSeason(const CWaveManager::SEASON season);	// 季節設定
 	static int GetNumAll(void);		// 総数取得
 
 	// メンバ関数

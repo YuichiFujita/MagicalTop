@@ -117,6 +117,7 @@ public:
 
 private:
 	// メンバ関数
+	void SetSeason(const SEASON season);	// 季節設定
 	void InitSeasonStart(void);		// 季節の開始初期化
 	void UpdateSeasonStart(void);	// 季節の開始
 	void InitWaveStart(void);		// ウェーブ開始初期化

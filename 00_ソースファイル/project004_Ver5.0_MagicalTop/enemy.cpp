@@ -707,12 +707,18 @@ void CEnemy::Damage(void)
 
 		// カウンターを加算
 		m_nCounterState++;
+
+		// マテリアルを設定
+		SetMaterial(material::Red());	// 赤
 	}
 	else
 	{ // カウンターが一定値以上の場合
 
 		// カウンターを初期化
 		m_nCounterState = 0;
+
+		// マテリアル再設定
+		ResetMaterial();
 
 		// 状態を設定
 		m_state = STATE_NORMAL;	// 通常状態

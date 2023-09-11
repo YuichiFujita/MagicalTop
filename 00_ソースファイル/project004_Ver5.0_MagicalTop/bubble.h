@@ -26,7 +26,8 @@ public:
 	// モデル列挙
 	typedef enum
 	{
-		MODEL_NORMAL = 0,	// 通常バブル
+		MODEL_BUBBLE = 0,	// バブル
+		MODEL_BOLD,			// 縁取り
 		MODEL_MAX			// この列挙型の総数
 	}MODEL;
 
@@ -64,13 +65,16 @@ public:
 	);
 
 	// メンバ関数
-	void AddLevel(const int nAdd);	// レベル加算
-	void SetLevel(const int nNum);	// レベル設定
-	int GetLevel(void) const;		// レベル取得
-	float GetMaxRadius(void) const;	// 最大半径取得
-	int GetMaxLevel(void) const;	// 最大レベル取得
-	void SetPositionUp(const float fUp);	// Y位置加算量設定
-	float GetPositionUp(void) const;		// Y位置加算量取得
+	void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
+	void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
+	void SetScaling(const D3DXVECTOR3& rScale);	// 大きさ設定
+	void AddLevel(const int nAdd);				// レベル加算
+	void SetLevel(const int nNum);				// レベル設定
+	int GetLevel(void) const;					// レベル取得
+	float GetMaxRadius(void) const;				// 最大半径取得
+	int GetMaxLevel(void) const;				// 最大レベル取得
+	void SetPositionUp(const float fUp);		// Y位置加算量設定
+	float GetPositionUp(void) const;			// Y位置加算量取得
 
 private:
 	// メンバ関数
@@ -80,6 +84,7 @@ private:
 	static const char *mc_apModelFile[];	// モデル定数
 
 	// メンバ変数
+	CObjectModel *m_pBold;		// 縁取りモデル
 	D3DXVECTOR3 m_currentScale;	// 現在の拡大率
 	D3DXVECTOR3 m_destScale;	// 目標の拡大率
 	CObject *m_pParentObject;	// 親オブジェクト

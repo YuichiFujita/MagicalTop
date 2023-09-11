@@ -33,7 +33,10 @@
 //************************************************************
 const char *CFlower::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\magicFlower000.png",	// マナフラワーテクスチャ
+	"data\\TEXTURE\\flower000.png",	// 春マナフラワーテクスチャ
+	"data\\TEXTURE\\flower001.png",	// 夏マナフラワーテクスチャ
+	"data\\TEXTURE\\flower002.png",	// 秋マナフラワーテクスチャ
+	"data\\TEXTURE\\flower003.png",	// 冬マナフラワーテクスチャ
 };
 int CFlower::m_nNumAll = 0;	// マナフラワーの総数
 
@@ -47,7 +50,7 @@ CFlower::CFlower(void) : CObjectBillboard(CObject::LABEL_FLOWER, FLOWER_PRIO)
 {
 	// メンバ変数をクリア
 	m_pShadow = NULL;		// 影の情報
-	m_type = TYPE_NORMAL;	// 種類
+	m_type = TYPE_SPRING;	// 種類
 	m_nLife = 0;			// 寿命
 
 	// マナフラワーの総数を加算
@@ -69,7 +72,7 @@ CFlower::~CFlower()
 HRESULT CFlower::Init(void)
 {
 	// メンバ変数を初期化
-	m_type = TYPE_NORMAL;	// 種類
+	m_type = TYPE_SPRING;	// 種類
 	m_nLife = 0;			// 寿命
 
 	// 影の生成
@@ -275,6 +278,52 @@ void CFlower::RandomSpawn
 
 			// マナフラワーオブジェクトの生成
 			CFlower::Create(type, posSet, rSize, nLife);
+		}
+	}
+}
+
+//============================================================
+//	季節の設定処理
+//============================================================
+void CFlower::SetSeason(const CWaveManager::SEASON season)
+{
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
+	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
+	{ // 優先順位の総数分繰り返す
+
+		// ポインタを宣言
+		CObject *pObjectTop = CObject::GetTop(nCntPri);	// 先頭オブジェクト
+
+		if (USED(pObjectTop))
+		{ // 先頭が存在する場合
+
+			// ポインタを宣言
+			CObject *pObjCheck = pObjectTop;	// オブジェクト確認用
+
+			while (USED(pObjCheck))
+			{ // オブジェクトが使用されている場合繰り返す
+
+				// ポインタを宣言
+				CObject *pObjectNext = pObjCheck->GetNext();	// 次オブジェクト
+
+				if (pObjCheck->GetLabel() != CObject::LABEL_FLOWER)
+				{ // オブジェクトラベルがマナフラワーではない場合
+
+					// 次のオブジェクトへのポインタを代入
+					pObjCheck = pObjectNext;
+
+					// 次の繰り返しに移行
+					continue;
+				}
+
+				// 引数の季節のテクスチャを登録・割当
+				pObjCheck->BindTexture(pTexture->Regist(mc_apTextureFile[season]));
+
+				// 次のオブジェクトへのポインタを代入
+				pObjCheck = pObjectNext;
+			}
 		}
 	}
 }

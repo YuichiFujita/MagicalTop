@@ -24,7 +24,10 @@
 //************************************************************
 const char *CField::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\field000.jpg",	// 通常テクスチャ
+	"data\\TEXTURE\\field000.jpg",	// 春地面テクスチャ
+	"data\\TEXTURE\\field001.jpg",	// 夏地面テクスチャ
+	"data\\TEXTURE\\field002.jpg",	// 秋地面テクスチャ
+	"data\\TEXTURE\\field003.jpg",	// 冬地面テクスチャ
 };
 CField::TerrainInfo CField::m_aTerrainInfo[TERRAIN_MAX] = {};	// 地形情報
 
@@ -208,6 +211,18 @@ void CField::SetTerrain(const TERRAIN terrain)
 		CObjectMeshField::SetTerrain(m_aTerrainInfo[terrain].part, m_aTerrainInfo[terrain].pPosGap);
 	}
 	else { assert(false); }	// 範囲外
+}
+
+//============================================================
+//	季節の設定処理
+//============================================================
+void CField::SetSeason(const CWaveManager::SEASON season)
+{
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
+	// 引数の季節のテクスチャを登録・割当
+	BindTexture(pTexture->Regist(mc_apTextureFile[season]));
 }
 
 //============================================================

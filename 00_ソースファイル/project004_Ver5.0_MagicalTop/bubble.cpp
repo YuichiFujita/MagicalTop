@@ -19,6 +19,7 @@
 //************************************************************
 #define BUBBLE_PRIO	(4)		// バブル表示の優先順位
 #define REV_SIZE	(0.25f)	// バブル拡大率の補正係数
+#define BOLD_ADD	(0.25f)	// バブルの縁取り加算量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -26,6 +27,7 @@
 const char *CBubble::mc_apModelFile[] =	// モデル定数
 {
 	"data\\MODEL\\BUBBLE\\bubble000.x",	// バブルモデル
+	"data\\MODEL\\BUBBLE\\bubble001.x",	// バブル縁取りモデル
 };
 
 //************************************************************
@@ -37,11 +39,12 @@ const char *CBubble::mc_apModelFile[] =	// モデル定数
 CBubble::CBubble(const int nMaxLevel, const D3DXVECTOR3& rMaxScale) : CObjectModel(CObject::LABEL_NONE, BUBBLE_PRIO), m_maxScale(rMaxScale), m_nMaxLevel(nMaxLevel)
 {
 	// メンバ変数をクリア
+	m_pBold			= NULL;			// 縁取りモデル
 	m_currentScale	= VEC3_ZERO;	// 現在の拡大率
 	m_destScale		= VEC3_ZERO;	// 目標の拡大率
 	m_pParentObject	= NULL;			// 親オブジェクト
-	m_fPosUp	= 0.0f;				// バブルのY位置加算量
-	m_nLevel	= 0;				// 大きさレベル
+	m_fPosUp		= 0.0f;			// バブルのY位置加算量
+	m_nLevel		= 0;			// 大きさレベル
 }
 
 //============================================================
@@ -57,12 +60,16 @@ CBubble::~CBubble()
 //============================================================
 HRESULT CBubble::Init(void)
 {
+	// ポインタを宣言
+	CModel *pModel = CManager::GetModel();	// モデルへのポインタ
+
 	// メンバ変数を初期化
+	m_pBold			= NULL;			// 縁取りモデル
 	m_currentScale	= VEC3_ZERO;	// 現在の拡大率
 	m_destScale		= VEC3_ZERO;	// 目標の拡大率
 	m_pParentObject	= NULL;			// 親オブジェクト
-	m_fPosUp	= 0.0f;				// バブルのY位置加算量
-	m_nLevel	= 0;				// 大きさレベル
+	m_fPosUp		= 0.0f;			// バブルのY位置加算量
+	m_nLevel		= 0;			// 大きさレベル
 
 	// オブジェクトモデルの初期化
 	if (FAILED(CObjectModel::Init()))
@@ -73,6 +80,22 @@ HRESULT CBubble::Init(void)
 		return E_FAIL;
 	}
 
+	// 縁取りモデルの生成
+	m_pBold = CObjectModel::Create(VEC3_ZERO, VEC3_ZERO);
+	if (UNUSED(m_pBold))
+	{ // 生成に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// モデルを登録・割当
+	m_pBold->BindModel(pModel->GetModel(pModel->Regist(mc_apModelFile[MODEL_BOLD])));
+
+	// 描画しない設定にする
+	m_pBold->SetEnableDraw(false);
+
 	// 成功を返す
 	return S_OK;
 }
@@ -82,6 +105,9 @@ HRESULT CBubble::Init(void)
 //============================================================
 void CBubble::Uninit(void)
 {
+	// 縁取りモデルの終了
+	m_pBold->Uninit();
+
 	// オブジェクトモデルの終了
 	CObjectModel::Uninit();
 }
@@ -123,6 +149,9 @@ void CBubble::Update(void)
 		SetScaling(scaleBubble);
 	}
 
+	// 縁取りモデルの更新
+	m_pBold->Update();
+
 	// オブジェクトモデルの更新
 	CObjectModel::Update();
 }
@@ -134,6 +163,9 @@ void CBubble::Draw(void)
 {
 	// オブジェクトモデルの描画
 	CObjectModel::Draw();
+
+	// 縁取りモデルの描画
+	m_pBold->Draw();
 }
 
 //============================================================
@@ -191,7 +223,7 @@ CBubble *CBubble::Create
 		}
 
 		// モデルを登録・割当
-		pBubble->BindModel(pModel->GetModel(pModel->Regist(mc_apModelFile[MODEL_NORMAL])));
+		pBubble->BindModel(pModel->GetModel(pModel->Regist(mc_apModelFile[MODEL_BUBBLE])));
 
 		// 位置を設定
 		pBubble->SetPosition(rPos);
@@ -212,6 +244,42 @@ CBubble *CBubble::Create
 		return pBubble;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	位置の設定処理
+//============================================================
+void CBubble::SetPosition(const D3DXVECTOR3& rPos)
+{
+	// 縁取りモデルの位置を設定
+	m_pBold->SetPosition(rPos);
+
+	// オブジェクトモデルの位置を設定
+	CObjectModel::SetPosition(rPos);
+}
+
+//============================================================
+//	向きの設定処理
+//============================================================
+void CBubble::SetRotation(const D3DXVECTOR3& rRot)
+{
+	// 縁取りモデルの向きを設定
+	m_pBold->SetRotation(rRot);
+
+	// オブジェクトモデルの向きを設定
+	CObjectModel::SetRotation(rRot);
+}
+
+//============================================================
+//	大きさの設定処理
+//============================================================
+void CBubble::SetScaling(const D3DXVECTOR3& rScale)
+{
+	// 縁取りモデルの大きさを設定
+	m_pBold->SetScaling(D3DXVECTOR3(rScale.x + BOLD_ADD, rScale.y + BOLD_ADD, rScale.z + BOLD_ADD));
+
+	// オブジェクトモデルの大きさを設定
+	CObjectModel::SetScaling(rScale);
 }
 
 //============================================================

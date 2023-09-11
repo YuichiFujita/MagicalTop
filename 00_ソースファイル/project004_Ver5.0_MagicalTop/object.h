@@ -95,6 +95,7 @@ public:
 
 	// 仮想関数
 	virtual void Hit(const int nDmg);					// ヒット
+	virtual void BindTexture(const int nTextureID);		// テクスチャ割当
 	virtual void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
 	virtual void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
 	virtual void SetState(const int nState);			// 状態設定

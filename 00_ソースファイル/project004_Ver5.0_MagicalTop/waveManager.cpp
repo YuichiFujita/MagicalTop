@@ -17,6 +17,8 @@
 #include "sceneGame.h"
 #include "target.h"
 #include "player.h"
+#include "field.h"
+#include "flower.h"
 #include "timerManager.h"
 
 //************************************************************
@@ -389,6 +391,9 @@ void CWaveManager::NextSeason(void)
 
 		// 状態を変更
 		m_state = STATE_SEASON_START_INIT;	// 季節の開始状態
+
+		// 季節の設定
+		SetSeason((SEASON)m_nSeason);
 	}
 	else { assert(false); }	// 使用不可タイミング
 }
@@ -449,6 +454,18 @@ HRESULT CWaveManager::Release(CWaveManager *&prWaveManager)
 		return S_OK;
 	}
 	else { assert(false); return E_FAIL; }	// 非使用中
+}
+
+//============================================================
+//	季節の設定処理
+//============================================================
+void CWaveManager::SetSeason(const SEASON season)
+{
+	// 地面を変更
+	CSceneGame::GetField()->SetSeason(season);
+
+	// 花を変更
+	CFlower::SetSeason(season);
 }
 
 //============================================================

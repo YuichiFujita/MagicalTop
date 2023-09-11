@@ -110,7 +110,7 @@ HRESULT CSceneGame::Init(void)
 	CSea::Create();
 
 	// 地面オブジェクトの生成
-	m_pField = CField::Create(CField::TEXTURE_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(6000.0f, 6000.0f), XCOL_WHITE, POSGRID2(120, 120));
+	m_pField = CField::Create(CField::TEXTURE_SPRING, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(6000.0f, 6000.0f), XCOL_WHITE, POSGRID2(120, 120));
 	if (UNUSED(m_pField))
 	{ // 非使用中の場合
 
@@ -176,7 +176,7 @@ HRESULT CSceneGame::Init(void)
 	CMagic::LoadSetup();
 
 	// マナフラワーランダム生成
-	CFlower::RandomSpawn(30, CFlower::TYPE_NORMAL, D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);	// TODO：定数変更
+	CFlower::RandomSpawn(30, CFlower::TYPE_SPRING, D3DXVECTOR3(25.0f, 50.0f, 0.0f), 10);	// TODO：定数変更
 
 	// 草ランダム生成
 	CWeed::RandomSpawn(100, CWeed::TYPE_NORMAL, D3DXVECTOR3(40.0f, 60.0f, 0.0f));	// TODO：定数変更
