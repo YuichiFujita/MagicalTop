@@ -28,6 +28,10 @@
 #define SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 #define SHADOW_ALPHA	(0.2f)	// 影のα値
 
+#define NORMAL_CNT	(20)	// ダメージ状態から通常状態に戻るまでのフレーム数
+
+#define PREC_PLUS_RADIUS	(80.0f)	// 生成制限の半径加算量
+
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
@@ -50,8 +54,9 @@ CFlower::CFlower(void) : CObject3D(CObject::LABEL_FLOWER, FLOWER_PRIO)
 {
 	// メンバ変数をクリア
 	m_pShadow = NULL;		// 影の情報
-	m_type = TYPE_SPRING;	// 種類
-	m_nLife = 0;			// 寿命
+	m_state = STATE_NORMAL;	// 状態
+	m_nLife = 0;			// 体力
+	m_nCounterState = 0;	// 状態管理カウンター
 
 	// マナフラワーの総数を加算
 	m_nNumAll++;
@@ -73,8 +78,9 @@ HRESULT CFlower::Init(void)
 {
 	// メンバ変数を初期化
 	m_pShadow = NULL;		// 影の情報
-	m_type = TYPE_SPRING;	// 種類
-	m_nLife = 0;			// 寿命
+	m_state = STATE_NORMAL;	// 状態
+	m_nLife = 0;			// 体力
+	m_nCounterState = 0;	// 状態管理カウンター
 
 	// 影の生成
 	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, SHADOW_SIZE, this, SHADOW_ALPHA, SHADOW_ALPHA);
@@ -119,19 +125,53 @@ void CFlower::Update(void)
 	// 変数を宣言
 	D3DXVECTOR3 pos = GetPosition();	// 位置
 
-	// TODO：花とプレイヤーの当たり判定
-#if 0
-	// プレイヤーとの当たり判定
-	if (CollisionPlayer())
-	{ // プレイヤーに当たっている場合
+	switch (m_state)
+	{ // 状態ごとの処理
+	case STATE_NORMAL:
 
-		// オブジェクトの終了
-		Uninit();
+		// プレイヤーとの当たり判定
+		if (CollisionPlayer(pos))
+		{ // 体力がなくなった場合
 
-		// 関数を抜ける
-		return;
+			// オブジェクトの終了
+			Uninit();
+
+			// 関数を抜ける
+			return;
+		}
+
+		break;
+
+	case STATE_DAMAGE:
+
+		if (m_nCounterState < NORMAL_CNT)
+		{ // カウンターが一定値より小さい場合
+
+			// 変数を宣言
+			D3DXVECTOR3 size = GetScaling();	// マナフラワー大きさ
+
+			// カウンターを加算
+			m_nCounterState++;
+
+			// 大きさを設定
+			SetScaling(D3DXVECTOR3(size.x, (30.0f / NORMAL_CNT) * m_nCounterState + 20.0f, size.z));	// TODO：定数
+		}
+		else
+		{ // カウンターが一定値以上の場合
+
+			// カウンターを初期化
+			m_nCounterState = 0;
+
+			// 状態を設定
+			m_state = STATE_NORMAL;	// 通常状態
+		}
+
+		break;
+
+	default:
+		assert(false);
+		break;
 	}
-#endif
 
 	// 位置を求める
 	pos.y = CSceneGame::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
@@ -230,6 +270,9 @@ CFlower *CFlower::Create
 		// 大きさを設定
 		pFlower->SetScaling(rSize);
 
+		// 体力を設定
+		pFlower->SetLife(nLife);
+
 		// カリングを設定
 		pFlower->SetCulling(D3DCULL_NONE);
 
@@ -278,7 +321,7 @@ void CFlower::RandomSpawn
 			posSet.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
 
 			// 生成位置を補正
-			collision::CirclePillar(posSet, posTarget, rSize.x, CSceneGame::GetStage()->GetStageBarrier().fRadius);	// ターゲット内部の生成防止
+			collision::CirclePillar(posSet, posTarget, rSize.x, CSceneGame::GetStage()->GetStageBarrier().fRadius + PREC_PLUS_RADIUS);	// ターゲット内部の生成防止
 			CSceneGame::GetStage()->LimitPosition(posSet, rSize.x);	// ステージ範囲外の生成防止
 
 			// 生成向きを設定
@@ -357,20 +400,58 @@ void CFlower::SetLife(const int nLife)
 //============================================================
 //	プレイヤーとの当たり判定
 //============================================================
-bool CFlower::CollisionPlayer(void)
+bool CFlower::CollisionPlayer(const D3DXVECTOR3& rPos)
 {
 	// 変数を宣言
-	bool bHit = false;	// 判定状況
+	bool bDeath = false;	// 死亡状況
 
 	// ポインタを宣言
 	CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー情報
 
-	if (pPlayer->GetState() != CPlayer::STATE_DEATH)
-	{ // プレイヤーが使用されている場合
+	// 変数を宣言
+	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();	// プレイヤー位置
+	D3DXVECTOR3 sizeFlower = GetScaling();	// マナフラワー大きさ
 
-		// TODO
+	if (pPlayer->GetState() == CPlayer::STATE_NORMAL)
+	{ // プレイヤーが通常状態の場合
+
+		if (collision::Circle2D(rPos, posPlayer, sizeFlower.x * 0.5f, pPlayer->GetRadius()))
+		{ // プレイヤーに当たっていた場合
+
+			if (pPlayer->GetMotionType() != CPlayer::MOTION_ACCELE)
+			{ // プレイヤーが加速中ではない場合
+
+				// 体力を減算
+				m_nLife--;
+			}
+			else
+			{ // プレイヤーが加速中の場合
+
+				// 体力を0にする
+				m_nLife = 0;
+			}
+
+			if (m_nLife > 0)
+			{ // 体力が残っていた場合
+
+				// 変数を宣言
+				float fCol = (0.5f / (float)10) * m_nLife + 0.5f;	// マナフラワー色	// TODO：定数
+
+				// マナフラワーの色を設定
+				SetColor(D3DXCOLOR(fCol, fCol, fCol, 1.0f));
+
+				// 状態を設定
+				m_state = STATE_DAMAGE;	// ダメージ状態
+			}
+			else
+			{ // 体力がなくなった場合
+
+				// 死亡状態にする
+				bDeath = true;
+			}
+		}
 	}
 
-	// 判定状況を返す
-	return bHit;
+	// 死亡状況を返す
+	return bDeath;
 }

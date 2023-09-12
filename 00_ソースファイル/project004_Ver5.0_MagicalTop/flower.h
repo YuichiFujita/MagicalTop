@@ -39,6 +39,14 @@ public:
 		TYPE_MAX			// この列挙型の総数
 	}TYPE;
 
+	// 状態列挙
+	typedef enum
+	{
+		STATE_NORMAL,	// 通常状態
+		STATE_DAMAGE,	// ダメージ状態
+		STATE_MAX		// この列挙型の総数
+	}STATE;
+
 	// コンストラクタ
 	CFlower();
 
@@ -75,16 +83,17 @@ public:
 
 private:
 	// メンバ関数
-	bool CollisionPlayer(void);	// プレイヤーとの当たり判定
+	bool CollisionPlayer(const D3DXVECTOR3& rPos);	// プレイヤーとの当たり判定
 
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 	static int m_nNumAll;					// マナフラワーの総数
 
 	// メンバ変数
-	CShadow *m_pShadow;	// 影の情報
-	TYPE m_type;		// 種類
-	int m_nLife;		// 体力
+	CShadow *m_pShadow;		// 影の情報
+	STATE m_state;			// 状態
+	int m_nLife;			// 体力
+	int m_nCounterState;	// 状態管理カウンター
 };
 
 #endif	// _FLOWER_H_

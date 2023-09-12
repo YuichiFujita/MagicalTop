@@ -28,6 +28,9 @@
 #define SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 #define SHADOW_ALPHA	(0.2f)	// 影のα値
 
+#define PREC_PLUS_RADIUS	(80.0f)		// 生成制限の半径加算量
+#define PREC_IN_RADIUS		(3000.0f)	// 生成制限の最大半径
+
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
@@ -48,9 +51,8 @@ const char *CWeed::mc_apTextureFile[] =	// テクスチャ定数
 CWeed::CWeed(void) : CObject3D(CObject::LABEL_WEED, WEED_PRIO)
 {
 	// メンバ変数をクリア
-	m_pShadow = NULL;		// 影の情報
-	m_type = TYPE_SPRING;	// 種類
-	m_fSinRot = 0.0f;		// なびき向き
+	m_pShadow = NULL;	// 影の情報
+	m_fSinRot = 0.0f;	// なびき向き
 }
 
 //============================================================
@@ -67,8 +69,7 @@ CWeed::~CWeed()
 HRESULT CWeed::Init(void)
 {
 	// メンバ変数を初期化
-	m_pShadow = NULL;		// 影の情報
-	m_type = TYPE_SPRING;	// 種類
+	m_pShadow = NULL;	// 影の情報
 	m_fSinRot = (float)(rand() % 629 - 314) * 0.01f;	// なびき向き
 
 	// 影の生成
@@ -283,8 +284,8 @@ void CWeed::RandomSpawn
 			posSet.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
 
 			// 生成位置を補正
-			collision::CirclePillar(posSet, posTarget, rSize.x, CSceneGame::GetStage()->GetStageBarrier().fRadius);	// ターゲット内部の生成防止
-			CSceneGame::GetStage()->LimitPosition(posSet, rSize.x);	// ステージ範囲外の生成防止
+			collision::CirclePillar(posSet, posTarget, rSize.x, CSceneGame::GetStage()->GetStageBarrier().fRadius + PREC_PLUS_RADIUS);	// ターゲット内部の生成防止
+			collision::InCirclePillar(posSet, posTarget, rSize.x, PREC_IN_RADIUS);	// 範囲外の生成防止
 
 			// 生成向きを設定
 			rotSet = D3DXVECTOR3(0.0f, atan2f(posSet.x - posTarget.x, posSet.z - posTarget.z), 0.0f);

@@ -77,7 +77,6 @@ private:
 
 	// ƒƒ“ƒo•Ï”
 	CShadow *m_pShadow;	// ‰e‚Ìî•ñ
-	TYPE m_type;		// í—Ş
 	float m_fSinRot;	// ‚È‚Ñ‚«Œü‚«
 };
 

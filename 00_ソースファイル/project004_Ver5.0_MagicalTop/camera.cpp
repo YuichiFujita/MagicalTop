@@ -56,7 +56,7 @@
 #define REV_BARG_POS	(0.25f)		// カメラ位置の補正係数
 
 // カメラ上向きマクロ
-#define POSRUP_MAX	(2000.0f)	// 上向き状態時の注視点の最大高度
+#define POSRUP_MAX	(1600.0f)	// 上向き状態時の注視点の最大高度
 #define POSRUP_ADD	(15.0f)		// 上向き状態時の注視点の高度加算量
 
 // カメラ操作マクロ
