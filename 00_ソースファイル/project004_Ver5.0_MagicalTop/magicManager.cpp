@@ -38,7 +38,6 @@
 
 #define HEAL_SAFE_PLUS	(2)		// 回復状態移行カウンターのセーフエリア時の加算量
 #define HEALCNT_AREAMUL	(10)	// セーフエリア外での回復カウンター設定用係数
-#define SUB_TARGLIFE	(-2)	// セーフエリアでマナ回復時のターゲットへのダメージ量
 #define NUM_DEADZONE	(100)	// デッドゾーンの値
 
 //************************************************************
@@ -191,9 +190,6 @@ void CMagicManager::Update(void)
 
 					// マナを回復
 					m_pMana->AddNum(1);
-
-					// ターゲットの体力を減算
-					CSceneGame::GetTarget()->AddLife(SUB_TARGLIFE);
 				}
 			}
 			else

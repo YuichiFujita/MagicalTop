@@ -1034,7 +1034,7 @@ void CPlayer::UpdateFadeOut(void)
 		fAlpha = GetMaxAlpha();
 
 		// ó‘Ô‚ğİ’è
-		m_state = STATE_NORMAL;	// ’Êíó‘Ô
+		m_state = STATE_INVULN;	// –³“Gó‘Ô
 	}
 
 	// “§–¾“x‚ğİ’è

@@ -114,7 +114,7 @@ void CWeed::Update(void)
 	// 変数を宣言
 	D3DXVECTOR3 pos = GetPosition();	// 位置
 
-	// TODO：花とプレイヤーの当たり判定
+	// TODO：草とプレイヤーの当たり判定
 #if 0
 	// プレイヤーとの当たり判定
 	if (CollisionPlayer())
