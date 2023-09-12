@@ -17,6 +17,7 @@
 #include "sceneGame.h"
 #include "target.h"
 #include "player.h"
+#include "camera.h"
 #include "field.h"
 #include "flower.h"
 #include "timerManager.h"
@@ -286,7 +287,7 @@ void CWaveManager::Update(void)
 
 		// 季節の開始処理に続く
 
-	case STATE_SEASON_START:		// 季節の開始状態
+	case STATE_SEASON_START:	// 季節の開始状態
 
 		// 季節の開始
 		UpdateSeasonStart();
@@ -373,15 +374,6 @@ void CWaveManager::Update(void)
 }
 
 //============================================================
-//	状態取得処理
-//============================================================
-CWaveManager::STATE CWaveManager::GetState(void)
-{
-	// 状態を返す
-	return m_state;
-}
-
-//============================================================
 //	季節の移行処理
 //============================================================
 void CWaveManager::NextSeason(void)
@@ -389,13 +381,25 @@ void CWaveManager::NextSeason(void)
 	if (m_state == STATE_WAIT)
 	{ // 次の季節の開始待機状態の場合
 
-		// 状態を変更
+		// 状態を設定
 		m_state = STATE_SEASON_START_INIT;	// 季節の開始状態
 
-		// 季節の設定
-		SetSeason((SEASON)m_nSeason);
+		// カメラ更新をONにする
+		CManager::GetCamera()->SetEnableUpdate(true);
+
+		// カメラ状態を設定
+		CManager::GetCamera()->SetState(CCamera::STATE_UP);	// 上向き状態
 	}
 	else { assert(false); }	// 使用不可タイミング
+}
+
+//============================================================
+//	状態取得処理
+//============================================================
+CWaveManager::STATE CWaveManager::GetState(void)
+{
+	// 状態を返す
+	return m_state;
 }
 
 //============================================================
@@ -645,6 +649,16 @@ void CWaveManager::UpdateWaveStart(void)
 
 		// プレイヤーを再出現させる
 		CSceneGame::GetPlayer()->SetRespawn(PLAY_SPAWN_POS);
+
+		if (m_nWave == 0)
+		{ // 初回ウェーブの場合
+
+			// 季節の設定
+			SetSeason((SEASON)m_nSeason);
+
+			// カメラ状態を設定
+			CManager::GetCamera()->SetState(CCamera::STATE_BARGAINING);	// 寄り引き状態
+		}
 
 		// タイムを計測再開
 		CSceneGame::GetTimerManager()->EnableStop(false);

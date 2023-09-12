@@ -107,8 +107,8 @@ public:
 	HRESULT Init(void);		// 初期化
 	void Uninit(void);		// 終了
 	void Update(void);		// 更新
-	STATE GetState(void);	// 状態取得
 	void NextSeason(void);	// 季節移行
+	STATE GetState(void);	// 状態取得
 
 	// 静的メンバ関数
 	static void LoadSetup(void);		// セットアップ

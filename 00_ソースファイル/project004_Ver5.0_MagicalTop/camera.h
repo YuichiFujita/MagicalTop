@@ -30,6 +30,14 @@ public:
 		TYPE_MAX		// この列挙型の総数
 	};
 
+	// 状態列挙
+	enum STATE
+	{
+		STATE_BARGAINING = 0,	// 寄り引き状態
+		STATE_UP,	// 上向き状態
+		STATE_MAX	// この列挙型の総数
+	};
+
 	// コンストラクタ
 	CCamera();
 
@@ -59,7 +67,9 @@ public:
 	void Update(void);	// 更新
 	void SetCamera(const TYPE type);	// カメラ設定
 	Camera GetCamera(const TYPE type);	// カメラ取得
+	void SetState(const STATE state);	// カメラ状態設定
 	void SetDestBargainingCamera(void);	// カメラ目標位置設定 (寄り引き)
+
 	void SetEnableUpdate(const bool bUpdate);		// 更新状況設定
 	void SetRotation(const D3DXVECTOR3& rRot);		// 現在向き設定
 	void SetDestRotation(const D3DXVECTOR3& rRot);	// 目標向き設定
@@ -81,6 +91,7 @@ private:
 
 	// メンバ変数
 	Camera m_aCamera[TYPE_MAX];	// カメラの情報
+	STATE m_state;	// 状態
 	bool m_bUpdate;	// 更新状況
 };
 

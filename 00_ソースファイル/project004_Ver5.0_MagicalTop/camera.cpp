@@ -55,6 +55,10 @@
 #define REV_DESTPOS_Y	(200.0f)	// カメラ位置加算時のターゲット距離補正値
 #define REV_BARG_POS	(0.25f)		// カメラ位置の補正係数
 
+// カメラ上向きマクロ
+#define POSRUP_MAX	(2000.0f)	// 上向き状態時の注視点の最大高度
+#define POSRUP_ADD	(15.0f)		// 上向き状態時の注視点の高度加算量
+
 // カメラ操作マクロ
 #define REV_MOVE_MOUSE	(1.6f)		// マウス操作でのカメラの移動の補正係数
 #define REV_DIS_MOUSE	(-0.3f)		// マウス操作でのカメラの距離の補正係数
@@ -75,6 +79,7 @@ CCamera::CCamera()
 {
 	// メンバ変数をクリア
 	memset(&m_aCamera[0], 0, sizeof(m_aCamera));	// カメラの情報
+	m_state = STATE_BARGAINING;	// 状態
 	m_bUpdate = false;	// 更新状況
 }
 
@@ -135,6 +140,9 @@ HRESULT CCamera::Init(void)
 	m_aCamera[TYPE_MODELUI].viewport.MinZ	= 0.0f;
 	m_aCamera[TYPE_MODELUI].viewport.MaxZ	= 0.5f;
 
+	// 状態を寄り引きに設定
+	m_state = STATE_BARGAINING;
+
 	// カメラ更新をONにする
 	m_bUpdate = true;
 
@@ -159,17 +167,46 @@ void CCamera::Update(void)
 	{ // 更新する状況の場合
 
 #if 1
-#if 0
-		// カメラの更新 (追従)
-		Follow();
+
+		switch (m_state)
+		{ // 状態ごとの処理
+		case STATE_BARGAINING:
+
+			// カメラの更新 (寄り引き)
+			Bargaining();
+
+			break;
+
+		case STATE_UP:
+
+			if (m_aCamera[TYPE_MAIN].posR.y < POSRUP_MAX)
+			{ // カメラの注視点Y座標が一定値より低い場合
+
+				// 注視点の現在位置を更新
+				m_aCamera[TYPE_MAIN].posR.y += POSRUP_ADD;
+
+				if (m_aCamera[TYPE_MAIN].posR.y > POSRUP_MAX)
+				{ // カメラの注視点Y座標が一定値を超えた場合
+
+					// 注視点の現在位置を補正
+					m_aCamera[TYPE_MAIN].posR.y += POSRUP_ADD;
+				}
+			}
+
+			break;
+
+		default:
+			assert(false);
+			break;
+		}
+
 #else
-		// カメラの更新 (寄り引き)
-		Bargaining();
-#endif
-#else
+
 		// カメラの更新 (操作)
 		Control();
+
 #endif
+
 	}
 
 	// デバッグ表示
@@ -332,6 +369,15 @@ CCamera::Camera CCamera::GetCamera(const TYPE type)
 {
 	// カメラの情報を返す
 	return m_aCamera[type];
+}
+
+//============================================================
+//	カメラ状態の設定処理
+//============================================================
+void CCamera::SetState(const STATE state)
+{
+	// 状態を設定
+	m_state = state;
 }
 
 //============================================================
