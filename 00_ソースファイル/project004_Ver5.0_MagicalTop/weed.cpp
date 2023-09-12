@@ -33,7 +33,10 @@
 //************************************************************
 const char *CWeed::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\weed000.png",	// 草テクスチャ
+	"data\\TEXTURE\\weed000.png",	// 春草テクスチャ
+	"data\\TEXTURE\\weed001.png",	// 夏草テクスチャ
+	"data\\TEXTURE\\weed002.png",	// 秋草テクスチャ
+	"data\\TEXTURE\\weed003.png",	// 冬草テクスチャ
 };
 
 //************************************************************
@@ -46,7 +49,8 @@ CWeed::CWeed(void) : CObject3D(CObject::LABEL_WEED, WEED_PRIO)
 {
 	// メンバ変数をクリア
 	m_pShadow = NULL;		// 影の情報
-	m_type = TYPE_NORMAL;	// 種類
+	m_type = TYPE_SPRING;	// 種類
+	m_fSinRot = 0.0f;		// なびき向き
 }
 
 //============================================================
@@ -64,7 +68,8 @@ HRESULT CWeed::Init(void)
 {
 	// メンバ変数を初期化
 	m_pShadow = NULL;		// 影の情報
-	m_type = TYPE_NORMAL;	// 種類
+	m_type = TYPE_SPRING;	// 種類
+	m_fSinRot = (float)(rand() % 629 - 314) * 0.01f;	// なびき向き
 
 	// 影の生成
 	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, SHADOW_SIZE, this, SHADOW_ALPHA, SHADOW_ALPHA);
@@ -123,6 +128,18 @@ void CWeed::Update(void)
 	}
 #endif
 
+
+
+	// なびき向きを加算
+	m_fSinRot += 0.2f;
+	useful::NormalizeRot(m_fSinRot);	// 向き正規化
+
+	// 頂点のずれ量を設定
+	SetGapPosition(0, D3DXVECTOR3(0.0f, 0.0f, sinf(m_fSinRot) * 15.0f - 25.0f));
+	SetGapPosition(1, D3DXVECTOR3(0.0f, 0.0f, sinf(m_fSinRot) * 15.0f - 25.0f));
+
+
+
 	// 位置を求める
 	pos.y = CSceneGame::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
 
@@ -134,16 +151,6 @@ void CWeed::Update(void)
 
 	// オブジェクト3Dの更新
 	CObject3D::Update();
-
-	// TODO：草のなびき実装
-#if 1
-
-	// 変数を宣言
-	float fGap = (float)(rand() % 22 + 18);	// 位置の変動量
-	SetGapPosition(0, D3DXVECTOR3(0.0f, 0.0f, -fGap));
-	SetGapPosition(1, D3DXVECTOR3(0.0f, 0.0f, -fGap));
-
-#endif
 }
 
 //============================================================
@@ -284,6 +291,52 @@ void CWeed::RandomSpawn
 
 			// 草オブジェクトの生成
 			CWeed::Create(type, posSet, rotSet, rSize);
+		}
+	}
+}
+
+//============================================================
+//	季節の設定処理
+//============================================================
+void CWeed::SetSeason(const CWaveManager::SEASON season)
+{
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
+	for (int nCntPri = 0; nCntPri < MAX_PRIO; nCntPri++)
+	{ // 優先順位の総数分繰り返す
+
+		// ポインタを宣言
+		CObject *pObjectTop = CObject::GetTop(nCntPri);	// 先頭オブジェクト
+
+		if (USED(pObjectTop))
+		{ // 先頭が存在する場合
+
+			// ポインタを宣言
+			CObject *pObjCheck = pObjectTop;	// オブジェクト確認用
+
+			while (USED(pObjCheck))
+			{ // オブジェクトが使用されている場合繰り返す
+
+				// ポインタを宣言
+				CObject *pObjectNext = pObjCheck->GetNext();	// 次オブジェクト
+
+				if (pObjCheck->GetLabel() != CObject::LABEL_WEED)
+				{ // オブジェクトラベルが草ではない場合
+
+					// 次のオブジェクトへのポインタを代入
+					pObjCheck = pObjectNext;
+
+					// 次の繰り返しに移行
+					continue;
+				}
+
+				// 引数の季節のテクスチャを登録・割当
+				pObjCheck->BindTexture(pTexture->Regist(mc_apTextureFile[season]));
+
+				// 次のオブジェクトへのポインタを代入
+				pObjCheck = pObjectNext;
+			}
 		}
 	}
 }

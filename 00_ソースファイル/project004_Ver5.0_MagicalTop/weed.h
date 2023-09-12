@@ -15,6 +15,7 @@
 //************************************************************
 #include "main.h"
 #include "object3D.h"
+#include "waveManager.h"
 
 //************************************************************
 //	前方宣言
@@ -31,7 +32,10 @@ public:
 	// 種類列挙
 	typedef enum
 	{
-		TYPE_NORMAL = 0,	// 通常
+		TYPE_SPRING = 0,	// 春草テクスチャ
+		TYPE_SUMMER,		// 夏草テクスチャ
+		TYPE_AUTUMN,		// 秋草テクスチャ
+		TYPE_WINTER,		// 冬草テクスチャ
 		TYPE_MAX			// この列挙型の総数
 	}TYPE;
 
@@ -61,6 +65,7 @@ public:
 		const TYPE type,			// 種類
 		const D3DXVECTOR3& rSize	// 大きさ
 	);
+	static void SetSeason(const CWaveManager::SEASON season);	// 季節設定
 
 private:
 	// メンバ関数
@@ -73,6 +78,7 @@ private:
 	// メンバ変数
 	CShadow *m_pShadow;	// 影の情報
 	TYPE m_type;		// 種類
+	float m_fSinRot;	// なびき向き
 };
 
 #endif	// _WEED_H_

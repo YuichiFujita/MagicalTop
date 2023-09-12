@@ -28,8 +28,9 @@
 #define AREA_ROT	(0.025f)	// エリアの回転量
 #define AREA_SUBROT	(0.003f)	// エリアの回転減算量
 
-#define WIND_CNT	(60)	// 風生成カウント
-#define WIND_SPAWN	(4)		// 風生成数
+#define WIND_POS	(3000.0f)	// 風生成位置
+#define WIND_CNT	(60)		// 風生成カウント
+#define WIND_SPAWN	(4)			// 風生成数
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -261,9 +262,9 @@ void CStage::Update(void)
 		{ // 風の生成数分繰り返す
 
 			// 生成位置を設定
-			spawnPos.x = sinf(fRot + ((D3DX_PI * 0.5f) * nCntWind)) * m_stageLimit.fRadius;
+			spawnPos.x = sinf(fRot + ((D3DX_PI * 0.5f) * nCntWind)) * WIND_POS;
 			spawnPos.y = 0.0f;
-			spawnPos.z = cosf(fRot + ((D3DX_PI * 0.5f) * nCntWind)) * m_stageLimit.fRadius;
+			spawnPos.z = cosf(fRot + ((D3DX_PI * 0.5f) * nCntWind)) * WIND_POS;
 
 			// 風の生成
 			CWind::Create(spawnPos);

@@ -20,6 +20,7 @@
 #include "camera.h"
 #include "field.h"
 #include "flower.h"
+#include "weed.h"
 #include "timerManager.h"
 
 //************************************************************
@@ -470,6 +471,9 @@ void CWaveManager::SetSeason(const SEASON season)
 
 	// ‰Ô‚ğ•ÏX
 	CFlower::SetSeason(season);
+
+	// ‘‚ğ•ÏX
+	CWeed::SetSeason(season);
 }
 
 //============================================================
