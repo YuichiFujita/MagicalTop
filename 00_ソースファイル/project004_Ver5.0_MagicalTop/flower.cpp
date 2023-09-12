@@ -46,7 +46,7 @@ int CFlower::m_nNumAll = 0;	// マナフラワーの総数
 //============================================================
 //	コンストラクタ
 //============================================================
-CFlower::CFlower(void) : CObjectBillboard(CObject::LABEL_FLOWER, FLOWER_PRIO)
+CFlower::CFlower(void) : CObject3D(CObject::LABEL_FLOWER, FLOWER_PRIO)
 {
 	// メンバ変数をクリア
 	m_pShadow = NULL;		// 影の情報
@@ -72,6 +72,7 @@ CFlower::~CFlower()
 HRESULT CFlower::Init(void)
 {
 	// メンバ変数を初期化
+	m_pShadow = NULL;		// 影の情報
 	m_type = TYPE_SPRING;	// 種類
 	m_nLife = 0;			// 寿命
 
@@ -85,8 +86,8 @@ HRESULT CFlower::Init(void)
 		return E_FAIL;
 	}
 
-	// オブジェクトビルボードの初期化
-	if (FAILED(CObjectBillboard::Init()))
+	// オブジェクト3Dの初期化
+	if (FAILED(CObject3D::Init()))
 	{ // 初期化に失敗した場合
 
 		// 失敗を返す
@@ -106,8 +107,8 @@ void CFlower::Uninit(void)
 	// 影を破棄
 	m_pShadow->Uninit();
 
-	// オブジェクトビルボードの終了
-	CObjectBillboard::Uninit();
+	// オブジェクト3Dの終了
+	CObject3D::Uninit();
 }
 
 //============================================================
@@ -141,8 +142,8 @@ void CFlower::Update(void)
 	// 影の更新
 	m_pShadow->Update();
 
-	// オブジェクトビルボードの更新
-	CObjectBillboard::Update();
+	// オブジェクト3Dの更新
+	CObject3D::Update();
 }
 
 //============================================================
@@ -158,8 +159,8 @@ void CFlower::Draw(void)
 	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);	// αテストの設定
 	pDevice->SetRenderState(D3DRS_ALPHAREF, 160);				// αテストの参照値設定
 
-	// オブジェクトビルボードの描画
-	CObjectBillboard::Draw();
+	// オブジェクト3Dの描画
+	CObject3D::Draw();
 
 	// αテストを無効にする
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);		// αテストの有効 / 無効の設定
@@ -174,6 +175,7 @@ CFlower *CFlower::Create
 (
 	const TYPE type,			// 種類
 	const D3DXVECTOR3& rPos,	// 位置
+	const D3DXVECTOR3& rRot,	// 向き
 	const D3DXVECTOR3& rSize,	// 大きさ
 	const int nLife				// 体力
 )
@@ -222,14 +224,17 @@ CFlower *CFlower::Create
 		pos.y = CSceneGame::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
 		pFlower->SetPosition(pos);
 
+		// 向きを設定
+		pFlower->SetRotation(rRot);
+
 		// 大きさを設定
 		pFlower->SetScaling(rSize);
 
-		// 体力を設定
-		pFlower->SetLife(nLife);
+		// カリングを設定
+		pFlower->SetCulling(D3DCULL_NONE);
 
-		// 回転を設定
-		pFlower->SetRotate(ROTATE_LATERAL);
+		// ライティングを設定
+		pFlower->SetLighting(false);
 
 		// Zテストを設定
 		pFlower->SetFunc(D3DCMP_LESSEQUAL);
@@ -256,10 +261,10 @@ void CFlower::RandomSpawn
 {
 	// 変数を宣言
 	D3DXVECTOR3 posSet;	// 位置設定用
-	int nLimit = (int)CSceneGame::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
+	D3DXVECTOR3 rotSet;	// 向き設定用
 
-	// ポインタを宣言
-	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
+	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();		// ターゲット位置
+	int nLimit = (int)CSceneGame::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
 
 	if (USED(CSceneGame::GetTarget()))
 	{ // ターゲットが使用されている場合
@@ -273,11 +278,14 @@ void CFlower::RandomSpawn
 			posSet.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
 
 			// 生成位置を補正
-			collision::CirclePillar(posSet, pTarget->GetPosition(), rSize.x,  CSceneGame::GetStage()->GetStageBarrier().fRadius);	// ターゲット内部の生成防止
+			collision::CirclePillar(posSet, posTarget, rSize.x, CSceneGame::GetStage()->GetStageBarrier().fRadius);	// ターゲット内部の生成防止
 			CSceneGame::GetStage()->LimitPosition(posSet, rSize.x);	// ステージ範囲外の生成防止
 
+			// 生成向きを設定
+			rotSet = D3DXVECTOR3(0.0f, atan2f(posSet.x - posTarget.x, posSet.z - posTarget.z), 0.0f);
+
 			// マナフラワーオブジェクトの生成
-			CFlower::Create(type, posSet, rSize, nLife);
+			CFlower::Create(type, posSet, rotSet, rSize, nLife);
 		}
 	}
 }

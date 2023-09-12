@@ -14,7 +14,7 @@
 //	インクルードファイル
 //************************************************************
 #include "main.h"
-#include "objectBillboard.h"
+#include "object3D.h"
 #include "waveManager.h"
 
 //************************************************************
@@ -26,7 +26,7 @@ class CShadow;	// 影クラス
 //	クラス定義
 //************************************************************
 // マナフラワークラス
-class CFlower : public CObjectBillboard
+class CFlower : public CObject3D
 {
 public:
 	// 種類列挙
@@ -56,6 +56,7 @@ public:
 	( // 引数
 		const TYPE type,			// 種類
 		const D3DXVECTOR3& rPos,	// 位置
+		const D3DXVECTOR3& rRot,	// 向き
 		const D3DXVECTOR3& rSize,	// 大きさ
 		const int nLife				// 体力
 	);
