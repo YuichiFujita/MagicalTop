@@ -96,6 +96,9 @@ public:
 		float	fCollRadius;		// 当たり判定の半径
 		float	fRadius;			// 半径
 		float	fHeight;			// 縦幅
+		float	fKnockBackUp;		// ノックバック上移動量
+		float	fKnockBackSide;		// ノックバック横移動量
+		float	fKnockBackRevision;	// ノックバック減衰係数
 		float	fForwardMove;		// 前進の移動量
 		float	fBackwardMove;		// 後退の移動量
 		float	fLookRevision;		// プレイヤー方向を向く補正係数
@@ -111,6 +114,7 @@ public:
 	void Update(void);	// 更新
 	void Draw(void);	// 描画
 	void Hit(const int nDmg);	// ヒット
+	void HitKnockBack(const int nDmg, const D3DXVECTOR3& vec);	// ノックバックヒット
 
 	// 静的メンバ関数
 	static void LoadSetup(void);	// セットアップ
@@ -131,6 +135,7 @@ public:
 
 	// メンバ関数
 	void UpdateOldPosition(void);					// 過去位置更新
+	void UpdateKnockBack(D3DXVECTOR3& rPos);		// ノックバック更新
 	void SetMovePosition(const D3DXVECTOR3& rMove);	// 位置移動量設定
 	void SetMoveRotation(const D3DXVECTOR3& rMove);	// 向き変更量設定
 	void SetState(const int nState);				// 状態設定
@@ -188,6 +193,7 @@ private:
 	CBubble *m_pBubble;				// バブルの情報
 	D3DXVECTOR3	m_oldPos;			// 過去位置
 	D3DXVECTOR3	m_movePos;			// 位置移動量
+	D3DXVECTOR3 m_moveKnock;		// ノックバック移動量
 	D3DXVECTOR3	m_moveRot;			// 向き変更量
 	D3DXVECTOR3 m_deathMoveRot;		// 死亡時の向き変更量
 	STATE m_state;					// 状態

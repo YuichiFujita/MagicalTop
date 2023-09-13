@@ -437,13 +437,13 @@ bool CMagic::CollisionEnemy(void)
 					{ // ó‘Ô‚ª’Êí‚Ìê‡
 
 						// “G‚Ìƒqƒbƒgˆ—
-						pObjCheck->Hit((m_pBubble->GetLevel() / (m_pBubble->GetMaxLevel() / 2)) + 1);
+						pObjCheck->HitKnockBack((m_pBubble->GetLevel() / (m_pBubble->GetMaxLevel() / 2)) + 1, m_movePos);
 					}
 					else
 					{ // ó‘Ô‚ª’Êí‚Å‚Í‚È‚¢ê‡
 
 						// “G‚Ìƒqƒbƒgˆ—
-						pObjCheck->Hit(MAGIC_TRICK_DMG);
+						pObjCheck->HitKnockBack(MAGIC_TRICK_DMG, m_movePos);
 					}
 
 					// “–‚½‚Á‚½”»’è‚ð•Ô‚·

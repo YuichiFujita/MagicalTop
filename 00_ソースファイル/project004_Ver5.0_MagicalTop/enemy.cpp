@@ -119,6 +119,7 @@ CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_type(typ
 	m_pBubble	= NULL;			// バブルの情報
 	m_oldPos	= VEC3_ZERO;	// 過去位置
 	m_movePos	= VEC3_ZERO;	// 位置移動量
+	m_moveKnock	= VEC3_ZERO;	// ノックバック移動量
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
 	m_deathMoveRot		= VEC3_ZERO;	// 死亡時の向き変更量
 	m_state				= STATE_SPAWN;	// 状態
@@ -153,6 +154,7 @@ HRESULT CEnemy::Init(void)
 	m_pBubble	= NULL;			// バブルの情報
 	m_oldPos	= VEC3_ZERO;	// 過去位置
 	m_movePos	= VEC3_ZERO;	// 位置移動量
+	m_moveKnock	= VEC3_ZERO;	// ノックバック移動量
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
 	m_state		= STATE_SPAWN;	// 状態
 	m_nCounterBubble	= 0;	// バブル管理カウンター
@@ -281,7 +283,7 @@ void CEnemy::Hit(const int nDmg)
 	D3DXVECTOR3 pos = GetPosition();	// 敵位置
 
 	if (IsDeath() != true && m_state == STATE_NORMAL)
-	{ // 死亡フラグが立っていない場合
+	{ // 死亡フラグが立っていない且つ、通常状態の場合
 
 		// レベルを加算
 		m_pBubble->AddLevel(nDmg);
@@ -291,6 +293,56 @@ void CEnemy::Hit(const int nDmg)
 
 			// パーティクル3Dオブジェクトを生成
 			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
+
+			// カウンターを初期化
+			m_nCounterState = 0;
+			m_nCounterBubble = 0;
+
+			// 状態を設定
+			m_state = STATE_DAMAGE;	// ダメージ状態
+		}
+		else
+		{ // 死んでいる場合
+
+			// モーションを更新しない状態にする
+			SetEnableMotionUpdate(false);
+
+			// パーティクル3Dオブジェクトを生成
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
+
+			// 状態を設定
+			m_state = STATE_DEATH;	// 死亡状態
+		}
+	}
+}
+
+//============================================================
+//	ノックバックヒット処理
+//============================================================
+void CEnemy::HitKnockBack(const int nDmg, const D3DXVECTOR3& vec)
+{
+	// 変数を宣言
+	D3DXVECTOR3 pos = GetPosition();	// 敵位置
+	D3DXVECTOR3 vecKnock = vec;			// ノックバックベクトル
+
+	if (IsDeath() != true && m_state == STATE_NORMAL)
+	{ // 死亡フラグが立っていない且つ、通常状態の場合
+
+		// レベルを加算
+		m_pBubble->AddLevel(nDmg);
+
+		if (m_pBubble->GetLevel() < m_status.nLife)
+		{ // 生きている場合
+
+			// パーティクル3Dオブジェクトを生成
+			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
+
+			// ノックバック移動量を設定
+			vecKnock.y = 0.0f;									// 縦ベクトルを初期化
+			D3DXVec3Normalize(&vecKnock, &vecKnock);			// ベクトルを正規化
+			m_moveKnock = vecKnock * m_status.fKnockBackSide;	// ノックバック横移動量を計算
+			m_moveKnock.y = m_status.fKnockBackUp;				// ノックバック縦移動量を代入
 
 			// カウンターを初期化
 			m_nCounterState = 0;
@@ -483,6 +535,22 @@ void CEnemy::UpdateOldPosition(void)
 {
 	// 過去位置を更新
 	m_oldPos = GetPosition();
+}
+
+//============================================================
+//	ノックバックの更新処理
+//============================================================
+void CEnemy::UpdateKnockBack(D3DXVECTOR3& rPos)
+{
+	// ノックバックを位置に反映
+	rPos += m_moveKnock;
+
+	// ノックバックに重力を加算
+	m_moveKnock.y -= ENE_GRAVITY;
+
+	// ノックバックを減衰
+	m_moveKnock.x += (0.0f - m_moveKnock.x) * m_status.fKnockBackRevision;
+	m_moveKnock.z += (0.0f - m_moveKnock.z) * m_status.fKnockBackRevision;
 }
 
 //============================================================
@@ -882,10 +950,10 @@ void CEnemy::CollisionTarget(D3DXVECTOR3& rPos)
 		// ターゲットとの衝突判定
 		collision::CirclePillar
 		( // 引数
-			rPos,					// 判定位置
+			rPos,	// 判定位置
 			pTarget->GetPosition(),	// 判定目標位置
 			m_status.fRadius,		// 判定半径
-			pTarget->GetRadius()	// 判定目標半径
+			pTarget->GetRadius() + m_status.fRadius	// 判定目標半径
 		);
 	}
 }
@@ -1310,6 +1378,9 @@ void CEnemyHuman::CollisionFind(void)
 			// 移動量を加算
 			posEnemy += moveEnemy;
 
+			// ノックバックの更新
+			UpdateKnockBack(posEnemy);
+
 			// 移動量を減衰
 			moveEnemy.x += (0.0f - moveEnemy.x) * ENE_REV;
 			moveEnemy.z += (0.0f - moveEnemy.z) * ENE_REV;
@@ -1335,6 +1406,12 @@ void CEnemyHuman::CollisionFind(void)
 		}
 		else
 		{ // 敵の攻撃範囲内の場合
+
+			// ノックバックの更新
+			UpdateKnockBack(posEnemy);
+
+			// 対象の方向を向かせる
+			Look(posLook, posEnemy, rotEnemy);
 
 			// ターゲットとの当たり判定
 			CollisionTarget(posEnemy);
@@ -1642,6 +1719,9 @@ void CEnemyCar::CollisionFind(void)
 			// 移動量を加算
 			posEnemy += moveEnemy;
 
+			// ノックバックの更新
+			UpdateKnockBack(posEnemy);
+
 			// 移動量を減衰
 			moveEnemy.x += (0.0f - moveEnemy.x) * ENE_REV;
 			moveEnemy.z += (0.0f - moveEnemy.z) * ENE_REV;
@@ -1660,6 +1740,9 @@ void CEnemyCar::CollisionFind(void)
 		}
 		else
 		{ // 敵の攻撃範囲内の場合
+
+			// ノックバックの更新
+			UpdateKnockBack(posEnemy);
 
 			// ターゲットとの当たり判定
 			CollisionTarget(posEnemy);
@@ -1912,6 +1995,24 @@ void CEnemy::LoadSetup(void)
 
 								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].fHeight);	// 縦幅を読み込む
+							}
+							else if (strcmp(&aString[0], "KNOCKBACK_UP") == 0)
+							{ // 読み込んだ文字列が KNOCKBACK_UP の場合
+
+								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fKnockBackUp);	// ノックバック上移動量を読み込む
+							}
+							else if (strcmp(&aString[0], "KNOCKBACK_SIDE") == 0)
+							{ // 読み込んだ文字列が KNOCKBACK_SIDE の場合
+
+								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fKnockBackSide);	// ノックバック横移動量を読み込む
+							}
+							else if (strcmp(&aString[0], "KNOCKBACK_REV") == 0)
+							{ // 読み込んだ文字列が KNOCKBACK_REV の場合
+
+								fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].fKnockBackRevision);	// ノックバック減衰係数を読み込む
 							}
 							else if (strcmp(&aString[0], "SPAWN_HEIGHT") == 0)
 							{ // 読み込んだ文字列が SPAWN_HEIGHT の場合
