@@ -72,8 +72,8 @@
 #define ENE_HIT_DMG		(30)		// 敵ヒット時のダメージ量
 
 #define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
-#define AWAY_SIDE_MOVE	(55.0f)		// 吹っ飛び時の横移動量
-#define AWAY_UP_MOVE	(14.0f)		// 吹っ飛び時の上移動量
+#define AWAY_SIDE_MOVE	(25.0f)		// 吹っ飛び時の横移動量
+#define AWAY_UP_MOVE	(18.0f)		// 吹っ飛び時の上移動量
 #define INVULN_CNT		(16)		// 無敵状態に移行するまでのカウンター
 #define NORMAL_CNT		(180)		// 通常状態に移行するまでのカウンター
 
@@ -986,6 +986,9 @@ void CPlayer::UpdateBlowAway(void)
 
 	// 位置を反映
 	SetPosition(posPlayer);
+
+	// 向きを設定
+	SetRotation(D3DXVECTOR3(0.0f, atan2f(m_move.x, m_move.z), 0.0f));
 }
 
 //============================================================
@@ -1080,7 +1083,6 @@ CPlayer::MOTION CPlayer::Move(void)
 	// 変数を宣言
 	MOTION currentMotion = MOTION_MOVE;	// 現在のモーション
 	D3DXVECTOR3 vecTarg, vecSide;		// ターゲット方向ベクトル・横方向ベクトル
-	D3DXVECTOR3 rot = CManager::GetCamera()->GetRotation();	// カメラの向き
 
 	// ポインタを宣言
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
