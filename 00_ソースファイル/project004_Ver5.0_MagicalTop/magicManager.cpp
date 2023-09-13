@@ -228,8 +228,8 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 {
 	// 変数を宣言
 	D3DXVECTOR3 rotCamera = CManager::GetCamera()->GetRotation();	// カメラ向き
-	Shot bShot = { false, false };	// 射撃状況
-	float fRotVec = 0.0f;			// 発射方向
+	Shot bShot = { 0.0f, false, false };	// 射撃状況
+	float fVecRot = 0.0f;	// 射撃方向
 
 	// ポインタを宣言
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
@@ -243,18 +243,27 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 
 		if (pKeyboard->GetPress(DIK_J))
 		{
-			// 発射向きを設定
-			fRotVec = D3DXToRadian(135) + rotCamera.y;
+			// 発射向きを保存
+			bShot.fRot = D3DXToRadian(135);
+
+			// 射撃方向を設定
+			fVecRot = D3DXToRadian(135) + rotCamera.y;
 		}
 		else if (pKeyboard->GetPress(DIK_L))
 		{
 			// 発射向きを設定
-			fRotVec = D3DXToRadian(225) + rotCamera.y;
+			bShot.fRot = D3DXToRadian(225);
+
+			// 射撃方向を設定
+			fVecRot = D3DXToRadian(225) + rotCamera.y;
 		}
 		else
 		{
 			// 発射向きを設定
-			fRotVec = D3DXToRadian(180) + rotCamera.y;
+			bShot.fRot = D3DXToRadian(180);
+
+			// 射撃方向を設定
+			fVecRot = D3DXToRadian(180) + rotCamera.y;
 		}
 	}
 	else if (pKeyboard->GetPress(DIK_K))
@@ -265,17 +274,26 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 		if (pKeyboard->GetPress(DIK_J))
 		{
 			// 発射向きを設定
-			fRotVec = D3DXToRadian(45) + rotCamera.y;
+			bShot.fRot = D3DXToRadian(45);
+
+			// 射撃方向を設定
+			fVecRot = D3DXToRadian(45) + rotCamera.y;
 		}
 		else if (pKeyboard->GetPress(DIK_L))
 		{
 			// 発射向きを設定
-			fRotVec = D3DXToRadian(315) + rotCamera.y;
+			bShot.fRot = D3DXToRadian(315);
+
+			// 射撃方向を設定
+			fVecRot = D3DXToRadian(315) + rotCamera.y;
 		}
 		else
 		{
 			// 発射向きを設定
-			fRotVec = D3DXToRadian(0) + rotCamera.y;
+			bShot.fRot = D3DXToRadian(0);
+
+			// 射撃方向を設定
+			fVecRot = D3DXToRadian(0) + rotCamera.y;
 		}
 	}
 	else if (pKeyboard->GetPress(DIK_J))
@@ -284,7 +302,10 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 		bShot.bControl = true;
 
 		// 発射向きを設定
-		fRotVec = D3DXToRadian(90) + rotCamera.y;
+		bShot.fRot = D3DXToRadian(90);
+
+		// 射撃方向を設定
+		fVecRot = D3DXToRadian(90) + rotCamera.y;
 	}
 	else if (pKeyboard->GetPress(DIK_L))
 	{
@@ -292,7 +313,10 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 		bShot.bControl = true;
 
 		// 発射向きを設定
-		fRotVec = D3DXToRadian(270) + rotCamera.y;
+		bShot.fRot = D3DXToRadian(270);
+
+		// 射撃方向を設定
+		fVecRot = D3DXToRadian(270) + rotCamera.y;
 	}
 	else if (pPad->GetPressRStickX() >  NUM_DEADZONE
 	||		 pPad->GetPressRStickX() < -NUM_DEADZONE
@@ -303,11 +327,14 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 		bShot.bControl = true;
 
 		// 発射向きを設定
-		fRotVec = pPad->GetPressRStickRot() + D3DXToRadian(270) + rotCamera.y;
+		bShot.fRot = pPad->GetPressRStickRot() + D3DXToRadian(270);
+
+		// 射撃方向を設定
+		fVecRot = pPad->GetPressRStickRot() + D3DXToRadian(270) + rotCamera.y;
 	}
 
 	// 向きを補正
-	useful::NormalizeRot(fRotVec);
+	useful::NormalizeRot(bShot.fRot);
 
 	if (bShot.bControl)
 	{ // 魔法の発射操作していた場合
@@ -337,10 +364,10 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 			magicPos = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
 
 			// 向きを正規化
-			useful::NormalizeRot(fRotVec);
+			useful::NormalizeRot(fVecRot);
 
 			// 移動方向を設定
-			vecMove = D3DXVECTOR3(sinf(fRotVec), 0.0f, cosf(fRotVec));
+			vecMove = D3DXVECTOR3(sinf(fVecRot), 0.0f, cosf(fVecRot));
 
 			// 魔法オブジェクトの生成
 			CMagic::Create

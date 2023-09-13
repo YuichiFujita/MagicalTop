@@ -75,12 +75,15 @@ public:
 	// モーション列挙
 	typedef enum
 	{
-		MOTION_MOVE = 0,	// 浮遊モーション
-		MOTION_ACCELE,		// 加速モーション
-		MOTION_DECELE,		// 減速モーション
-		MOTION_ACTION,		// アクションモーション
-		MOTION_BLOW_AWAY,	// 吹っ飛びモーション
-		MOTION_MAX			// この列挙型の総数
+		MOTION_MOVE = 0,		// 浮遊モーション
+		MOTION_ACCELE,			// 加速モーション
+		MOTION_DECELE,			// 減速モーション
+		MOTION_ACTION_LEFT,		// 左アクションモーション
+		MOTION_ACTION_RIGHT,	// 右アクションモーション
+		MOTION_ACTION_FAR,		// 奥アクションモーション
+		MOTION_ACTION_NEAR,		// 手前アクションモーション
+		MOTION_BLOW_AWAY,		// 吹っ飛びモーション
+		MOTION_MAX				// この列挙型の総数
 	}MOTION;
 
 	// 回転列挙

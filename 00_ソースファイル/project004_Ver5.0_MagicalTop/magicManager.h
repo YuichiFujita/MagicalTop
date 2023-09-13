@@ -46,6 +46,7 @@ public:
 	// ËŒ‚ó‹µ\‘¢‘Ì
 	typedef struct
 	{
+		float fRot;		// ”­ËŒü‚«
 		bool bControl;	// ËŒ‚‘€ì‚ªs‚í‚ê‚Ä‚¢‚é‚©
 		bool bShot;		// ÀÛ‚ÉËŒ‚‚Å‚«‚Ä‚¢‚é‚©
 	}Shot;

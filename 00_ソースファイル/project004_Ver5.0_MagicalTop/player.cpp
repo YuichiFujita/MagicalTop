@@ -1331,13 +1331,42 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion)
 {
 	// 変数を宣言
 	MOTION currentMotion = motion;	// 現在のモーション
+	CMagicManager::Shot shot;		// 魔法の発射状況
 
 	// 魔法の発射
-	if (m_pMagic->ShotMagic().bControl && m_pMagic->GetMana() > 0)
+	shot = m_pMagic->ShotMagic();	// 発射情報を代入
+
+	if (shot.bControl && m_pMagic->GetMana() > 0)
 	{ // 発射操作をしている且つ、マナ残量がある場合
 
-		// アクションモーションを設定
-		currentMotion = MOTION_ACTION;
+		// 射撃向きをの値を0～2πにする
+		shot.fRot += D3DX_PI;
+
+		if (shot.fRot >= QRTR_PI && shot.fRot <= D3DX_PI - QRTR_PI)
+		{
+			// 右のアクションモーションを設定
+			currentMotion = MOTION_ACTION_RIGHT;
+		}
+		else if (shot.fRot >= D3DX_PI - QRTR_PI && shot.fRot <= D3DX_PI + QRTR_PI)
+		{
+			// 手前のアクションモーションを設定
+			currentMotion = MOTION_ACTION_NEAR;
+		}
+		else if (shot.fRot >= D3DX_PI + QRTR_PI && shot.fRot <= (D3DX_PI * 2) - QRTR_PI)
+		{
+			// 左のアクションモーションを設定
+			currentMotion = MOTION_ACTION_LEFT;
+		}
+		else if (shot.fRot >= (D3DX_PI * 2) - QRTR_PI && shot.fRot <= (D3DX_PI * 2) || shot.fRot >= 0.0f && shot.fRot <= QRTR_PI)
+		{
+			// 奥のアクションモーションを設定
+			currentMotion = MOTION_ACTION_FAR;
+		}
+		else
+		{
+			// 例外処理
+			assert(false);	// 向きの正規化ミス
+		}
 	}
 
 	// 現在のモーションを返す
@@ -1406,14 +1435,6 @@ void CPlayer::Motion(int nMotion)
 
 		switch (GetMotionType())
 		{ // モーションの種類ごとの処理
-		case MOTION_ACTION:		// アクション状態
-
-			// 待機モーションに移行
-			SetMotion(MOTION_MOVE);
-
-			// 処理を抜ける
-			break;
-
 		case MOTION_BLOW_AWAY:	// 吹っ飛び状態
 
 			// 無し
