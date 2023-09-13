@@ -33,6 +33,7 @@
 const char *CGaugeStar::mc_apTextureFile[] =	// テクスチャ定数
 {
 	"data\\TEXTURE\\star000.png",	// 星
+	"data\\TEXTURE\\star001.png",	// 星枠
 };
 
 //************************************************************
@@ -113,7 +114,7 @@ HRESULT CGaugeStar::Init(void)
 		}
 
 		// テクスチャを登録・割当
-		m_apStarFrame[nCntStar]->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_STAR]));
+		m_apStarFrame[nCntStar]->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_FRAME]));
 
 		// 優先順位を設定
 		m_apStarFrame[nCntStar]->SetPriority(GAUGE_PRIO);
@@ -173,6 +174,9 @@ HRESULT CGaugeStar::Init(void)
 
 		// 優先順位を設定
 		m_aStar[nCntStar].pBillboard->SetPriority(GAUGE_PRIO);
+
+		// 色を設定
+		m_aStar[nCntStar].pBillboard->SetColor(XCOL_WHITE);
 
 		// Zテストを設定
 		m_aStar[nCntStar].pBillboard->SetFunc(D3DCMP_LESSEQUAL);
@@ -461,7 +465,6 @@ CGaugeStar *CGaugeStar::Create
 	const int nHealWait,		// 回復待機カウント
 	CObject *pObject,			// 親オブジェクト
 	const D3DXVECTOR3& rGap,	// 表示位置の加算量
-	const float fFrameRadius,	// 枠の半径
 	const float fDistance,		// 中心からの距離
 	const float fFlicker		// 揺らめき量
 )
@@ -495,7 +498,7 @@ CGaugeStar *CGaugeStar::Create
 		pGaugeStar->SetGapPosition(rGap);
 
 		// 星情報を設定
-		pGaugeStar->SetStar(nMaxNumGauge, fMaxRadius, fFrameRadius);
+		pGaugeStar->SetStar(nMaxNumGauge, fMaxRadius);
 
 		// 中心からの距離を設定
 		pGaugeStar->SetDistance(fDistance);
@@ -547,7 +550,7 @@ bool CGaugeStar::UseGauge(void)
 //============================================================
 //	星情報の設定処理
 //============================================================
-void CGaugeStar::SetStar(const int nNumGauge, const float fRadius, const float fFrameRadius)
+void CGaugeStar::SetStar(const int nNumGauge, const float fRadius)
 {
 	for (int nCntStar = 0; nCntStar < MAX_STAR; nCntStar++)
 	{ // 星の最大数分繰り返す
@@ -565,7 +568,7 @@ void CGaugeStar::SetStar(const int nNumGauge, const float fRadius, const float f
 		m_apStarBG[nCntStar]->SetScaling(D3DXVECTOR3(fRadius, fRadius, 0.0f));
 
 		// 星の枠の大きさを設定
-		m_apStarFrame[nCntStar]->SetScaling(D3DXVECTOR3(fFrameRadius, fFrameRadius, 0.0f));
+		m_apStarFrame[nCntStar]->SetScaling(D3DXVECTOR3(fRadius, fRadius, 0.0f));
 	}
 }
 

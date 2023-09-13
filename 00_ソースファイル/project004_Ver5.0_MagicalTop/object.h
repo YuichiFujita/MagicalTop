@@ -99,6 +99,7 @@ public:
 	virtual void SetPosition(const D3DXVECTOR3& rPos);	// ˆÊ’uİ’è
 	virtual void SetRotation(const D3DXVECTOR3& rRot);	// Œü‚«İ’è
 	virtual void SetState(const int nState);			// ó‘Ôİ’è
+	virtual void SetType(const int nType);				// í—Şİ’è
 	virtual void SetEnableUpdate(const bool bUpdate);	// XVó‹µİ’è
 	virtual void SetEnableDraw(const bool bDraw);		// •`‰æó‹µİ’è
 	virtual void SetPriority(const int nPriority);		// —Dæ‡ˆÊİ’è

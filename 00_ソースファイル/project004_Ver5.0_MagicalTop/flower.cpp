@@ -23,13 +23,17 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
+#define FLOWER_SETUP_TXT	"data\\TXT\\flower.txt"	// セットアップテキスト相対パス
+
 #define FLOWER_PRIO	(2)	// マナフラワーの優先順位
 
 #define SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 #define SHADOW_ALPHA	(0.2f)	// 影のα値
 
 #define NORMAL_CNT	(20)	// ダメージ状態から通常状態に戻るまでのフレーム数
+#define MIN_COL		(0.5f)	// 色の最小値
 
+#define REV_MIN_SIZE		(0.6f)	// 最低限の大きさの補正係数
 #define PREC_PLUS_RADIUS	(80.0f)	// 生成制限の半径加算量
 
 //************************************************************
@@ -42,6 +46,7 @@ const char *CFlower::mc_apTextureFile[] =	// テクスチャ定数
 	"data\\TEXTURE\\flower002.png",	// 秋マナフラワーテクスチャ
 	"data\\TEXTURE\\flower003.png",	// 冬マナフラワーテクスチャ
 };
+CFlower::StatusInfo CFlower::m_aStatusInfo[TYPE_MAX] = {};	// ステータス情報
 int CFlower::m_nNumAll = 0;	// マナフラワーの総数
 
 //************************************************************
@@ -55,6 +60,7 @@ CFlower::CFlower(void) : CObject3D(CObject::LABEL_FLOWER, FLOWER_PRIO)
 	// メンバ変数をクリア
 	m_pShadow = NULL;		// 影の情報
 	m_state = STATE_NORMAL;	// 状態
+	m_type = TYPE_SPRING;	// 種類
 	m_nLife = 0;			// 体力
 	m_nCounterState = 0;	// 状態管理カウンター
 
@@ -79,6 +85,7 @@ HRESULT CFlower::Init(void)
 	// メンバ変数を初期化
 	m_pShadow = NULL;		// 影の情報
 	m_state = STATE_NORMAL;	// 状態
+	m_type = TYPE_SPRING;	// 種類
 	m_nLife = 0;			// 体力
 	m_nCounterState = 0;	// 状態管理カウンター
 
@@ -147,20 +154,24 @@ void CFlower::Update(void)
 		if (m_nCounterState < NORMAL_CNT)
 		{ // カウンターが一定値より小さい場合
 
-			// 変数を宣言
-			D3DXVECTOR3 size = GetScaling();	// マナフラワー大きさ
-
 			// カウンターを加算
 			m_nCounterState++;
 
+			// 変数を宣言
+			D3DXVECTOR3 size = GetScaling();	// マナフラワー大きさ
+			float fSizeY = ((m_aStatusInfo[m_type].size.y - (m_aStatusInfo[m_type].size.y * REV_MIN_SIZE)) / NORMAL_CNT) * m_nCounterState + (m_aStatusInfo[m_type].size.y * REV_MIN_SIZE);	// 縦の大きさ
+
 			// 大きさを設定
-			SetScaling(D3DXVECTOR3(size.x, (30.0f / NORMAL_CNT) * m_nCounterState + 20.0f, size.z));	// TODO：定数
+			SetScaling(D3DXVECTOR3(size.x, fSizeY, size.z));
 		}
 		else
 		{ // カウンターが一定値以上の場合
 
 			// カウンターを初期化
 			m_nCounterState = 0;
+
+			// 大きさを初期化
+			SetScaling(m_aStatusInfo[m_type].size);
 
 			// 状態を設定
 			m_state = STATE_NORMAL;	// 通常状態
@@ -221,11 +232,9 @@ CFlower *CFlower::Create
 )
 {
 	// 変数を宣言
-	D3DXVECTOR3 pos = rPos;	// 座標設定用
-	int nTextureID;	// テクスチャインデックス
+	D3DXVECTOR3 pos = rPos;		// 座標設定用
 
 	// ポインタを宣言
-	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 	CFlower *pFlower = NULL;	// マナフラワー生成用
 
 	if (UNUSED(pFlower))
@@ -251,12 +260,6 @@ CFlower *CFlower::Create
 			return NULL;
 		}
 
-		// テクスチャを登録
-		nTextureID = pTexture->Regist(mc_apTextureFile[type]);
-
-		// テクスチャを割当
-		pFlower->BindTexture(nTextureID);
-
 		// 原点を設定
 		pFlower->SetOrigin(ORIGIN_DOWN);
 
@@ -269,6 +272,9 @@ CFlower *CFlower::Create
 
 		// 大きさを設定
 		pFlower->SetScaling(rSize);
+
+		// 種類を設定
+		pFlower->SetType((int)type);
 
 		// 体力を設定
 		pFlower->SetLife(nLife);
@@ -296,10 +302,8 @@ CFlower *CFlower::Create
 //============================================================
 void CFlower::RandomSpawn
 (
-	const int nNum,				// 生成数
-	const TYPE type,			// 種類
-	const D3DXVECTOR3& rSize,	// 大きさ
-	const int nLife				// 体力
+	const int nNum,	// 生成数
+	const TYPE type	// 種類
 )
 {
 	// 変数を宣言
@@ -321,14 +325,14 @@ void CFlower::RandomSpawn
 			posSet.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
 
 			// 生成位置を補正
-			collision::CirclePillar(posSet, posTarget, rSize.x, CSceneGame::GetStage()->GetStageBarrier().fRadius + PREC_PLUS_RADIUS);	// ターゲット内部の生成防止
-			CSceneGame::GetStage()->LimitPosition(posSet, rSize.x);	// ステージ範囲外の生成防止
+			collision::CirclePillar(posSet, posTarget, m_aStatusInfo[type].size.x, CSceneGame::GetStage()->GetStageBarrier().fRadius + PREC_PLUS_RADIUS);	// ターゲット内部の生成防止
+			CSceneGame::GetStage()->LimitPosition(posSet, m_aStatusInfo[type].size.x);	// ステージ範囲外の生成防止
 
 			// 生成向きを設定
 			rotSet = D3DXVECTOR3(0.0f, atan2f(posSet.x - posTarget.x, posSet.z - posTarget.z), 0.0f);
 
 			// マナフラワーオブジェクトの生成
-			CFlower::Create(type, posSet, rotSet, rSize, nLife);
+			CFlower::Create(type, posSet, rotSet, m_aStatusInfo[type].size, m_aStatusInfo[type].nLife);
 		}
 	}
 }
@@ -369,8 +373,8 @@ void CFlower::SetSeason(const CWaveManager::SEASON season)
 					continue;
 				}
 
-				// 引数の季節のテクスチャを登録・割当
-				pObjCheck->BindTexture(pTexture->Regist(mc_apTextureFile[season]));
+				// 引数の季節を設定
+				pObjCheck->SetType((int)season);
 
 				// 次のオブジェクトへのポインタを代入
 				pObjCheck = pObjectNext;
@@ -386,6 +390,27 @@ int CFlower::GetNumAll(void)
 {
 	// 現在のマナフラワーの総数を返す
 	return m_nNumAll;
+}
+
+//============================================================
+//	種類の設定処理
+//============================================================
+void CFlower::SetType(const int nType)
+{
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
+	// 引数の種類を設定
+	m_type = (TYPE)nType;
+	
+	// テクスチャを登録・割当
+	BindTexture(pTexture->Regist(mc_apTextureFile[m_type]));
+
+	// 大きさを設定
+	SetScaling(m_aStatusInfo[m_type].size);
+
+	// 体力を設定
+	SetLife(m_aStatusInfo[m_type].nLife);
 }
 
 //============================================================
@@ -435,7 +460,7 @@ bool CFlower::CollisionPlayer(const D3DXVECTOR3& rPos)
 			{ // 体力が残っていた場合
 
 				// 変数を宣言
-				float fCol = (0.5f / (float)10) * m_nLife + 0.5f;	// マナフラワー色	// TODO：定数
+				float fCol = (MIN_COL / (float)m_aStatusInfo[m_type].nLife) * m_nLife + fabsf(MIN_COL - 1.0f);	// マナフラワー色
 
 				// マナフラワーの色を設定
 				SetColor(D3DXCOLOR(fCol, fCol, fCol, 1.0f));
@@ -454,4 +479,90 @@ bool CFlower::CollisionPlayer(const D3DXVECTOR3& rPos)
 
 	// 死亡状況を返す
 	return bDeath;
+}
+
+//============================================================
+//	セットアップ処理
+//============================================================
+void CFlower::LoadSetup(void)
+{
+	// 変数を宣言
+	int nType	= 0;	// 種類の代入用
+	int nEnd	= 0;	// テキスト読み込み終了の確認用
+
+	// 変数配列を宣言
+	char aString[MAX_STRING];	// テキストの文字列の代入用
+
+	// ポインタを宣言
+	FILE *pFile;	// ファイルポインタ
+
+	// 静的メンバ変数の情報をクリア
+	memset(&m_aStatusInfo[0], 0, sizeof(m_aStatusInfo));	// ステータス情報
+
+	// ファイルを読み込み形式で開く
+	pFile = fopen(FLOWER_SETUP_TXT, "r");
+
+	if (pFile != NULL)
+	{ // ファイルが開けた場合
+
+		do
+		{ // 読み込んだ文字列が EOF ではない場合ループ
+
+			// ファイルから文字列を読み込む
+			nEnd = fscanf(pFile, "%s", &aString[0]);	// テキストを読み込みきったら EOF を返す
+
+			// ステータスの設定
+			if (strcmp(&aString[0], "STATUSSET") == 0)
+			{ // 読み込んだ文字列が STATUSSET の場合
+
+				do
+				{ // 読み込んだ文字列が END_STATUSSET ではない場合ループ
+
+					// ファイルから文字列を読み込む
+					fscanf(pFile, "%s", &aString[0]);
+
+					if (strcmp(&aString[0], "FLOWERSET") == 0)
+					{ // 読み込んだ文字列が FLOWERSET の場合
+
+						do
+						{ // 読み込んだ文字列が END_FLOWERSET ではない場合ループ
+
+							// ファイルから文字列を読み込む
+							fscanf(pFile, "%s", &aString[0]);
+
+							if (strcmp(&aString[0], "TYPE") == 0)
+							{ // 読み込んだ文字列が TYPE の場合
+
+								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
+								fscanf(pFile, "%d", &nType);		// 種類を読み込む
+							}
+							else if (strcmp(&aString[0], "LIFE") == 0)
+							{ // 読み込んだ文字列が LIFE の場合
+
+								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nType].nLife);	// 体力を読み込む
+							}
+							else if (strcmp(&aString[0], "SIZE") == 0)
+							{ // 読み込んだ文字列が SIZE の場合
+
+								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].size.x);	// 大きさXを読み込む
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].size.y);	// 大きさYを読み込む
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].size.z);	// 大きさZを読み込む
+							}
+						} while (strcmp(&aString[0], "END_FLOWERSET") != 0);	// 読み込んだ文字列が END_FLOWERSET ではない場合ループ
+					}
+				} while (strcmp(&aString[0], "END_STATUSSET") != 0);			// 読み込んだ文字列が END_STATUSSET ではない場合ループ
+			}
+		} while (nEnd != EOF);	// 読み込んだ文字列が EOF ではない場合ループ
+		
+		// ファイルを閉じる
+		fclose(pFile);
+	}
+	else
+	{ // ファイルが開けなかった場合
+
+		// エラーメッセージボックス
+		MessageBox(NULL, "マナフラワーセットアップの読み込みに失敗！", "警告！", MB_ICONWARNING);
+	}
 }

@@ -45,6 +45,12 @@ public:
 	// デストラクタ
 	~CWeed();
 
+	// ステータス構造体
+	typedef struct
+	{
+		D3DXVECTOR3 size;	// 大きさ
+	}StatusInfo;
+
 	// オーバーライド関数
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
@@ -52,6 +58,7 @@ public:
 	void Draw(void);	// 描画
 
 	// 静的メンバ関数
+	static void LoadSetup(void);	// セットアップ
 	static CWeed *Create	// 生成
 	( // 引数
 		const TYPE type,			// 種類
@@ -61,22 +68,22 @@ public:
 	);
 	static void RandomSpawn	// ランダム生成
 	( // 引数
-		const int nNum,				// 生成数
-		const TYPE type,			// 種類
-		const D3DXVECTOR3& rSize	// 大きさ
+		const int nNum,	// 生成数
+		const TYPE type	// 種類
 	);
 	static void SetSeason(const CWaveManager::SEASON season);	// 季節設定
 
-private:
 	// メンバ関数
-	bool CollisionPlayer(void);	// プレイヤーとの当たり判定
-	bool CollisionEnemy(void);	// 敵との当たり判定
+	void SetType(const int nType);	// 種類設定
 
+private:
 	// 静的メンバ変数
-	static const char *mc_apTextureFile[];	// テクスチャ定数
+	static const char *mc_apTextureFile[];		// テクスチャ定数
+	static StatusInfo m_aStatusInfo[TYPE_MAX];	// ステータス情報
 
 	// メンバ変数
 	CShadow *m_pShadow;	// 影の情報
+	TYPE m_type;		// 種類
 	float m_fSinRot;	// なびき向き
 };
 

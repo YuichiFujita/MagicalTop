@@ -23,6 +23,8 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
+#define WEED_SETUP_TXT	"data\\TXT\\weed.txt"	// セットアップテキスト相対パス
+
 #define WEED_PRIO	(2)	// 草の優先順位
 
 #define SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
@@ -41,6 +43,7 @@ const char *CWeed::mc_apTextureFile[] =	// テクスチャ定数
 	"data\\TEXTURE\\weed002.png",	// 秋草テクスチャ
 	"data\\TEXTURE\\weed003.png",	// 冬草テクスチャ
 };
+CWeed::StatusInfo CWeed::m_aStatusInfo[TYPE_MAX] = {};	// ステータス情報
 
 //************************************************************
 //	子クラス [CWeed] のメンバ関数
@@ -51,8 +54,9 @@ const char *CWeed::mc_apTextureFile[] =	// テクスチャ定数
 CWeed::CWeed(void) : CObject3D(CObject::LABEL_WEED, WEED_PRIO)
 {
 	// メンバ変数をクリア
-	m_pShadow = NULL;	// 影の情報
-	m_fSinRot = 0.0f;	// なびき向き
+	m_pShadow = NULL;		// 影の情報
+	m_type = TYPE_SPRING;	// 種類
+	m_fSinRot = 0.0f;		// なびき向き
 }
 
 //============================================================
@@ -69,7 +73,8 @@ CWeed::~CWeed()
 HRESULT CWeed::Init(void)
 {
 	// メンバ変数を初期化
-	m_pShadow = NULL;	// 影の情報
+	m_pShadow = NULL;		// 影の情報
+	m_type = TYPE_SPRING;	// 種類
 	m_fSinRot = (float)(rand() % 629 - 314) * 0.01f;	// なびき向き
 
 	// 影の生成
@@ -115,22 +120,6 @@ void CWeed::Update(void)
 	// 変数を宣言
 	D3DXVECTOR3 pos = GetPosition();	// 位置
 
-	// TODO：草とプレイヤーの当たり判定
-#if 0
-	// プレイヤーとの当たり判定
-	if (CollisionPlayer())
-	{ // プレイヤーに当たっている場合
-
-		// オブジェクトの終了
-		Uninit();
-
-		// 関数を抜ける
-		return;
-	}
-#endif
-
-
-
 	// なびき向きを加算
 	m_fSinRot += 0.2f;
 	useful::NormalizeRot(m_fSinRot);	// 向き正規化
@@ -138,8 +127,6 @@ void CWeed::Update(void)
 	// 頂点のずれ量を設定
 	SetGapPosition(0, D3DXVECTOR3(0.0f, 0.0f, sinf(m_fSinRot) * 15.0f - 25.0f));
 	SetGapPosition(1, D3DXVECTOR3(0.0f, 0.0f, sinf(m_fSinRot) * 15.0f - 25.0f));
-
-
 
 	// 位置を求める
 	pos.y = CSceneGame::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
@@ -189,10 +176,8 @@ CWeed *CWeed::Create
 {
 	// 変数を宣言
 	D3DXVECTOR3 pos = rPos;	// 座標設定用
-	int nTextureID;	// テクスチャインデックス
 
 	// ポインタを宣言
-	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 	CWeed *pWeed = NULL;	// 草生成用
 
 	if (UNUSED(pWeed))
@@ -218,12 +203,6 @@ CWeed *CWeed::Create
 			return NULL;
 		}
 
-		// テクスチャを登録
-		nTextureID = pTexture->Regist(mc_apTextureFile[type]);
-
-		// テクスチャを割当
-		pWeed->BindTexture(nTextureID);
-
 		// 原点を設定
 		pWeed->SetOrigin(ORIGIN_DOWN);
 
@@ -236,6 +215,9 @@ CWeed *CWeed::Create
 
 		// 大きさを設定
 		pWeed->SetScaling(rSize);
+
+		// 種類を設定
+		pWeed->SetType((int)type);
 
 		// カリングを設定
 		pWeed->SetCulling(D3DCULL_NONE);
@@ -260,9 +242,8 @@ CWeed *CWeed::Create
 //============================================================
 void CWeed::RandomSpawn
 (
-	const int nNum,				// 生成数
-	const TYPE type,			// 種類
-	const D3DXVECTOR3& rSize	// 大きさ
+	const int nNum,	// 生成数
+	const TYPE type	// 種類
 )
 {
 	// 変数を宣言
@@ -284,14 +265,14 @@ void CWeed::RandomSpawn
 			posSet.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
 
 			// 生成位置を補正
-			collision::CirclePillar(posSet, posTarget, rSize.x, CSceneGame::GetStage()->GetStageBarrier().fRadius + PREC_PLUS_RADIUS);	// ターゲット内部の生成防止
-			collision::InCirclePillar(posSet, posTarget, rSize.x, PREC_IN_RADIUS);	// 範囲外の生成防止
+			collision::CirclePillar(posSet, posTarget, m_aStatusInfo[type].size.x, CSceneGame::GetStage()->GetStageBarrier().fRadius + PREC_PLUS_RADIUS);	// ターゲット内部の生成防止
+			collision::InCirclePillar(posSet, posTarget, m_aStatusInfo[type].size.x, PREC_IN_RADIUS);	// 範囲外の生成防止
 
 			// 生成向きを設定
 			rotSet = D3DXVECTOR3(0.0f, atan2f(posSet.x - posTarget.x, posSet.z - posTarget.z), 0.0f);
 
 			// 草オブジェクトの生成
-			CWeed::Create(type, posSet, rotSet, rSize);
+			CWeed::Create(type, posSet, rotSet, m_aStatusInfo[type].size);
 		}
 	}
 }
@@ -332,8 +313,8 @@ void CWeed::SetSeason(const CWaveManager::SEASON season)
 					continue;
 				}
 
-				// 引数の季節のテクスチャを登録・割当
-				pObjCheck->BindTexture(pTexture->Regist(mc_apTextureFile[season]));
+				// 引数の季節を設定
+				pObjCheck->SetType((int)season);
 
 				// 次のオブジェクトへのポインタを代入
 				pObjCheck = pObjectNext;
@@ -343,22 +324,99 @@ void CWeed::SetSeason(const CWaveManager::SEASON season)
 }
 
 //============================================================
-//	プレイヤーとの当たり判定
+//	種類の設定処理
 //============================================================
-bool CWeed::CollisionPlayer(void)
+void CWeed::SetType(const int nType)
+{
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
+	// 引数の種類を設定
+	m_type = (TYPE)nType;
+	
+	// テクスチャを登録・割当
+	BindTexture(pTexture->Regist(mc_apTextureFile[m_type]));
+
+	// 大きさを設定
+	SetScaling(m_aStatusInfo[m_type].size);
+}
+
+//============================================================
+//	セットアップ処理
+//============================================================
+void CWeed::LoadSetup(void)
 {
 	// 変数を宣言
-	bool bHit = false;	// 判定状況
+	int nType	= 0;	// 種類の代入用
+	int nEnd	= 0;	// テキスト読み込み終了の確認用
+
+	// 変数配列を宣言
+	char aString[MAX_STRING];	// テキストの文字列の代入用
 
 	// ポインタを宣言
-	CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー情報
+	FILE *pFile;	// ファイルポインタ
 
-	if (pPlayer->GetState() != CPlayer::STATE_DEATH)
-	{ // プレイヤーが使用されている場合
+	// 静的メンバ変数の情報をクリア
+	memset(&m_aStatusInfo[0], 0, sizeof(m_aStatusInfo));	// ステータス情報
 
-		// TODO
+	// ファイルを読み込み形式で開く
+	pFile = fopen(WEED_SETUP_TXT, "r");
+
+	if (pFile != NULL)
+	{ // ファイルが開けた場合
+
+		do
+		{ // 読み込んだ文字列が EOF ではない場合ループ
+
+			// ファイルから文字列を読み込む
+			nEnd = fscanf(pFile, "%s", &aString[0]);	// テキストを読み込みきったら EOF を返す
+
+			// ステータスの設定
+			if (strcmp(&aString[0], "STATUSSET") == 0)
+			{ // 読み込んだ文字列が STATUSSET の場合
+
+				do
+				{ // 読み込んだ文字列が END_STATUSSET ではない場合ループ
+
+					// ファイルから文字列を読み込む
+					fscanf(pFile, "%s", &aString[0]);
+
+					if (strcmp(&aString[0], "WEEDSET") == 0)
+					{ // 読み込んだ文字列が WEEDSET の場合
+
+						do
+						{ // 読み込んだ文字列が END_WEEDSET ではない場合ループ
+
+							// ファイルから文字列を読み込む
+							fscanf(pFile, "%s", &aString[0]);
+
+							if (strcmp(&aString[0], "TYPE") == 0)
+							{ // 読み込んだ文字列が TYPE の場合
+
+								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
+								fscanf(pFile, "%d", &nType);		// 種類を読み込む
+							}
+							else if (strcmp(&aString[0], "SIZE") == 0)
+							{ // 読み込んだ文字列が SIZE の場合
+
+								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].size.x);	// 大きさXを読み込む
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].size.y);	// 大きさYを読み込む
+								fscanf(pFile, "%f", &m_aStatusInfo[nType].size.z);	// 大きさZを読み込む
+							}
+						} while (strcmp(&aString[0], "END_WEEDSET") != 0);	// 読み込んだ文字列が END_WEEDSET ではない場合ループ
+					}
+				} while (strcmp(&aString[0], "END_STATUSSET") != 0);		// 読み込んだ文字列が END_STATUSSET ではない場合ループ
+			}
+		} while (nEnd != EOF);	// 読み込んだ文字列が EOF ではない場合ループ
+		
+		// ファイルを閉じる
+		fclose(pFile);
 	}
+	else
+	{ // ファイルが開けなかった場合
 
-	// 判定状況を返す
-	return bHit;
+		// エラーメッセージボックス
+		MessageBox(NULL, "草セットアップの読み込みに失敗！", "警告！", MB_ICONWARNING);
+	}
 }

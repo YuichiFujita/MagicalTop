@@ -467,7 +467,6 @@ void CMagic::LoadSetup(void)
 {
 	// 変数を宣言
 	int nType	= 0;	// 種類の代入用
-	//int nHoming	= 0;	// ホーミングのON/OFFの変換用
 	int nEnd	= 0;	// テキスト読み込み終了の確認用
 
 	// 変数配列を宣言

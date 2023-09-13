@@ -175,11 +175,17 @@ HRESULT CSceneGame::Init(void)
 	// 魔法セットアップの読込
 	CMagic::LoadSetup();
 
+	// マナフラワーセットアップの読込
+	CFlower::LoadSetup();
+
+	// 草セットアップの読込
+	CWeed::LoadSetup();
+
 	// マナフラワーランダム生成
-	CFlower::RandomSpawn(30, CFlower::TYPE_SPRING, D3DXVECTOR3(50.0f, 50.0f, 0.0f), 10);	// TODO：定数変更
+	CFlower::RandomSpawn(30, CFlower::TYPE_SPRING);	// TODO：定数変更
 
 	// 草ランダム生成
-	CWeed::RandomSpawn(200, CWeed::TYPE_SPRING, D3DXVECTOR3(60.0f, 90.0f, 0.0f));	// TODO：定数変更
+	CWeed::RandomSpawn(200, CWeed::TYPE_SPRING);	// TODO：定数変更
 
 	// カメラ目標位置設定
 	CManager::GetCamera()->SetDestBargainingCamera();
