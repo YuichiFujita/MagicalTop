@@ -24,11 +24,14 @@
 //	マクロ定義
 //************************************************************
 #define WEED_SETUP_TXT	"data\\TXT\\weed.txt"	// セットアップテキスト相対パス
-
 #define WEED_PRIO	(2)	// 草の優先順位
 
 #define SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
 #define SHADOW_ALPHA	(0.2f)	// 影のα値
+
+#define ADD_ROT		(0.2f)	// なびき向きの加算量
+#define RANGE		(15.0f)	// なびき量の範囲
+#define SUB_RANGE	(25.0f)	// なびき向きの減算量
 
 #define PREC_PLUS_RADIUS	(80.0f)		// 生成制限の半径加算量
 #define PREC_IN_RADIUS		(3000.0f)	// 生成制限の最大半径
@@ -121,12 +124,12 @@ void CWeed::Update(void)
 	D3DXVECTOR3 pos = GetPosition();	// 位置
 
 	// なびき向きを加算
-	m_fSinRot += 0.2f;
+	m_fSinRot += ADD_ROT;
 	useful::NormalizeRot(m_fSinRot);	// 向き正規化
 
 	// 頂点のずれ量を設定
-	SetGapPosition(0, D3DXVECTOR3(0.0f, 0.0f, sinf(m_fSinRot) * 15.0f - 25.0f));
-	SetGapPosition(1, D3DXVECTOR3(0.0f, 0.0f, sinf(m_fSinRot) * 15.0f - 25.0f));
+	SetGapPosition(0, D3DXVECTOR3(0.0f, 0.0f, sinf(m_fSinRot) * RANGE - SUB_RANGE));
+	SetGapPosition(1, D3DXVECTOR3(0.0f, 0.0f, sinf(m_fSinRot) * RANGE - SUB_RANGE));
 
 	// 位置を求める
 	pos.y = CSceneGame::GetField()->GetPositionHeight(pos);	// 高さを地面に設定

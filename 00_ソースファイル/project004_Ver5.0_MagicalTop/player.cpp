@@ -63,16 +63,16 @@
 #define PLAY_MOVEZ		(2.0f)		// 前後の移動量
 #define PLAY_REV		(0.2f)		// プレイヤー移動量の減衰係数
 #define PLAY_REV_ROTA	(0.15f)		// プレイヤー向き変更の減衰係数
-#define PLAY_CAM_ROTA	(0.04f)		// カメラ回転量
 #define PLAY_JUMP		(20.0f)		// プレイヤージャンプ量
 #define PLAY_GRAVITY	(1.0f)		// プレイヤー重力
 #define PLAY_RADIUS		(20.0f)		// プレイヤー半径
-#define PLAY_LIFE		(250)		// プレイヤー体力
-#define BARRIER_DMG		(50)		// バリアのダメージ量
-#define ENE_HIT_DMG		(20)		// 敵ヒット時のダメージ量
+#define PLAY_LIFE		(150)		// プレイヤー体力
+#define HURRICANE_DMG	(50)		// バリアのダメージ量
+#define ENE_HIT_DMG		(30)		// 敵ヒット時のダメージ量
+
+#define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
 #define AWAY_SIDE_MOVE	(75.0f)		// 吹っ飛び時の横移動量
 #define AWAY_UP_MOVE	(28.0f)		// 吹っ飛び時の上移動量
-#define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
 #define INVULN_CNT		(16)		// 無敵状態に移行するまでのカウンター
 #define NORMAL_CNT		(180)		// 通常状態に移行するまでのカウンター
 
@@ -637,20 +637,27 @@ void CPlayer::HitVortex
 	if (m_state == STATE_NORMAL)
 	{ // 通常状態の場合
 
-		// 巻き込まれ始めの向きを設定
-		m_fVortexRot = atan2f(rPlayerPos.x - rHitPos.x, rPlayerPos.z - rHitPos.z);
+		// ヒット処理
+		Hit(HURRICANE_DMG);
 
-		// 渦との距離を設定
-		m_fVortexDis = sqrtf((rPlayerPos.x - rHitPos.x) * (rPlayerPos.x - rHitPos.x) + (rPlayerPos.z - rHitPos.z) * (rPlayerPos.z - rHitPos.z)) * 0.5f;
+		if (m_state != STATE_DEATH)
+		{ // 死亡状態の場合
 
-		// カメラ更新をOFFにする
-		CManager::GetCamera()->SetEnableUpdate(false);
+			// 巻き込まれ始めの向きを設定
+			m_fVortexRot = atan2f(rPlayerPos.x - rHitPos.x, rPlayerPos.z - rHitPos.z);
 
-		// 状態を設定
-		m_state = STATE_VORTEX;	// 渦巻きこまれ状態
+			// 渦との距離を設定
+			m_fVortexDis = sqrtf((rPlayerPos.x - rHitPos.x) * (rPlayerPos.x - rHitPos.x) + (rPlayerPos.z - rHitPos.z) * (rPlayerPos.z - rHitPos.z)) * 0.5f;
 
-		// 吹っ飛びモーションに移行
-		SetMotion(MOTION_BLOW_AWAY);
+			// カメラ更新をOFFにする
+			CManager::GetCamera()->SetEnableUpdate(false);
+
+			// 状態を設定
+			m_state = STATE_VORTEX;	// 渦巻きこまれ状態
+
+			// 吹っ飛びモーションに移行
+			SetMotion(MOTION_BLOW_AWAY);
+		}
 	}
 }
 
