@@ -61,7 +61,8 @@
 #define PULSROT_MOVEZ	(20)		// 前後移動時のプレイヤー向きの変更量
 #define PLUS_MOVEX		(0.5f)		// 左右回転の移動量の加算量
 #define PLAY_MOVEZ		(2.0f)		// 前後の移動量
-#define PLAY_REV		(0.2f)		// プレイヤー移動量の減衰係数
+#define PLAY_AWAY_REV	(0.08f)		// 空中のプレイヤー移動量の減衰係数
+#define PLAY_LAND_REV	(0.2f)		// 地上のプレイヤー移動量の減衰係数
 #define PLAY_REV_ROTA	(0.15f)		// プレイヤー向き変更の減衰係数
 #define PLAY_JUMP		(20.0f)		// プレイヤージャンプ量
 #define PLAY_GRAVITY	(1.0f)		// プレイヤー重力
@@ -71,8 +72,8 @@
 #define ENE_HIT_DMG		(30)		// 敵ヒット時のダメージ量
 
 #define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
-#define AWAY_SIDE_MOVE	(75.0f)		// 吹っ飛び時の横移動量
-#define AWAY_UP_MOVE	(28.0f)		// 吹っ飛び時の上移動量
+#define AWAY_SIDE_MOVE	(55.0f)		// 吹っ飛び時の横移動量
+#define AWAY_UP_MOVE	(14.0f)		// 吹っ飛び時の上移動量
 #define INVULN_CNT		(16)		// 無敵状態に移行するまでのカウンター
 #define NORMAL_CNT		(180)		// 通常状態に移行するまでのカウンター
 
@@ -1435,8 +1436,18 @@ void CPlayer::Pos(D3DXVECTOR3& rPos)
 	rPos += m_move;
 
 	// 移動量を減衰
-	m_move.x += (0.0f - m_move.x) * PLAY_REV;
-	m_move.z += (0.0f - m_move.z) * PLAY_REV;
+	if (m_state == STATE_BLOW_AWAY)
+	{ // 空中の場合
+
+		m_move.x += (0.0f - m_move.x) * PLAY_AWAY_REV;
+		m_move.z += (0.0f - m_move.z) * PLAY_AWAY_REV;
+	}
+	else
+	{ // 地上の場合
+
+		m_move.x += (0.0f - m_move.x) * PLAY_LAND_REV;
+		m_move.z += (0.0f - m_move.z) * PLAY_LAND_REV;
+	}
 }
 
 //============================================================
