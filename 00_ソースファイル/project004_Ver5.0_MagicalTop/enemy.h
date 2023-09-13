@@ -42,7 +42,6 @@ public:
 	{
 		TYPE_HUMAN = 0,	// •à•º
 		TYPE_CAR,		// íŽÔ
-		TYPE_FLY,		// ƒwƒŠ
 		TYPE_MAX		// ‚±‚Ì—ñ‹“Œ^‚Ì‘”
 	}TYPE;
 

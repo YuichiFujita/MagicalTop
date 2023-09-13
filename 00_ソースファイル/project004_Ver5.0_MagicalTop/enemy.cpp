@@ -44,8 +44,9 @@
 #define ENE_DEATH_POSY		(1300.0f)	// 死亡するY座標
 #define ENE_SUB_ALPHA		(0.02f)		// 消失時のα値減算量
 
-#define DAMAGE_CNT		(10)	// ダメージ状態維持カウント
-#define BUBBLE_SUB_CNT	(420)	// バブル消失カウント
+#define DAMAGE_CNT		(10)		// ダメージ状態維持カウント
+#define BUBBLE_SUB_CNT	(420)		// バブル消失カウント
+#define LIMIT_RADIUS	(2400.0f)	// 敵のステージ移動半径
 
 // 歩兵マクロ
 #define HUMAN_FALL	(5.5f)	// 歩兵生成時の落下速度
@@ -388,7 +389,6 @@ void CEnemy::RandomSpawn
 	// 変数を宣言
 	D3DXVECTOR3 pos, rot;	// 位置・向き設定用
 	D3DXVECTOR3 posTarget;	// ターゲット位置
-	int nLimit = (int)CSceneGame::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
 
 	// ポインタを宣言
 	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
@@ -403,17 +403,17 @@ void CEnemy::RandomSpawn
 			posTarget = pTarget->GetPosition();
 
 			// 生成位置を設定
-			pos.x = (float)(rand() % (nLimit * 2) - nLimit + 1);
+			pos.x = (float)(rand() % ((int)LIMIT_RADIUS * 2) - (int)LIMIT_RADIUS + 1);
 			pos.y = m_aStatusInfo[type].fSpawnHeight;
-			pos.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
+			pos.z = (float)(rand() % ((int)LIMIT_RADIUS * 2) - (int)LIMIT_RADIUS + 1);
 
 			// 生成向きを設定
 			rot = VEC3_ZERO;	// 向きを初期化
 			rot.y = atan2f(pos.x - posTarget.x, pos.z - posTarget.z);	// ターゲットの方向を向かせる
 
 			// 位置を補正
-			pos.x = sinf(rot.y) * (CSceneGame::GetStage()->GetStageLimit().fRadius - m_aStatusInfo[type].fRadius);
-			pos.z = cosf(rot.y) * (CSceneGame::GetStage()->GetStageLimit().fRadius - m_aStatusInfo[type].fRadius);
+			pos.x = sinf(rot.y) * (LIMIT_RADIUS - m_aStatusInfo[type].fRadius);
+			pos.z = cosf(rot.y) * (LIMIT_RADIUS - m_aStatusInfo[type].fRadius);
 
 			// 敵オブジェクトの生成
 			CEnemy::Create(type, pos, rot);
@@ -657,6 +657,7 @@ void CEnemy::Spawn(void)
 	D3DXVECTOR3 posEnemy = GetPosition();		// 敵位置
 	D3DXVECTOR3 moveEnemy = GetMovePosition();	// 敵移動量
 	D3DXVECTOR3 posWarning = posEnemy;			// 警告位置
+	D3DXVECTOR3 posBarrier = CSceneGame::GetStage()->GetStageBarrierPosition();	// バリア位置
 
 	// 過去位置の更新
 	UpdateOldPosition();
@@ -665,7 +666,7 @@ void CEnemy::Spawn(void)
 	CollisionSpawnEnemy(posEnemy);
 
 	// ステージ範囲外の補正
-	CSceneGame::GetStage()->LimitPosition(posEnemy, m_status.fRadius);
+	collision::InCirclePillar(posEnemy, posBarrier, m_status.fRadius, LIMIT_RADIUS);
 
 	// 重力を加算
 	moveEnemy.y -= ENE_GRAVITY;
@@ -1276,7 +1277,9 @@ void CEnemyHuman::CollisionFind(void)
 	D3DXVECTOR3 rotEnemy	= GetRotation();		// 敵向き
 	D3DXVECTOR3 posLook		= VEC3_ZERO;			// 視認対象位置
 	float fLookRadius		= 0.0f;					// 視認対象半径
-	float fPlayerRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
+
+	D3DXVECTOR3 posBarrier	= CSceneGame::GetStage()->GetStageBarrierPosition();	// バリア位置
+	float fPlayerRadius		= CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
 
 	// 過去位置の更新
 	UpdateOldPosition();
@@ -1321,7 +1324,7 @@ void CEnemyHuman::CollisionFind(void)
 			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
 
 			// ステージ範囲外の補正
-			CSceneGame::GetStage()->LimitPosition(posEnemy, status.fRadius);
+			collision::InCirclePillar(posEnemy, posBarrier, status.fRadius, LIMIT_RADIUS);
 
 			if (GetMotionType() != MOTION_MOVE)
 			{ // 現在のモーションが歩行じゃない場合
@@ -1343,7 +1346,7 @@ void CEnemyHuman::CollisionFind(void)
 			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
 
 			// ステージ範囲外の補正
-			CSceneGame::GetStage()->LimitPosition(posEnemy, status.fRadius);
+			collision::InCirclePillar(posEnemy, posBarrier, status.fRadius, LIMIT_RADIUS);
 
 			// 攻撃
 			Attack(posLook, posEnemy, fLookRadius);
@@ -1517,9 +1520,11 @@ const char* CEnemyCar::GetModelFileName(const int nModel) const
 void CEnemyCar::Spawn(void)
 {
 	// 変数を宣言
+	StatusInfo  status = GetStatusInfo();		// 敵ステータス
 	D3DXVECTOR3 posEnemy = GetPosition();		// 敵位置
 	D3DXVECTOR3 moveEnemy = GetMovePosition();	// 敵移動量
 	D3DXVECTOR3 posWarning = posEnemy;			// 警告位置
+	D3DXVECTOR3 posBarrier = CSceneGame::GetStage()->GetStageBarrierPosition();	// バリア位置
 
 	// 過去位置の更新
 	UpdateOldPosition();
@@ -1528,7 +1533,7 @@ void CEnemyCar::Spawn(void)
 	CollisionSpawnEnemy(posEnemy);
 
 	// ステージ範囲外の補正
-	CSceneGame::GetStage()->LimitPosition(posEnemy, GetStatusInfo().fRadius);
+	collision::InCirclePillar(posEnemy, posBarrier, status.fRadius, LIMIT_RADIUS);
 
 	switch (m_spawn)
 	{ // スポーン状態ごとの処理
@@ -1604,7 +1609,9 @@ void CEnemyCar::CollisionFind(void)
 	D3DXVECTOR3 posLook		= VEC3_ZERO;			// 視認対象位置
 	D3DXVECTOR3 rotCannon	= VEC3_ZERO;			// キャノン向き
 	float fLookRadius		= 0.0f;					// 視認対象半径
-	float fPlayerRadius = CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
+
+	D3DXVECTOR3 posBarrier	= CSceneGame::GetStage()->GetStageBarrierPosition();	// バリア位置
+	float fPlayerRadius		= CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
 
 	// 過去位置の更新
 	UpdateOldPosition();
@@ -1649,7 +1656,7 @@ void CEnemyCar::CollisionFind(void)
 			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
 
 			// ステージ範囲外の補正
-			CSceneGame::GetStage()->LimitPosition(posEnemy, status.fRadius);
+			collision::InCirclePillar(posEnemy, posBarrier, status.fRadius, LIMIT_RADIUS);
 		}
 		else
 		{ // 敵の攻撃範囲内の場合
@@ -1664,7 +1671,7 @@ void CEnemyCar::CollisionFind(void)
 			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
 
 			// ステージ範囲外の補正
-			CSceneGame::GetStage()->LimitPosition(posEnemy, status.fRadius);
+			collision::InCirclePillar(posEnemy, posBarrier, status.fRadius, LIMIT_RADIUS);
 
 			// キャノン向きの設定
 			if (SetRotationCannon(posLook, posEnemy, rotEnemy))
