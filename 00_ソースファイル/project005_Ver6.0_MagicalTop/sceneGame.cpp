@@ -38,8 +38,8 @@ CTimerManager	*CSceneGame::m_pTimerManager = NULL;	// タイマーマネージャー
 CPause	*CSceneGame::m_pPause	= NULL;					// ポーズ
 CStage	*CSceneGame::m_pStage	= NULL;					// ステージ
 CPlayer	*CSceneGame::m_pPlayer	= NULL;					// プレイヤーオブジェクト
-CField	*CSceneGame::m_pField	= NULL;					// 地面オブジェクト
 CTarget	*CSceneGame::m_pTarget	= NULL;					// ターゲットオブジェクト
+CField	*CSceneGame::m_pField	= NULL;					// 地面オブジェクト
 CScore	*CSceneGame::m_pScore	= NULL;					// スコアオブジェクト
 
 //************************************************************
@@ -66,6 +66,9 @@ CSceneGame::~CSceneGame()
 //============================================================
 HRESULT CSceneGame::Init(void)
 {
+	//--------------------------------------------------------
+	//	オブジェクト生成
+	//--------------------------------------------------------
 	// ウェーブマネージャーの生成
 	m_pWaveManager = CWaveManager::Create();
 	if (UNUSED(m_pWaveManager))
@@ -187,12 +190,13 @@ HRESULT CSceneGame::Init(void)
 	// 草ランダム生成
 	CWeed::RandomSpawn(200, CWeed::TYPE_SPRING);	// TODO：定数変更
 
-	// カメラ目標位置設定
-	CManager::GetCamera()->SetDestBargainingCamera();
+	// カメラを設定
+	CManager::GetCamera()->SetState(CCamera::STATE_BARGAINING);	// カメラを寄り引き状態に設定
+	CManager::GetCamera()->SetDestBargaining();	// 目標位置を設定
 
 	// タイムを計測開始
-	m_pTimerManager->Start();
-	m_pTimerManager->EnableStop(true);
+	m_pTimerManager->Start();			// 計測を開始
+	m_pTimerManager->EnableStop(true);	// 計測を一時停止
 
 	// BGMの再生
 	//CManager::GetSound()->Play(CSound::LABEL_BGM_000);

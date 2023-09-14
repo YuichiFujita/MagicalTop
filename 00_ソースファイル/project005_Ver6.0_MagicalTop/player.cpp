@@ -702,7 +702,7 @@ void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 	CManager::GetCamera()->SetEnableUpdate(true);
 
 	// ƒJƒƒ‰–Ú•WˆÊ’uÝ’è
-	CManager::GetCamera()->SetDestBargainingCamera();
+	CManager::GetCamera()->SetDestBargaining();
 }
 
 //============================================================

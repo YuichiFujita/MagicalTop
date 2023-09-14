@@ -22,17 +22,19 @@
 // カメラ基本情報マクロ
 #define VIEW_ANGLE	(D3DXToRadian(45.0f))	// 視野角
 #define VIEW_ASPECT	((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT)	// アスペクト比
+
 #define VIEW_NEAR	(10.0f)		// モデルが見えるZ軸の最小値
 #define VIEW_FAR	(50000.0f)	// モデルが見えるZ軸の最大値
+
 #define INIT_VECU	(D3DXVECTOR3(0.0f, 1.0f, 0.0f))		// 上方向ベクトルの初期値
 #define INIT_POSV	(D3DXVECTOR3(0.0f, 0.0f, -600.0f))	// 視点の初期値
 
-// カメラ追従マクロ
-#define REV_ROT		(0.2f)		// カメラ向きの補正係数
-#define POS_R_PLUS	(25.0f)		// プレイヤーの位置と注視点の位置の距離
-#define POS_V_Y		(900.0f)	// 追従時の視点の y座標
-#define REV_POS_V	(D3DXVECTOR2(0.225f, 0.045f))	// 視点の補正係数
-#define REV_POS_R	(D3DXVECTOR2(0.25f, 0.05f))		// 注視点の補正係数
+// カメラ回転マクロ
+#define ROTATE_INITPOSR	(D3DXVECTOR3(0.0f, 0.0f, 0.0f))	// 回転カメラの注視点の初期値
+#define ROTATE_INITROT	(D3DXVECTOR2(1.2f, 0.0f))		// 回転カメラの向き初期値
+
+#define ROTATE_INITDIS	(-6000.0f)	// 回転カメラの距離初期値
+#define ROTATE_ADDROTY	(0.005f)	// 回転カメラの向き加算量Y
 
 // カメラ寄り引きマクロ
 #define INIT_DESTROT_X	(0.65f)	// 初期のカメラ向き
@@ -79,8 +81,8 @@ CCamera::CCamera()
 {
 	// メンバ変数をクリア
 	memset(&m_aCamera[0], 0, sizeof(m_aCamera));	// カメラの情報
-	m_state = STATE_BARGAINING;	// 状態
-	m_bUpdate = false;	// 更新状況
+	m_state = STATE_NONE;	// 状態
+	m_bUpdate = false;		// 更新状況
 }
 
 //============================================================
@@ -96,6 +98,12 @@ CCamera::~CCamera()
 //============================================================
 HRESULT CCamera::Init(void)
 {
+	//--------------------------------------------------------
+	//	メンバ変数を初期化
+	//--------------------------------------------------------
+	m_state = STATE_NONE;	// 状態
+	m_bUpdate = true;	 	// 更新状況
+
 	//--------------------------------------------------------
 	//	メインカメラの初期化
 	//--------------------------------------------------------
@@ -140,12 +148,6 @@ HRESULT CCamera::Init(void)
 	m_aCamera[TYPE_MODELUI].viewport.MinZ	= 0.0f;
 	m_aCamera[TYPE_MODELUI].viewport.MaxZ	= 0.5f;
 
-	// 状態を寄り引きに設定
-	m_state = STATE_BARGAINING;
-
-	// カメラ更新をONにする
-	m_bUpdate = true;
-
 	// 成功を返す
 	return S_OK;
 }
@@ -170,14 +172,27 @@ void CCamera::Update(void)
 
 		switch (m_state)
 		{ // 状態ごとの処理
-		case STATE_BARGAINING:
+		case STATE_NONE:	// なにもしない状態
+
+			// 無し
+
+			break;
+
+		case STATE_ROTATE:	// 回転状態
+
+			// カメラの更新処 (回転)
+			Rotate();
+
+			break;
+
+		case STATE_BARGAINING:	// 寄り引き状態
 
 			// カメラの更新 (寄り引き)
 			Bargaining();
 
 			break;
 
-		case STATE_UP:
+		case STATE_UP:	// 上向き状態
 
 			if (m_aCamera[TYPE_MAIN].posR.y < POSRUP_MAX)
 			{ // カメラの注視点Y座標が一定値より低い場合
@@ -195,7 +210,7 @@ void CCamera::Update(void)
 
 			break;
 
-		default:
+		default:	// 例外処理
 			assert(false);
 			break;
 		}
@@ -260,9 +275,39 @@ void CCamera::SetCamera(const TYPE type)
 }
 
 //============================================================
+//	カメラ目標位置の設定処理 (回転)
+//============================================================
+void CCamera::SetDestRotate(void)
+{
+	//----------------------------------------------------
+	//	向きの更新
+	//----------------------------------------------------
+	// 現在向きの更新
+	m_aCamera[TYPE_MAIN].rot.x = ROTATE_INITROT.x;
+	m_aCamera[TYPE_MAIN].rot.y = ROTATE_INITROT.y;
+	useful::Vec3NormalizeRot(m_aCamera[TYPE_MAIN].rot);	// 現在向きを正規化
+
+	//----------------------------------------------------
+	//	距離の更新
+	//----------------------------------------------------
+	m_aCamera[TYPE_MAIN].fDis = ROTATE_INITDIS;
+
+	//----------------------------------------------------
+	//	位置の更新
+	//----------------------------------------------------
+	// 注視点の更新
+	m_aCamera[TYPE_MAIN].posR = ROTATE_INITPOSR;
+
+	// 視点の更新
+	m_aCamera[TYPE_MAIN].posV.x = m_aCamera[TYPE_MAIN].posR.x + ((-m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));
+	m_aCamera[TYPE_MAIN].posV.y = m_aCamera[TYPE_MAIN].posR.y + ((-m_aCamera[TYPE_MAIN].fDis * cosf(m_aCamera[TYPE_MAIN].rot.x)));
+	m_aCamera[TYPE_MAIN].posV.z = m_aCamera[TYPE_MAIN].posR.z + ((-m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));
+}
+
+//============================================================
 //	カメラの目標位置の設定処理 (寄り引き)
 //============================================================
-void CCamera::SetDestBargainingCamera(void)
+void CCamera::SetDestBargaining(void)
 {
 	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
 	{ // プレイヤー・ターゲットが使用されている場合
@@ -457,48 +502,33 @@ HRESULT CCamera::Release(CCamera *&prCamera)
 }
 
 //============================================================
-//	カメラの更新処理 (追従)
+//	カメラの更新処理 (回転)
 //============================================================
-void CCamera::Follow(void)
+void CCamera::Rotate(void)
 {
-	// 変数を宣言
-	D3DXVECTOR3 diffRot  = VEC3_ZERO;	// カメラの向き差分
-	D3DXVECTOR3 diffPosV = VEC3_ZERO;	// カメラの視点の位置差分
-	D3DXVECTOR3 diffPosR = VEC3_ZERO;	// カメラの注視点の位置差分
-	D3DXVECTOR3 pos = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
-	D3DXVECTOR3 rot = CSceneGame::GetPlayer()->GetRotation();	// プレイヤー向き
+	//----------------------------------------------------
+	//	向きの更新
+	//----------------------------------------------------
+	// 現在向きの更新
+	m_aCamera[TYPE_MAIN].rot.x = ROTATE_INITROT.x;
+	m_aCamera[TYPE_MAIN].rot.y += ROTATE_ADDROTY;
+	useful::Vec3NormalizeRot(m_aCamera[TYPE_MAIN].rot);	// 現在向きを正規化
 
-	// 目標の向きまでの差分を計算
-	diffRot = m_aCamera[TYPE_MAIN].destRot - m_aCamera[TYPE_MAIN].rot;
-	useful::NormalizeRot(diffRot.y);	// 差分向き正規化
+	//----------------------------------------------------
+	//	距離の更新
+	//----------------------------------------------------
+	m_aCamera[TYPE_MAIN].fDis = ROTATE_INITDIS;
 
-	// 向きを更新
-	m_aCamera[TYPE_MAIN].rot.y += diffRot.y * REV_ROT;
-	useful::NormalizeRot(m_aCamera[TYPE_MAIN].rot.y);	// 向き正規化
+	//----------------------------------------------------
+	//	位置の更新
+	//----------------------------------------------------
+	// 注視点の更新
+	m_aCamera[TYPE_MAIN].posR = ROTATE_INITPOSR;
 
-	// 目標の注視点の位置を更新
-	m_aCamera[TYPE_MAIN].destPosR.x = pos.x + sinf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
-	m_aCamera[TYPE_MAIN].destPosR.y = pos.y;										// プレイヤーの位置と同じ
-	m_aCamera[TYPE_MAIN].destPosR.z = pos.z + cosf(rot.y + D3DX_PI) * POS_R_PLUS;	// プレイヤーの位置より少し前
-
-	// 目標の視点の位置を更新
-	m_aCamera[TYPE_MAIN].destPosV.x = m_aCamera[TYPE_MAIN].destPosR.x + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));	// 目標注視点から距離分離れた位置
-	m_aCamera[TYPE_MAIN].destPosV.y = POS_V_Y;																																	// 固定の高さ
-	m_aCamera[TYPE_MAIN].destPosV.z = m_aCamera[TYPE_MAIN].destPosR.z + ((m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));	// 目標注視点から距離分離れた位置
-
-	// 目標の位置までの差分を計算
-	diffPosV = m_aCamera[TYPE_MAIN].destPosV - m_aCamera[TYPE_MAIN].posV;	// 視点
-	diffPosR = m_aCamera[TYPE_MAIN].destPosR - m_aCamera[TYPE_MAIN].posR;	// 注視点
-
-	// 視点の位置を更新
-	m_aCamera[TYPE_MAIN].posV.x += diffPosV.x * REV_POS_V.x;
-	m_aCamera[TYPE_MAIN].posV.y += diffPosV.y * REV_POS_V.y;
-	m_aCamera[TYPE_MAIN].posV.z += diffPosV.z * REV_POS_V.x;
-
-	// 注視点の位置を更新
-	m_aCamera[TYPE_MAIN].posR.x += diffPosR.x * REV_POS_R.x;
-	m_aCamera[TYPE_MAIN].posR.y += diffPosR.y * REV_POS_R.y;
-	m_aCamera[TYPE_MAIN].posR.z += diffPosR.z * REV_POS_R.x;
+	// 視点の更新
+	m_aCamera[TYPE_MAIN].posV.x = m_aCamera[TYPE_MAIN].posR.x + ((-m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * sinf(m_aCamera[TYPE_MAIN].rot.y));
+	m_aCamera[TYPE_MAIN].posV.y = m_aCamera[TYPE_MAIN].posR.y + ((-m_aCamera[TYPE_MAIN].fDis * cosf(m_aCamera[TYPE_MAIN].rot.x)));
+	m_aCamera[TYPE_MAIN].posV.z = m_aCamera[TYPE_MAIN].posR.z + ((-m_aCamera[TYPE_MAIN].fDis * sinf(m_aCamera[TYPE_MAIN].rot.x)) * cosf(m_aCamera[TYPE_MAIN].rot.y));
 }
 
 //============================================================

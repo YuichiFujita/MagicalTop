@@ -33,9 +33,11 @@ public:
 	// 状態列挙
 	enum STATE
 	{
-		STATE_BARGAINING = 0,	// 寄り引き状態
-		STATE_UP,	// 上向き状態
-		STATE_MAX	// この列挙型の総数
+		STATE_NONE = 0,		// なにもしない状態
+		STATE_ROTATE,		// 回転状態
+		STATE_BARGAINING,	// 寄り引き状態
+		STATE_UP,			// 上向き状態
+		STATE_MAX			// この列挙型の総数
 	};
 
 	// コンストラクタ
@@ -68,7 +70,8 @@ public:
 	void SetCamera(const TYPE type);	// カメラ設定
 	Camera GetCamera(const TYPE type);	// カメラ取得
 	void SetState(const STATE state);	// カメラ状態設定
-	void SetDestBargainingCamera(void);	// カメラ目標位置設定 (寄り引き)
+	void SetDestRotate(void);			// カメラ目標位置設定 (回転)
+	void SetDestBargaining(void);		// カメラ目標位置設定 (寄り引き)
 
 	void SetEnableUpdate(const bool bUpdate);		// 更新状況設定
 	void SetRotation(const D3DXVECTOR3& rRot);		// 現在向き設定
@@ -82,7 +85,7 @@ public:
 
 private:
 	// メンバ関数
-	void Follow(void);		// カメラの更新 (追従)
+	void Rotate(void);		// カメラの更新 (回転)
 	void Bargaining(void);	// カメラの更新 (寄り引き)
 	void Control(void);		// カメラの更新 (操作)
 	void Move(void);		// 位置の更新 (操作)
