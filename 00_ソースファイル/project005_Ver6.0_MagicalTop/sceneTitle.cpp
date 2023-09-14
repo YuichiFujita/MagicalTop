@@ -196,3 +196,12 @@ void CSceneTitle::Draw(void)
 {
 
 }
+
+//============================================================
+//	タイトルマネージャー取得処理
+//============================================================
+CTitleManager *CSceneTitle::GetTitleManager(void)
+{
+	// タイトルマネージャーを返す
+	return m_pTitleManager;
+}

@@ -17,11 +17,6 @@
 #include "enemy.h"
 
 //************************************************************
-//	マクロ定義
-//************************************************************
-#define NUM_LOGO	(2)	// ロゴの使用数
-
-//************************************************************
 //	前方宣言
 //************************************************************
 class CObject2D;	// オブジェクト2Dクラス
@@ -33,20 +28,21 @@ class CObject2D;	// オブジェクト2Dクラス
 class CTitleManager
 {
 public:
-	// テクスチャ列挙
-	typedef enum
-	{
-		TEXTURE_NORMAL = 0,	// タイトル
-		TEXTURE_MAX			// この列挙型の総数
-	}TEXTURE;
-
 	// ロゴ列挙
 	typedef enum
 	{
-		LOGO_MAGICAL = 0,	// MAGICAL
-		LOGO_TOP,			// TOP
+		LOGO_MAGICAL = 0,	// MAGICALロゴ
+		LOGO_TOP,			// TOPロゴ
 		LOGO_MAX			// この列挙型の総数
 	}LOGO;
+
+	// 選択列挙
+	typedef enum
+	{
+		SELECT_GAME = 0,	// ゲーム選択
+		SELECT_TUTORIAL,	// チュートリアル選択
+		SELECT_MAX			// この列挙型の総数
+	}SELECT;
 
 	// 状態列挙
 	typedef enum
@@ -78,18 +74,22 @@ private:
 	void UpdateFade(void);	// フェードアウト
 	void UpdateMove(void);	// タイトル移動
 	void UpdateStart(void);	// 遷移決定
+	void ActSelect(void);	// 選択操作
 	void SkipStaging(void);	// 演出スキップ
 
 	// 静的メンバ変数
-	static const char *mc_apTextureFile[];		// テクスチャ定数
-	static const char *mc_apLogoTextureFile[];	// ロゴテクスチャ定数
+	static const char *mc_apLogoTextureFile[];		// ロゴテクスチャ定数
+	static const char *mc_apSelectTextureFile[];	// 選択テクスチャ定数
 
 	// メンバ変数
-	CObject2D *m_apLogo[NUM_LOGO];	// タイトル表示の情報
+	CObject2D *m_apLogo[LOGO_MAX];		// タイトル表示の情報
+	CObject2D *m_apSelect[SELECT_MAX];	// 選択表示の情報
 	CObject2D *m_pFade;		// フェードの情報
-	STATE m_state;			// 状態
-	int m_nCounterState;	// 状態管理カウンター
-	float m_fScale;			// タイトル拡大率
+	CObject2D *m_pSelectBG;	// 選択背景の情報
+	STATE m_state;		// 状態
+	float m_fScale;		// タイトル拡大率
+	int m_nSelect;		// 現在の選択
+	int m_nOldSelect;	// 前回の選択
 };
 
 #endif	// _TITLEMANAGER_H_
