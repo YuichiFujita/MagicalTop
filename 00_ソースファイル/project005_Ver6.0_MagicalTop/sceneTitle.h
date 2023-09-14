@@ -19,9 +19,9 @@
 //************************************************************
 //	前方宣言
 //************************************************************
-class CObject2D;	// オブジェクト2Dクラス
-class CStage;		// ステージクラス
-class CField;		// 地面クラス
+class CTitleManager;	// タイトルマネージャークラス
+class CStage;	// ステージクラス
+class CField;	// 地面クラス
 
 //************************************************************
 //	クラス定義
@@ -42,9 +42,12 @@ public:
 	void Update(void) override;		// 更新
 	void Draw(void) override;		// 描画
 
+	// 静的メンバ関数
+	static CTitleManager *GetTitleManager(void);	// タイトルマネージャー取得
+
 private:
-	// メンバ変数
-	CObject2D *m_pObject2D;	// タイトル表示用
+	// 静的メンバ変数
+	static CTitleManager *m_pTitleManager;	// タイトルマネージャー
 };
 
 #endif	// _SCENE_TITLE_H_

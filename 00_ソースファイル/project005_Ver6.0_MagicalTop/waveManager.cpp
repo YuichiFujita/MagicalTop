@@ -74,7 +74,7 @@ CWaveManager::Season CWaveManager::m_aWaveInfo[CWaveManager::SEASON_MAX] = {};	/
 #define SEASON_SUB_ROT	(0.005f)	// シーズン表示のY向き加算量
 #define SEASON_MUL_SIZE	(1.05f)		// シーズン表示の拡大率乗算量
 
-#define WAIT_FRAME	(240)	//	リザルト遷移時の余韻フレーム
+#define WAIT_FRAME	(240)	// リザルト遷移時の余韻フレーム
 
 //************************************************************
 //	親クラス [CWaveManager] のメンバ関数
