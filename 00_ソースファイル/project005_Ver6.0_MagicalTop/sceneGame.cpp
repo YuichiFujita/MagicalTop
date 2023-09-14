@@ -23,7 +23,6 @@
 #include "enemy.h"
 #include "magic.h"
 #include "sea.h"
-#include "field.h"
 #include "wall.h"
 #include "scenery.h"
 #include "sky.h"
@@ -39,7 +38,6 @@ CPause	*CSceneGame::m_pPause	= NULL;					// ポーズ
 CStage	*CSceneGame::m_pStage	= NULL;					// ステージ
 CPlayer	*CSceneGame::m_pPlayer	= NULL;					// プレイヤーオブジェクト
 CTarget	*CSceneGame::m_pTarget	= NULL;					// ターゲットオブジェクト
-CField	*CSceneGame::m_pField	= NULL;					// 地面オブジェクト
 CScore	*CSceneGame::m_pScore	= NULL;					// スコアオブジェクト
 
 //************************************************************
@@ -48,7 +46,7 @@ CScore	*CSceneGame::m_pScore	= NULL;					// スコアオブジェクト
 //============================================================
 //	コンストラクタ
 //============================================================
-CSceneGame::CSceneGame()
+CSceneGame::CSceneGame(const MODE mode) : CScene(mode)
 {
 
 }
@@ -109,21 +107,11 @@ HRESULT CSceneGame::Init(void)
 		return E_FAIL;
 	}
 
+	// シーンの初期化
+	CScene::Init();
+
 	// 海オブジェクトの生成
 	CSea::Create();
-
-	// 地面オブジェクトの生成
-	m_pField = CField::Create(CField::TEXTURE_SPRING, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(6000.0f, 6000.0f), XCOL_WHITE, POSGRID2(120, 120));
-	if (UNUSED(m_pField))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// 地形を設定
-	m_pField->SetTerrain(CField::TERRAIN_120x120);
 
 	// 壁オブジェクトの生成
 	CWall::Create(CWall::TEXTURE_NORMAL, D3DXVECTOR3( 0.0f,    0.0f, -3000.0f), D3DXToRadian(D3DXVECTOR3(0.0f, 0.0f, 0.0f)),   D3DXVECTOR2(6000.0f, 400.0f), XCOL_WHITE, POSGRID2(18, 1));
@@ -249,8 +237,10 @@ HRESULT CSceneGame::Uninit(void)
 	// 終了済みのオブジェクトポインタをNULLにする
 	m_pPlayer	= NULL;		// プレイヤーオブジェクト
 	m_pTarget	= NULL;		// ターゲットオブジェクト
-	m_pField	= NULL;		// 地面オブジェクト
 	m_pScore	= NULL;		// スコアオブジェクト
+
+	// シーンの終了
+	CScene::Uninit();
 
 	// 成功を返す
 	return S_OK;
@@ -364,15 +354,6 @@ CTarget *CSceneGame::GetTarget(void)
 {
 	// ターゲットのポインタを返す
 	return m_pTarget;
-}
-
-//============================================================
-//	地面取得処理
-//============================================================
-CField *CSceneGame::GetField(void)
-{
-	// 地面のポインタを返す
-	return m_pField;
 }
 
 //============================================================

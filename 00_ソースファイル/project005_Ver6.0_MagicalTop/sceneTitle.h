@@ -31,7 +31,7 @@ class CSceneTitle : public CScene
 {
 public:
 	// コンストラクタ
-	CSceneTitle();
+	CSceneTitle(const MODE mode);
 
 	// デストラクタ
 	~CSceneTitle();
@@ -44,12 +44,10 @@ public:
 
 	// 静的メンバ関数
 	static CStage *GetStage(void);	// ステージ取得
-	static CField *GetField(void);	// 地面取得
 
 private:
 	// 静的メンバ変数
 	static CStage *m_pStage;	// ステージ
-	static CField *m_pField;	// 地面オブジェクト
 
 	// メンバ変数
 	CObject2D *m_pObject2D;	// タイトル表示用

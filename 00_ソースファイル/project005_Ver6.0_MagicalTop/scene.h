@@ -16,6 +16,11 @@
 #include "main.h"
 
 //************************************************************
+//	前方宣言
+//************************************************************
+class CField;	// 地面クラス
+
+//************************************************************
 //	クラス定義
 //************************************************************
 // シーンクラス
@@ -32,28 +37,34 @@ public:
 	};
 
 	// コンストラクタ
-	CScene();
+	CScene(const MODE mode);
 
 	// デストラクタ
 	~CScene();
 
 	// 純粋仮想関数
-	virtual HRESULT Init(void)		= 0;	// 初期化
-	virtual HRESULT Uninit(void)	= 0;	// 終了
-	virtual void Draw(void)			= 0;	// 描画
+	virtual void Draw(void)	= 0;	// 描画
 
 	// 仮想関数
-	virtual void Update(void);	// 更新
+	virtual HRESULT Init(void);		// 初期化
+	virtual HRESULT Uninit(void);	// 終了
+	virtual void Update(void);		// 更新
 
 	// 静的メンバ関数
 	static CScene *Create(MODE mode);			// 生成
 	static HRESULT Release(CScene *&prScene);	// 破棄
+
+	static HRESULT CreateField(MODE mode);	// 地面生成
+	static CField *GetField(void);			// 地面取得
 
 	// メンバ関数
 	void SetMode(const MODE mode);	// モード設定
 	MODE GetMode(void) const;		// モード取得
 
 private:
+	// 静的メンバ変数
+	static CField *m_pField;	// 地面オブジェクト
+
 	// メンバ変数
 	MODE m_mode;	// モード
 };

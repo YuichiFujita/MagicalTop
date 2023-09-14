@@ -19,7 +19,7 @@
 //============================================================
 //	コンストラクタ
 //============================================================
-CSceneResult::CSceneResult()
+CSceneResult::CSceneResult(const MODE mode) : CScene(mode)
 {
 	// メンバ変数をクリア
 	m_pObject2D = NULL;	// タイトル表示用

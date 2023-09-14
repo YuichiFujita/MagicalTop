@@ -16,15 +16,23 @@
 #include "sceneGame.h"
 #include "sceneResult.h"
 
+#include "field.h"
+
+//************************************************************
+//	静的メンバ変数宣言
+//************************************************************
+CField *CScene::m_pField = NULL;	// 地面オブジェクト
+
 //************************************************************
 //	親クラス [CScene] のメンバ関数
 //************************************************************
 //============================================================
 //	コンストラクタ
 //============================================================
-CScene::CScene()
+CScene::CScene(const MODE mode)
 {
-
+	// メンバ変数をクリア
+	m_mode = mode;	// モード
 }
 
 //============================================================
@@ -33,6 +41,36 @@ CScene::CScene()
 CScene::~CScene()
 {
 
+}
+
+//============================================================
+//	初期化処理
+//============================================================
+HRESULT CScene::Init(void)
+{
+	// 地面オブジェクトの生成
+	if (FAILED(CreateField(m_mode)))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 成功を返す
+	return S_OK;
+}
+
+//============================================================
+//	終了処理
+//============================================================
+HRESULT CScene::Uninit(void)
+{
+	// 終了済みのオブジェクトポインタをNULLにする
+	m_pField = NULL;	// 地面オブジェクト
+
+	// 成功を返す
+	return S_OK;
 }
 
 //============================================================
@@ -82,21 +120,21 @@ CScene *CScene::Create(MODE mode)
 		case MODE_TITLE:
 
 			// タイトル画面を生成
-			pScene = new CSceneTitle;
+			pScene = new CSceneTitle(mode);
 
 			break;
 
 		case MODE_GAME:
 
 			// ゲーム画面を生成
-			pScene = new CSceneGame;
+			pScene = new CSceneGame(mode);
 
 			break;
 
 		case MODE_RESULT:
 
 			// リザルト画面を生成
-			pScene = new CSceneResult;
+			pScene = new CSceneResult(mode);
 
 			break;
 
@@ -136,9 +174,6 @@ CScene *CScene::Create(MODE mode)
 			return NULL;
 		}
 
-		// モードの設定
-		pScene->SetMode(mode);
-
 		// 確保したアドレスを返す
 		return pScene;
 	}
@@ -170,6 +205,89 @@ HRESULT CScene::Release(CScene *&prScene)
 		return S_OK;
 	}
 	else { assert(false); return E_FAIL; }	// 非使用中
+}
+
+//============================================================
+//	地面生成処理
+//============================================================
+HRESULT CScene::CreateField(MODE mode)
+{
+	switch (mode)
+	{ // モードごとの処理
+	case MODE_TITLE:
+
+		// 地面オブジェクトの生成
+		m_pField = CField::Create(CField::TEXTURE_SPRING, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(6000.0f, 6000.0f), XCOL_WHITE, POSGRID2(120, 120));
+		if (UNUSED(m_pField))
+		{ // 非使用中の場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// 地形を設定
+		m_pField->SetTerrain(CField::TERRAIN_120x120);
+
+		// 成功を返す
+		return S_OK;
+
+		break;
+
+	case MODE_GAME:
+
+		// 地面オブジェクトの生成
+		m_pField = CField::Create(CField::TEXTURE_SPRING, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(6000.0f, 6000.0f), XCOL_WHITE, POSGRID2(120, 120));
+		if (UNUSED(m_pField))
+		{ // 非使用中の場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// 地形を設定
+		m_pField->SetTerrain(CField::TERRAIN_120x120);
+
+		// 成功を返す
+		return S_OK;
+
+		break;
+
+	case MODE_RESULT:
+
+		// 地面オブジェクトの生成
+		m_pField = CField::Create(CField::TEXTURE_SPRING, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(6000.0f, 6000.0f), XCOL_WHITE, POSGRID2(120, 120));
+		if (UNUSED(m_pField))
+		{ // 非使用中の場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// 地形を設定
+		m_pField->SetTerrain(CField::TERRAIN_120x120);
+
+		// 成功を返す
+		return S_OK;
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		return E_FAIL;
+		break;
+	}
+}
+
+//============================================================
+//	地面取得処理
+//============================================================
+CField *CScene::GetField(void)
+{
+	// 地面のポインタを返す
+	return m_pField;
 }
 
 //============================================================

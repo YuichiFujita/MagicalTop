@@ -9,6 +9,7 @@
 //************************************************************
 #include "enemy.h"
 #include "manager.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "renderer.h"
 #include "texture.h"
@@ -743,7 +744,7 @@ void CEnemy::Spawn(void)
 	posEnemy += moveEnemy;
 
 	// 着地判定
-	if (CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy))
+	if (CScene::GetField()->LandPosition(posEnemy, moveEnemy))
 	{ // 着地した場合
 
 		// 描画をしない設定にする
@@ -760,7 +761,7 @@ void CEnemy::Spawn(void)
 	SetMovePosition(moveEnemy);
 
 	// 警告位置を地形に添わせる
-	posWarning.y = CSceneGame::GetField()->GetPositionHeight(posWarning);
+	posWarning.y = CScene::GetField()->GetPositionHeight(posWarning);
 
 	// 警告表示位置を設定
 	m_pWarning->SetPosition(D3DXVECTOR3(posWarning.x, posWarning.y + ENE_WAR_ADD_POSY, posWarning.z));
@@ -1310,7 +1311,7 @@ void CEnemyHuman::Spawn(void)
 	posEnemy.y -= HUMAN_FALL;
 	
 	// 着地判定
-	if (CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy))
+	if (CScene::GetField()->LandPosition(posEnemy, moveEnemy))
 	{ // 着地した場合
 
 		// 警告の描画状況の設定
@@ -1327,7 +1328,7 @@ void CEnemyHuman::Spawn(void)
 	SetMovePosition(moveEnemy);
 
 	// 警告位置を地形に添わせる
-	posWarning.y = CSceneGame::GetField()->GetPositionHeight(posWarning);
+	posWarning.y = CScene::GetField()->GetPositionHeight(posWarning);
 
 	// 警告の位置の設定
 	SetPositionWarning(D3DXVECTOR3(posWarning.x, posWarning.y + ENE_WAR_ADD_POSY, posWarning.z));
@@ -1392,7 +1393,7 @@ void CEnemyHuman::CollisionFind(void)
 			CollisionNormalEnemy(posEnemy);
 
 			// 着地判定
-			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
+			CScene::GetField()->LandPosition(posEnemy, moveEnemy);
 
 			// ステージ範囲外の補正
 			collision::InCirclePillar(posEnemy, posBarrier, status.fRadius, LIMIT_RADIUS);
@@ -1420,7 +1421,7 @@ void CEnemyHuman::CollisionFind(void)
 			CollisionNormalEnemy(posEnemy);
 
 			// 着地判定
-			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
+			CScene::GetField()->LandPosition(posEnemy, moveEnemy);
 
 			// ステージ範囲外の補正
 			collision::InCirclePillar(posEnemy, posBarrier, status.fRadius, LIMIT_RADIUS);
@@ -1643,7 +1644,7 @@ void CEnemyCar::Spawn(void)
 		posEnemy += moveEnemy;
 	
 		// 着地判定
-		if (CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy))
+		if (CScene::GetField()->LandPosition(posEnemy, moveEnemy))
 		{ // 着地した場合
 
 			// 警告の描画状況の設定
@@ -1667,7 +1668,7 @@ void CEnemyCar::Spawn(void)
 	SetMovePosition(moveEnemy);
 
 	// 警告位置を地形に添わせる
-	posWarning.y = CSceneGame::GetField()->GetPositionHeight(posWarning);
+	posWarning.y = CScene::GetField()->GetPositionHeight(posWarning);
 
 	// 警告の位置の設定
 	SetPositionWarning(D3DXVECTOR3(posWarning.x, posWarning.y + ENE_WAR_ADD_POSY, posWarning.z));
@@ -1733,7 +1734,7 @@ void CEnemyCar::CollisionFind(void)
 			CollisionNormalEnemy(posEnemy);
 
 			// 着地判定
-			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
+			CScene::GetField()->LandPosition(posEnemy, moveEnemy);
 
 			// ステージ範囲外の補正
 			collision::InCirclePillar(posEnemy, posBarrier, status.fRadius, LIMIT_RADIUS);
@@ -1751,7 +1752,7 @@ void CEnemyCar::CollisionFind(void)
 			CollisionNormalEnemy(posEnemy);
 
 			// 着地判定
-			CSceneGame::GetField()->LandPosition(posEnemy, moveEnemy);
+			CScene::GetField()->LandPosition(posEnemy, moveEnemy);
 
 			// ステージ範囲外の補正
 			collision::InCirclePillar(posEnemy, posBarrier, status.fRadius, LIMIT_RADIUS);

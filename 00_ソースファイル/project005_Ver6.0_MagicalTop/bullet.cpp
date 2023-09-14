@@ -9,6 +9,7 @@
 //************************************************************
 #include "bullet.h"
 #include "manager.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "renderer.h"
 #include "texture.h"
@@ -108,7 +109,7 @@ void CBullet::Update(void)
 	pos += m_move;
 
 	// 地面との当たり判定
-	if (pos.y <= CSceneGame::GetField()->GetPositionHeight(pos))
+	if (pos.y <= CScene::GetField()->GetPositionHeight(pos))
 	{ // 地面に当たっている場合
 
 		// オブジェクトの終了

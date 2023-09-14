@@ -9,6 +9,7 @@
 //************************************************************
 #include "player.h"
 #include "manager.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "renderer.h"
 #include "input.h"
@@ -567,7 +568,7 @@ CPlayer *CPlayer::Create(D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 
 		// 位置を設定
 		CSceneGame::GetStage()->LimitPosition(pos, PLAY_RADIUS);	// ステージ範囲外補正
-		pos.y = CSceneGame::GetField()->GetPositionHeight(pos);		// 高さを地面に設定
+		pos.y = CScene::GetField()->GetPositionHeight(pos);		// 高さを地面に設定
 		pPlayer->SetPosition(pos);
 
 		// 向きを設定
@@ -1384,7 +1385,7 @@ bool CPlayer::Land(D3DXVECTOR3& rPos)
 	bool bLand = false;	// 着地状況
 
 	// 着地判定
-	if (CSceneGame::GetField()->LandPosition(rPos, m_move)
+	if (CScene::GetField()->LandPosition(rPos, m_move)
 	||  CSceneGame::GetStage()->LandPosition(rPos, m_move, 0.0f))
 	{ // プレイヤーが着地していた場合
 

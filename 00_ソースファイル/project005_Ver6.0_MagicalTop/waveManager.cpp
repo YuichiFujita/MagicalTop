@@ -14,6 +14,7 @@
 #include "modelUI.h"
 #include "object2D.h"
 #include "value.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "target.h"
 #include "player.h"
@@ -467,7 +468,7 @@ HRESULT CWaveManager::Release(CWaveManager *&prWaveManager)
 void CWaveManager::SetSeason(const SEASON season)
 {
 	// ’n–Ê‚ğ•ÏX
-	CSceneGame::GetField()->SetSeason(season);
+	CScene::GetField()->SetSeason(season);
 
 	// ‰Ô‚ğ•ÏX
 	CFlower::SetSeason(season);

@@ -9,6 +9,7 @@
 //************************************************************
 #include "flower.h"
 #include "manager.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "renderer.h"
 #include "texture.h"
@@ -185,7 +186,7 @@ void CFlower::Update(void)
 	}
 
 	// 位置を求める
-	pos.y = CSceneGame::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
+	pos.y = CScene::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
 
 	// 位置を更新
 	SetPosition(pos);
@@ -264,7 +265,7 @@ CFlower *CFlower::Create
 		pFlower->SetOrigin(ORIGIN_DOWN);
 
 		// 位置を設定
-		pos.y = CSceneGame::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
+		pos.y = CScene::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
 		pFlower->SetPosition(pos);
 
 		// 向きを設定

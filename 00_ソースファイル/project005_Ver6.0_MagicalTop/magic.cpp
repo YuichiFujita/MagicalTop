@@ -9,6 +9,7 @@
 //************************************************************
 #include "magic.h"
 #include "manager.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "renderer.h"
 #include "texture.h"
@@ -212,11 +213,11 @@ void CMagic::Update(void)
 		break;
 	}
 
-	if (CSceneGame::GetField()->IsPositionRange(m_pos))
+	if (CScene::GetField()->IsPositionRange(m_pos))
 	{ // ’n–Ê‚Ì”ÍˆÍ“à‚Ìê‡
 
 		// cÀ•W‚ð’nŒ`‚É“Y‚í‚¹‚é
-		m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
+		m_pos.y = CScene::GetField()->GetPositionHeight(m_pos);
 		m_pos.y += m_pBubble->GetRadius() + BUBBLE_POSY_UP;
 	}
 

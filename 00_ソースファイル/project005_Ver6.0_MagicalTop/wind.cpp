@@ -12,6 +12,7 @@
 #include "renderer.h"
 #include "texture.h"
 #include "collision.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "target.h"
 #include "stage.h"
@@ -112,11 +113,11 @@ void CWind::Update(void)
 		m_pos += vecSide * MOVE_SIDE;
 
 		// cÀ•W‚ð’n–Ê‚É“Y‚í‚¹‚é
-		if (CSceneGame::GetField()->IsPositionRange(m_pos))
+		if (CScene::GetField()->IsPositionRange(m_pos))
 		{ // ’n–Ê‚Ì”ÍˆÍ“à‚Ìê‡
 
 			// cÀ•W‚ð’nŒ`‚É“Y‚í‚¹‚é
-			m_pos.y = CSceneGame::GetField()->GetPositionHeight(m_pos);
+			m_pos.y = CScene::GetField()->GetPositionHeight(m_pos);
 			m_pos.y += PLUS_POSY;
 		}
 

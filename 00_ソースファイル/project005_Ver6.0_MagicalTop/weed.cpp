@@ -9,6 +9,7 @@
 //************************************************************
 #include "weed.h"
 #include "manager.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "renderer.h"
 #include "texture.h"
@@ -132,7 +133,7 @@ void CWeed::Update(void)
 	SetGapPosition(1, D3DXVECTOR3(0.0f, 0.0f, sinf(m_fSinRot) * RANGE - SUB_RANGE));
 
 	// 位置を求める
-	pos.y = CSceneGame::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
+	pos.y = CScene::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
 
 	// 位置を更新
 	SetPosition(pos);
@@ -210,7 +211,7 @@ CWeed *CWeed::Create
 		pWeed->SetOrigin(ORIGIN_DOWN);
 
 		// 位置を設定
-		pos.y = CSceneGame::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
+		pos.y = CScene::GetField()->GetPositionHeight(pos);	// 高さを地面に設定
 		pWeed->SetPosition(pos);
 
 		// 向きを設定

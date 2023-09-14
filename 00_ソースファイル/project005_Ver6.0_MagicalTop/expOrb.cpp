@@ -9,6 +9,7 @@
 //************************************************************
 #include "expOrb.h"
 #include "manager.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "renderer.h"
 #include "texture.h"
@@ -135,7 +136,7 @@ void CExpOrb::Update(void)
 		posExp.z -= cosf(rotExp.y) * EXP_MOVE;
 
 		// 地面との当たり判定
-		posExp.y = CSceneGame::GetField()->GetPositionHeight(posExp);
+		posExp.y = CScene::GetField()->GetPositionHeight(posExp);
 		posExp.y += EXP_PLUS_POSY;
 
 		// ステージ範囲外の補正

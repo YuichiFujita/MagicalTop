@@ -10,6 +10,7 @@
 #include "stage.h"
 #include "manager.h"
 #include "texture.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "player.h"
 #include "target.h"
@@ -183,7 +184,7 @@ void CStage::Update(void)
 
 	// 世界の中心位置を設定
 	posCenter = posTarget;	// ターゲットの位置を設定
-	posCenter.y = CSceneGame::GetField()->GetPosition().y;	// 地面の縦位置を設定
+	posCenter.y = CScene::GetField()->GetPosition().y;	// 地面の縦位置を設定
 
 	//--------------------------------------------------------
 	//	ハリケーンの更新

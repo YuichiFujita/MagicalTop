@@ -18,8 +18,8 @@
 #include "target.h"
 #include "player.h"
 
-#include "sea.h"
 #include "field.h"
+#include "sea.h"
 #include "wall.h"
 #include "scenery.h"
 #include "sky.h"
@@ -30,7 +30,6 @@
 //	静的メンバ変数宣言
 //************************************************************
 CStage	*CSceneTitle::m_pStage = NULL;	// ステージ
-CField	*CSceneTitle::m_pField = NULL;	// 地面オブジェクト
 
 //************************************************************
 //	子クラス [CSceneTitle] のメンバ関数
@@ -38,7 +37,7 @@ CField	*CSceneTitle::m_pField = NULL;	// 地面オブジェクト
 //============================================================
 //	コンストラクタ
 //============================================================
-CSceneTitle::CSceneTitle()
+CSceneTitle::CSceneTitle(const MODE mode) : CScene(mode)
 {
 	// メンバ変数をクリア
 	m_pObject2D = NULL;	// タイトル表示用
@@ -100,18 +99,8 @@ HRESULT CSceneTitle::Init(void)
 	// 海オブジェクトの生成
 	CSea::Create();
 
-	// 地面オブジェクトの生成
-	m_pField = CField::Create(CField::TEXTURE_SPRING, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(6000.0f, 6000.0f), XCOL_WHITE, POSGRID2(120, 120));
-	if (UNUSED(m_pField))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// 地形を設定
-	m_pField->SetTerrain(CField::TERRAIN_120x120);
+	// シーンの初期化
+	CScene::Init();
 
 	// 壁オブジェクトの生成
 	CWall::Create(CWall::TEXTURE_NORMAL, D3DXVECTOR3( 0.0f,    0.0f, -3000.0f), D3DXToRadian(D3DXVECTOR3(0.0f, 0.0f, 0.0f)),   D3DXVECTOR2(6000.0f, 400.0f), XCOL_WHITE, POSGRID2(18, 1));
@@ -167,7 +156,7 @@ HRESULT CSceneTitle::Init(void)
 #endif
 
 	// 季節を設定
-	m_pField->SetSeason(season);	// 地面を変更
+	GetField()->SetSeason(season);	// 地面を変更
 	CFlower::SetSeason(season);		// 花を変更
 	CWeed::SetSeason(season);		// 草を変更
 
@@ -195,6 +184,9 @@ HRESULT CSceneTitle::Uninit(void)
 
 	// オブジェクト2Dの終了
 	m_pObject2D->Uninit();
+
+	// シーンの終了
+	CScene::Uninit();
 
 	// 成功を返す
 	return S_OK;
@@ -246,13 +238,4 @@ CStage *CSceneTitle::GetStage(void)
 {
 	// ステージのポインタを返す
 	return m_pStage;
-}
-
-//============================================================
-//	地面取得処理
-//============================================================
-CField *CSceneTitle::GetField(void)
-{
-	// 地面のポインタを返す
-	return m_pField;
 }
