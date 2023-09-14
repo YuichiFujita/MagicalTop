@@ -35,7 +35,6 @@
 CWaveManager	*CSceneGame::m_pWaveManager  = NULL;	// ウェーブマネージャー
 CTimerManager	*CSceneGame::m_pTimerManager = NULL;	// タイマーマネージャー
 CPause	*CSceneGame::m_pPause	= NULL;					// ポーズ
-CStage	*CSceneGame::m_pStage	= NULL;					// ステージ
 CPlayer	*CSceneGame::m_pPlayer	= NULL;					// プレイヤーオブジェクト
 CTarget	*CSceneGame::m_pTarget	= NULL;					// ターゲットオブジェクト
 CScore	*CSceneGame::m_pScore	= NULL;					// スコアオブジェクト
@@ -90,16 +89,6 @@ HRESULT CSceneGame::Init(void)
 	// ポーズの生成
 	m_pPause = CPause::Create();
 	if (UNUSED(m_pPause))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// ステージの生成
-	m_pStage = CStage::Create();
-	if (UNUSED(m_pStage))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -225,15 +214,6 @@ HRESULT CSceneGame::Uninit(void)
 		return E_FAIL;
 	}
 
-	// ステージの破棄
-	if (FAILED(CStage::Release(m_pStage)))
-	{ // 破棄に失敗した場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
 	// 終了済みのオブジェクトポインタをNULLにする
 	m_pPlayer	= NULL;		// プレイヤーオブジェクト
 	m_pTarget	= NULL;		// ターゲットオブジェクト
@@ -269,14 +249,6 @@ void CSceneGame::Update(void)
 
 	if (!m_pPause->IsPause())
 	{ // ポーズ中ではない場合
-
-		if (USED(m_pStage))
-		{ // 使用中の場合
-
-			// ステージの更新
-			m_pStage->Update();
-		}
-		else { assert(false); }	// 非使用中
 
 		if (USED(m_pWaveManager))
 		{ // 使用中の場合
@@ -327,15 +299,6 @@ CPause *CSceneGame::GetPause(void)
 {
 	// ポーズのポインタを返す
 	return m_pPause;
-}
-
-//============================================================
-//	ステージ取得処理
-//============================================================
-CStage *CSceneGame::GetStage(void)
-{
-	// ステージのポインタを返す
-	return m_pStage;
 }
 
 //============================================================

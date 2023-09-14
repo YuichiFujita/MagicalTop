@@ -253,31 +253,25 @@ void CWeed::RandomSpawn
 	// 変数を宣言
 	D3DXVECTOR3 posSet;	// 位置設定用
 	D3DXVECTOR3 rotSet;	// 向き設定用
+	D3DXVECTOR3 posCenter = CScene::GetStage()->GetStageLimit().center;	// 中心座標
 
-	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();		// ターゲット位置
-	int nLimit = (int)CSceneGame::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
+	for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
+	{ // 生成数分繰り返す
 
-	if (USED(CSceneGame::GetTarget()))
-	{ // ターゲットが使用されている場合
+		// 生成位置を設定
+		posSet.x = (float)(rand() % ((int)PREC_IN_RADIUS * 2) - (int)PREC_IN_RADIUS + 1);
+		posSet.y = 0.0f;
+		posSet.z = (float)(rand() % ((int)PREC_IN_RADIUS * 2) - (int)PREC_IN_RADIUS + 1);
 
-		for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
-		{ // 生成数分繰り返す
+		// 生成位置を補正
+		collision::CirclePillar(posSet, posCenter, m_aStatusInfo[type].size.x, CScene::GetStage()->GetStageBarrier().fRadius + PREC_PLUS_RADIUS);	// ターゲット内部の生成防止
+		collision::InCirclePillar(posSet, posCenter, m_aStatusInfo[type].size.x, PREC_IN_RADIUS);	// 範囲外の生成防止
 
-			// 生成位置を設定
-			posSet.x = (float)(rand() % (nLimit * 2) - nLimit + 1);
-			posSet.y = 0.0f;
-			posSet.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
+		// 生成向きを設定
+		rotSet = D3DXVECTOR3(0.0f, atan2f(posSet.x - posCenter.x, posSet.z - posCenter.z), 0.0f);
 
-			// 生成位置を補正
-			collision::CirclePillar(posSet, posTarget, m_aStatusInfo[type].size.x, CSceneGame::GetStage()->GetStageBarrier().fRadius + PREC_PLUS_RADIUS);	// ターゲット内部の生成防止
-			collision::InCirclePillar(posSet, posTarget, m_aStatusInfo[type].size.x, PREC_IN_RADIUS);	// 範囲外の生成防止
-
-			// 生成向きを設定
-			rotSet = D3DXVECTOR3(0.0f, atan2f(posSet.x - posTarget.x, posSet.z - posTarget.z), 0.0f);
-
-			// 草オブジェクトの生成
-			CWeed::Create(type, posSet, rotSet, m_aStatusInfo[type].size);
-		}
+		// 草オブジェクトの生成
+		CWeed::Create(type, posSet, rotSet, m_aStatusInfo[type].size);
 	}
 }
 

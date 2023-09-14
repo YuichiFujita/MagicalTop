@@ -16,11 +16,13 @@
 #include "sceneGame.h"
 #include "sceneResult.h"
 
+#include "stage.h"
 #include "field.h"
 
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
+CStage *CScene::m_pStage = NULL;	// ステージ
 CField *CScene::m_pField = NULL;	// 地面オブジェクト
 
 //************************************************************
@@ -48,6 +50,15 @@ CScene::~CScene()
 //============================================================
 HRESULT CScene::Init(void)
 {
+	// ステージの生成
+	if (FAILED(CreateStage(m_mode)))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// 地面オブジェクトの生成
 	if (FAILED(CreateField(m_mode)))
 	{ // 非使用中の場合
@@ -66,6 +77,15 @@ HRESULT CScene::Init(void)
 //============================================================
 HRESULT CScene::Uninit(void)
 {
+	// ステージの破棄
+	if (FAILED(CStage::Release(m_pStage)))
+	{ // 破棄に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// 終了済みのオブジェクトポインタをNULLにする
 	m_pField = NULL;	// 地面オブジェクト
 
@@ -78,6 +98,14 @@ HRESULT CScene::Uninit(void)
 //============================================================
 void CScene::Update(void)
 {
+	if (USED(m_pStage))
+	{ // 使用中の場合
+
+		// ステージの更新
+		m_pStage->Update();
+	}
+	else { assert(false); }	// 非使用中
+
 	if (USED(CManager::GetLight()))
 	{ // 使用中の場合
 
@@ -208,6 +236,73 @@ HRESULT CScene::Release(CScene *&prScene)
 }
 
 //============================================================
+//	ステージ生成処理
+//============================================================
+HRESULT CScene::CreateStage(MODE mode)
+{
+	switch (mode)
+	{ // モードごとの処理
+	case MODE_TITLE:
+
+		// ステージの生成
+		m_pStage = CStage::Create();
+		if (UNUSED(m_pStage))
+		{ // 非使用中の場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// 成功を返す
+		return S_OK;
+
+	case MODE_GAME:
+
+		// ステージの生成
+		m_pStage = CStage::Create();
+		if (UNUSED(m_pStage))
+		{ // 非使用中の場合
+	
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// 成功を返す
+		return S_OK;
+
+	case MODE_RESULT:
+
+		// ステージの生成
+		m_pStage = CStage::Create();
+		if (UNUSED(m_pStage))
+		{ // 非使用中の場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// 成功を返す
+		return S_OK;
+
+	default:	// 例外処理
+		assert(false);
+		return E_FAIL;
+	}
+}
+
+//============================================================
+//	ステージ取得処理
+//============================================================
+CStage *CScene::GetStage(void)
+{
+	// ステージのポインタを返す
+	return m_pStage;
+}
+
+//============================================================
 //	地面生成処理
 //============================================================
 HRESULT CScene::CreateField(MODE mode)
@@ -232,8 +327,6 @@ HRESULT CScene::CreateField(MODE mode)
 		// 成功を返す
 		return S_OK;
 
-		break;
-
 	case MODE_GAME:
 
 		// 地面オブジェクトの生成
@@ -251,8 +344,6 @@ HRESULT CScene::CreateField(MODE mode)
 
 		// 成功を返す
 		return S_OK;
-
-		break;
 
 	case MODE_RESULT:
 
@@ -272,12 +363,9 @@ HRESULT CScene::CreateField(MODE mode)
 		// 成功を返す
 		return S_OK;
 
-		break;
-
 	default:	// 例外処理
 		assert(false);
 		return E_FAIL;
-		break;
 	}
 }
 

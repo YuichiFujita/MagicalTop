@@ -11,6 +11,7 @@
 #include "manager.h"
 #include "renderer.h"
 #include "texture.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "pause.h"
 
@@ -156,6 +157,7 @@ void CObjectOrbit::Draw(void)
 	// 変数を宣言
 	D3DXMATRIX mtxIdent;	// 単位マトリックス設定用
 	D3DXMATRIX mtxParent;	// 親のマトリックス
+	bool bUpdate = true;	// 更新状況
 
 	// 単位マトリックスの初期化
 	D3DXMatrixIdentity(&mtxIdent);
@@ -233,12 +235,23 @@ void CObjectOrbit::Draw(void)
 			D3DXMatrixMultiply(&m_orbit.aMtxWorldPoint[nCntOff], &m_orbit.aMtxWorldPoint[nCntOff], &mtxParent);
 		}
 
-		if (!CSceneGame::GetPause()->IsPause())
-		{ // ポーズ中ではない場合
+		if (CManager::GetScene()->GetMode() == CScene::MODE_GAME)
+		{ // モードがゲームの場合
 
-			//------------------------------------------------
+			if (CSceneGame::GetPause()->IsPause())
+			{ // ポーズ中の場合
+
+				// 更新しない状況にする
+				bUpdate = false;
+			}
+		}
+
+		if (bUpdate)
+		{ // 更新する状況の場合
+
+			//--------------------------------------------
 			//	頂点座標と頂点カラーの情報をずらす
-			//------------------------------------------------
+			//--------------------------------------------
 			for (int nCntVtx = m_nNumVtx - 1; nCntVtx >= MAX_OFFSET; nCntVtx--)
 			{ // 維持する頂点の最大数分繰り返す (オフセット分は含まない)
 
@@ -247,9 +260,9 @@ void CObjectOrbit::Draw(void)
 				m_orbit.pColPoint[nCntVtx] = m_orbit.pColPoint[nCntVtx - MAX_OFFSET];
 			}
 
-			//------------------------------------------------
+			//--------------------------------------------
 			//	最新の頂点座標と頂点カラーの情報を設定
-			//------------------------------------------------
+			//--------------------------------------------
 			for (int nCntOff = 0; nCntOff < MAX_OFFSET; nCntOff++)
 			{ // オフセットの数分繰り返す
 

@@ -30,10 +30,10 @@
 #define INIT_POSV	(D3DXVECTOR3(0.0f, 0.0f, -600.0f))	// 視点の初期値
 
 // カメラ回転マクロ
-#define ROTATE_INITPOSR	(D3DXVECTOR3(0.0f, 0.0f, 0.0f))	// 回転カメラの注視点の初期値
-#define ROTATE_INITROT	(D3DXVECTOR2(1.2f, 0.0f))		// 回転カメラの向き初期値
+#define ROTATE_INITPOSR	(D3DXVECTOR3(0.0f, 200.0f, 0.0f))	// 回転カメラの注視点の初期値
+#define ROTATE_INITROT	(D3DXVECTOR2(1.3f, 0.0f))			// 回転カメラの向き初期値
 
-#define ROTATE_INITDIS	(-6000.0f)	// 回転カメラの距離初期値
+#define ROTATE_INITDIS	(-2000.0f)	// 回転カメラの距離初期値
 #define ROTATE_ADDROTY	(0.005f)	// 回転カメラの向き加算量Y
 
 // カメラ寄り引きマクロ
@@ -318,7 +318,7 @@ void CCamera::SetDestBargaining(void)
 		float fLength = 0.0f;	// ターゲット距離のカメラ注視点設定用の割合
 
 		float fDisTarget = CSceneGame::GetPlayer()->GetDistanceTarget();	// ターゲットとプレイヤー間の距離
-		float fRateTarget = (1.0f / CSceneGame::GetStage()->GetStageLimit().fRadius) * fDisTarget;	// ターゲットとプレイヤー間の距離の割合
+		float fRateTarget = (1.0f / CScene::GetStage()->GetStageLimit().fRadius) * fDisTarget;	// ターゲットとプレイヤー間の距離の割合
 
 		//----------------------------------------------------
 		//	向きの更新
@@ -549,7 +549,7 @@ void CCamera::Bargaining(void)
 		float fLength = 0.0f;	// ターゲット距離のカメラ注視点設定用の割合
 
 		float fDisTarget = CSceneGame::GetPlayer()->GetDistanceTarget();	// ターゲットとプレイヤー間の距離
-		float fRateTarget = (1.0f / CSceneGame::GetStage()->GetStageLimit().fRadius) * fDisTarget;	// ターゲットとプレイヤー間の距離の割合
+		float fRateTarget = (1.0f / CScene::GetStage()->GetStageLimit().fRadius) * fDisTarget;	// ターゲットとプレイヤー間の距離の割合
 
 		//----------------------------------------------------
 		//	向きの更新

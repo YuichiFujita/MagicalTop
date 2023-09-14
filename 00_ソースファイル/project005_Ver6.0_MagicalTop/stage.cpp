@@ -177,13 +177,10 @@ void CStage::Update(void)
 {
 	// 変数を宣言
 	D3DXVECTOR3 posCenter;	// 世界の中心位置
-	D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
-	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
-	D3DXVECTOR3 rotBarrier = m_pStageBarrier->GetRotation();		// バリア表示向き
-	float fRadiusPlayer = CSceneGame::GetPlayer()->GetRadius();		// プレイヤー半径
+	D3DXVECTOR3 rotBarrier = m_pStageBarrier->GetRotation();	// バリア表示向き
 
 	// 世界の中心位置を設定
-	posCenter = posTarget;	// ターゲットの位置を設定
+	posCenter = m_stageLimit.center;	// 中心座標を設定
 	posCenter.y = CScene::GetField()->GetPosition().y;	// 地面の縦位置を設定
 
 	//--------------------------------------------------------
@@ -204,41 +201,6 @@ void CStage::Update(void)
 	// バリア表示の向きを設定
 	rotBarrier.y -= AREA_ROT;
 	m_pStageBarrier->SetRotation(rotBarrier);
-
-	//--------------------------------------------------------
-	//	エリア表示の更新
-	//--------------------------------------------------------
-	// 現在のエリアを初期化
-	m_area = AREA_NONE;
-
-	for (int nCntArea = 0; nCntArea < AREA_MAX; nCntArea++)
-	{ // エリアの最大数分繰り返す
-
-		if (collision::Circle2D(posPlayer, posTarget, fRadiusPlayer, m_aStageArea[nCntArea].fRadius))
-		{ // エリア内の場合
-
-			// エリア表示の大きさを設定
-			m_pStageArea->SetScaling(D3DXVECTOR3(m_aStageArea[nCntArea].fRadius * 2.0f, 0.0f, m_aStageArea[nCntArea].fRadius * 2.0f));
-
-			// エリア表示の色を設定
-			m_pStageArea->SetColor(m_aStageArea[nCntArea].col);
-
-			// 現在のエリアを設定
-			m_area = (AREA)nCntArea;
-
-			// 処理を抜ける
-			break;
-		}
-	}
-
-	// エリア表示の位置を設定
-	m_pStageArea->SetPosition(posCenter);
-
-	// エリア表示の向きを設定
-	m_pStageArea->SetRotation(D3DXVECTOR3(0.0f, atan2f(posPlayer.x - posTarget.x, posPlayer.z - posTarget.z), 0.0f));
-
-	// 例外処理
-	assert(m_area != AREA_NONE);	// エリア外
 
 	//--------------------------------------------------------
 	//	風の生成
@@ -270,6 +232,50 @@ void CStage::Update(void)
 			// 風の生成
 			CWind::Create(spawnPos);
 		}
+	}
+
+	//--------------------------------------------------------
+	//	エリア表示の更新
+	//--------------------------------------------------------
+	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
+	{ // プレイヤー・ターゲットが使用されている場合
+
+		// 変数を宣言
+		D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+		D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+		float fRadiusPlayer = CSceneGame::GetPlayer()->GetRadius();		// プレイヤー半径
+
+		// 現在のエリアを初期化
+		m_area = AREA_NONE;
+
+		for (int nCntArea = 0; nCntArea < AREA_MAX; nCntArea++)
+		{ // エリアの最大数分繰り返す
+
+			if (collision::Circle2D(posPlayer, posTarget, fRadiusPlayer, m_aStageArea[nCntArea].fRadius))
+			{ // エリア内の場合
+
+				// エリア表示の大きさを設定
+				m_pStageArea->SetScaling(D3DXVECTOR3(m_aStageArea[nCntArea].fRadius * 2.0f, 0.0f, m_aStageArea[nCntArea].fRadius * 2.0f));
+
+				// エリア表示の色を設定
+				m_pStageArea->SetColor(m_aStageArea[nCntArea].col);
+
+				// 現在のエリアを設定
+				m_area = (AREA)nCntArea;
+
+				// 処理を抜ける
+				break;
+			}
+		}
+
+		// エリア表示の位置を設定
+		m_pStageArea->SetPosition(posCenter);
+
+		// エリア表示の向きを設定
+		m_pStageArea->SetRotation(D3DXVECTOR3(0.0f, atan2f(posPlayer.x - posTarget.x, posPlayer.z - posTarget.z), 0.0f));
+
+		// 例外処理
+		assert(m_area != AREA_NONE);	// エリア外
 	}
 }
 
@@ -394,6 +400,15 @@ CStage::StageArea CStage::GetStageArea(const int nID) const
 }
 
 //============================================================
+//	ステージエリアの描画設定処理
+//============================================================
+void CStage::SetEnableDrawArea(const bool bDraw)
+{
+	// 引数の描画状況をステージエリアに設定
+	m_pStageArea->SetEnableDraw(bDraw);
+}
+
+//============================================================
 //	プレイヤーの現在エリア取得処理
 //============================================================
 CStage::AREA CStage::GetAreaPlayer(void) const
@@ -424,6 +439,15 @@ CStage::StageArea CStage::GetStageBarrier(void) const
 {
 	// ステージバリアを返す
 	return m_stageBarrier;
+}
+
+//============================================================
+//	ステージバリアの描画設定処理
+//============================================================
+void CStage::SetEnableDrawBarrier(const bool bDraw)
+{
+	// 引数の描画状況をステージバリアに設定
+	m_pStageBarrier->SetEnableDraw(bDraw);
 }
 
 //============================================================
@@ -522,7 +546,86 @@ void CStage::LoadSetup(CStage *pStage)
 			// ファイルから文字列を読み込む
 			nEnd = fscanf(pFile, "%s", &aString[0]);	// テキストを読み込みきったら EOF を返す
 
-			if (strcmp(&aString[0], "BARRIERSET") == 0)
+			// ステージ範囲の設定
+			if (strcmp(&aString[0], "LIMITSET") == 0)
+			{ // 読み込んだ文字列が LIMITSET の場合
+
+				do
+				{ // 読み込んだ文字列が END_LIMITSET ではない場合ループ
+
+					// ファイルから文字列を読み込む
+					fscanf(pFile, "%s", &aString[0]);
+
+					if (strcmp(&aString[0], "CENTER") == 0)
+					{ // 読み込んだ文字列が CENTER の場合
+
+						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+						fscanf(pFile, "%f", &stageLimit.center.x);	// 中心座標Xを読み込む
+						fscanf(pFile, "%f", &stageLimit.center.y);	// 中心座標Yを読み込む
+						fscanf(pFile, "%f", &stageLimit.center.z);	// 中心座標Zを読み込む
+					}
+					else if (strcmp(&aString[0], "NEAR") == 0)
+					{ // 読み込んだ文字列が NEAR の場合
+
+						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+						fscanf(pFile, "%f", &stageLimit.fNear);		// 前位置を読み込む
+
+						// 制限モードを矩形範囲に設定
+						stageLimit.mode = LIMIT_BOX;
+					}
+					else if (strcmp(&aString[0], "FAR") == 0)
+					{ // 読み込んだ文字列が FAR の場合
+
+						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+						fscanf(pFile, "%f", &stageLimit.fFar);		// 後位置を読み込む
+
+						// 制限モードを矩形範囲に設定
+						stageLimit.mode = LIMIT_BOX;
+					}
+					else if (strcmp(&aString[0], "RIGHT") == 0)
+					{ // 読み込んだ文字列が RIGHT の場合
+
+						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+						fscanf(pFile, "%f", &stageLimit.fRight);	// 右位置を読み込む
+
+						// 制限モードを矩形範囲に設定
+						stageLimit.mode = LIMIT_BOX;
+					}
+					else if (strcmp(&aString[0], "LEFT") == 0)
+					{ // 読み込んだ文字列が LEFT の場合
+
+						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+						fscanf(pFile, "%f", &stageLimit.fLeft);		// 左位置を読み込む
+
+						// 制限モードを矩形範囲に設定
+						stageLimit.mode = LIMIT_BOX;
+					}
+					else if (strcmp(&aString[0], "RADIUS") == 0)
+					{ // 読み込んだ文字列が RADIUS の場合
+
+						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+						fscanf(pFile, "%f", &stageLimit.fRadius);	// 半径を読み込む
+
+						// 制限モードを円範囲に設定
+						stageLimit.mode = LIMIT_CIRCLE;
+					}
+					else if (strcmp(&aString[0], "FIELD") == 0)
+					{ // 読み込んだ文字列が FIELD の場合
+
+						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
+						fscanf(pFile, "%f", &stageLimit.fField);	// 地面位置を読み込む
+					}
+				} while (strcmp(&aString[0], "END_LIMITSET") != 0);	// 読み込んだ文字列が END_LIMITSET ではない場合ループ
+
+				// ステージ範囲の設定
+				pStage->SetStageLimit(stageLimit);
+
+				// 例外処理
+				assert(stageLimit.mode == CStage::LIMIT_CIRCLE);	// 範囲制限エラー
+			}
+
+			// ステージバリアの設定
+			else if (strcmp(&aString[0], "BARRIERSET") == 0)
 			{ // 読み込んだ文字列が BARRIERSET の場合
 
 				do
@@ -601,76 +704,6 @@ void CStage::LoadSetup(CStage *pStage)
 
 				// 例外処理
 				assert(nArea == AREA_MAX);	// エリア未設定
-			}
-
-			// ステージ範囲の設定
-			else if (strcmp(&aString[0], "LIMITSET") == 0)
-			{ // 読み込んだ文字列が LIMITSET の場合
-
-				do
-				{ // 読み込んだ文字列が END_LIMITSET ではない場合ループ
-
-					// ファイルから文字列を読み込む
-					fscanf(pFile, "%s", &aString[0]);
-
-					if (strcmp(&aString[0], "NEAR") == 0)
-					{ // 読み込んだ文字列が NEAR の場合
-
-						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
-						fscanf(pFile, "%f", &stageLimit.fNear);		// 前位置を読み込む
-
-						// 制限モードを矩形範囲に設定
-						stageLimit.mode = LIMIT_BOX;
-					}
-					else if (strcmp(&aString[0], "FAR") == 0)
-					{ // 読み込んだ文字列が FAR の場合
-
-						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
-						fscanf(pFile, "%f", &stageLimit.fFar);		// 後位置を読み込む
-
-						// 制限モードを矩形範囲に設定
-						stageLimit.mode = LIMIT_BOX;
-					}
-					else if (strcmp(&aString[0], "RIGHT") == 0)
-					{ // 読み込んだ文字列が RIGHT の場合
-
-						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
-						fscanf(pFile, "%f", &stageLimit.fRight);	// 右位置を読み込む
-
-						// 制限モードを矩形範囲に設定
-						stageLimit.mode = LIMIT_BOX;
-					}
-					else if (strcmp(&aString[0], "LEFT") == 0)
-					{ // 読み込んだ文字列が LEFT の場合
-
-						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
-						fscanf(pFile, "%f", &stageLimit.fLeft);		// 左位置を読み込む
-
-						// 制限モードを矩形範囲に設定
-						stageLimit.mode = LIMIT_BOX;
-					}
-					else if (strcmp(&aString[0], "RADIUS") == 0)
-					{ // 読み込んだ文字列が RADIUS の場合
-
-						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
-						fscanf(pFile, "%f", &stageLimit.fRadius);	// 半径を読み込む
-
-						// 制限モードを円範囲に設定
-						stageLimit.mode = LIMIT_CIRCLE;
-					}
-					else if (strcmp(&aString[0], "FIELD") == 0)
-					{ // 読み込んだ文字列が FIELD の場合
-
-						fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
-						fscanf(pFile, "%f", &stageLimit.fField);	// 地面位置を読み込む
-					}
-				} while (strcmp(&aString[0], "END_LIMITSET") != 0);	// 読み込んだ文字列が END_LIMITSET ではない場合ループ
-
-				// ステージ範囲の設定
-				pStage->SetStageLimit(stageLimit);
-
-				// 例外処理
-				assert(stageLimit.mode == CStage::LIMIT_CIRCLE);	// 範囲制限エラー
 			}
 		} while (nEnd != EOF);	// 読み込んだ文字列が EOF ではない場合ループ
 		

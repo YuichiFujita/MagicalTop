@@ -140,7 +140,7 @@ void CExpOrb::Update(void)
 		posExp.y += EXP_PLUS_POSY;
 
 		// ステージ範囲外の補正
-		CSceneGame::GetStage()->LimitPosition(posExp, EXP_RADIUS);
+		CScene::GetStage()->LimitPosition(posExp, EXP_RADIUS);
 
 		// 位置を設定
 		CObjectBillboard::SetPosition(posExp);
@@ -243,7 +243,7 @@ void CExpOrb::RandomSpawn(const int nNum, const D3DXVECTOR3& rPos)
 		pos.z = rPos.z + (float)(rand() % (EXP_SPAWN_RADIUS * 2) - EXP_SPAWN_RADIUS + 1);
 
 		// 生成位置を補正
-		CSceneGame::GetStage()->LimitPosition(pos, EXP_RADIUS);
+		CScene::GetStage()->LimitPosition(pos, EXP_RADIUS);
 
 		// 経験値オブジェクトの生成
 		CExpOrb::Create(pos);

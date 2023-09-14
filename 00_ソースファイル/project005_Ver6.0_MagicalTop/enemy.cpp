@@ -726,7 +726,7 @@ void CEnemy::Spawn(void)
 	D3DXVECTOR3 posEnemy = GetPosition();		// 敵位置
 	D3DXVECTOR3 moveEnemy = GetMovePosition();	// 敵移動量
 	D3DXVECTOR3 posWarning = posEnemy;			// 警告位置
-	D3DXVECTOR3 posBarrier = CSceneGame::GetStage()->GetStageBarrierPosition();	// バリア位置
+	D3DXVECTOR3 posBarrier = CScene::GetStage()->GetStageBarrierPosition();	// バリア位置
 
 	// 過去位置の更新
 	UpdateOldPosition();
@@ -1347,7 +1347,7 @@ void CEnemyHuman::CollisionFind(void)
 	D3DXVECTOR3 posLook		= VEC3_ZERO;			// 視認対象位置
 	float fLookRadius		= 0.0f;					// 視認対象半径
 
-	D3DXVECTOR3 posBarrier	= CSceneGame::GetStage()->GetStageBarrierPosition();	// バリア位置
+	D3DXVECTOR3 posBarrier	= CScene::GetStage()->GetStageBarrierPosition();	// バリア位置
 	float fPlayerRadius		= CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
 
 	// 過去位置の更新
@@ -1602,7 +1602,7 @@ void CEnemyCar::Spawn(void)
 	D3DXVECTOR3 posEnemy = GetPosition();		// 敵位置
 	D3DXVECTOR3 moveEnemy = GetMovePosition();	// 敵移動量
 	D3DXVECTOR3 posWarning = posEnemy;			// 警告位置
-	D3DXVECTOR3 posBarrier = CSceneGame::GetStage()->GetStageBarrierPosition();	// バリア位置
+	D3DXVECTOR3 posBarrier = CScene::GetStage()->GetStageBarrierPosition();	// バリア位置
 
 	// 過去位置の更新
 	UpdateOldPosition();
@@ -1688,7 +1688,7 @@ void CEnemyCar::CollisionFind(void)
 	D3DXVECTOR3 rotCannon	= VEC3_ZERO;			// キャノン向き
 	float fLookRadius		= 0.0f;					// 視認対象半径
 
-	D3DXVECTOR3 posBarrier	= CSceneGame::GetStage()->GetStageBarrierPosition();	// バリア位置
+	D3DXVECTOR3 posBarrier	= CScene::GetStage()->GetStageBarrierPosition();	// バリア位置
 	float fPlayerRadius		= CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
 
 	// 過去位置の更新

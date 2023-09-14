@@ -163,7 +163,7 @@ void CMagic::Update(void)
 		// バブルレベルを加算
 		m_pBubble->AddLevel(1);
 
-		if (CSceneGame::GetStage()->CollisionBarrier(m_pos, m_pBubble->GetRadius())
+		if (CScene::GetStage()->CollisionBarrier(m_pos, m_pBubble->GetRadius())
 		||  m_pBubble->GetLevel() >= m_statusInfo.nLife)
 		{ // 消失範囲に当たっているまたは寿命が来た場合
 
@@ -175,7 +175,7 @@ void CMagic::Update(void)
 
 	case STATE_DELETE:	// 消失状態
 		
-		if (CSceneGame::GetStage()->CollisionBarrier(m_pos, m_pBubble->GetRadius()))
+		if (CScene::GetStage()->CollisionBarrier(m_pos, m_pBubble->GetRadius()))
 		{ // バリアの判定内の場合
 
 			// 移動量を設定

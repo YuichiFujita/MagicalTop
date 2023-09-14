@@ -16,8 +16,6 @@
 
 #include "stage.h"
 #include "target.h"
-#include "player.h"
-
 #include "field.h"
 #include "sea.h"
 #include "wall.h"
@@ -27,9 +25,10 @@
 #include "weed.h"
 
 //************************************************************
-//	静的メンバ変数宣言
+//	マクロ定義
 //************************************************************
-CStage	*CSceneTitle::m_pStage = NULL;	// ステージ
+#define CREATE_FLOWER	(30)	// マナフラワーの生成数
+#define CREATE_WEED		(200)	// 草の生成数
 
 //************************************************************
 //	子クラス [CSceneTitle] のメンバ関数
@@ -57,10 +56,11 @@ CSceneTitle::~CSceneTitle()
 HRESULT CSceneTitle::Init(void)
 {
 	// 変数を宣言
-	CWaveManager::SEASON season = (CWaveManager::SEASON)(rand() % CWaveManager::SEASON_MAX + 1);	// 季節
+	CWaveManager::SEASON season = (CWaveManager::SEASON)(rand() % CWaveManager::SEASON_MAX);	// 季節
 
 	// ポインタを宣言
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+	CTarget *pTarget = NULL;	// ターゲット設定用
 
 	// メンバ変数を初期化
 	m_pObject2D = NULL;	// タイトル表示用
@@ -84,23 +84,13 @@ HRESULT CSceneTitle::Init(void)
 	m_pObject2D->BindTexture(pTexture->Regist("data\\TEXTURE\\title000.png"));
 
 	//--------------------------------------------------------
-	//	オブジェクト生成
+	//	オブジェクト生成・初期化
 	//--------------------------------------------------------
-	// ステージの生成
-	m_pStage = CStage::Create();
-	if (UNUSED(m_pStage))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
+	// シーンの初期化
+	CScene::Init();
 
 	// 海オブジェクトの生成
 	CSea::Create();
-
-	// シーンの初期化
-	CScene::Init();
 
 	// 壁オブジェクトの生成
 	CWall::Create(CWall::TEXTURE_NORMAL, D3DXVECTOR3( 0.0f,    0.0f, -3000.0f), D3DXToRadian(D3DXVECTOR3(0.0f, 0.0f, 0.0f)),   D3DXVECTOR2(6000.0f, 400.0f), XCOL_WHITE, POSGRID2(18, 1));
@@ -116,32 +106,26 @@ HRESULT CSceneTitle::Init(void)
 	// 空オブジェクトの生成
 	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
 
-#if 0
 	// ターゲットオブジェクトの生成
-	m_pTarget = CTarget::Create(CTarget::MODEL_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO);
-	if (UNUSED(m_pTarget))
+	pTarget = CTarget::Create(CTarget::MODEL_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO);
+	if (UNUSED(pTarget))
 	{ // 非使用中の場合
 
 		// 失敗を返す
 		assert(false);
 		return E_FAIL;
 	}
-
-	// プレイヤーオブジェクトの生成
-	m_pPlayer = CPlayer::Create(VEC3_ZERO, VEC3_ZERO);
-	if (UNUSED(m_pPlayer))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-#endif
 
 	//--------------------------------------------------------
 	//	初期設定
 	//--------------------------------------------------------
-#if 0
+	// ステージエリア・バリアの描画を停止
+	GetStage()->SetEnableDrawArea(false);
+	GetStage()->SetEnableDrawBarrier(false);
+
+	// ターゲット体力の描画を停止
+	pTarget->SetEnableDrawLife(false);
+
 	// マナフラワーセットアップの読込
 	CFlower::LoadSetup();
 
@@ -149,11 +133,10 @@ HRESULT CSceneTitle::Init(void)
 	CWeed::LoadSetup();
 
 	// マナフラワーランダム生成
-	CFlower::RandomSpawn(30, CFlower::TYPE_SPRING);	// TODO：定数変更
+	CFlower::RandomSpawn(CREATE_FLOWER, CFlower::TYPE_SPRING);
 
 	// 草ランダム生成
-	CWeed::RandomSpawn(200, CWeed::TYPE_SPRING);	// TODO：定数変更
-#endif
+	CWeed::RandomSpawn(CREATE_WEED, CWeed::TYPE_SPRING);
 
 	// 季節を設定
 	GetField()->SetSeason(season);	// 地面を変更
@@ -164,6 +147,9 @@ HRESULT CSceneTitle::Init(void)
 	CManager::GetCamera()->SetState(CCamera::STATE_ROTATE);	// カメラを回転状態に設定
 	CManager::GetCamera()->SetDestRotate();	// 目標位置を設定
 
+	// BGMの再生
+	//CManager::GetSound()->Play(CSound::LABEL_BGM_000);
+
 	// 成功を返す
 	return S_OK;
 }
@@ -173,15 +159,6 @@ HRESULT CSceneTitle::Init(void)
 //============================================================
 HRESULT CSceneTitle::Uninit(void)
 {
-	// ステージの破棄
-	if (FAILED(CStage::Release(m_pStage)))
-	{ // 破棄に失敗した場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
 	// オブジェクト2Dの終了
 	m_pObject2D->Uninit();
 
@@ -209,16 +186,6 @@ void CSceneTitle::Update(void)
 		CManager::SetScene(MODE_GAME);	// ゲーム画面
 	}
 
-#if 0
-	if (USED(m_pStage))
-	{ // 使用中の場合
-
-		// ステージの更新
-		m_pStage->Update();
-	}
-	else { assert(false); }	// 非使用中
-#endif
-
 	// シーンの更新
 	CScene::Update();
 }
@@ -229,13 +196,4 @@ void CSceneTitle::Update(void)
 void CSceneTitle::Draw(void)
 {
 
-}
-
-//============================================================
-//	ステージ取得処理
-//============================================================
-CStage *CSceneTitle::GetStage(void)
-{
-	// ステージのポインタを返す
-	return m_pStage;
 }

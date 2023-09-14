@@ -567,7 +567,7 @@ CPlayer *CPlayer::Create(D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 		}
 
 		// 位置を設定
-		CSceneGame::GetStage()->LimitPosition(pos, PLAY_RADIUS);	// ステージ範囲外補正
+		CScene::GetStage()->LimitPosition(pos, PLAY_RADIUS);	// ステージ範囲外補正
 		pos.y = CScene::GetField()->GetPositionHeight(pos);		// 高さを地面に設定
 		pPlayer->SetPosition(pos);
 
@@ -630,10 +630,10 @@ void CPlayer::HitVortex
 	// バリアの衝突判定
 	collision::CirclePillar
 	( // 引数
-		rPlayerPos,											// 判定位置
-		CSceneGame::GetStage()->GetStageBarrierPosition(),	// 判定目標位置
-		PLAY_RADIUS,										// 判定半径
-		CSceneGame::GetStage()->GetStageBarrier().fRadius	// 判定目標半径
+		rPlayerPos,										// 判定位置
+		CScene::GetStage()->GetStageBarrierPosition(),	// 判定目標位置
+		PLAY_RADIUS,									// 判定半径
+		CScene::GetStage()->GetStageBarrier().fRadius	// 判定目標半径
 	);
 
 	if (m_state == STATE_NORMAL)
@@ -686,7 +686,7 @@ void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 	m_nCounterState = 0;	// カウンターを初期化
 
 	// 位置を補正・設定
-	CSceneGame::GetStage()->LimitPosition(rPos, PLAY_RADIUS);	// ステージ範囲外の補正
+	CScene::GetStage()->LimitPosition(rPos, PLAY_RADIUS);	// ステージ範囲外の補正
 	Land(rPos);				// 着地判定
 	SetPosition(rPos);		// 位置を設定
 
@@ -839,7 +839,7 @@ CPlayer::MOTION CPlayer::UpdateNormal(void)
 	Pos(posPlayer);
 
 	// ステージ範囲外の補正
-	CSceneGame::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
+	CScene::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
 
 	// 着地判定
 	Land(posPlayer);
@@ -852,11 +852,11 @@ CPlayer::MOTION CPlayer::UpdateNormal(void)
 	CollisionEnemy(posPlayer);	// 敵
 
 	// バリアとの当たり判定
-	if (CSceneGame::GetStage()->CollisionBarrier(posPlayer, PLAY_RADIUS))
+	if (CScene::GetStage()->CollisionBarrier(posPlayer, PLAY_RADIUS))
 	{ // 当たっていた場合
 
 		// 渦巻きこまれヒット
-		HitVortex(posPlayer, CSceneGame::GetStage()->GetStageBarrierPosition());
+		HitVortex(posPlayer, CScene::GetStage()->GetStageBarrierPosition());
 	}
 
 	// 位置を更新
@@ -972,7 +972,7 @@ void CPlayer::UpdateBlowAway(void)
 	CollisionTarget(posPlayer);
 
 	// ステージ範囲外の補正
-	CSceneGame::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
+	CScene::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
 
 	// 着地判定
 	if (Land(posPlayer))
@@ -1094,7 +1094,7 @@ CPlayer::MOTION CPlayer::Move(void)
 	// 変数を宣言
 	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
-	float fDisTargRate = (1.0f / CSceneGame::GetStage()->GetStageLimit().fRadius) * m_fDisTarget;	// ターゲット距離の割合
+	float fDisTargRate = (1.0f / CScene::GetStage()->GetStageLimit().fRadius) * m_fDisTarget;	// ターゲット距離の割合
 
 	// ターゲット方向のベクトルを計算
 	vecTarg = posTarget - posPlayer;
@@ -1386,7 +1386,7 @@ bool CPlayer::Land(D3DXVECTOR3& rPos)
 
 	// 着地判定
 	if (CScene::GetField()->LandPosition(rPos, m_move)
-	||  CSceneGame::GetStage()->LandPosition(rPos, m_move, 0.0f))
+	||  CScene::GetStage()->LandPosition(rPos, m_move, 0.0f))
 	{ // プレイヤーが着地していた場合
 
 		// 着地している状態にする

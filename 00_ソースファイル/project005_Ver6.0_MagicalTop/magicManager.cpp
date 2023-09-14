@@ -135,7 +135,7 @@ void CMagicManager::Update(void)
 			if (m_nCounterState < HEAL_CNT)
 			{ // カウンターが一定値より小さい場合
 
-				if (CSceneGame::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
+				if (CScene::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
 				{ // セーフエリアにいる場合
 
 					// カウンターを加算
@@ -182,7 +182,7 @@ void CMagicManager::Update(void)
 
 		case STATE_HEAL:	// 回復状態
 
-			if (CSceneGame::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
+			if (CScene::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
 			{ // セーフエリアにいる場合
 
 				if (m_pMana->GetNum() < MAX_MANA)
@@ -195,7 +195,7 @@ void CMagicManager::Update(void)
 			else
 			{ // セーフエリアにいない場合
 
-				if (m_nCounterHeal < HEALCNT_AREAMUL * CSceneGame::GetStage()->GetAreaPlayer())
+				if (m_nCounterHeal < HEALCNT_AREAMUL * CScene::GetStage()->GetAreaPlayer())
 				{ // カウンターが一定値より小さい場合
 
 					// カウンターを加算

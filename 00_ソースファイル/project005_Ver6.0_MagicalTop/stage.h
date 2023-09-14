@@ -77,13 +77,14 @@ public:
 	// ステージ範囲構造体
 	typedef struct
 	{
-		LIMIT mode;		// 制限モード
-		float fNear;	// 制限位置 (前)
-		float fFar;		// 制限位置 (後)
-		float fRight;	// 制限位置 (右)
-		float fLeft;	// 制限位置 (左)
-		float fRadius;	// 制限位置 (半径)
-		float fField;	// 制限位置 (地面)
+		LIMIT mode;			// 制限モード
+		D3DXVECTOR3 center;	// 中心座標
+		float fNear;		// 制限位置 (前)
+		float fFar;			// 制限位置 (後)
+		float fRight;		// 制限位置 (右)
+		float fLeft;		// 制限位置 (左)
+		float fRadius;		// 制限位置 (半径)
+		float fField;		// 制限位置 (地面)
 	}StageLimit;
 
 	// メンバ関数
@@ -95,14 +96,18 @@ public:
 	void LimitPosition(D3DXVECTOR3& rPos, const float fRadius);	// 位置補正
 	bool LandPosition(D3DXVECTOR3& rPos, D3DXVECTOR3& rMove, const float fHeight);	// 範囲外着地
 
-	void SetStageLimit(const StageLimit& rLimit);				// ステージ範囲設定
-	StageLimit GetStageLimit(void) const;						// ステージ範囲取得
+	void SetStageLimit(const StageLimit& rLimit);	// ステージ範囲設定
+	StageLimit GetStageLimit(void) const;			// ステージ範囲取得
+
 	void SetStageArea(const int nID, const StageArea& rArea);	// ステージエリア設定
 	StageArea GetStageArea(const int nID) const;				// ステージエリア取得
-	void SetStageBarrier(const StageArea& rBarrier);			// ステージバリア設定
-	StageArea GetStageBarrier(void) const;						// ステージバリア取得
-	D3DXVECTOR3 GetStageBarrierPosition(void) const;			// ステージバリアの位置取得
+	void SetEnableDrawArea(const bool bDraw);					// ステージエリア描画設定
 	AREA GetAreaPlayer(void) const;								// プレイヤーの現在エリア取得
+
+	void SetStageBarrier(const StageArea& rBarrier);	// ステージバリア設定
+	StageArea GetStageBarrier(void) const;				// ステージバリア取得
+	void SetEnableDrawBarrier(const bool bDraw);		// ステージバリア描画設定
+	D3DXVECTOR3 GetStageBarrierPosition(void) const;	// ステージバリアの位置取得
 
 	// 静的メンバ関数
 	static CStage *Create(void);				// 生成

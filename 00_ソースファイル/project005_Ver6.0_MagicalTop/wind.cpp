@@ -14,7 +14,6 @@
 #include "collision.h"
 #include "scene.h"
 #include "sceneGame.h"
-#include "target.h"
 #include "stage.h"
 #include "field.h"
 
@@ -99,7 +98,7 @@ void CWind::Update(void)
 	case STATE_NORMAL:
 
 		// ターゲット方向のベクトルを計算
-		vecTarg = CSceneGame::GetTarget()->GetPosition() - m_pos;
+		vecTarg = CScene::GetStage()->GetStageLimit().center - m_pos;
 		vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
 		D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトルの正規化
 
@@ -122,7 +121,7 @@ void CWind::Update(void)
 		}
 
 		// バリアとの当たり判定
-		if (collision::Circle2D(CSceneGame::GetStage()->GetStageBarrierPosition(), m_pos, COLL_RADIUS, 0.0f))
+		if (collision::Circle2D(CScene::GetStage()->GetStageBarrierPosition(), m_pos, COLL_RADIUS, 0.0f))
 		{ // 当たっていた場合
 
 			// 状態を設定

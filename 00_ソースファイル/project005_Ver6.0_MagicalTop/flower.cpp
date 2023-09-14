@@ -310,31 +310,26 @@ void CFlower::RandomSpawn
 	// 変数を宣言
 	D3DXVECTOR3 posSet;	// 位置設定用
 	D3DXVECTOR3 rotSet;	// 向き設定用
+	D3DXVECTOR3 posTarget = CScene::GetStage()->GetStageLimit().center;	// 中心座標
+	int nLimit = (int)CScene::GetStage()->GetStageLimit().fRadius;		// ステージ範囲
 
-	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();		// ターゲット位置
-	int nLimit = (int)CSceneGame::GetStage()->GetStageLimit().fRadius;	// ステージ範囲
+	for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
+	{ // 生成数分繰り返す
 
-	if (USED(CSceneGame::GetTarget()))
-	{ // ターゲットが使用されている場合
+		// 生成位置を設定
+		posSet.x = (float)(rand() % (nLimit * 2) - nLimit + 1);
+		posSet.y = 0.0f;
+		posSet.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
 
-		for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
-		{ // 生成数分繰り返す
+		// 生成位置を補正
+		collision::CirclePillar(posSet, posTarget, m_aStatusInfo[type].size.x, CScene::GetStage()->GetStageBarrier().fRadius + PREC_PLUS_RADIUS);	// ターゲット内部の生成防止
+		CScene::GetStage()->LimitPosition(posSet, m_aStatusInfo[type].size.x);	// ステージ範囲外の生成防止
 
-			// 生成位置を設定
-			posSet.x = (float)(rand() % (nLimit * 2) - nLimit + 1);
-			posSet.y = 0.0f;
-			posSet.z = (float)(rand() % (nLimit * 2) - nLimit + 1);
+		// 生成向きを設定
+		rotSet = D3DXVECTOR3(0.0f, atan2f(posSet.x - posTarget.x, posSet.z - posTarget.z), 0.0f);
 
-			// 生成位置を補正
-			collision::CirclePillar(posSet, posTarget, m_aStatusInfo[type].size.x, CSceneGame::GetStage()->GetStageBarrier().fRadius + PREC_PLUS_RADIUS);	// ターゲット内部の生成防止
-			CSceneGame::GetStage()->LimitPosition(posSet, m_aStatusInfo[type].size.x);	// ステージ範囲外の生成防止
-
-			// 生成向きを設定
-			rotSet = D3DXVECTOR3(0.0f, atan2f(posSet.x - posTarget.x, posSet.z - posTarget.z), 0.0f);
-
-			// マナフラワーオブジェクトの生成
-			CFlower::Create(type, posSet, rotSet, m_aStatusInfo[type].size, m_aStatusInfo[type].nLife);
-		}
+		// マナフラワーオブジェクトの生成
+		CFlower::Create(type, posSet, rotSet, m_aStatusInfo[type].size, m_aStatusInfo[type].nLife);
 	}
 }
 
@@ -431,49 +426,53 @@ bool CFlower::CollisionPlayer(const D3DXVECTOR3& rPos)
 	// 変数を宣言
 	bool bDeath = false;	// 死亡状況
 
-	// ポインタを宣言
-	CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー情報
+	if (USED(CSceneGame::GetPlayer()))
+	{ // プレイヤーが使用されている場合
 
-	// 変数を宣言
-	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();	// プレイヤー位置
-	D3DXVECTOR3 sizeFlower = GetScaling();	// マナフラワー大きさ
+		// ポインタを宣言
+		CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー情報
 
-	if (pPlayer->GetState() == CPlayer::STATE_NORMAL)
-	{ // プレイヤーが通常状態の場合
+		// 変数を宣言
+		D3DXVECTOR3 posPlayer = pPlayer->GetPosition();	// プレイヤー位置
+		D3DXVECTOR3 sizeFlower = GetScaling();	// マナフラワー大きさ
 
-		if (collision::Circle2D(rPos, posPlayer, sizeFlower.x * 0.5f, pPlayer->GetRadius()))
-		{ // プレイヤーに当たっていた場合
+		if (pPlayer->GetState() == CPlayer::STATE_NORMAL)
+		{ // プレイヤーが通常状態の場合
 
-			if (pPlayer->GetMotionType() != CPlayer::MOTION_ACCELE)
-			{ // プレイヤーが加速中ではない場合
+			if (collision::Circle2D(rPos, posPlayer, sizeFlower.x * 0.5f, pPlayer->GetRadius()))
+			{ // プレイヤーに当たっていた場合
 
-				// 体力を減算
-				m_nLife--;
-			}
-			else
-			{ // プレイヤーが加速中の場合
+				if (pPlayer->GetMotionType() != CPlayer::MOTION_ACCELE)
+				{ // プレイヤーが加速中ではない場合
 
-				// 体力を0にする
-				m_nLife = 0;
-			}
+					// 体力を減算
+					m_nLife--;
+				}
+				else
+				{ // プレイヤーが加速中の場合
 
-			if (m_nLife > 0)
-			{ // 体力が残っていた場合
+					// 体力を0にする
+					m_nLife = 0;
+				}
 
-				// 変数を宣言
-				float fCol = (MIN_COL / (float)m_aStatusInfo[m_type].nLife) * m_nLife + fabsf(MIN_COL - 1.0f);	// マナフラワー色
+				if (m_nLife > 0)
+				{ // 体力が残っていた場合
 
-				// マナフラワーの色を設定
-				SetColor(D3DXCOLOR(fCol, fCol, fCol, 1.0f));
+					// 変数を宣言
+					float fCol = (MIN_COL / (float)m_aStatusInfo[m_type].nLife) * m_nLife + fabsf(MIN_COL - 1.0f);	// マナフラワー色
 
-				// 状態を設定
-				m_state = STATE_DAMAGE;	// ダメージ状態
-			}
-			else
-			{ // 体力がなくなった場合
+					// マナフラワーの色を設定
+					SetColor(D3DXCOLOR(fCol, fCol, fCol, 1.0f));
 
-				// 死亡状態にする
-				bDeath = true;
+					// 状態を設定
+					m_state = STATE_DAMAGE;	// ダメージ状態
+				}
+				else
+				{ // 体力がなくなった場合
+
+					// 死亡状態にする
+					bDeath = true;
+				}
 			}
 		}
 	}
