@@ -93,10 +93,10 @@ HRESULT CSceneGame::Init(void)
 	m_pTimerManager = CTimerManager::Create
 	( // ˆø”
 		TIME_POS,		// ˆÊ’u
-		TIME_VAL_SIZE,	// ‹æØ‚è‚Ì‘å‚«‚³
-		TIME_PART_SIZE,	// ”Žš‚Ì‘å‚«‚³
-		TIME_VAL_SPACE,	// ‹æØ‚è‚Ì‹ó”’
-		TIME_PART_SPACE	// ”Žš‚Ì‹ó”’
+		TIME_VAL_SIZE,	// ”Žš‚Ì‘å‚«‚³
+		TIME_PART_SIZE,	// ‹æØ‚è‚Ì‘å‚«‚³
+		TIME_VAL_SPACE,	// ”Žš‚Ì‹ó”’
+		TIME_PART_SPACE	// ‹æØ‚è‚Ì‹ó”’
 	);
 	if (UNUSED(m_pTimerManager))
 	{ // ”ñŽg—p’†‚Ìê‡

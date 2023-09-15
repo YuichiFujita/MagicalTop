@@ -71,9 +71,12 @@ public:
 	void AddMSec(long nMSec);	// ƒ~ƒŠ•b‰ÁZ
 	void AddSec(long nSec);		// •b‰ÁZ
 	void AddMin(long nMin);		// •ª‰ÁZ
-	int GetMSec(void);	// ƒ~ƒŠ•bæ“¾
-	int GetSec(void);	// •bæ“¾
-	int GetMin(void);	// •ªæ“¾
+	void SetMSec(long nMSec);	// ƒ~ƒŠ•bİ’è
+	void SetSec(long nSec);		// •bİ’è
+	void SetMin(long nMin);		// •ªİ’è
+	int GetMSec(void);			// ƒ~ƒŠ•bæ“¾
+	int GetSec(void);			// •bæ“¾
+	int GetMin(void);			// •ªæ“¾
 	void SetPosition(const D3DXVECTOR3& rPos);		// ˆÊ’uİ’è
 	void SetScalingValue(const D3DXVECTOR3& rSize);	// ‹æØ‚è‚Ì‘å‚«‚³İ’è
 	void SetScalingPart(const D3DXVECTOR3& rSize);	// ”š‚Ì‘å‚«‚³İ’è
@@ -92,10 +95,10 @@ public:
 	static CTimerManager *Create	// ¶¬
 	( // ˆø”
 		const D3DXVECTOR3& rPos,		// ˆÊ’u
-		const D3DXVECTOR3& rSizeValue,	// ‹æØ‚è‚Ì‘å‚«‚³
-		const D3DXVECTOR3& rSizePart,	// ”š‚Ì‘å‚«‚³
-		const D3DXVECTOR3& rSpaceValue,	// ‹æØ‚è‚Ì‹ó”’
-		const D3DXVECTOR3& rSpacePart	// ”š‚Ì‹ó”’
+		const D3DXVECTOR3& rSizeValue,	// ”š‚Ì‘å‚«‚³
+		const D3DXVECTOR3& rSizePart,	// ‹æØ‚è‚Ì‘å‚«‚³
+		const D3DXVECTOR3& rSpaceValue,	// ”š‚Ì‹ó”’
+		const D3DXVECTOR3& rSpacePart	// ‹æØ‚è‚Ì‹ó”’
 	);
 	static HRESULT Release(CTimerManager *&prTimerManager);	// ”jŠü
 

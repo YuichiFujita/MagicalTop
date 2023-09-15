@@ -24,8 +24,9 @@
 //************************************************************
 //	前方宣言
 //************************************************************
-class CObject2D;	// オブジェクト2Dクラス
-class CScore;		// スコアオブジェクトクラス
+class CObject2D;		// オブジェクト2Dクラス
+class CScore;			// スコアオブジェクトクラス
+class CTimerManager;	// タイマーマネージャークラス
 
 //************************************************************
 //	クラス定義
@@ -88,8 +89,10 @@ private:
 	// メンバ変数
 	CObject2D *m_apResult[NUM_RESULT];	// リザルト表示の情報
 	CObject2D *m_pScoreLogo;	// スコアロゴの情報
+	CObject2D *m_pTimeLogo;		// タイムロゴの情報
 	CObject2D *m_pFade;		// フェードの情報
 	CScore *m_pScore;		// スコアの情報
+	CTimerManager *m_pTime;	// タイムの情報
 	STATE m_state;			// 状態
 	int m_nCounterState;	// 状態管理カウンター
 	float m_fScale;			// ポリゴン拡大率

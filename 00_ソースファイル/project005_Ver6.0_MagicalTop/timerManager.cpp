@@ -14,6 +14,8 @@
 #include "value.h"
 #include "object2D.h"
 
+#include "input.h"
+
 //************************************************************
 //	マクロ定義
 //************************************************************
@@ -219,10 +221,10 @@ void CTimerManager::Update(void)
 CTimerManager *CTimerManager::Create
 (
 	const D3DXVECTOR3& rPos,		// 位置
-	const D3DXVECTOR3& rSizeValue,	// 区切りの大きさ
-	const D3DXVECTOR3& rSizePart,	// 数字の大きさ
-	const D3DXVECTOR3& rSpaceValue,	// 区切りの空白
-	const D3DXVECTOR3& rSpacePart	// 数字の空白
+	const D3DXVECTOR3& rSizeValue,	// 数字の大きさ
+	const D3DXVECTOR3& rSizePart,	// 区切りの大きさ
+	const D3DXVECTOR3& rSpaceValue,	// 数字の空白
+	const D3DXVECTOR3& rSpacePart	// 区切りの空白
 )
 {
 	// ポインタを宣言
@@ -417,6 +419,78 @@ void CTimerManager::AddMin(long nMin)
 
 		// 数字のテクスチャ座標の設定
 		SetTexNum();
+	}
+}
+
+//============================================================
+//	ミリ秒の設定処理
+//============================================================
+void CTimerManager::SetMSec(long nMSec)
+{
+	if (!m_bStop)
+	{ // 停止中ではない場合
+
+		// 加算量の補正
+		useful::LimitNum(nMSec, -(long)m_dwTime, (long)TIME_NUMMAX);
+
+		// 時刻を設定
+		m_dwStartTime = timeGetTime() - nMSec;
+		m_dwTempTime = m_dwStartTime;
+
+		// 値を初期化
+		m_dwTime			= 0;	// 経過時間
+		m_dwStopStartTime	= 0;	// 停止開始時間
+		m_dwStopTime		= 0;	// 停止時間
+	}
+}
+
+//============================================================
+//	秒の設定処理
+//============================================================
+void CTimerManager::SetSec(long nSec)
+{
+	if (!m_bStop)
+	{ // 停止中ではない場合
+
+		// 引数をミリ秒に変換
+		nSec *= 1000;
+
+		// 加算量の補正
+		useful::LimitNum(nSec, -(long)m_dwTime, (long)TIME_NUMMAX);
+
+		// 時刻を設定
+		m_dwStartTime = timeGetTime() - nSec;
+		m_dwTempTime = m_dwStartTime;
+
+		// 値を初期化
+		m_dwTime			= 0;	// 経過時間
+		m_dwStopStartTime	= 0;	// 停止開始時間
+		m_dwStopTime		= 0;	// 停止時間
+	}
+}
+
+//============================================================
+//	分の設定処理
+//============================================================
+void CTimerManager::SetMin(long nMin)
+{
+	if (!m_bStop)
+	{ // 停止中ではない場合
+
+		// 引数をミリ秒に変換
+		nMin *= 60000;
+
+		// 加算量の補正
+		useful::LimitNum(nMin, -(long)m_dwTime, (long)TIME_NUMMAX);
+
+		// 時刻を設定
+		m_dwStartTime = timeGetTime() - nMin;
+		m_dwTempTime = m_dwStartTime;
+
+		// 値を初期化
+		m_dwTime			= 0;	// 経過時間
+		m_dwStopStartTime	= 0;	// 停止開始時間
+		m_dwStopTime		= 0;	// 停止時間
 	}
 }
 

@@ -15,6 +15,7 @@
 #include "model.h"
 #include "object2D.h"
 #include "score.h"
+#include "timerManager.h"
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -38,19 +39,29 @@ const char *CResultManager::mc_apTextureFile[] =	// テクスチャ定数
 #define ADD_ALPHA	(0.008f)	// α値の加算量
 #define SET_ALPHA	(0.6f)		// α値の停止値
 
-#define POS_RESULT_MISSION	(D3DXVECTOR3(360.0f, 160.0f, 0.0f))	// リザルト表示のMISSION位置
-#define POS_RESULT_RESULT	(D3DXVECTOR3(920.0f, 160.0f, 0.0f))	// リザルト表示のRESULT位置
+#define POS_RESULT_MISSION	(D3DXVECTOR3(360.0f, 170.0f, 0.0f))	// リザルト表示のMISSION位置
+#define POS_RESULT_RESULT	(D3DXVECTOR3(920.0f, 170.0f, 0.0f))	// リザルト表示のRESULT位置
 #define SIZE_RESULT			(D3DXVECTOR3(632.7f, 203.5f, 0.0f))	// リザルト表示の大きさ
 #define SET_RESULT_SCALE	(15.0f)	// リザルト表示の初期拡大率
 #define SUB_RESULT_SCALE	(0.65f)	// リザルト表示拡大率の減算量
 
-#define POS_SCORE_LOGO	(D3DXVECTOR3(250.0f, 340.0f, 0.0f))		// スコアロゴ位置
+#define POS_SCORE_LOGO	(D3DXVECTOR3(250.0f, 400.0f, 0.0f))		// スコアロゴ位置
 #define SIZE_SCORE_LOGO	(D3DXVECTOR3(487.5f, 154.7f, 0.0f))		// スコアロゴ大きさ
-#define POS_SCORE		(D3DXVECTOR3(490.0f, 340.0f, 0.0f))		// スコア位置
+#define POS_SCORE		(D3DXVECTOR3(490.0f, 400.0f, 0.0f))		// スコア位置
 #define SIZE_SCORE		(D3DXVECTOR3(94.0f, 112.0f, 0.0f))		// スコア大きさ
 #define SPACE_SCORE		(D3DXVECTOR3(SIZE_SCORE.x, 0.0f, 0.0f))	// スコア空白
 #define SET_SCORE_SCALE	(8.0f)	// スコア表示の初期拡大率
 #define SUB_SCORE_SCALE	(0.95f)	// スコア表示拡大率の減算量
+
+#define POS_TIME_LOGO	(D3DXVECTOR3(250.0f, 560.0f, 0.0f))			// タイムロゴ位置
+#define SIZE_TIME_LOGO	(D3DXVECTOR3(487.5f, 154.7f, 0.0f))			// タイムロゴ大きさ
+#define POS_TIME		(D3DXVECTOR3(490.0f, 560.0f, 0.0f))			// タイム位置
+#define SIZE_TIME_VAL	(D3DXVECTOR3(94.0f, 112.0f, 0.0f))			// タイム数字大きさ
+#define SIZE_TIME_PART	(D3DXVECTOR3(48.0f, 112.0f, 0.0f))			// タイム区切り大きさ
+#define SPACE_TIME_VAL	(D3DXVECTOR3(SIZE_TIME_VAL.x, 0.0f, 0.0f))	// タイム数字空白
+#define SPACE_TIME_PART	(D3DXVECTOR3(SIZE_TIME_PART.x, 0.0f, 0.0f))	// タイム区切り空白
+#define SET_TIME_SCALE	(1.0f)	// タイム表示の初期拡大率
+#define SUB_TIME_SCALE	(0.95f)	// タイム表示拡大率の減算量
 
 //************************************************************
 //	親クラス [CResultManager] のメンバ関数
@@ -63,8 +74,10 @@ CResultManager::CResultManager()
 	// メンバ変数をクリア
 	memset(&m_apResult[0], 0, sizeof(m_apResult));	// リザルト表示の情報
 	m_pScoreLogo	= NULL;			// スコアロゴの情報
+	m_pTimeLogo		= NULL;			// タイムロゴの情報
 	m_pFade			= NULL;			// フェードの情報
 	m_pScore		= NULL;			// スコアの情報
+	m_pTime			= NULL;			// タイムの情報
 	m_state			= STATE_NONE;	// 状態
 	m_nCounterState	= 0;			// 状態管理カウンター
 	m_fScale		= 0.0f;			// ポリゴン拡大率
@@ -96,8 +109,10 @@ HRESULT CResultManager::Init(void)
 	// メンバ変数を初期化
 	memset(&m_apResult[0], 0, sizeof(m_apResult));	// リザルト表示の情報
 	m_pScoreLogo	= NULL;			// スコアロゴの情報
+	m_pTimeLogo		= NULL;			// タイムロゴの情報
 	m_pFade			= NULL;			// フェードの情報
 	m_pScore		= NULL;			// スコアの情報
+	m_pTime			= NULL;			// タイムの情報
 	m_state			= STATE_FADEIN;	// 状態
 	m_nCounterState	= 0;			// 状態管理カウンター
 	m_fScale		= 0.0f;			// ポリゴン拡大率
@@ -207,6 +222,61 @@ HRESULT CResultManager::Init(void)
 	// スコアを設定
 	m_pScore->Set(12345678);	// TODO：獲得スコアの保持
 
+	//--------------------------------------------------------
+	//	タイムロゴ表示の生成・設定
+	//--------------------------------------------------------
+	// タイムロゴ表示の生成
+	m_pTimeLogo = CObject2D::Create
+	( // 引数
+		POS_TIME_LOGO,					// 位置
+		SIZE_TIME_LOGO * SET_TIME_SCALE	// 大きさ
+	);
+	if (UNUSED(m_pTimeLogo))
+	{ // 生成に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// テクスチャを登録・割当
+	m_pTimeLogo->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_TIME]));
+
+	// 優先順位を設定
+	m_pTimeLogo->SetPriority(RESULT_PRIO);
+
+	// 描画をしない設定にする
+	//m_pTimeLogo->SetEnableDraw(false);
+
+	//--------------------------------------------------------
+	//	タイム表示の生成・設定
+	//--------------------------------------------------------
+	// タイマーマネージャーの生成
+	m_pTime = CTimerManager::Create
+	( // 引数
+		POS_TIME,							// 位置
+		SIZE_TIME_VAL * SET_TIME_SCALE,		// 数字の大きさ
+		SIZE_TIME_PART * SET_TIME_SCALE,	// 区切りの大きさ
+		SPACE_TIME_VAL,						// 数字の空白
+		SPACE_TIME_PART						// 区切りの空白
+	);
+	if (UNUSED(m_pTime))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 優先順位を設定
+	m_pTime->SetPriority(RESULT_PRIO);
+
+	// 描画をしない設定にする
+	//m_pTime->SetEnableDraw(false);
+
+	// タイムを設定
+	//m_pTime->(12345678);	// TODO：タイムの保持
+
 	// 成功を返す
 	return S_OK;
 }
@@ -225,6 +295,12 @@ void CResultManager::Uninit(void)
 
 	// スコアロゴ表示の終了
 	m_pScoreLogo->Uninit();
+
+	// タイムロゴ表示の終了
+	m_pTimeLogo->Uninit();
+
+	// タイムの終了
+	m_pTime->Uninit();
 
 	// フェードの終了
 	m_pFade->Uninit();
@@ -309,6 +385,12 @@ void CResultManager::Update(void)
 
 	// スコアロゴ表示の更新
 	m_pScoreLogo->Update();
+
+	// タイムロゴ表示の更新
+	m_pTimeLogo->Update();
+
+	// タイムの更新
+	m_pTime->Update();
 
 	// フェードの更新
 	m_pFade->Update();
