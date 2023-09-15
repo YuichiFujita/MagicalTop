@@ -68,12 +68,12 @@ public:
 	void Start(void);	// Œv‘ªŠJn
 	void End(void);		// Œv‘ªI—¹
 	void EnableStop(const bool bStop);	// Œv‘ª’â~İ’è
-	void AddMSec(long nMSec);	// ƒ~ƒŠ•b‰ÁZ
-	void AddSec(long nSec);		// •b‰ÁZ
-	void AddMin(long nMin);		// •ª‰ÁZ
-	void SetMSec(long nMSec);	// ƒ~ƒŠ•bİ’è
-	void SetSec(long nSec);		// •bİ’è
-	void SetMin(long nMin);		// •ªİ’è
+	bool AddMSec(long nMSec);	// ƒ~ƒŠ•b‰ÁZ
+	bool AddSec(long nSec);		// •b‰ÁZ
+	bool AddMin(long nMin);		// •ª‰ÁZ
+	bool SetMSec(long nMSec);	// ƒ~ƒŠ•bİ’è
+	bool SetSec(long nSec);		// •bİ’è
+	bool SetMin(long nMin);		// •ªİ’è
 	int GetMSec(void);			// ƒ~ƒŠ•bæ“¾
 	int GetSec(void);			// •bæ“¾
 	int GetMin(void);			// •ªæ“¾

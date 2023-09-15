@@ -246,7 +246,7 @@ HRESULT CResultManager::Init(void)
 	m_pTimeLogo->SetPriority(RESULT_PRIO);
 
 	// 描画をしない設定にする
-	//m_pTimeLogo->SetEnableDraw(false);
+	m_pTimeLogo->SetEnableDraw(false);
 
 	//--------------------------------------------------------
 	//	タイム表示の生成・設定
@@ -272,10 +272,15 @@ HRESULT CResultManager::Init(void)
 	m_pTime->SetPriority(RESULT_PRIO);
 
 	// 描画をしない設定にする
-	//m_pTime->SetEnableDraw(false);
+	m_pTime->SetEnableDraw(false);
 
 	// タイムを設定
-	//m_pTime->(12345678);	// TODO：タイムの保持
+	if (!m_pTime->SetMSec(20000))	// TODO：タイムの保持
+	{ // 設定に失敗した場合
+
+		// 失敗を返す
+		return E_FAIL;
+	}
 
 	// 成功を返す
 	return S_OK;

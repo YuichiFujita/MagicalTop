@@ -353,10 +353,24 @@ void CTimerManager::EnableStop(const bool bStop)
 //============================================================
 //	ミリ秒の加算処理
 //============================================================
-void CTimerManager::AddMSec(long nMSec)
+bool CTimerManager::AddMSec(long nMSec)
 {
-	if (!m_bStop)
-	{ // 停止中ではない場合
+	// 変数を宣言
+	bool bAdd = true;	// 加算状況
+
+	if (m_state == STATE_MEASURE)
+	{ // タイムの計測中の場合
+
+		if (m_bStop)
+		{ // 停止中の場合
+
+			// 加算できない状態にする
+			bAdd = false;
+		}
+	}
+
+	if (bAdd)
+	{ // 加算できる場合
 
 		// 加算量の補正
 		useful::LimitNum(nMSec, -(long)m_dwTime, (long)TIME_NUMMAX);
@@ -370,15 +384,32 @@ void CTimerManager::AddMSec(long nMSec)
 		// 数字のテクスチャ座標の設定
 		SetTexNum();
 	}
+
+	// 加算の成功失敗を返す
+	return bAdd;
 }
 
 //============================================================
 //	秒の加算処理
 //============================================================
-void CTimerManager::AddSec(long nSec)
+bool CTimerManager::AddSec(long nSec)
 {
-	if (!m_bStop)
-	{ // 停止中ではない場合
+	// 変数を宣言
+	bool bAdd = true;	// 加算状況
+
+	if (m_state == STATE_MEASURE)
+	{ // タイムの計測中の場合
+
+		if (m_bStop)
+		{ // 停止中の場合
+
+			// 加算できない状態にする
+			bAdd = false;
+		}
+	}
+
+	if (bAdd)
+	{ // 加算できる場合
 
 		// 引数をミリ秒に変換
 		nSec *= 1000;
@@ -395,15 +426,32 @@ void CTimerManager::AddSec(long nSec)
 		// 数字のテクスチャ座標の設定
 		SetTexNum();
 	}
+
+	// 加算の成功失敗を返す
+	return bAdd;
 }
 
 //============================================================
 //	分の加算処理
 //============================================================
-void CTimerManager::AddMin(long nMin)
+bool CTimerManager::AddMin(long nMin)
 {
-	if (!m_bStop)
-	{ // 停止中ではない場合
+	// 変数を宣言
+	bool bAdd = true;	// 加算状況
+
+	if (m_state == STATE_MEASURE)
+	{ // タイムの計測中の場合
+
+		if (m_bStop)
+		{ // 停止中の場合
+
+			// 加算できない状態にする
+			bAdd = false;
+		}
+	}
+
+	if (bAdd)
+	{ // 加算できる場合
 
 		// 引数をミリ秒に変換
 		nMin *= 60000;
@@ -420,15 +468,32 @@ void CTimerManager::AddMin(long nMin)
 		// 数字のテクスチャ座標の設定
 		SetTexNum();
 	}
+
+	// 加算の成功失敗を返す
+	return bAdd;
 }
 
 //============================================================
 //	ミリ秒の設定処理
 //============================================================
-void CTimerManager::SetMSec(long nMSec)
+bool CTimerManager::SetMSec(long nMSec)
 {
-	if (!m_bStop)
-	{ // 停止中ではない場合
+	// 変数を宣言
+	bool bSet = true;	// 設定状況
+
+	if (m_state == STATE_MEASURE)
+	{ // タイムの計測中の場合
+
+		if (m_bStop)
+		{ // 停止中の場合
+
+			// 設定できない状態にする
+			bSet = false;
+		}
+	}
+
+	if (bSet)
+	{ // 設定できる場合
 
 		// 加算量の補正
 		useful::LimitNum(nMSec, -(long)m_dwTime, (long)TIME_NUMMAX);
@@ -437,20 +502,42 @@ void CTimerManager::SetMSec(long nMSec)
 		m_dwStartTime = timeGetTime() - nMSec;
 		m_dwTempTime = m_dwStartTime;
 
+		// 現在の計測ミリ秒を設定
+		m_dwTime = timeGetTime() - m_dwTempTime;
+
 		// 値を初期化
-		m_dwTime			= 0;	// 経過時間
 		m_dwStopStartTime	= 0;	// 停止開始時間
 		m_dwStopTime		= 0;	// 停止時間
+
+		// 数字のテクスチャ座標の設定
+		SetTexNum();
 	}
+
+	// 設定の成功失敗を返す
+	return bSet;
 }
 
 //============================================================
 //	秒の設定処理
 //============================================================
-void CTimerManager::SetSec(long nSec)
+bool CTimerManager::SetSec(long nSec)
 {
-	if (!m_bStop)
-	{ // 停止中ではない場合
+	// 変数を宣言
+	bool bSet = true;	// 設定状況
+
+	if (m_state == STATE_MEASURE)
+	{ // タイムの計測中の場合
+
+		if (m_bStop)
+		{ // 停止中の場合
+
+			// 設定できない状態にする
+			bSet = false;
+		}
+	}
+
+	if (bSet)
+	{ // 設定できる場合
 
 		// 引数をミリ秒に変換
 		nSec *= 1000;
@@ -462,20 +549,42 @@ void CTimerManager::SetSec(long nSec)
 		m_dwStartTime = timeGetTime() - nSec;
 		m_dwTempTime = m_dwStartTime;
 
+		// 現在の計測ミリ秒を設定
+		m_dwTime = timeGetTime() - m_dwTempTime;
+
 		// 値を初期化
-		m_dwTime			= 0;	// 経過時間
 		m_dwStopStartTime	= 0;	// 停止開始時間
 		m_dwStopTime		= 0;	// 停止時間
+
+		// 数字のテクスチャ座標の設定
+		SetTexNum();
 	}
+
+	// 設定の成功失敗を返す
+	return bSet;
 }
 
 //============================================================
 //	分の設定処理
 //============================================================
-void CTimerManager::SetMin(long nMin)
+bool CTimerManager::SetMin(long nMin)
 {
-	if (!m_bStop)
-	{ // 停止中ではない場合
+	// 変数を宣言
+	bool bSet = true;	// 設定状況
+
+	if (m_state == STATE_MEASURE)
+	{ // タイムの計測中の場合
+
+		if (m_bStop)
+		{ // 停止中の場合
+
+			// 設定できない状態にする
+			bSet = false;
+		}
+	}
+
+	if (bSet)
+	{ // 設定できる場合
 
 		// 引数をミリ秒に変換
 		nMin *= 60000;
@@ -487,11 +596,19 @@ void CTimerManager::SetMin(long nMin)
 		m_dwStartTime = timeGetTime() - nMin;
 		m_dwTempTime = m_dwStartTime;
 
+		// 現在の計測ミリ秒を設定
+		m_dwTime = timeGetTime() - m_dwTempTime;
+
 		// 値を初期化
-		m_dwTime			= 0;	// 経過時間
 		m_dwStopStartTime	= 0;	// 停止開始時間
 		m_dwStopTime		= 0;	// 停止時間
+
+		// 数字のテクスチャ座標の設定
+		SetTexNum();
 	}
+
+	// 設定の成功失敗を返す
+	return bSet;
 }
 
 //============================================================
