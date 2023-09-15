@@ -58,7 +58,7 @@ HRESULT CScore::Init(void)
 	{ // ƒXƒRƒA‚ÌŒ…”•ªŒJ‚è•Ô‚·
 
 		// ”š‚Ì¶¬
-		m_apValue[nCntScore] = CValue::Create(CValue::TEXTURE_NORMAL);
+		m_apValue[nCntScore] = CValue::Create(CValue::TEXTURE_MAGIC_GREEN);
 		if (UNUSED(m_apValue[nCntScore]))
 		{ // ¶¬‚É¸”s‚µ‚½ê‡
 

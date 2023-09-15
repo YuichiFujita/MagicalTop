@@ -44,10 +44,10 @@ const char *CResultManager::mc_apTextureFile[] =	// テクスチャ定数
 #define SET_RESULT_SCALE	(15.0f)	// リザルト表示の初期拡大率
 #define SUB_RESULT_SCALE	(0.65f)	// リザルト表示拡大率の減算量
 
-#define POS_SCORE_LOGO	(D3DXVECTOR3(290.0f, 340.0f, 0.0f))		// スコアロゴ位置
+#define POS_SCORE_LOGO	(D3DXVECTOR3(250.0f, 340.0f, 0.0f))		// スコアロゴ位置
 #define SIZE_SCORE_LOGO	(D3DXVECTOR3(487.5f, 154.7f, 0.0f))		// スコアロゴ大きさ
-#define POS_SCORE		(D3DXVECTOR3(520.0f, 340.0f, 0.0f))		// スコア位置
-#define SIZE_SCORE		(D3DXVECTOR3(84.0f, 112.0f, 0.0f))		// スコア大きさ
+#define POS_SCORE		(D3DXVECTOR3(490.0f, 340.0f, 0.0f))		// スコア位置
+#define SIZE_SCORE		(D3DXVECTOR3(94.0f, 112.0f, 0.0f))		// スコア大きさ
 #define SPACE_SCORE		(D3DXVECTOR3(SIZE_SCORE.x, 0.0f, 0.0f))	// スコア空白
 #define SET_SCORE_SCALE	(8.0f)	// スコア表示の初期拡大率
 #define SUB_SCORE_SCALE	(0.95f)	// スコア表示拡大率の減算量
@@ -205,7 +205,7 @@ HRESULT CResultManager::Init(void)
 	m_pScore->SetEnableDraw(false);
 
 	// スコアを設定
-	m_pScore->Set(100);	// TODO：獲得スコアの保持
+	m_pScore->Set(12345678);	// TODO：獲得スコアの保持
 
 	// 成功を返す
 	return S_OK;

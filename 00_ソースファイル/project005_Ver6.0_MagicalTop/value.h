@@ -26,8 +26,10 @@ public:
 	// テクスチャ列挙
 	typedef enum
 	{
-		TEXTURE_NORMAL = 0,	// 通常テクスチャ
-		TEXTURE_MAX			// この列挙型の総数
+		TEXTURE_NORMAL = 0,		// 通常テクスチャ
+		TEXTURE_MAGIC_WHITE,	// 魔法っぽいテクスチャ (白)
+		TEXTURE_MAGIC_GREEN,	// 魔法っぽいテクスチャ (緑)
+		TEXTURE_MAX				// この列挙型の総数
 	}TEXTURE;
 
 	// コンストラクタ
