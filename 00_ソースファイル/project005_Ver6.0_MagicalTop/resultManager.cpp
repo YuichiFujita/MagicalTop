@@ -34,9 +34,10 @@ const char *CResultManager::mc_apTextureFile[] =	// テクスチャ定数
 //************************************************************
 #define RESULT_PRIO	(6)		// リザルトの優先順位
 
+#define INITCOL_FADE	(XCOL_AWHITE)	// α値の初期値
+#define SETCOL_FADE	(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.6f))	// α値の停止値
 #define SIZE_FADE	(SCREEN_SIZE * 0.95f)	// フェードの大きさ
 #define ADD_ALPHA	(0.008f)	// α値の加算量
-#define SET_ALPHA	(0.6f)		// α値の停止値
 
 #define POS_RESULT_MISSION	(D3DXVECTOR3(360.0f, 170.0f, 0.0f))	// リザルト表示のMISSION位置
 #define POS_RESULT_RESULT	(D3DXVECTOR3(920.0f, 170.0f, 0.0f))	// リザルト表示のRESULT位置
@@ -127,7 +128,7 @@ HRESULT CResultManager::Init(void)
 		SCREEN_CENT,	// 位置
 		SIZE_FADE,		// 大きさ
 		VEC3_ZERO,		// 向き
-		XCOL_AWHITE		// 色
+		INITCOL_FADE	// 色
 	);
 	if (UNUSED(m_pFade))
 	{ // 生成に失敗した場合
@@ -513,7 +514,7 @@ void CResultManager::UpdateFade(void)
 	// 変数を宣言
 	D3DXCOLOR colFade = m_pFade->GetColor();	// フェードの色
 
-	if (colFade.a < SET_ALPHA)
+	if (colFade.a < SETCOL_FADE.a)
 	{ // 透明量が設定値未満の場合
 
 		// 透明度を加算
@@ -523,7 +524,7 @@ void CResultManager::UpdateFade(void)
 	{ // 透明量が設定値以上の場合
 
 		// 透明度を補正
-		colFade.a = SET_ALPHA;
+		colFade.a = SETCOL_FADE.a;
 
 		for (int nCntResult = 0; nCntResult < NUM_RESULT; nCntResult++)
 		{ // リザルト表示の総数分繰り返す
@@ -617,7 +618,7 @@ void CResultManager::UpdateTime(void)
 		// 拡大率を減算
 		m_fScale -= SUB_TIME_SCALE;
 
-		// スコア表示の大きさを設定
+		// タイム表示の大きさを設定
 		m_pTimeLogo->SetScaling(SIZE_TIME_LOGO * m_fScale);
 		m_pTime->SetScalingValue(SIZE_TIME_VAL * m_fScale);
 		m_pTime->SetScalingPart(SIZE_TIME_PART * m_fScale);
@@ -628,7 +629,7 @@ void CResultManager::UpdateTime(void)
 		// 拡大率を補正
 		m_fScale = 1.0f;
 
-		// スコア表示の大きさを設定
+		// タイム表示の大きさを設定
 		m_pTimeLogo->SetScaling(SIZE_TIME_LOGO);
 		m_pTime->SetScalingValue(SIZE_TIME_VAL);
 		m_pTime->SetScalingPart(SIZE_TIME_PART);
@@ -675,36 +676,36 @@ void CResultManager::UpdateBack(void)
 //============================================================
 void CResultManager::SkipStaging(void)
 {
-#if 0
+	// リザルト表示の描画をONにし、大きさを設定
+	for (int nCntResult = 0; nCntResult < NUM_RESULT; nCntResult++)
+	{ // リザルト表示の総数分繰り返す
 
-	// リザルトロゴを表示状態に設定・大きさを正規化
-	for (int nCntResult = 0; nCntResult < LOGO_MAX; nCntResult++)
-	{ // リザルトロゴの総数分繰り返す
+		// リザルト表示の描画開始
+		m_apResult[nCntResult]->SetEnableDraw(true);
 
-		// リザルトロゴの大きさを設定
-		m_apLogo[nCntResult]->SetScaling(SIZE_RESULT);
-
-		// 描画をする設定にする
-		m_apLogo[nCntResult]->SetEnableDraw(true);
+		// リザルト表示の大きさを設定
+		m_apResult[nCntResult]->SetScaling(SIZE_RESULT);
 	}
 
-	// 選択表示を描画する設定にする
-	for (int nCntResult = 0; nCntResult < SELECT_MAX; nCntResult++)
-	{ // 選択項目の総数分繰り返す
+	// スコア表示をONにする
+	m_pScoreLogo->SetEnableDraw(true);
+	m_pScore->SetEnableDraw(true);
 
-		m_apSelect[nCntResult]->SetEnableDraw(true);
-	}
+	// スコア表示の大きさを設定
+	m_pScoreLogo->SetScaling(SIZE_SCORE_LOGO);
+	m_pScore->SetScaling(SIZE_SCORE);
 
-	// フェードを透明にする
-	m_pFade->SetColor(XCOL_ABLACK);
+	// タイム表示をONにする
+	m_pTimeLogo->SetEnableDraw(true);
+	m_pTime->SetEnableDraw(true);
 
-	// 選択背景を描画する設定にする
-	m_pSelectBG->SetEnableDraw(true);
+	// タイム表示の大きさを設定
+	m_pTimeLogo->SetScaling(SIZE_TIME_LOGO);
+	m_pTime->SetScalingValue(SIZE_TIME_VAL);
+	m_pTime->SetScalingPart(SIZE_TIME_PART);
 
-	// カメラの更新を再開
-	CManager::GetCamera()->SetEnableUpdate(true);
-
-#endif
+	// フェードの透明度を設定
+	m_pFade->SetColor(SETCOL_FADE);
 
 	// 状態を変更
 	m_state = STATE_WAIT;	// 遷移待機状態
