@@ -54,6 +54,8 @@ public:
 		STATE_RESULT,		// リザルト表示状態
 		STATE_SCORE_WAIT,	// スコア表示待機状態
 		STATE_SCORE,		// スコア表示状態
+		STATE_TIME_WAIT,	// タイム表示待機状態
+		STATE_TIME,			// タイム表示状態
 		STATE_WAIT,			// 遷移待機状態
 		STATE_MAX			// この列挙型の総数
 	}STATE;
@@ -65,9 +67,9 @@ public:
 	~CResultManager();
 
 	// メンバ関数
-	HRESULT Init(void);	// 初期化
-	void Uninit(void);	// 終了
-	void Update(void);	// 更新
+	HRESULT Init(void);		// 初期化
+	HRESULT Uninit(void);	// 終了
+	void Update(void);		// 更新
 
 	// 静的メンバ関数
 	static CResultManager *Create(void);	// 生成
@@ -78,10 +80,11 @@ private:
 	void UpdateFade(void);		// フェードイン
 	void UpdateResult(void);	// リザルト表示
 	void UpdateScore(void);		// スコア表示
-	bool UpdateDrawWait(void);	// 表示待機
+	void UpdateTime(void);		// タイム表示
 	void UpdateBack(void);		// 遷移決定
 	void SkipStaging(void);		// 演出スキップ
 	void SetTexResult(void);	// リザルト表示のテクスチャ設定
+	bool UpdateDrawWait(const int nWait);	// 表示待機
 
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];	// テクスチャ定数

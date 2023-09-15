@@ -33,7 +33,6 @@ const char *CResultManager::mc_apTextureFile[] =	// テクスチャ定数
 //	マクロ定義
 //************************************************************
 #define RESULT_PRIO	(6)		// リザルトの優先順位
-#define WAIT_CNT	(10)	// 状態変更待機フレーム数
 
 #define SIZE_FADE	(SCREEN_SIZE * 0.95f)	// フェードの大きさ
 #define ADD_ALPHA	(0.008f)	// α値の加算量
@@ -45,14 +44,16 @@ const char *CResultManager::mc_apTextureFile[] =	// テクスチャ定数
 #define SET_RESULT_SCALE	(15.0f)	// リザルト表示の初期拡大率
 #define SUB_RESULT_SCALE	(0.65f)	// リザルト表示拡大率の減算量
 
+#define SCORE_WAIT_CNT	(10)	// スコア表示状態への変更待機フレーム数
 #define POS_SCORE_LOGO	(D3DXVECTOR3(250.0f, 400.0f, 0.0f))		// スコアロゴ位置
 #define SIZE_SCORE_LOGO	(D3DXVECTOR3(487.5f, 154.7f, 0.0f))		// スコアロゴ大きさ
 #define POS_SCORE		(D3DXVECTOR3(490.0f, 400.0f, 0.0f))		// スコア位置
 #define SIZE_SCORE		(D3DXVECTOR3(94.0f, 112.0f, 0.0f))		// スコア大きさ
 #define SPACE_SCORE		(D3DXVECTOR3(SIZE_SCORE.x, 0.0f, 0.0f))	// スコア空白
 #define SET_SCORE_SCALE	(8.0f)	// スコア表示の初期拡大率
-#define SUB_SCORE_SCALE	(0.95f)	// スコア表示拡大率の減算量
+#define SUB_SCORE_SCALE	(0.4f)	// スコア表示拡大率の減算量
 
+#define TIME_WAIT_CNT	(3)	// タイム表示状態への変更待機フレーム数
 #define POS_TIME_LOGO	(D3DXVECTOR3(250.0f, 560.0f, 0.0f))			// タイムロゴ位置
 #define SIZE_TIME_LOGO	(D3DXVECTOR3(487.5f, 154.7f, 0.0f))			// タイムロゴ大きさ
 #define POS_TIME		(D3DXVECTOR3(490.0f, 560.0f, 0.0f))			// タイム位置
@@ -60,8 +61,8 @@ const char *CResultManager::mc_apTextureFile[] =	// テクスチャ定数
 #define SIZE_TIME_PART	(D3DXVECTOR3(48.0f, 112.0f, 0.0f))			// タイム区切り大きさ
 #define SPACE_TIME_VAL	(D3DXVECTOR3(SIZE_TIME_VAL.x, 0.0f, 0.0f))	// タイム数字空白
 #define SPACE_TIME_PART	(D3DXVECTOR3(SIZE_TIME_PART.x, 0.0f, 0.0f))	// タイム区切り空白
-#define SET_TIME_SCALE	(1.0f)	// タイム表示の初期拡大率
-#define SUB_TIME_SCALE	(0.95f)	// タイム表示拡大率の減算量
+#define SET_TIME_SCALE	(8.0f)	// タイム表示の初期拡大率
+#define SUB_TIME_SCALE	(0.4f)	// タイム表示拡大率の減算量
 
 //************************************************************
 //	親クラス [CResultManager] のメンバ関数
@@ -289,8 +290,17 @@ HRESULT CResultManager::Init(void)
 //============================================================
 //	終了処理
 //============================================================
-void CResultManager::Uninit(void)
+HRESULT CResultManager::Uninit(void)
 {
+	// タイムの破棄
+	if (FAILED(CTimerManager::Release(m_pTime)))
+	{ // 破棄に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	for (int nCntResult = 0; nCntResult < NUM_RESULT; nCntResult++)
 	{ // リザルト表示の総数分繰り返す
 
@@ -304,14 +314,14 @@ void CResultManager::Uninit(void)
 	// タイムロゴ表示の終了
 	m_pTimeLogo->Uninit();
 
-	// タイムの終了
-	m_pTime->Uninit();
-
 	// フェードの終了
 	m_pFade->Uninit();
 
 	// 終了済みのオブジェクトポインタをNULLにする
 	m_pScore = NULL;	// スコアオブジェクト
+
+	// 成功を返す
+	return S_OK;
 }
 
 //============================================================
@@ -347,7 +357,7 @@ void CResultManager::Update(void)
 	case STATE_SCORE_WAIT:	// スコア表示待機状態
 
 		// 表示待機の更新
-		if (UpdateDrawWait())
+		if (UpdateDrawWait(SCORE_WAIT_CNT))
 		{ // 待機完了の場合
 
 			// スコア表示の拡大率を設定
@@ -367,6 +377,32 @@ void CResultManager::Update(void)
 
 		// スコア表示の更新
 		UpdateScore();
+
+		break;
+
+	case STATE_TIME_WAIT:	// タイム表示待機状態
+
+		// 表示待機の更新
+		if (UpdateDrawWait(TIME_WAIT_CNT))
+		{ // 待機完了の場合
+
+			// タイム表示の拡大率を設定
+			m_fScale = SET_TIME_SCALE;
+
+			// タイム表示の描画開始
+			m_pTimeLogo->SetEnableDraw(true);
+			m_pTime->SetEnableDraw(true);
+
+			// 状態を変更
+			m_state = STATE_TIME;	// タイム表示状態
+		}
+
+		break;
+
+	case STATE_TIME:	// タイム表示状態
+
+		// タイム表示の更新
+		UpdateTime();
 
 		break;
 
@@ -447,7 +483,17 @@ HRESULT CResultManager::Release(CResultManager *&prResultManager)
 	{ // 使用中の場合
 
 		// リザルトマネージャーの終了
-		prResultManager->Uninit();
+		if (FAILED(prResultManager->Uninit()))
+		{ // 破棄に失敗した場合
+
+			// メモリ開放
+			delete prResultManager;
+			prResultManager = NULL;
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
 
 		// メモリ開放
 		delete prResultManager;
@@ -556,32 +602,39 @@ void CResultManager::UpdateScore(void)
 		m_pScore->SetScaling(SIZE_SCORE);
 
 		// 状態を変更
-		//m_state = STATE_SCORE;	// スコア表示状態	// TODO
+		m_state = STATE_TIME_WAIT;	// タイム表示待機状態
 	}
 }
 
 //============================================================
-//	表示待機処理
+//	タイム表示処理
 //============================================================
-bool CResultManager::UpdateDrawWait(void)
+void CResultManager::UpdateTime(void)
 {
-	if (m_nCounterState < WAIT_CNT)
-	{ // カウンターが待機カウントまで達していない場合
+	if (m_fScale > 1.0f)
+	{ // 拡大率が最小値より大きい場合
 
-		// カウンターを加算
-		m_nCounterState++;
+		// 拡大率を減算
+		m_fScale -= SUB_TIME_SCALE;
 
-		// 待機未完了を返す
-		return false;
+		// スコア表示の大きさを設定
+		m_pTimeLogo->SetScaling(SIZE_TIME_LOGO * m_fScale);
+		m_pTime->SetScalingValue(SIZE_TIME_VAL * m_fScale);
+		m_pTime->SetScalingPart(SIZE_TIME_PART * m_fScale);
 	}
 	else
-	{ // カウンターが待機完了した場合
+	{ // 拡大率が最小値以下の場合
 
-		// カウンターを初期化
-		m_nCounterState = 0;
+		// 拡大率を補正
+		m_fScale = 1.0f;
 
-		// 待機完了を返す
-		return true;
+		// スコア表示の大きさを設定
+		m_pTimeLogo->SetScaling(SIZE_TIME_LOGO);
+		m_pTime->SetScalingValue(SIZE_TIME_VAL);
+		m_pTime->SetScalingPart(SIZE_TIME_PART);
+
+		// 状態を変更
+		m_state = STATE_WAIT;	// 遷移待機状態
 	}
 }
 
@@ -669,5 +722,30 @@ void CResultManager::SetTexResult(void)
 	m_apResult[0]->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_MISSION]));
 
 	// RESULTテクスチャを登録・割当
-	m_apResult[1]->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_FAILED]));
+	m_apResult[1]->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_FAILED]));	// TODO：リザルトもらってくる
+}
+
+//============================================================
+//	表示待機処理
+//============================================================
+bool CResultManager::UpdateDrawWait(const int nWait)
+{
+	if (m_nCounterState < nWait)
+	{ // カウンターが待機カウントまで達していない場合
+
+		// カウンターを加算
+		m_nCounterState++;
+
+		// 待機未完了を返す
+		return false;
+	}
+	else
+	{ // カウンターが待機完了した場合
+
+		// カウンターを初期化
+		m_nCounterState = 0;
+
+		// 待機完了を返す
+		return true;
+	}
 }
