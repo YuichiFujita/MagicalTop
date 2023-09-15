@@ -10,17 +10,25 @@
 #include "timerManager.h"
 #include "manager.h"
 #include "renderer.h"
+#include "texture.h"
 #include "value.h"
+#include "object2D.h"
 
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define TIME_POS	(D3DXVECTOR3(36.0f, 42.0f, 0.0f))		// ポリゴン位置
-#define TIME_SIZE	(D3DXVECTOR3(60.0f, 80.0f, 0.0f))		// ポリゴン大きさ
-#define TIME_SPACE	(D3DXVECTOR3(TIME_SIZE.x, 0.0f, 0.0f))	// ポリゴン間の空白
+#define TIMER_PRIO	(5)	// タイマーの優先順位
 
 #define TIME_NUMMIN	(DWORD)(0)			// 最少タイム
 #define TIME_NUMMAX	(DWORD)(99 * 60000)	// 最大タイム
+
+//************************************************************
+//	静的メンバ変数宣言
+//************************************************************
+const char *CTimerManager::mc_apTextureFile[] =	// テクスチャ定数
+{
+	"data\\TEXTURE\\timer000.png",	// 区切り表示
+};
 
 //************************************************************
 //	子クラス [CTimerManager] のメンバ関数
@@ -32,6 +40,12 @@ CTimerManager::CTimerManager()
 {
 	// メンバ変数をクリア
 	memset(&m_apValue[0], 0, sizeof(m_apValue));	// 数値の情報
+	memset(&m_apPart[0], 0, sizeof(m_apPart));		// 区切りの情報
+	m_pos				= VEC3_ZERO;	// 位置
+	m_sizeValue			= VEC3_ZERO;	// 数字の大きさ
+	m_sizePart			= VEC3_ZERO;	// 区切りの大きさ
+	m_spaceValue		= VEC3_ZERO;	// 数字の空白
+	m_spacePart			= VEC3_ZERO;	// 区切りの空白
 	m_dwStartTime		= 0;			// 開始時間
 	m_dwTime			= 0;			// 経過時間
 	m_dwStopStartTime	= 0;			// 停止開始時間
@@ -54,8 +68,17 @@ CTimerManager::~CTimerManager()
 //============================================================
 HRESULT CTimerManager::Init(void)
 {
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
 	// メンバ変数を初期化
 	memset(&m_apValue[0], 0, sizeof(m_apValue));	// 数値の情報
+	memset(&m_apPart[0], 0, sizeof(m_apPart));		// 区切りの情報
+	m_pos				= VEC3_ZERO;	// 位置
+	m_sizeValue			= VEC3_ZERO;	// 数字の大きさ
+	m_sizePart			= VEC3_ZERO;	// 区切りの大きさ
+	m_spaceValue		= VEC3_ZERO;	// 数字の空白
+	m_spacePart			= VEC3_ZERO;	// 区切りの空白
 	m_dwStartTime		= 0;			// 開始時間
 	m_dwTime			= 0;			// 経過時間
 	m_dwStopStartTime	= 0;			// 停止開始時間
@@ -68,7 +91,7 @@ HRESULT CTimerManager::Init(void)
 	{ // タイマーの桁数分繰り返す
 
 		// 数字の生成
-		m_apValue[nCntTimer] = CValue::Create(CValue::TEXTURE_NORMAL, TIME_POS + (TIME_SPACE * (float)nCntTimer), TIME_SIZE);
+		m_apValue[nCntTimer] = CValue::Create(CValue::TEXTURE_NORMAL);
 		if (UNUSED(m_apValue[nCntTimer]))
 		{ // 生成に失敗した場合
 
@@ -76,6 +99,29 @@ HRESULT CTimerManager::Init(void)
 			assert(false);
 			return E_FAIL;
 		}
+
+		// 優先順位を設定
+		m_apValue[nCntTimer]->SetPriority(TIMER_PRIO);
+	}
+
+	for (int nCntTimer = 0; nCntTimer < MAX_PART; nCntTimer++)
+	{ // 区切りの数分繰り返す
+
+		// 区切りの生成
+		m_apPart[nCntTimer] = CObject2D::Create(VEC3_ZERO);
+		if (UNUSED(m_apPart[nCntTimer]))
+		{ // 生成に失敗した場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// テクスチャを登録・割当
+		m_apPart[nCntTimer]->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_NORMAL]));
+
+		// 優先順位を設定
+		m_apPart[nCntTimer]->SetPriority(TIMER_PRIO);
 	}
 
 	// 成功を返す
@@ -93,6 +139,14 @@ void CTimerManager::Uninit(void)
 
 		// 数字の終了
 		m_apValue[nCntTimer]->Uninit();
+	}
+
+	// 区切りオブジェクトを破棄
+	for (int nCntTimer = 0; nCntTimer < MAX_PART; nCntTimer++)
+	{ // 区切りの数分繰り返す
+
+		// 区切りの終了
+		m_apPart[nCntTimer]->Uninit();
 	}
 }
 
@@ -147,6 +201,13 @@ void CTimerManager::Update(void)
 		m_apValue[nCntTimer]->Update();
 	}
 
+	for (int nCntTimer = 0; nCntTimer < MAX_PART; nCntTimer++)
+	{ // 区切りの数分繰り返す
+
+		// 区切りの更新
+		m_apPart[nCntTimer]->Update();
+	}
+
 	// デバッグ表示
 	CManager::GetDebugProc()->Print("タイマー：[%d:%d:%d]\n", m_dwTime / 60000, (m_dwTime / 1000) % 60, m_dwTime % 1000);
 	CManager::GetDebugProc()->Print("停止タイマー：[%d:%d:%d]\n", m_dwStopTime / 60000, (m_dwStopTime / 1000) % 60, m_dwStopTime % 1000);
@@ -155,7 +216,14 @@ void CTimerManager::Update(void)
 //============================================================
 //	生成処理
 //============================================================
-CTimerManager *CTimerManager::Create(void)
+CTimerManager *CTimerManager::Create
+(
+	const D3DXVECTOR3& rPos,		// 位置
+	const D3DXVECTOR3& rSizeValue,	// 区切りの大きさ
+	const D3DXVECTOR3& rSizePart,	// 数字の大きさ
+	const D3DXVECTOR3& rSpaceValue,	// 区切りの空白
+	const D3DXVECTOR3& rSpacePart	// 数字の空白
+)
 {
 	// ポインタを宣言
 	CTimerManager *pTimerManager = NULL;	// タイマーマネージャー生成用
@@ -182,6 +250,21 @@ CTimerManager *CTimerManager::Create(void)
 			// 失敗を返す
 			return NULL;
 		}
+
+		// 位置を設定
+		pTimerManager->SetPosition(rPos);
+
+		// 数字の大きさを設定
+		pTimerManager->SetScalingValue(rSizeValue);
+
+		// 区切りの大きさを設定
+		pTimerManager->SetScalingPart(rSizePart);
+
+		// 数字の空白を設定
+		pTimerManager->SetSpaceValue(rSpaceValue);
+
+		// 区切りの空白を設定
+		pTimerManager->SetSpacePart(rSpacePart);
 
 		// 確保したアドレスを返す
 		return pTimerManager;
@@ -362,6 +445,245 @@ int CTimerManager::GetMin(void)
 {
 	// 分を返す
 	return m_dwTime / 60000;
+}
+
+//============================================================
+//	位置の設定処理
+//============================================================
+void CTimerManager::SetPosition(const D3DXVECTOR3& rPos)
+{
+	// 引数の位置を設定
+	m_pos = rPos;
+
+	// 数字の表示設定
+	SetDrawValue();
+}
+
+//============================================================
+//	数字の大きさの設定処理
+//============================================================
+void CTimerManager::SetScalingValue(const D3DXVECTOR3& rSize)
+{
+	// 引数の数字の大きさを設定
+	m_sizeValue = rSize;
+
+	// 数字の表示設定
+	SetDrawValue();
+}
+
+//============================================================
+//	区切りの大きさの設定処理
+//============================================================
+void CTimerManager::SetScalingPart(const D3DXVECTOR3& rSize)
+{
+	// 引数の区切りの大きさを設定
+	m_sizePart = rSize;
+
+	// 数字の表示設定
+	SetDrawValue();
+}
+
+//============================================================
+//	数字の空白の設定処理
+//============================================================
+void CTimerManager::SetSpaceValue(const D3DXVECTOR3& rSpace)
+{
+	// 引数の数字の空白を設定
+	m_spaceValue = rSpace;
+
+	// 数字の表示設定
+	SetDrawValue();
+}
+
+//============================================================
+//	区切りの空白の設定処理
+//============================================================
+void CTimerManager::SetSpacePart(const D3DXVECTOR3& rSpace)
+{
+	// 引数の区切りの空白を設定
+	m_spacePart = rSpace;
+
+	// 数字の表示設定
+	SetDrawValue();
+}
+
+//============================================================
+//	優先順位の設定処理
+//============================================================
+void CTimerManager::SetPriority(const int nPriority)
+{
+	if (USED(m_apValue[0]))
+	{ // スコアの先頭の数値が使用されている場合
+
+		// 数字オブジェクトの優先順位を設定
+		for (int nCntTimer = 0; nCntTimer < MAX_TIMER; nCntTimer++)
+		{ // タイマーの桁数分繰り返す
+
+			m_apValue[nCntTimer]->SetPriority(nPriority);
+		}
+
+		// 区切りオブジェクトの優先順位を設定
+		for (int nCntTimer = 0; nCntTimer < MAX_PART; nCntTimer++)
+		{ // 区切りの数分繰り返す
+
+			m_apPart[nCntTimer]->SetPriority(nPriority);
+		}
+	}
+	else { assert(false); }	// 非使用中
+}
+
+//============================================================
+//	更新状況の設定処理
+//============================================================
+void CTimerManager::SetEnableUpdate(const bool bUpdate)
+{
+	if (USED(m_apValue[0]))
+	{ // スコアの先頭の数値が使用されている場合
+
+		// 数字オブジェクトの更新状況を設定
+		for (int nCntTimer = 0; nCntTimer < MAX_TIMER; nCntTimer++)
+		{ // タイマーの桁数分繰り返す
+
+			m_apValue[nCntTimer]->SetEnableUpdate(bUpdate);
+		}
+
+		// 区切りオブジェクトの更新状況を設定
+		for (int nCntTimer = 0; nCntTimer < MAX_PART; nCntTimer++)
+		{ // 区切りの数分繰り返す
+
+			m_apPart[nCntTimer]->SetEnableUpdate(bUpdate);
+		}
+	}
+	else { assert(false); }	// 非使用中
+}
+
+//============================================================
+//	描画状況の設定処理
+//============================================================
+void CTimerManager::SetEnableDraw(const bool bDraw)
+{
+	if (USED(m_apValue[0]))
+	{ // スコアの先頭の数値が使用されている場合
+
+		// 数字オブジェクトの描画状況を設定
+		for (int nCntTimer = 0; nCntTimer < MAX_TIMER; nCntTimer++)
+		{ // タイマーの桁数分繰り返す
+
+			m_apValue[nCntTimer]->SetEnableDraw(bDraw);
+		}
+
+		// 区切りオブジェクトの描画状況を設定
+		for (int nCntTimer = 0; nCntTimer < MAX_PART; nCntTimer++)
+		{ // 区切りの数分繰り返す
+
+			m_apPart[nCntTimer]->SetEnableDraw(bDraw);
+		}
+	}
+	else { assert(false); }	// 非使用中
+}
+
+//============================================================
+//	位置取得処理
+//============================================================
+D3DXVECTOR3 CTimerManager::GetPosition(void) const
+{
+	// 位置を返す
+	return m_pos;
+}
+
+//============================================================
+//	数字の大きさ取得処理
+//============================================================
+D3DXVECTOR3 CTimerManager::GetScalingValue(void) const
+{
+	// 数字の大きさを返す
+	return m_sizeValue;
+}
+
+//============================================================
+//	区切りの大きさ取得処理
+//============================================================
+D3DXVECTOR3 CTimerManager::GetScalingPart(void) const
+{
+	// 区切りの大きさを返す
+	return m_sizePart;
+}
+
+//============================================================
+//	数字の空白取得処理
+//============================================================
+D3DXVECTOR3 CTimerManager::GetSpaceValue(void) const
+{
+	// 数字の空白を返す
+	return m_spaceValue;
+}
+
+//============================================================
+//	区切りの空白取得処理
+//============================================================
+D3DXVECTOR3 CTimerManager::GetSpacePart(void) const
+{
+	// 区切りの空白を返す
+	return m_spacePart;
+}
+
+//============================================================
+//	数字の表示設定処理
+//============================================================
+void CTimerManager::SetDrawValue(void)
+{
+	// 変数を宣言
+	D3DXVECTOR3 spaceValue = m_spaceValue * 0.5f;	// 数字の空白
+	D3DXVECTOR3 spacePart = m_spacePart * 0.5f;		// 区切りの空白
+	D3DXVECTOR3 posPoly = m_pos - spaceValue;		// ポリゴン生成位置
+	int nNumValue = 0;	// 数字の生成数
+	int nNumPart = 0;	// 区切りの生成数
+
+	if (USED(m_apValue[0]) && USED(m_apPart[0]))
+	{ // タイマーの先頭数値、タイマーの先頭区切りが使用されている場合
+
+		for (int nCntTimer = 0; nCntTimer < MAX_TIMER + MAX_PART; nCntTimer++)
+		{ // タイマーの桁数 + タイマーの区切り数分繰り返す
+
+			if (nCntTimer == MAX_MIN || nCntTimer == MAX_MIN + MAX_SEC + 1)
+			{ // 区切りの生成タイミングだった場合
+
+				// ポリゴン生成位置をずらす
+				posPoly += spacePart;
+
+				// 区切りの位置を設定
+				m_apPart[nNumValue]->SetPosition(posPoly);
+
+				// 区切りの大きさを設定
+				m_apPart[nNumValue]->SetScaling(m_sizePart);
+
+				// 区切り生成数を加算
+				nNumValue++;
+
+				// ポリゴン生成位置をずらす
+				posPoly += spacePart;
+			}
+			else
+			{ // 区切りの生成タイミングではない場合
+
+				// ポリゴン生成位置をずらす
+				posPoly += spaceValue;
+
+				// 数字の位置を設定
+				m_apValue[nNumPart]->SetPosition(posPoly);
+
+				// 数字の大きさを設定
+				m_apValue[nNumPart]->SetScaling(m_sizeValue);
+
+				// 数字生成数を加算
+				nNumPart++;
+
+				// ポリゴン生成位置をずらす
+				posPoly += spaceValue;
+			}
+		}
+	}
+	else { assert(false); }	// 非使用中
 }
 
 //============================================================

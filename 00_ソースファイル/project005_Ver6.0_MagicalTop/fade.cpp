@@ -16,7 +16,7 @@
 //************************************************************
 #define FADE_PRIO	(7)		// フェードの優先順位
 #define FADE_LEVEL	(0.05f)	// フェードのα値の加減量
-#define INIT_SCENE	(CScene::MODE_RESULT)	// 初期シーン
+#define INIT_SCENE	(CScene::MODE_GAME)	// 初期シーン
 
 //************************************************************
 //	親クラス [CFade] のメンバ関数
