@@ -34,12 +34,12 @@
 //************************************************************
 #define TIME_POS		(D3DXVECTOR3(40.0f, 50.0f, 0.0f))			// タイマー位置
 #define TIME_VAL_SIZE	(D3DXVECTOR3(60.0f, 80.0f, 0.0f))			// タイマー数字大きさ
-#define TIME_PART_SIZE	(D3DXVECTOR3(40.0f, 80.0f, 0.0f))			// タイマー区切り大きさ
+#define TIME_PART_SIZE	(D3DXVECTOR3(35.0f, 80.0f, 0.0f))			// タイマー区切り大きさ
 #define TIME_VAL_SPACE	(D3DXVECTOR3(TIME_VAL_SIZE.x, 0.0f, 0.0f))	// タイマー数字空白
 #define TIME_PART_SPACE	(D3DXVECTOR3(TIME_PART_SIZE.x, 0.0f, 0.0f))	// タイマー区切り空白
 
-#define SCO_POS		(D3DXVECTOR3(748.0f, 42.0f, 0.0f))		// スコア位置
-#define SCO_SIZE	(D3DXVECTOR3(70.0f, 80.0f, 0.0f))		// スコア大きさ
+#define SCO_POS		(D3DXVECTOR3(825.0f, 50.0f, 0.0f))		// スコア位置
+#define SCO_SIZE	(D3DXVECTOR3(60.0f, 80.0f, 0.0f))		// スコア大きさ
 #define SCO_SPACE	(D3DXVECTOR3(SCO_SIZE.x, 0.0f, 0.0f))	// スコア空白
 
 //************************************************************
