@@ -19,7 +19,9 @@
 CGameManager::CGameManager()
 {
 	// メンバ変数をクリア
-
+	m_result = RESULT_NONE;	// クリア状況
+	m_nScore = 0;			// 獲得スコア
+	m_nTime  = 0;			// 経過タイム
 }
 
 //============================================================
@@ -36,7 +38,9 @@ CGameManager::~CGameManager()
 HRESULT CGameManager::Init(void)
 {
 	// メンバ変数を初期化
-
+	m_result = RESULT_NONE;	// クリア状況
+	m_nScore = 0;			// 獲得スコア
+	m_nTime  = 0;			// 経過タイム
 
 	// 成功を返す
 	return S_OK;
@@ -114,4 +118,63 @@ HRESULT CGameManager::Release(CGameManager *&prGameManager)
 		return S_OK;
 	}
 	else { assert(false); return E_FAIL; }	// 非使用中
+}
+
+//============================================================
+//	クリア状況の設定処理
+//============================================================
+void CGameManager::SetResult(const RESULT result)
+{
+	if (result > RESULT_NONE && result < RESULT_MAX)
+	{ // リザルトが範囲内の場合
+
+		// 引数のクリア状況を設定
+		m_result = result;
+	}
+	else { assert(false); }	// 範囲外
+}
+
+//============================================================
+//	獲得スコアの設定処理
+//============================================================
+void CGameManager::SetScore(const int nScore)
+{
+	// 引数の獲得スコアを設定
+	m_nScore = nScore;
+}
+
+//============================================================
+//	経過タイムの設定処理
+//============================================================
+void CGameManager::SetTime(const long nTime)
+{
+	// 引数の経過タイムを設定
+	m_nTime = nTime;
+}
+
+//============================================================
+//	クリア状況取得処理
+//============================================================
+CGameManager::RESULT CGameManager::GetResult(void) const
+{
+	// クリア状況を返す
+	return m_result;
+}
+
+//============================================================
+//	獲得スコア取得処理
+//============================================================
+int CGameManager::GetScore(void) const
+{
+	// 獲得スコアを返す
+	return m_nScore;
+}
+
+//============================================================
+//	経過タイム取得処理
+//============================================================
+long CGameManager::GetTime(void) const
+{
+	// 経過タイムを返す
+	return m_nTime;
 }

@@ -74,6 +74,7 @@ public:
 	bool SetMSec(long nMSec);	// ƒ~ƒŠ•bİ’è
 	bool SetSec(long nSec);		// •bİ’è
 	bool SetMin(long nMin);		// •ªİ’è
+	int Get(void);				// ƒ^ƒCƒ€æ“¾
 	int GetMSec(void);			// ƒ~ƒŠ•bæ“¾
 	int GetSec(void);			// •bæ“¾
 	int GetMin(void);			// •ªæ“¾

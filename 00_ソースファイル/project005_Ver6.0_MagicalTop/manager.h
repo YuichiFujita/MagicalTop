@@ -29,11 +29,12 @@ class CLight;			// ライトクラス
 class CTexture;			// テクスチャクラス
 class CModel;			// モデルクラス
 class CFade;			// フェードクラス
+class CGameManager;		// ゲームマネージャークラス
 class CDebugProc;		// デバッグ表示クラス
 
 #ifdef _DEBUG	// デバッグ処理
 
-class CDebug;		// デバッグクラス
+class CDebug;	// デバッグクラス
 
 #endif	// _DEBUG
 
@@ -74,6 +75,7 @@ public:
 	static CModel			*GetModel(void);		// モデル取得
 	static CFade			*GetFade(void);			// フェード取得
 	static CScene			*GetScene(void);		// シーン取得
+	static CGameManager		*GetGameManager(void);	// ゲームマネージャー取得
 	static CDebugProc		*GetDebugProc(void);	// デバッグ表示取得
 
 #ifdef _DEBUG	// デバッグ処理
@@ -85,18 +87,19 @@ public:
 
 private:
 	// 静的メンバ変数
-	static CRenderer		*m_pRenderer;	// レンダラーオブジェクト
-	static CInputKeyboard	*m_pKeyboard;	// キーボードオブジェクト
-	static CInputMouse		*m_pMouse;		// マウスオブジェクト
-	static CInputPad		*m_pPad;		// パッドオブジェクト
-	static CSound			*m_pSound;		// サウンドオブジェクト
-	static CCamera			*m_pCamera;		// カメラオブジェクト
-	static CLight			*m_pLight;		// ライトオブジェクト
-	static CTexture			*m_pTexture;	// テクスチャオブジェクト
-	static CModel			*m_pModel;		// モデルオブジェクト
-	static CFade			*m_pFade;		// フェードオブジェクト
-	static CScene			*m_pScene;		// シーンオブジェクト
-	static CDebugProc		*m_pDebugProc;	// デバッグ表示オブジェクト
+	static CRenderer		*m_pRenderer;		// レンダラーオブジェクト
+	static CInputKeyboard	*m_pKeyboard;		// キーボードオブジェクト
+	static CInputMouse		*m_pMouse;			// マウスオブジェクト
+	static CInputPad		*m_pPad;			// パッドオブジェクト
+	static CSound			*m_pSound;			// サウンドオブジェクト
+	static CCamera			*m_pCamera;			// カメラオブジェクト
+	static CLight			*m_pLight;			// ライトオブジェクト
+	static CTexture			*m_pTexture;		// テクスチャオブジェクト
+	static CModel			*m_pModel;			// モデルオブジェクト
+	static CFade			*m_pFade;			// フェードオブジェクト
+	static CScene			*m_pScene;			// シーンオブジェクト
+	static CGameManager		*m_pGameManager;	// ゲームマネージャー
+	static CDebugProc		*m_pDebugProc;		// デバッグ表示オブジェクト
 
 #ifdef _DEBUG	// デバッグ処理
 

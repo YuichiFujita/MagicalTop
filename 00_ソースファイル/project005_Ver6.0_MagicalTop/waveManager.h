@@ -15,6 +15,7 @@
 //************************************************************
 #include "main.h"
 #include "enemy.h"
+#include "gameManager.h"
 
 //************************************************************
 //	マクロ定義
@@ -117,6 +118,7 @@ public:
 
 private:
 	// メンバ関数
+	void ResultTransition(const CGameManager::RESULT result, const int nWait = 0);	// リザルト遷移
 	void SetSeason(const SEASON season);	// 季節設定
 	void InitSeasonStart(void);		// 季節の開始初期化
 	void UpdateSeasonStart(void);	// 季節の開始

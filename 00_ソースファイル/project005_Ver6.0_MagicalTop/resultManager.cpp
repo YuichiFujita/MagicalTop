@@ -16,6 +16,7 @@
 #include "object2D.h"
 #include "score.h"
 #include "timerManager.h"
+#include "gameManager.h"
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -222,7 +223,7 @@ HRESULT CResultManager::Init(void)
 	m_pScore->SetEnableDraw(false);
 
 	// スコアを設定
-	m_pScore->Set(12345678);	// TODO：獲得スコアの保持
+	m_pScore->Set(CManager::GetGameManager()->GetScore());
 
 	//--------------------------------------------------------
 	//	タイムロゴ表示の生成・設定
@@ -277,7 +278,7 @@ HRESULT CResultManager::Init(void)
 	m_pTime->SetEnableDraw(false);
 
 	// タイムを設定
-	if (!m_pTime->SetMSec(20000))	// TODO：タイムの保持
+	if (!m_pTime->SetMSec(CManager::GetGameManager()->GetTime()))
 	{ // 設定に失敗した場合
 
 		// 失敗を返す
@@ -723,7 +724,26 @@ void CResultManager::SetTexResult(void)
 	m_apResult[0]->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_MISSION]));
 
 	// RESULTテクスチャを登録・割当
-	m_apResult[1]->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_FAILED]));	// TODO：リザルトもらってくる
+	switch (CManager::GetGameManager()->GetResult())
+	{ // リザルトごとの処理
+	case CGameManager::RESULT_FAILED:
+
+		// FAILEDテクスチャ
+		m_apResult[1]->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_FAILED]));
+
+		break;
+
+	case CGameManager::RESULT_CLEAR:
+
+		// CLEARテクスチャ
+		m_apResult[1]->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_CLEAR]));
+
+		break;
+
+	default:
+		assert(false);
+		break;
+	}
 }
 
 //============================================================

@@ -22,6 +22,7 @@
 #include "field.h"
 #include "flower.h"
 #include "weed.h"
+#include "score.h"
 #include "timerManager.h"
 
 //************************************************************
@@ -339,8 +340,8 @@ void CWaveManager::Update(void)
 
 	case STATE_END:		// 終了状態
 
-		// シーンの設定
-		CManager::SetScene(CScene::MODE_RESULT);	// リザルト画面
+		// リザルト遷移
+		ResultTransition(CGameManager::RESULT_CLEAR);
 
 		// 処理を抜ける
 		return;
@@ -354,8 +355,8 @@ void CWaveManager::Update(void)
 	||  CSceneGame::GetTarget()->GetState() == CTarget::STATE_DESTROY)
 	{ // プレイヤーが死亡状態、またはターゲットが破壊状態の場合
 
-		// シーンの設定
-		CManager::SetScene(CScene::MODE_RESULT, WAIT_FRAME);	// リザルト画面
+		// リザルト遷移
+		ResultTransition(CGameManager::RESULT_FAILED, WAIT_FRAME);
 
 		// 処理を抜ける
 		return;
@@ -460,6 +461,30 @@ HRESULT CWaveManager::Release(CWaveManager *&prWaveManager)
 		return S_OK;
 	}
 	else { assert(false); return E_FAIL; }	// 非使用中
+}
+
+//============================================================
+//	リザルト遷移処理
+//============================================================
+void CWaveManager::ResultTransition(const CGameManager::RESULT result, const int nWait)
+{
+	// ポインタを宣言
+	CGameManager *m_pGameManager = CManager::GetGameManager();	// ゲームマネージャー
+
+	// クリア状況を設定
+	m_pGameManager->SetResult(result);
+
+	// 獲得スコアを設定
+	m_pGameManager->SetScore(CSceneGame::GetScore()->Get());
+
+	// 経過時間を設定
+	m_pGameManager->SetTime(CSceneGame::GetTimerManager()->Get());
+
+	// タイムの計測を終了
+	CSceneGame::GetTimerManager()->End();
+
+	// シーンの設定
+	CManager::SetScene(CScene::MODE_RESULT, nWait);	// リザルト画面
 }
 
 //============================================================
