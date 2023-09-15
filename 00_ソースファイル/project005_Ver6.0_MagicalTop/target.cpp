@@ -11,6 +11,9 @@
 #include "manager.h"
 #include "renderer.h"
 #include "model.h"
+#include "stage.h"
+#include "field.h"
+#include "scene.h"
 #include "sceneGame.h"
 #include "waveManager.h"
 #include "objectMeshCube.h"
@@ -371,6 +374,7 @@ CTarget *CTarget::Create
 )
 {
 	// 変数を宣言
+	D3DXVECTOR3 pos = rPos;	// 座標設定用
 	int nModelID;	// モデルインデックス
 
 	// ポインタを宣言
@@ -407,7 +411,9 @@ CTarget *CTarget::Create
 		pTarget->BindModel(pModel->GetModel(nModelID));
 
 		// 位置を設定
-		pTarget->SetPosition(rPos);
+		CScene::GetStage()->LimitPosition(pos, TARG_RADIUS);	// ステージ範囲外補正
+		pos.y = CScene::GetField()->GetPositionHeight(pos);		// 高さを地面に設定
+		pTarget->SetPosition(pos);
 
 		// 向きを設定
 		pTarget->SetRotation(rRot);

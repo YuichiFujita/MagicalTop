@@ -103,7 +103,7 @@ HRESULT CSceneTitle::Init(void)
 	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
 
 	// ターゲットオブジェクトの生成
-	pTarget = CTarget::Create(CTarget::MODEL_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO);
+	pTarget = CTarget::Create(CTarget::MODEL_NORMAL, GetStage()->GetStageLimit().center, VEC3_ZERO);
 	if (UNUSED(pTarget))
 	{ // 非使用中の場合
 

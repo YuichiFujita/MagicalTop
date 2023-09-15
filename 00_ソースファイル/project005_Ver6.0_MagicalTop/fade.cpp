@@ -16,6 +16,7 @@
 //************************************************************
 #define FADE_PRIO	(7)		// フェードの優先順位
 #define FADE_LEVEL	(0.05f)	// フェードのα値の加減量
+#define INIT_SCENE	(CScene::MODE_RESULT)	// 初期シーン
 
 //************************************************************
 //	親クラス [CFade] のメンバ関数
@@ -46,10 +47,10 @@ CFade::~CFade()
 HRESULT CFade::Init(void)
 {
 	// メンバ変数を初期化
-	m_pObject2D = NULL;					// フェード表示の情報
-	m_fade		= FADE_IN;				// フェード状態
-	m_modeNext	= CScene::MODE_TITLE;	// 次のシーンモード
-	m_nCounterWait = 0;					// 余韻管理カウンター
+	m_pObject2D = NULL;			// フェード表示の情報
+	m_fade		= FADE_IN;		// フェード状態
+	m_modeNext	= INIT_SCENE;	// 次のシーンモード
+	m_nCounterWait = 0;			// 余韻管理カウンター
 
 	// オブジェクト2Dの生成
 	m_pObject2D = CObject2D::Create

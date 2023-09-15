@@ -30,6 +30,13 @@
 #include "weed.h"
 
 //************************************************************
+//	マクロ定義
+//************************************************************
+#define SCO_POS		(D3DXVECTOR3(824.0f, 42.0f, 0.0f))		// スコア位置
+#define SCO_SIZE	(D3DXVECTOR3(60.0f, 80.0f, 0.0f))		// スコア大きさ
+#define SCO_SPACE	(D3DXVECTOR3(SCO_SIZE.x, 0.0f, 0.0f))	// スコア空白
+
+//************************************************************
 //	静的メンバ変数宣言
 //************************************************************
 CWaveManager	*CSceneGame::m_pWaveManager  = NULL;	// ウェーブマネージャー
@@ -117,7 +124,7 @@ HRESULT CSceneGame::Init(void)
 	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
 
 	// ターゲットオブジェクトの生成
-	m_pTarget = CTarget::Create(CTarget::MODEL_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO);
+	m_pTarget = CTarget::Create(CTarget::MODEL_NORMAL, GetStage()->GetStageLimit().center, VEC3_ZERO);
 	if (UNUSED(m_pTarget))
 	{ // 非使用中の場合
 
@@ -137,7 +144,12 @@ HRESULT CSceneGame::Init(void)
 	}
 
 	// スコアオブジェクトの生成
-	m_pScore = CScore::Create();
+	m_pScore = CScore::Create
+	( // 引数
+		SCO_POS,	// 位置
+		SCO_SIZE,	// 大きさ
+		SCO_SPACE	// 空白
+	);
 	if (UNUSED(m_pScore))
 	{ // 非使用中の場合
 

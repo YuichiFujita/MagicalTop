@@ -19,7 +19,7 @@
 //************************************************************
 //	前方宣言
 //************************************************************
-class CObject2D;	// オブジェクト2Dクラス
+class CResultManager;	// リザルトマネージャークラス
 
 //************************************************************
 //	クラス定義
@@ -40,9 +40,12 @@ public:
 	void Update(void) override;		// 更新
 	void Draw(void) override;		// 描画
 
+	// 静的メンバ関数
+	static CResultManager *GetResultManager(void);	// リザルトマネージャー取得
+
 private:
-	// メンバ変数
-	CObject2D *m_pObject2D;	// タイトル表示用
+	// 静的メンバ変数
+	static CResultManager *m_pResultManager;	// リザルトマネージャー
 };
 
 #endif	// _SCENE_RESULT_H_

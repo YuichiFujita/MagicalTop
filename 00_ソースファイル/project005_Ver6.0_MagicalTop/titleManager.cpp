@@ -95,7 +95,6 @@ HRESULT CTitleManager::Init(void)
 
 	// ポインタを宣言
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
-	CModel *pModel = CManager::GetModel();			// モデルへのポインタ
 
 	// メンバ変数を初期化
 	memset(&m_apLogo[0], 0, sizeof(m_apLogo));		// タイトル表示の情報

@@ -12,7 +12,7 @@
 #include "texture.h"
 #include "input.h"
 #include "camera.h"
-#include "object2D.h"
+#include "resultManager.h"
 
 #include "stage.h"
 #include "target.h"
@@ -31,6 +31,11 @@
 #define CREATE_WEED		(200)	// 草の生成数
 
 //************************************************************
+//	静的メンバ変数宣言
+//************************************************************
+CResultManager *CSceneResult::m_pResultManager = NULL;	// リザルトマネージャー
+
+//************************************************************
 //	子クラス [CSceneResult] のメンバ関数
 //************************************************************
 //============================================================
@@ -38,8 +43,7 @@
 //============================================================
 CSceneResult::CSceneResult(const MODE mode) : CScene(mode)
 {
-	// メンバ変数をクリア
-	m_pObject2D = NULL;	// タイトル表示用
+
 }
 
 //============================================================
@@ -62,33 +66,25 @@ HRESULT CSceneResult::Init(void)
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 	CTarget *pTarget = NULL;	// ターゲット設定用
 
-	// メンバ変数を初期化
-	m_pObject2D = NULL;	// タイトル表示用
-
-	// オブジェクト2Dの生成
-	m_pObject2D = CObject2D::Create
-	( // 引数
-		D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f),	// 位置
-		//D3DXVECTOR3(SCREEN_WIDTH, SCREEN_HEIGHT, 0.0f)					// 大きさ
-		D3DXVECTOR3(100.0f, 100.0f, 0.0f)
-	);
-	if (UNUSED(m_pObject2D))
-	{ // 生成に失敗した場合
+	//--------------------------------------------------------
+	//	リザルトの初期化
+	//--------------------------------------------------------
+	// リザルトマネージャーの生成
+	m_pResultManager = CResultManager::Create();
+	if (UNUSED(m_pResultManager))
+	{ // 非使用中の場合
 
 		// 失敗を返す
 		assert(false);
 		return E_FAIL;
 	}
 
-	// テクスチャを登録・割当
-	m_pObject2D->BindTexture(pTexture->Regist("data\\TEXTURE\\result000.png"));
+	// シーンの初期化
+	CScene::Init();
 
 	//--------------------------------------------------------
 	//	オブジェクト生成・初期化
 	//--------------------------------------------------------
-	// シーンの初期化
-	CScene::Init();
-
 	// 海オブジェクトの生成
 	CSea::Create();
 
@@ -107,7 +103,7 @@ HRESULT CSceneResult::Init(void)
 	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
 
 	// ターゲットオブジェクトの生成
-	pTarget = CTarget::Create(CTarget::MODEL_NORMAL, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO);
+	pTarget = CTarget::Create(CTarget::MODEL_NORMAL, GetStage()->GetStageLimit().center, VEC3_ZERO);
 	if (UNUSED(pTarget))
 	{ // 非使用中の場合
 
@@ -159,8 +155,14 @@ HRESULT CSceneResult::Init(void)
 //============================================================
 HRESULT CSceneResult::Uninit(void)
 {
-	// オブジェクト2Dの終了
-	m_pObject2D->Uninit();
+	// リザルトマネージャーの破棄
+	if (FAILED(CResultManager::Release(m_pResultManager)))
+	{ // 破棄に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// シーンの終了
 	CScene::Uninit();
@@ -174,17 +176,13 @@ HRESULT CSceneResult::Uninit(void)
 //============================================================
 void CSceneResult::Update(void)
 {
-	if (CManager::GetKeyboard()->GetTrigger(DIK_RETURN)
-	||  CManager::GetKeyboard()->GetTrigger(DIK_SPACE)
-	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_A)
-	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_B)
-	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_X)
-	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_Y)
-	||  CManager::GetPad()->GetTrigger(CInputPad::KEY_START))
-	{
-		// シーンの設定
-		CManager::SetScene(MODE_TITLE);	// タイトル画面
+	if (USED(m_pResultManager))
+	{ // 使用中の場合
+
+		// リザルトマネージャーの更新
+		m_pResultManager->Update();
 	}
+	else { assert(false); }	// 非使用中
 
 	// シーンの更新
 	CScene::Update();
@@ -196,4 +194,13 @@ void CSceneResult::Update(void)
 void CSceneResult::Draw(void)
 {
 
+}
+
+//============================================================
+//	リザルトマネージャー取得処理
+//============================================================
+CResultManager *CSceneResult::GetResultManager(void)
+{
+	// リザルトマネージャーを返す
+	return m_pResultManager;
 }
