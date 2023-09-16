@@ -17,12 +17,14 @@
 #include "sceneResult.h"
 
 #include "stage.h"
+#include "player.h"
 #include "field.h"
 
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
 CStage *CScene::m_pStage = NULL;	// ステージ
+CPlayer	*CScene::m_pPlayer = NULL;	// プレイヤーオブジェクト
 CField *CScene::m_pField = NULL;	// 地面オブジェクト
 
 //************************************************************
@@ -51,7 +53,8 @@ CScene::~CScene()
 HRESULT CScene::Init(void)
 {
 	// ステージの生成
-	if (FAILED(CreateStage(m_mode)))
+	m_pStage = CStage::Create();
+	if (UNUSED(m_pStage))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -67,6 +70,9 @@ HRESULT CScene::Init(void)
 		assert(false);
 		return E_FAIL;
 	}
+
+	// プレイヤーオブジェクトの生成
+	m_pPlayer = CPlayer::Create(m_mode, VEC3_ZERO, VEC3_ZERO);
 
 	// 成功を返す
 	return S_OK;
@@ -87,6 +93,7 @@ HRESULT CScene::Uninit(void)
 	}
 
 	// 終了済みのオブジェクトポインタをNULLにする
+	m_pPlayer = NULL;	// プレイヤーオブジェクト
 	m_pField = NULL;	// 地面オブジェクト
 
 	// 成功を返す
@@ -236,70 +243,21 @@ HRESULT CScene::Release(CScene *&prScene)
 }
 
 //============================================================
-//	ステージ生成処理
-//============================================================
-HRESULT CScene::CreateStage(MODE mode)
-{
-	switch (mode)
-	{ // モードごとの処理
-	case MODE_TITLE:
-
-		// ステージの生成
-		m_pStage = CStage::Create();
-		if (UNUSED(m_pStage))
-		{ // 非使用中の場合
-
-			// 失敗を返す
-			assert(false);
-			return E_FAIL;
-		}
-
-		// 成功を返す
-		return S_OK;
-
-	case MODE_GAME:
-
-		// ステージの生成
-		m_pStage = CStage::Create();
-		if (UNUSED(m_pStage))
-		{ // 非使用中の場合
-	
-			// 失敗を返す
-			assert(false);
-			return E_FAIL;
-		}
-
-		// 成功を返す
-		return S_OK;
-
-	case MODE_RESULT:
-
-		// ステージの生成
-		m_pStage = CStage::Create();
-		if (UNUSED(m_pStage))
-		{ // 非使用中の場合
-
-			// 失敗を返す
-			assert(false);
-			return E_FAIL;
-		}
-
-		// 成功を返す
-		return S_OK;
-
-	default:	// 例外処理
-		assert(false);
-		return E_FAIL;
-	}
-}
-
-//============================================================
 //	ステージ取得処理
 //============================================================
 CStage *CScene::GetStage(void)
 {
 	// ステージのポインタを返す
 	return m_pStage;
+}
+
+//============================================================
+//	プレイヤー取得処理
+//============================================================
+CPlayer *CScene::GetPlayer(void)
+{
+	// プレイヤーのポインタを返す
+	return m_pPlayer;
 }
 
 //============================================================

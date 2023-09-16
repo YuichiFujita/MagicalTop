@@ -17,7 +17,6 @@
 #include "stage.h"
 #include "pause.h"
 #include "target.h"
-#include "player.h"
 #include "score.h"
 
 #include "enemy.h"
@@ -48,7 +47,6 @@
 CWaveManager	*CSceneGame::m_pWaveManager  = NULL;	// ウェーブマネージャー
 CTimerManager	*CSceneGame::m_pTimerManager = NULL;	// タイマーマネージャー
 CPause	*CSceneGame::m_pPause	= NULL;					// ポーズ
-CPlayer	*CSceneGame::m_pPlayer	= NULL;					// プレイヤーオブジェクト
 CTarget	*CSceneGame::m_pTarget	= NULL;					// ターゲットオブジェクト
 CScore	*CSceneGame::m_pScore	= NULL;					// スコアオブジェクト
 
@@ -146,16 +144,6 @@ HRESULT CSceneGame::Init(void)
 		return E_FAIL;
 	}
 
-	// プレイヤーオブジェクトの生成
-	m_pPlayer = CPlayer::Create(VEC3_ZERO, VEC3_ZERO);
-	if (UNUSED(m_pPlayer))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
 	// スコアオブジェクトの生成
 	m_pScore = CScore::Create
 	( // 引数
@@ -240,9 +228,8 @@ HRESULT CSceneGame::Uninit(void)
 	}
 
 	// 終了済みのオブジェクトポインタをNULLにする
-	m_pPlayer	= NULL;		// プレイヤーオブジェクト
-	m_pTarget	= NULL;		// ターゲットオブジェクト
-	m_pScore	= NULL;		// スコアオブジェクト
+	m_pTarget = NULL;	// ターゲットオブジェクト
+	m_pScore = NULL;	// スコアオブジェクト
 
 	// シーンの終了
 	CScene::Uninit();
@@ -324,15 +311,6 @@ CPause *CSceneGame::GetPause(void)
 {
 	// ポーズのポインタを返す
 	return m_pPause;
-}
-
-//============================================================
-//	プレイヤー取得処理
-//============================================================
-CPlayer *CSceneGame::GetPlayer(void)
-{
-	// プレイヤーのポインタを返す
-	return m_pPlayer;
 }
 
 //============================================================

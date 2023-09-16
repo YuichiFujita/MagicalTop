@@ -351,7 +351,7 @@ void CWaveManager::Update(void)
 		break;
 	}
 
-	if (CSceneGame::GetPlayer()->GetState() == CPlayer::STATE_DEATH
+	if (CScene::GetPlayer()->GetState() == CPlayer::STATE_DEATH
 	||  CSceneGame::GetTarget()->GetState() == CTarget::STATE_DESTROY)
 	{ // プレイヤーが死亡状態、またはターゲットが破壊状態の場合
 
@@ -678,7 +678,7 @@ void CWaveManager::UpdateWaveStart(void)
 		m_state = STATE_PROGRESSION;	// ウェーブ進行状態
 
 		// プレイヤーを再出現させる
-		CSceneGame::GetPlayer()->SetRespawn(PLAY_SPAWN_POS);
+		CScene::GetPlayer()->SetRespawn(PLAY_SPAWN_POS);
 
 		if (m_nWave == 0)
 		{ // 初回ウェーブの場合
@@ -752,7 +752,7 @@ void CWaveManager::UpdateProgression(void)
 			CEnemy::SetAllVanish();
 
 			// プレイヤーを表示しない状態にする
-			CSceneGame::GetPlayer()->SetDisp(false);
+			CScene::GetPlayer()->SetDisp(false);
 
 			// タイムを計測停止
 			CSceneGame::GetTimerManager()->EnableStop(true);

@@ -110,13 +110,13 @@ void CExpOrb::Uninit(void)
 void CExpOrb::Update(void)
 {
 	// 変数を宣言
-	D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+	D3DXVECTOR3 posPlayer = CScene::GetPlayer()->GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 posExp = CObjectBillboard::GetPosition();	// 経験値位置
 	D3DXVECTOR3 rotExp = CObjectBillboard::GetRotation();	// 経験値向き
 	float fDestRot = 0.0f;	// 目標向き
 	float fDiffRot = 0.0f;	// 向き
 
-	if (CSceneGame::GetPlayer()->GetState() != CPlayer::STATE_DEATH)
+	if (CScene::GetPlayer()->GetState() != CPlayer::STATE_DEATH)
 	{ // プレイヤーが死亡していない場合
 
 		// プレイヤーの方向を代入
@@ -259,7 +259,7 @@ bool CExpOrb::CollisionPlayer(void)
 	bool bHit = false;	// 判定状況
 
 	// ポインタを宣言
-	CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー情報
+	CPlayer *pPlayer = CScene::GetPlayer();	// プレイヤー情報
 
 	if (pPlayer->GetState() != CPlayer::STATE_DEATH)
 	{ // プレイヤーが使用されている場合
@@ -277,7 +277,7 @@ bool CExpOrb::CollisionPlayer(void)
 		{ // 当たっていた場合
 
 			// プレイヤーの経験値の加算
-			CSceneGame::GetPlayer()->AddExp(1);
+			CScene::GetPlayer()->AddExp(1);
 		}
 	}
 

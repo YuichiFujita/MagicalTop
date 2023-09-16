@@ -22,7 +22,6 @@
 class CWaveManager;		// ウェーブマネージャークラス
 class CTimerManager;	// タイマーマネージャークラス
 class CPause;			// ポーズクラス
-class CPlayer;			// プレイヤークラス
 class CTarget;			// ターゲットクラス
 class CScore;			// スコアクラス
 
@@ -49,7 +48,6 @@ public:
 	static CWaveManager		*GetWaveManager(void);	// ウェーブマネージャー取得
 	static CTimerManager	*GetTimerManager(void);	// タイマーマネージャー取得
 	static CPause			*GetPause(void);		// ポーズ取得
-	static CPlayer			*GetPlayer(void);		// プレイヤー取得
 	static CTarget			*GetTarget(void);		// ターゲット取得
 	static CScore			*GetScore(void);		// スコア取得
 
@@ -58,7 +56,6 @@ private:
 	static CWaveManager		*m_pWaveManager;	// ウェーブマネージャー
 	static CTimerManager	*m_pTimerManager;	// タイマーマネージャー
 	static CPause			*m_pPause;			// ポーズ
-	static CPlayer			*m_pPlayer;			// プレイヤーオブジェクト
 	static CTarget			*m_pTarget;			// ターゲットオブジェクト
 	static CScore			*m_pScore;			// スコアオブジェクト
 };

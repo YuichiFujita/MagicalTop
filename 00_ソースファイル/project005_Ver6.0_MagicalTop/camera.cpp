@@ -309,15 +309,15 @@ void CCamera::SetDestRotate(void)
 //============================================================
 void CCamera::SetDestBargaining(void)
 {
-	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
+	if (USED(CScene::GetPlayer()) && USED(CSceneGame::GetTarget()))
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 変数を宣言
-		D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+		D3DXVECTOR3 posPlayer = CScene::GetPlayer()->GetPosition();		// プレイヤー位置
 		D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 		float fLength = 0.0f;	// ターゲット距離のカメラ注視点設定用の割合
 
-		float fDisTarget = CSceneGame::GetPlayer()->GetDistanceTarget();	// ターゲットとプレイヤー間の距離
+		float fDisTarget = CScene::GetPlayer()->GetDistanceTarget();	// ターゲットとプレイヤー間の距離
 		float fRateTarget = (1.0f / CScene::GetStage()->GetStageLimit().fRadius) * fDisTarget;	// ターゲットとプレイヤー間の距離の割合
 
 		//----------------------------------------------------
@@ -536,11 +536,11 @@ void CCamera::Rotate(void)
 //============================================================
 void CCamera::Bargaining(void)
 {
-	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
+	if (USED(CScene::GetPlayer()) && USED(CSceneGame::GetTarget()))
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 変数を宣言
-		D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+		D3DXVECTOR3 posPlayer = CScene::GetPlayer()->GetPosition();		// プレイヤー位置
 		D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 		D3DXVECTOR3 diffPosV = VEC3_ZERO;	// 視点の差分位置
 		D3DXVECTOR3 diffPosR = VEC3_ZERO;	// 注視点の差分位置
@@ -548,7 +548,7 @@ void CCamera::Bargaining(void)
 		float fDiffDis = 0.0f;	// 目標距離
 		float fLength = 0.0f;	// ターゲット距離のカメラ注視点設定用の割合
 
-		float fDisTarget = CSceneGame::GetPlayer()->GetDistanceTarget();	// ターゲットとプレイヤー間の距離
+		float fDisTarget = CScene::GetPlayer()->GetDistanceTarget();	// ターゲットとプレイヤー間の距離
 		float fRateTarget = (1.0f / CScene::GetStage()->GetStageLimit().fRadius) * fDisTarget;	// ターゲットとプレイヤー間の距離の割合
 
 		//----------------------------------------------------

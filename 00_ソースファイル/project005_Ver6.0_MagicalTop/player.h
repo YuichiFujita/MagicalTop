@@ -15,6 +15,7 @@
 //************************************************************
 #include "main.h"
 #include "objectChara.h"
+#include "scene.h"
 #include "magic.h"
 
 //************************************************************
@@ -125,8 +126,9 @@ public:
 	// 静的メンバ関数
 	static CPlayer *Create	// 生成
 	( // 引数
-		D3DXVECTOR3& rPos,		// 位置
-		const D3DXVECTOR3& rRot	// 向き
+		const CScene::MODE mode,	// モード
+		const D3DXVECTOR3& rPos,	// 位置
+		const D3DXVECTOR3& rRot		// 向き
 	);
 
 	// メンバ関数

@@ -237,13 +237,13 @@ void CStage::Update(void)
 	//--------------------------------------------------------
 	//	エリア表示の更新
 	//--------------------------------------------------------
-	if (USED(CSceneGame::GetPlayer()) && USED(CSceneGame::GetTarget()))
+	if (USED(CScene::GetPlayer()) && USED(CSceneGame::GetTarget()))
 	{ // プレイヤー・ターゲットが使用されている場合
 
 		// 変数を宣言
-		D3DXVECTOR3 posPlayer = CSceneGame::GetPlayer()->GetPosition();	// プレイヤー位置
+		D3DXVECTOR3 posPlayer = CScene::GetPlayer()->GetPosition();		// プレイヤー位置
 		D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
-		float fRadiusPlayer = CSceneGame::GetPlayer()->GetRadius();		// プレイヤー半径
+		float fRadiusPlayer = CScene::GetPlayer()->GetRadius();			// プレイヤー半径
 
 		// 現在のエリアを初期化
 		m_area = AREA_NONE;

@@ -8,6 +8,8 @@
 //	インクルードファイル
 //************************************************************
 #include "player.h"
+#include "playerTutorial.h"
+#include "playerGame.h"
 #include "manager.h"
 #include "scene.h"
 #include "sceneGame.h"
@@ -380,6 +382,8 @@ void CPlayer::Update(void)
 	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 
+#if 0
+
 	// 過去位置を更新
 	m_oldPos = posPlayer;
 
@@ -453,6 +457,8 @@ void CPlayer::Update(void)
 		assert(false);
 		break;
 	}
+
+#endif
 
 	// 魔法マネージャーの更新
 	m_pMagic->Update();
@@ -535,7 +541,12 @@ void CPlayer::Hit(const int nDmg)
 //============================================================
 //	生成処理
 //============================================================
-CPlayer *CPlayer::Create(D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
+CPlayer *CPlayer::Create
+(
+	const CScene::MODE mode,	// モード
+	const D3DXVECTOR3& rPos,	// 位置
+	const D3DXVECTOR3& rRot		// 向き
+)
 {
 	// 変数を宣言
 	D3DXVECTOR3 pos = rPos;		// 座標設定用
@@ -546,8 +557,31 @@ CPlayer *CPlayer::Create(D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 	if (UNUSED(pPlayer))
 	{ // 使用されていない場合
 
-		// メモリ確保
-		pPlayer = new CPlayer;	// プレイヤー
+		switch (mode)
+		{ // モードごとの処理
+		case CScene::MODE_TITLE:
+
+			// 無し
+
+			break;
+
+		case CScene::MODE_GAME:
+
+			// メモリ確保
+			pPlayer = new CPlayerGame;	// ゲームプレイヤー
+
+			break;
+
+		case CScene::MODE_RESULT:
+
+			// 無し
+
+			break;
+
+		default:	// 例外処理
+			assert(false);
+			break;
+		}
 	}
 	else { assert(false); return NULL; }	// 使用中
 
@@ -573,11 +607,10 @@ CPlayer *CPlayer::Create(D3DXVECTOR3& rPos, const D3DXVECTOR3& rRot)
 
 		// 向きを設定
 		pPlayer->SetRotation(rRot);
-
-		// 確保したアドレスを返す
-		return pPlayer;
 	}
-	else { assert(false); return NULL; }	// 確保失敗
+
+	// 確保したアドレスを返す
+	return pPlayer;
 }
 
 //============================================================
@@ -681,7 +714,7 @@ void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 
 	// 情報を初期化
-	CSceneGame::GetPlayer()->SetMotion(CPlayer::MOTION_MOVE);	// 浮遊モーションを設定
+	SetMotion(CPlayer::MOTION_MOVE);	// 浮遊モーションを設定
 	m_state = STATE_NORMAL;	// 通常状態を設定
 	m_nCounterState = 0;	// カウンターを初期化
 
@@ -1034,6 +1067,9 @@ void CPlayer::UpdateFadeOut(void)
 	// 変数を宣言
 	float fAlpha = GetAlpha();	// 透明度
 
+	// プレイヤー自身の描画を再開
+	CObject::SetEnableDraw(true);
+
 	// 透明度を上げる
 	fAlpha += FADE_LEVEL;
 
@@ -1067,6 +1103,9 @@ void CPlayer::UpdateFadeIn(void)
 
 		// 透明度を補正
 		fAlpha = 0.0f;
+
+		// プレイヤー自身の描画を停止
+		CObject::SetEnableDraw(false);
 
 		// 状態を設定
 		m_state = STATE_NONE;	// 何もしない状態

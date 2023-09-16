@@ -15,6 +15,8 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
+#define SCORE_PRIO	(6)	// スコアの優先順位
+
 #define SCO_NUMMIN	(0)			// 最少スコア
 #define SCO_NUMMAX	(99999999)	// 最大スコア
 
@@ -66,6 +68,9 @@ HRESULT CScore::Init(void)
 			assert(false);
 			return E_FAIL;
 		}
+
+		// 優先順位を設定
+		m_apValue[nCntScore]->SetPriority(SCORE_PRIO);
 	}
 
 	// 成功を返す

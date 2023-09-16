@@ -426,11 +426,11 @@ bool CFlower::CollisionPlayer(const D3DXVECTOR3& rPos)
 	// 変数を宣言
 	bool bDeath = false;	// 死亡状況
 
-	if (USED(CSceneGame::GetPlayer()))
+	if (USED(CScene::GetPlayer()))
 	{ // プレイヤーが使用されている場合
 
 		// ポインタを宣言
-		CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー情報
+		CPlayer *pPlayer = CScene::GetPlayer();	// プレイヤー情報
 
 		// 変数を宣言
 		D3DXVECTOR3 posPlayer = pPlayer->GetPosition();	// プレイヤー位置

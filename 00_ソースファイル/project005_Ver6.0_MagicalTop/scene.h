@@ -19,6 +19,7 @@
 //	前方宣言
 //************************************************************
 class CStage;	// ステージクラス
+class CPlayer;	// プレイヤークラス
 class CField;	// 地面クラス
 
 //************************************************************
@@ -55,8 +56,8 @@ public:
 	static CScene *Create(MODE mode);			// 生成
 	static HRESULT Release(CScene *&prScene);	// 破棄
 
-	static HRESULT CreateStage(MODE mode);	// ステージ生成
 	static CStage *GetStage(void);			// ステージ取得
+	static CPlayer *GetPlayer(void);		// プレイヤー取得
 	static HRESULT CreateField(MODE mode);	// 地面生成
 	static CField *GetField(void);			// 地面取得
 
@@ -67,6 +68,7 @@ public:
 private:
 	// 静的メンバ変数
 	static CStage *m_pStage;	// ステージ
+	static CPlayer *m_pPlayer;	// プレイヤーオブジェクト
 	static CField *m_pField;	// 地面オブジェクト
 
 	// メンバ変数

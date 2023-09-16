@@ -295,7 +295,7 @@ void CShopManager::Update(void)
 	m_pLife->GetMultiValue()->SetNum(CSceneGame::GetTarget()->GetLife());
 
 	// ”’l‚ÉƒŒƒxƒ‹‚ðÝ’è
-	m_pLv->GetMultiValue()->SetNum(CSceneGame::GetPlayer()->GetLevel());
+	m_pLv->GetMultiValue()->SetNum(CScene::GetPlayer()->GetLevel());
 
 	// ‘I‘ð‘€ì
 	if (pKeyboard->GetTrigger(DIK_LEFT) || pPad->GetTrigger(CInputPad::KEY_LEFT))

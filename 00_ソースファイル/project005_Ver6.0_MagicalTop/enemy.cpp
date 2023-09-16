@@ -1348,7 +1348,7 @@ void CEnemyHuman::CollisionFind(void)
 	float fLookRadius		= 0.0f;					// 視認対象半径
 
 	D3DXVECTOR3 posBarrier	= CScene::GetStage()->GetStageBarrierPosition();	// バリア位置
-	float fPlayerRadius		= CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
+	float fPlayerRadius		= CScene::GetPlayer()->GetRadius();	// プレイヤー半径
 
 	// 過去位置の更新
 	UpdateOldPosition();
@@ -1689,7 +1689,7 @@ void CEnemyCar::CollisionFind(void)
 	float fLookRadius		= 0.0f;					// 視認対象半径
 
 	D3DXVECTOR3 posBarrier	= CScene::GetStage()->GetStageBarrierPosition();	// バリア位置
-	float fPlayerRadius		= CSceneGame::GetPlayer()->GetRadius();	// プレイヤー半径
+	float fPlayerRadius		= CScene::GetPlayer()->GetRadius();	// プレイヤー半径
 
 	// 過去位置の更新
 	UpdateOldPosition();

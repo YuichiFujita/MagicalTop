@@ -116,9 +116,9 @@ void CMagicManager::Uninit(void)
 //============================================================
 void CMagicManager::Update(void)
 {
-	if (CSceneGame::GetPlayer()->GetState() != CPlayer::STATE_NONE
-	&&  CSceneGame::GetPlayer()->GetState() != CPlayer::STATE_FADEIN
-	&&  CSceneGame::GetPlayer()->GetState() != CPlayer::STATE_FADEOUT)
+	if (CScene::GetPlayer()->GetState() != CPlayer::STATE_NONE
+	&&  CScene::GetPlayer()->GetState() != CPlayer::STATE_FADEIN
+	&&  CScene::GetPlayer()->GetState() != CPlayer::STATE_FADEOUT)
 	{ // プレイヤーが何もしない状態ではない場合
 
 		if (m_nCounterMagic > 0)
@@ -343,7 +343,7 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 		{ // マナがある且つ、クールタイムが終了した場合
 
 			// ポインタを宣言
-			CPlayer *pPlayer = CSceneGame::GetPlayer();	// プレイヤー
+			CPlayer *pPlayer = CScene::GetPlayer();	// プレイヤー
 
 			// 変数を宣言
 			CMagic::StatusInfo status = CMagic::GetStatusInfo();	// 魔法ステータス
