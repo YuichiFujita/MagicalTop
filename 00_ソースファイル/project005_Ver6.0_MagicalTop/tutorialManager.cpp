@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "texture.h"
 #include "object2D.h"
+#include "objectGauge2D.h"
 #include "player.h"
 
 //************************************************************
@@ -35,19 +36,23 @@
 //************************************************************
 const char *CTutorialManager::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\tutorial000.png",	// ウェーブ表示テクスチャ
+	"data\\TEXTURE\\tutorial000.png",	// テクスチャ
 };
 
 const char *CTutorialManager::mc_apLessonTextureFile[] =	// レッスンテクスチャ定数
 {
 	NULL,	// レッスン00：テクスチャなし
-	"data\\TEXTURE\\lesson000.png",	// レッスン01：吸い込まれるのテクスチャ
+	"data\\TEXTURE\\lesson000.png",	// レッスン01：吸い込まれる説明のテクスチャ
+	"data\\TEXTURE\\lesson001.png",	// レッスン02：前後加速の説明のテクスチャ
+	"data\\TEXTURE\\lesson002.png",	// レッスン03：左右加速の説明のテクスチャ
 };
 
-const int CTutorialManager::mn_aNextLesson[] =	// レッスン移行カウント
+const int CTutorialManager::mc_aNextLesson[] =	// レッスン移行カウント
 {
 	0,		// レッスンなし
-	60,		// レッスン01：吸い込まれるの終了カウント
+	1,		// レッスン01：吸い込まれる終了カウント
+	60,		// レッスン02：前後加速の終了カウント
+	60,		// レッスン03：左右加速の終了カウント
 };
 
 //************************************************************
@@ -59,13 +64,13 @@ const int CTutorialManager::mn_aNextLesson[] =	// レッスン移行カウント
 CTutorialManager::CTutorialManager()
 {
 	// メンバ変数をクリア
+	m_pConterLesson	= NULL;		// レッスン管理カウンターの情報
 	m_pFade		= NULL;			// フェードの情報
 	m_pExplain	= NULL;			// 説明表示の情報
 	m_state		= STATE_NONE;	// 状態
 	m_nLesson	= 0;			// レッスン
 	m_fScale	= 0.0f;			// ポリゴン拡大率
-	m_nCounterState		= 0;	// 状態管理カウンター
-	m_nCounterLesson	= 0;	// レッスン管理カウンター
+	m_nCounterState	= 0;		// 状態管理カウンター
 }
 
 //============================================================
@@ -85,13 +90,33 @@ HRESULT CTutorialManager::Init(void)
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 
 	// メンバ変数を初期化
+	m_pConterLesson	= NULL;		// レッスン管理カウンターの情報
 	m_pFade		= NULL;			// フェードの情報
 	m_pExplain	= NULL;			// 説明表示の情報
 	m_state		= STATE_WAIT;	// 状態
 	m_nLesson	= LESSON_NONE;	// レッスン
 	m_fScale	= 0.0f;			// ポリゴン拡大率
-	m_nCounterState		= 0;	// 状態管理カウンター
-	m_nCounterLesson	= 0;	// レッスン管理カウンター
+	m_nCounterState	= 0;		// 状態管理カウンター
+
+	//--------------------------------------------------------
+	//	レッスン管理カウンターの生成・設定
+	//--------------------------------------------------------
+	// レッスン管理カウンターの生成
+	m_pConterLesson = CObjectGauge2D::Create	// TODO:定数
+	( // 引数
+		CObject::LABEL_GAUGE,
+		mc_aNextLesson[0],
+		20,
+		D3DXVECTOR3(200.0f, 200.0f, 0.0f),
+		D3DXVECTOR3(100.0f, 20.0f, 0.0f)
+	);
+	if (UNUSED(m_pConterLesson))
+	{ // 生成に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	//--------------------------------------------------------
 	//	フェードの生成・設定
@@ -221,6 +246,15 @@ void CTutorialManager::Update(void)
 }
 
 //============================================================
+//	レッスン取得処理
+//============================================================
+int CTutorialManager::GetLesson(void) const
+{
+	// 現在のレッスンを返す
+	return m_nLesson;
+}
+
+//============================================================
 //	次レッスンへの移行処理
 //============================================================
 void CTutorialManager::NextLesson(void)
@@ -229,13 +263,10 @@ void CTutorialManager::NextLesson(void)
 	{ // レッスンがまだある場合
 
 		// レッスンカウンターを加算
-		m_nCounterLesson++;
+		m_pConterLesson->AddNum(1);
 
-		if (m_nCounterLesson >= mn_aNextLesson[m_nLesson])
+		if (m_pConterLesson->GetNum() >= mc_aNextLesson[m_nLesson])
 		{ // レッスンを次に進めるカウントまで到達した場合
-
-			// レッスンカウンターを初期化
-			m_nCounterLesson = 0;
 
 			// レッスンを次に進める
 			m_nLesson++;
@@ -249,10 +280,30 @@ void CTutorialManager::NextLesson(void)
 				// 処理を抜ける
 				break;
 
+			case LESSON_02:	// レッスン02：前後加速
+
+				// 無し
+
+				// 処理を抜ける
+				break;
+
+			case LESSON_03:	// レッスン03：左右加速
+
+				// 無し
+
+				// 処理を抜ける
+				break;
+
 			default:	// 例外処理
 				assert(false);
 				break;
 			}
+
+			// レッスンカウンターの最大値を設定
+			m_pConterLesson->SetMaxNum(mc_aNextLesson[m_nLesson]);
+
+			// レッスンカウンターを初期化
+			m_pConterLesson->SetNum(0);
 
 			// プレイヤーを見えなくする
 			CScene::GetPlayer()->SetDisp(false);
@@ -420,7 +471,8 @@ void CTutorialManager::UpdateExplain(void)
 		m_pExplain->SetScaling(SIZE_EXPLAIN);
 
 		if (CManager::GetKeyboard()->GetTrigger(DIK_0))
-		{
+		{ // TODO：操作
+
 			// 説明表示の初期ポリゴン拡大率を設定
 			m_fScale = SET_SCALE;
 

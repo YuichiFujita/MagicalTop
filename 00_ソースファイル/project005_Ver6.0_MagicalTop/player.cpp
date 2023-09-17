@@ -72,7 +72,6 @@
 #define PLAY_GRAVITY	(1.0f)		// プレイヤー重力
 #define PLAY_RADIUS		(20.0f)		// プレイヤー半径
 #define PLAY_LIFE		(150)		// プレイヤー体力
-#define HURRICANE_DMG	(50)		// バリアのダメージ量
 #define ENE_HIT_DMG		(30)		// 敵ヒット時のダメージ量
 
 #define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
@@ -499,89 +498,6 @@ CPlayer *CPlayer::Create
 }
 
 //============================================================
-//	吹っ飛びヒット処理
-//============================================================
-void CPlayer::HitBlowAway
-(
-	const D3DXVECTOR3& rPlayerPos,	// プレイヤー位置
-	const D3DXVECTOR3& rHitObjPos,	// オブジェクト位置
-	const int nDmg					// ダメージ量
-)
-{
-	// 変数を宣言
-	D3DXVECTOR3 vecAway = VEC3_ZERO;	// 吹っ飛びベクトル
-	STATE oldState = m_state;	// 過去の状態
-
-	// ヒット処理
-	Hit(nDmg);
-
-	if (oldState == STATE_NORMAL
-	&&  m_state  == STATE_DAMAGE)
-	{ // 元の状態が通常状態且つ、現在の状態がダメージ状態の場合
-
-		// 吹っ飛びベクトルを求める
-		vecAway = rPlayerPos - rHitObjPos;
-		vecAway.y = 0.0f;						// 縦ベクトルを削除
-		D3DXVec3Normalize(&vecAway, &vecAway);	// ベクトルを正規化
-
-		// 移動量を設定
-		m_move = vecAway * AWAY_SIDE_MOVE;
-		m_move.y = AWAY_UP_MOVE;
-
-		// 状態を変更
-		m_state = STATE_BLOW_AWAY;	// 吹っ飛び状態
-
-		// 吹っ飛びモーションに移行
-		SetMotion(MOTION_BLOW_AWAY);
-	}
-}
-
-//============================================================
-//	渦巻きこまれヒット処理
-//============================================================
-void CPlayer::HitVortex
-(
-	D3DXVECTOR3& rPlayerPos,	// プレイヤー位置
-	const D3DXVECTOR3& rHitPos	// 当たり判定位置
-)
-{
-	// バリアの衝突判定
-	collision::CirclePillar
-	( // 引数
-		rPlayerPos,										// 判定位置
-		CScene::GetStage()->GetStageBarrierPosition(),	// 判定目標位置
-		PLAY_RADIUS,									// 判定半径
-		CScene::GetStage()->GetStageBarrier().fRadius	// 判定目標半径
-	);
-
-	if (m_state == STATE_NORMAL)
-	{ // 通常状態の場合
-
-		// ヒット処理
-		Hit(HURRICANE_DMG);
-
-		if (m_state != STATE_DEATH)
-		{ // 死亡状態の場合
-
-			// 巻き込まれ始めの向きを設定
-			m_fVortexRot = atan2f(rPlayerPos.x - rHitPos.x, rPlayerPos.z - rHitPos.z);
-
-			// 渦との距離を設定
-			m_fVortexDis = sqrtf((rPlayerPos.x - rHitPos.x) * (rPlayerPos.x - rHitPos.x) + (rPlayerPos.z - rHitPos.z) * (rPlayerPos.z - rHitPos.z)) * 0.5f;
-
-			// カメラ更新をOFFにする
-			CManager::GetCamera()->SetEnableUpdate(false);
-
-			// 状態を設定
-			m_state = STATE_VORTEX;	// 渦巻きこまれ状態
-
-			// 吹っ飛びモーションに移行
-			SetMotion(MOTION_BLOW_AWAY);
-		}
-	}
-}
-
-//============================================================
 //	経験値の加算処理
 //============================================================
 void CPlayer::AddExp(const int nAdd)
@@ -591,7 +507,7 @@ void CPlayer::AddExp(const int nAdd)
 }
 
 //============================================================
-//	再出現設定の設定処理
+//	再出現の設定処理
 //============================================================
 void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 {
@@ -648,6 +564,15 @@ void CPlayer::SetDisp(const bool bDisp)
 		SetEnableDraw(false);
 		CObject::SetEnableDraw(true);	// プレイヤーの描画はONにする
 	}
+}
+
+//============================================================
+//	状態の設定処理
+//============================================================
+void CPlayer::SetState(const int nState)
+{
+	// 引数の状態を設定
+	m_state = (STATE)nState;
 }
 
 //============================================================
@@ -774,6 +699,28 @@ float CPlayer::GetRadius(void) const
 }
 
 //============================================================
+//	吹っ飛びの設定処理
+//============================================================
+void CPlayer::SetBlowAway(const D3DXVECTOR3& rVecAway)
+{
+	// 移動量を設定
+	m_move = rVecAway * AWAY_SIDE_MOVE;
+	m_move.y = AWAY_UP_MOVE;
+}
+
+//============================================================
+//	渦巻きこまれの設定処理
+//============================================================
+void CPlayer::SetVortex(const D3DXVECTOR3& rPlayerPos, const D3DXVECTOR3& rHitPos)
+{
+	// 巻き込まれ始めの向きを設定
+	m_fVortexRot = atan2f(rPlayerPos.x - rHitPos.x, rPlayerPos.z - rHitPos.z);
+
+	// 渦との距離を設定
+	m_fVortexDis = sqrtf((rPlayerPos.x - rHitPos.x) * (rPlayerPos.x - rHitPos.x) + (rPlayerPos.z - rHitPos.z) * (rPlayerPos.z - rHitPos.z)) * 0.5f;
+}
+
+//============================================================
 //	過去位置の更新処理
 //============================================================
 void CPlayer::UpdateOldPosition(void)
@@ -835,29 +782,6 @@ void CPlayer::UpdateMotion(int nMotion)
 			break;
 		}
 	}
-}
-
-//============================================================
-//	移動量・目標向きの更新処理
-//============================================================
-CPlayer::MOTION CPlayer::UpdateMove(void)
-{
-	// 変数を宣言
-	MOTION currentMotion = MOTION_MOVE;	// 現在のモーション
-	D3DXVECTOR3 vecTarg = VEC3_ZERO;	// ターゲット逆方向ベクトル
-	D3DXVECTOR3 vecSide = VEC3_ZERO;	// ターゲット横方向ベクトル
-
-	// 吸い込みの更新
-	UpdateAbsorb(vecTarg, vecSide);
-
-	// ターゲット逆方向への加減速の操作
-	currentMotion = ControlTargAccel(vecTarg);
-
-	// ターゲット横方向への加減速の操作
-	currentMotion = ControlSideAccel(vecSide);
-
-	// 現在のモーションを返す
-	return currentMotion;
 }
 
 //============================================================

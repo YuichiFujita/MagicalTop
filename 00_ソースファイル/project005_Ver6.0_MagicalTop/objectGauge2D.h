@@ -42,7 +42,7 @@ public:
 
 	// コンストラクタ
 	CObjectGauge2D();
-	CObjectGauge2D(const int nMax, const int nFrame, const CObject::LABEL label, const int nPriority = DEFAULT_PRIO);
+	CObjectGauge2D(const int nFrame, const CObject::LABEL label, const int nPriority = DEFAULT_PRIO);
 
 	// デストラクタ
 	~CObjectGauge2D();
@@ -71,6 +71,8 @@ public:
 	void AddNum(const int nAdd);	// ゲージ加算
 	void SetNum(const int nNum);	// ゲージ設定
 	int  GetNum(void) const;		// ゲージ取得
+	void SetMaxNum(const int nMax);	// ゲージ最大値設定
+	int  GetMaxNum(void) const;		// ゲージ最大値取得
 	void BindTexture(const int nPolygonID, const int nTextureID);	// テクスチャ割当
 	void SetPosition(const D3DXVECTOR3& rPos);		// 位置設定
 	void SetScalingGauge(const D3DXVECTOR3& rSize);	// ゲージ大きさ設定
@@ -103,7 +105,7 @@ private:
 	float m_fAddRight;					// 横幅加算量
 	int m_nCounterState;				// 状態管理カウンター
 	int m_nNumGauge;					// 表示値
-	const int m_nMaxNumGauge;			// 表示値の最大値定数
+	int m_nMaxNumGauge;					// 表示値の最大値
 	const int m_nFrame;					// 表示値の変動フレーム定数
 	int m_aTextureID[POLYGON_MAX];		// テクスチャインデックス
 };

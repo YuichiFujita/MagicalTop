@@ -8,8 +8,16 @@
 //	インクルードファイル
 //************************************************************
 #include "playerGame.h"
+#include "manager.h"
+#include "camera.h"
+#include "collision.h"
 #include "stage.h"
 #include "levelupManager.h"
+
+//************************************************************
+//	マクロ定義
+//************************************************************
+#define HURRICANE_DMG	(50)	// ハリケーンのダメージ量
 
 //************************************************************
 //	子クラス [CPlayerGame] のメンバ関数
@@ -171,6 +179,86 @@ void CPlayerGame::Update(void)
 }
 
 //============================================================
+//	吹っ飛びヒット処理
+//============================================================
+void CPlayerGame::HitBlowAway
+(
+	const D3DXVECTOR3& rPlayerPos,	// プレイヤー位置
+	const D3DXVECTOR3& rHitObjPos,	// オブジェクト位置
+	const int nDmg					// ダメージ量
+)
+{
+	// 変数を宣言
+	D3DXVECTOR3 vecAway = VEC3_ZERO;	// 吹っ飛びベクトル
+	STATE oldState = (STATE)GetState();	// 過去の状態
+
+	// ヒット処理
+	Hit(nDmg);
+
+	if (oldState   == STATE_NORMAL
+	&&  GetState() == STATE_DAMAGE)
+	{ // 元の状態が通常状態且つ、現在の状態がダメージ状態の場合
+
+		// 吹っ飛びベクトルを求める
+		vecAway = rPlayerPos - rHitObjPos;
+		vecAway.y = 0.0f;						// 縦ベクトルを削除
+		D3DXVec3Normalize(&vecAway, &vecAway);	// ベクトルを正規化
+
+		// 吹っ飛びの設定
+		SetBlowAway(vecAway);
+
+		// 状態を変更
+		SetState(STATE_BLOW_AWAY);	// 吹っ飛び状態
+
+		// 吹っ飛びモーションに移行
+		SetMotion(MOTION_BLOW_AWAY);
+	}
+}
+
+//============================================================
+//	渦巻きこまれヒット処理
+//============================================================
+void CPlayerGame::HitVortex
+(
+	D3DXVECTOR3& rPlayerPos,	// プレイヤー位置
+	const D3DXVECTOR3& rHitPos,	// 当たり判定位置
+	const int nDmg				// ダメージ量
+)
+{
+	// バリアの衝突判定
+	collision::CirclePillar
+	( // 引数
+		rPlayerPos,										// 判定位置
+		CScene::GetStage()->GetStageBarrierPosition(),	// 判定目標位置
+		GetRadius(),									// 判定半径
+		CScene::GetStage()->GetStageBarrier().fRadius	// 判定目標半径
+	);
+
+	if (GetState() == STATE_NORMAL)
+	{ // 通常状態の場合
+
+		// ヒット処理
+		Hit(nDmg);
+
+		if (GetState() != STATE_DEATH)
+		{ // 死亡状態の場合
+
+			// 渦巻きこまれの設定処理
+			SetVortex(rPlayerPos, rHitPos);
+
+			// カメラ更新をOFFにする
+			CManager::GetCamera()->SetEnableUpdate(false);
+
+			// 状態を設定
+			SetState(STATE_VORTEX);	// 渦巻きこまれ状態
+
+			// 吹っ飛びモーションに移行
+			SetMotion(MOTION_BLOW_AWAY);
+		}
+	}
+}
+
+//============================================================
 //	通常状態時の更新処理
 //============================================================
 CPlayer::MOTION CPlayerGame::UpdateNormal(void)
@@ -214,7 +302,7 @@ CPlayer::MOTION CPlayerGame::UpdateNormal(void)
 		{ // 当たっていた場合
 
 			// 渦巻きこまれヒット
-			HitVortex(posPlayer, pStage->GetStageBarrierPosition());
+			HitVortex(posPlayer, pStage->GetStageBarrierPosition(), HURRICANE_DMG);
 		}
 
 		// 位置を更新
@@ -224,6 +312,29 @@ CPlayer::MOTION CPlayerGame::UpdateNormal(void)
 		SetRotation(rotPlayer);
 	}
 	else { assert(false); }	// 非使用中
+
+	// 現在のモーションを返す
+	return currentMotion;
+}
+
+//============================================================
+//	移動量・目標向きの更新処理
+//============================================================
+CPlayer::MOTION CPlayerGame::UpdateMove(void)
+{
+	// 変数を宣言
+	MOTION currentMotion = MOTION_MOVE;	// 現在のモーション
+	D3DXVECTOR3 vecTarg = VEC3_ZERO;	// ターゲット逆方向ベクトル
+	D3DXVECTOR3 vecSide = VEC3_ZERO;	// ターゲット横方向ベクトル
+
+	// 吸い込みの更新
+	UpdateAbsorb(vecTarg, vecSide);
+
+	// ターゲット逆方向への加減速の操作
+	currentMotion = ControlTargAccel(vecTarg);
+
+	// ターゲット横方向への加減速の操作
+	currentMotion = ControlSideAccel(vecSide);
 
 	// 現在のモーションを返す
 	return currentMotion;

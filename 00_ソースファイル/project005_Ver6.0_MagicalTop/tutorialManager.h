@@ -18,7 +18,8 @@
 //************************************************************
 //	前方宣言
 //************************************************************
-class CObject2D;	// オブジェクト2Dクラス
+class CObject2D;		// オブジェクト2Dクラス
+class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
 
 //************************************************************
 //	クラス定義
@@ -46,8 +47,12 @@ public:
 	{
 		LESSON_NONE = 0,	// レッスン無し
 		LESSON_01,			// レッスン01：吸い込まれる
+		LESSON_02,			// レッスン02：前後加速
+		LESSON_03,			// レッスン03：左右加速
 		LESSON_MAX			// この列挙型の総数
 	};
+
+	// TOMORROW:MoveとVortexの関数仮想化
 
 	// コンストラクタ
 	CTutorialManager();
@@ -56,10 +61,11 @@ public:
 	~CTutorialManager();
 
 	// メンバ関数
-	HRESULT Init(void);		// 初期化
-	void Uninit(void);		// 終了
-	void Update(void);		// 更新
-	void NextLesson(void);	// 次レッスンへの移行
+	HRESULT Init(void);			// 初期化
+	void Uninit(void);			// 終了
+	void Update(void);			// 更新
+	int  GetLesson(void) const;	// レッスン取得
+	void NextLesson(void);		// 次レッスンへの移行
 
 	// 静的メンバ関数
 	static CTutorialManager *Create(void);	// 生成
@@ -76,15 +82,15 @@ private:
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];			// テクスチャ定数
 	static const char *mc_apLessonTextureFile[];	// レッスンテクスチャ定数
-	static const int mn_aNextLesson[];				// レッスン移行カウント
+	static const int mc_aNextLesson[];				// レッスン移行カウント
 
 	// メンバ変数
+	CObjectGauge2D *m_pConterLesson;	// レッスン管理カウンターの情報
 	CObject2D *m_pFade;		// フェードの情報
 	CObject2D *m_pExplain;	// 説明表示の情報
 	STATE m_state;			// 状態
 	int m_nCounterState;	// 状態管理カウンター
 	int m_nLesson;			// レッスン
-	int m_nCounterLesson;	// レッスン管理カウンター
 	float m_fScale;			// ポリゴン拡大率
 };
 

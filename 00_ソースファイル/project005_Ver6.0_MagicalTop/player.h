@@ -130,21 +130,25 @@ public:
 		const D3DXVECTOR3& rRot		// 向き
 	);
 
-	// メンバ関数
-	void HitBlowAway	// 吹っ飛びヒット
+	// 純粋仮想関数
+	virtual void HitBlowAway	// 吹っ飛びヒット
 	( // 引数
 		const D3DXVECTOR3& rPlayerPos,	// プレイヤー位置
 		const D3DXVECTOR3& rHitObjPos,	// オブジェクト位置
 		const int nDmg					// ダメージ量
-	);
-	void HitVortex	// 渦巻きこまれヒット
+	) = 0;
+	virtual void HitVortex	// 渦巻きこまれヒット
 	( // 引数
 		D3DXVECTOR3& rPlayerPos,	// プレイヤー位置
-		const D3DXVECTOR3& rHitPos	// 当たり判定位置
-	);
+		const D3DXVECTOR3& rHitPos,	// 当たり判定位置
+		const int nDmg				// ダメージ量
+	) = 0;
+
+	// メンバ関数
 	void AddExp(const int nAdd);				// 経験値加算
 	void SetRespawn(D3DXVECTOR3& rPos);			// 再出現設定
 	void SetDisp(const bool bDisp);				// 表示設定
+	void SetState(const int nState);			// 状態設定
 	void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
 	void SetEnableDraw(const bool bDraw);		// 描画状況設定
 	void SetEnableDrawMana(const bool bDraw);	// マナの描画状況設定
@@ -162,11 +166,13 @@ protected:
 	virtual MOTION UpdateNormal(void) = 0;	// 通常状態時の更新
 
 	// メンバ関数
+	void SetBlowAway(const D3DXVECTOR3& rVecAway);	// 吹っ飛び設定
+	void SetVortex(const D3DXVECTOR3& rPlayerPos, const D3DXVECTOR3& rHitPos);	// 渦巻きこまれ設定
+
 	void UpdateOldPosition(void);	// 過去位置の更新
 	void UpdateDisTarget(void);		// ターゲット距離の更新
 	void UpdateMotion(int nMotion);	// モーション・オブジェクトキャラクターの更新
 
-	MOTION UpdateMove(void);	// 移動量・目標向きの更新
 	void UpdateAbsorb(D3DXVECTOR3& rVecTarg, D3DXVECTOR3& rVecSide);	// 吸い込みの更新
 	MOTION ControlTargAccel(const D3DXVECTOR3& rVecTarg);	// ターゲット逆方向への加減速の操作
 	MOTION ControlSideAccel(const D3DXVECTOR3& rVecSide);	// ターゲット横方向への加減速の操作

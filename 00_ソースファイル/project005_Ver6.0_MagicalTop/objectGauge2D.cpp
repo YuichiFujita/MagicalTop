@@ -40,6 +40,7 @@ CObjectGauge2D::CObjectGauge2D() : m_nMaxNumGauge(0), m_nFrame(0)
 	m_fAddRight = 0.0f;			// 横幅加算量
 	m_nCounterState = 0;		// 状態管理カウンター
 	m_nNumGauge = 0;			// 表示値
+	m_nMaxNumGauge = 0;			// 表示値の最大値
 
 	for (int nCntGauge = 0; nCntGauge < POLYGON_MAX; nCntGauge++)
 	{ // 使用する四角形ポリゴン数分繰り返す
@@ -52,7 +53,7 @@ CObjectGauge2D::CObjectGauge2D() : m_nMaxNumGauge(0), m_nFrame(0)
 //============================================================
 //	オーバーロードコンストラクタ
 //============================================================
-CObjectGauge2D::CObjectGauge2D(const int nMax, const int nFrame, const CObject::LABEL label, const int nPriority) : CObject(label, nPriority), m_nMaxNumGauge(nMax), m_nFrame(nFrame)
+CObjectGauge2D::CObjectGauge2D(const int nFrame, const CObject::LABEL label, const int nPriority) : CObject(label, nPriority), m_nFrame(nFrame)
 {
 	// メンバ変数をクリア
 	m_pVtxBuff	= NULL;			// 頂点バッファへのポインタ
@@ -68,6 +69,7 @@ CObjectGauge2D::CObjectGauge2D(const int nMax, const int nFrame, const CObject::
 	m_fAddRight = 0.0f;			// 横幅加算量
 	m_nCounterState = 0;		// 状態管理カウンター
 	m_nNumGauge = 0;			// 表示値
+	m_nMaxNumGauge = 0;			// 表示値の最大値
 
 	for (int nCntGauge = 0; nCntGauge < POLYGON_MAX; nCntGauge++)
 	{ // 使用する四角形ポリゴン数分繰り返す
@@ -103,7 +105,7 @@ HRESULT CObjectGauge2D::Init(void)
 	m_fCurrentNumGauge = 0.0f;		// 現在表示値
 	m_fAddRight = 0.0f;				// 横幅加算量
 	m_nCounterState = 0;			// 状態管理カウンター
-	m_nNumGauge = m_nMaxNumGauge;	// 表示値
+	m_nNumGauge = 0;				// 表示値
 
 	for (int nCntTexture = 0; nCntTexture < POLYGON_MAX; nCntTexture++)
 	{ // 使用する四角形ポリゴン数分繰り返す
@@ -261,7 +263,7 @@ CObjectGauge2D *CObjectGauge2D::Create
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pObjectGauge2D = new CObjectGauge2D(nMax, nFrame, label, GAUGE_PRIO);	// オブジェクトゲージ2D
+		pObjectGauge2D = new CObjectGauge2D(nFrame, label, GAUGE_PRIO);	// オブジェクトゲージ2D
 	}
 	else { assert(false); return NULL; }	// 使用中
 
@@ -279,6 +281,9 @@ CObjectGauge2D *CObjectGauge2D::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// ゲージ最大値を設定
+		pObjectGauge2D->SetMaxNum(nMax);
 
 		// 位置を設定
 		pObjectGauge2D->SetPosition(rPos);
@@ -347,6 +352,33 @@ int CObjectGauge2D::GetNum(void) const
 {
 	// 表示値を返す
 	return m_nNumGauge;
+}
+
+//============================================================
+//	ゲージ最大値の設定処理
+//============================================================
+void CObjectGauge2D::SetMaxNum(const int nMax)
+{
+	// 引数の表示最大値を設定
+	m_nMaxNumGauge = nMax;
+
+	// 表示値の制限
+	useful::LimitNum(m_nNumGauge, 0, m_nMaxNumGauge);
+
+	// ゲージの横幅加算量を設定
+	m_fAddRight = ((float)m_nNumGauge * ((m_sizeGauge.x * 2.0f) / (float)m_nMaxNumGauge)) - m_sizeGauge.x;
+
+	// 頂点情報の設定
+	SetVtx();
+}
+
+//============================================================
+//	ゲージ最大値取得処理
+//============================================================
+int CObjectGauge2D::GetMaxNum(void) const
+{
+	// 表示最大値を返す
+	return m_nMaxNumGauge;
 }
 
 //============================================================
