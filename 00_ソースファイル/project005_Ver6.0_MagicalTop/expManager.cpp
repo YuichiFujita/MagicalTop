@@ -154,6 +154,16 @@ int CExpManager::GetLevel(void) const
 }
 
 //============================================================
+//	経験値描画状況の設定処理
+//============================================================
+void CExpManager::SetEnableExpDraw(const bool bDraw)
+{
+	// 引数の描画状況を設定
+	m_pExp->SetEnableDraw(bDraw);	// ゲージ
+	m_pLevel->SetEnableDraw(bDraw);	// 数値
+}
+
+//============================================================
 //	生成処理
 //============================================================
 CExpManager *CExpManager::Create()

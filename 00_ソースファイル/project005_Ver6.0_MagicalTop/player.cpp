@@ -23,7 +23,6 @@
 #include "multiModel.h"
 #include "magicManager.h"
 #include "expManager.h"
-#include "levelupManager.h"
 #include "objectGauge3D.h"
 #include "gaugeStar.h"
 #include "shadow.h"
@@ -140,7 +139,6 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 	// メンバ変数をクリア
 	m_pMagic		= NULL;				// 魔法マネージャーの情報
 	m_pExp			= NULL;				// 経験値マネージャーの情報
-	m_pLevelup		= NULL;				// 強化マネージャーの情報
 	m_pLife			= NULL;				// 体力の情報
 	m_pDash			= NULL;				// ダッシュの情報
 	m_pShadow		= NULL;				// 影の情報
@@ -177,7 +175,6 @@ HRESULT CPlayer::Init(void)
 	// メンバ変数を初期化
 	m_pMagic		= NULL;				// 魔法マネージャーの情報
 	m_pExp			= NULL;				// 経験値マネージャーの情報
-	m_pLevelup		= NULL;				// 強化マネージャーの情報
 	m_pLife			= NULL;				// 体力の情報
 	m_pDash			= NULL;				// ダッシュの情報
 	m_pShadow		= NULL;				// 影の情報
@@ -207,16 +204,6 @@ HRESULT CPlayer::Init(void)
 	// 経験値マネージャーの生成
 	m_pExp = CExpManager::Create();
 	if (UNUSED(m_pExp))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// 強化マネージャーの生成
-	m_pLevelup = CLevelupManager::Create();
-	if (UNUSED(m_pLevelup))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -342,14 +329,6 @@ void CPlayer::Uninit(void)
 		assert(false);
 	}
 
-	// 強化マネージャーを破棄
-	if (FAILED(m_pLevelup->Release(m_pLevelup)))
-	{ // 破棄に失敗した場合
-
-		// 例外処理
-		assert(false);
-	}
-
 	// 影を破棄
 	m_pShadow->Uninit();
 
@@ -370,9 +349,6 @@ void CPlayer::Update(void)
 
 	// 経験値マネージャーの更新
 	m_pExp->Update();
-
-	// 強化マネージャーの更新
-	m_pLevelup->Update();
 
 	// 影の更新
 	m_pShadow->Update();
@@ -698,6 +674,42 @@ void CPlayer::SetEnableDraw(const bool bDraw)
 	m_pDash->SetEnableDraw(bDraw);		// ダッシュ
 	m_pLife->SetEnableDraw(bDraw);		// 体力
 	m_pMagic->SetEnableManaDraw(bDraw);	// マナ
+}
+
+//============================================================
+//	マナの描画状況の設定処理
+//============================================================
+void CPlayer::SetEnableDrawMana(const bool bDraw)
+{
+	// 引数の描画状況をマナに設定
+	m_pMagic->SetEnableManaDraw(bDraw);
+}
+
+//============================================================
+//	経験値の描画状況の設定処理
+//============================================================
+void CPlayer::SetEnableDrawExp(const bool bDraw)
+{
+	// 引数の描画状況を経験値に設定
+	m_pExp->SetEnableExpDraw(bDraw);
+}
+
+//============================================================
+//	体力の描画状況の設定処理
+//============================================================
+void CPlayer::SetEnableDrawLife(const bool bDraw)
+{
+	// 引数の描画状況を体力に設定
+	m_pLife->SetEnableDraw(bDraw);
+}
+
+//============================================================
+//	ダッシュの描画状況の設定処理
+//============================================================
+void CPlayer::SetEnableDrawDash(const bool bDraw)
+{
+	// 引数の描画状況をダッシュに設定
+	m_pDash->SetEnableDraw(bDraw);
 }
 
 //============================================================

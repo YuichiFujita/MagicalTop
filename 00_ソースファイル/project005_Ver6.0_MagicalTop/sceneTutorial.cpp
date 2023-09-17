@@ -11,10 +11,9 @@
 #include "manager.h"
 #include "sound.h"
 #include "camera.h"
+#include "tutorialManager.h"
 
 #include "stage.h"
-#include "score.h"
-
 #include "enemy.h"
 #include "magic.h"
 #include "sea.h"
@@ -34,7 +33,7 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
-CScore *CSceneTutorial::m_pScore = NULL;	// スコアオブジェクト
+CTutorialManager *CSceneTutorial::m_pTutorialManager = NULL;	// チュートリアルマネージャー
 
 //************************************************************
 //	子クラス [CSceneTutorial] のメンバ関数
@@ -63,15 +62,15 @@ HRESULT CSceneTutorial::Init(void)
 	//--------------------------------------------------------
 	//	チュートリアルの初期化
 	//--------------------------------------------------------
-	//// リザルトマネージャーの生成
-	//m_pResultManager = CResultManager::Create();
-	//if (UNUSED(m_pResultManager))
-	//{ // 非使用中の場合
+	// チュートリアルマネージャーの生成
+	m_pTutorialManager = CTutorialManager::Create();
+	if (UNUSED(m_pTutorialManager))
+	{ // 非使用中の場合
 
-	//	// 失敗を返す
-	//	assert(false);
-	//	return E_FAIL;
-	//}
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// シーンの初期化
 	CScene::Init();
@@ -95,21 +94,6 @@ HRESULT CSceneTutorial::Init(void)
 
 	// 空オブジェクトの生成
 	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
-
-	// スコアオブジェクトの生成
-	m_pScore = CScore::Create
-	( // 引数
-		SCO_POS,	// 位置
-		SCO_SIZE,	// 大きさ
-		SCO_SPACE	// 空白
-	);
-	if (UNUSED(m_pScore))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
 
 	//--------------------------------------------------------
 	//	初期設定
@@ -148,8 +132,14 @@ HRESULT CSceneTutorial::Init(void)
 //============================================================
 HRESULT CSceneTutorial::Uninit(void)
 {
-	// 終了済みのオブジェクトポインタをNULLにする
-	m_pScore = NULL;	// スコアオブジェクト
+	// チュートリアルマネージャーの破棄
+	if (FAILED(CTutorialManager::Release(m_pTutorialManager)))
+	{ // 破棄に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	// シーンの終了
 	CScene::Uninit();
@@ -163,6 +153,14 @@ HRESULT CSceneTutorial::Uninit(void)
 //============================================================
 void CSceneTutorial::Update(void)
 {
+	if (USED(m_pTutorialManager))
+	{ // 使用中の場合
+
+		// チュートリアルマネージャーの更新
+		m_pTutorialManager->Update();
+	}
+	else { assert(false); }	// 非使用中
+
 	// シーンの更新
 	CScene::Update();
 }
@@ -176,10 +174,10 @@ void CSceneTutorial::Draw(void)
 }
 
 //============================================================
-//	スコア取得処理
+//	チュートリアルマネージャー取得処理
 //============================================================
-CScore *CSceneTutorial::GetScore(void)
+CTutorialManager *CSceneTutorial::GetTutorialManager(void)
 {
-	// スコアのポインタを返す
-	return m_pScore;
+	// チュートリアルマネージャーのポインタを返す
+	return m_pTutorialManager;
 }

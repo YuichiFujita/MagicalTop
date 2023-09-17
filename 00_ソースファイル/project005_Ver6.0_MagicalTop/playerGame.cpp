@@ -9,6 +9,7 @@
 //************************************************************
 #include "playerGame.h"
 #include "stage.h"
+#include "levelupManager.h"
 
 //************************************************************
 //	子クラス [CPlayerGame] のメンバ関数
@@ -18,7 +19,8 @@
 //============================================================
 CPlayerGame::CPlayerGame()
 {
-
+	// メンバ変数をクリア
+	m_pLevelup = NULL;	// 強化マネージャーの情報
 }
 
 //============================================================
@@ -34,6 +36,19 @@ CPlayerGame::~CPlayerGame()
 //============================================================
 HRESULT CPlayerGame::Init(void)
 {
+	// メンバ変数を初期化
+	m_pLevelup = NULL;	// 強化マネージャーの情報
+
+	// 強化マネージャーの生成
+	m_pLevelup = CLevelupManager::Create();
+	if (UNUSED(m_pLevelup))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// プレイヤーの初期化
 	if (FAILED(CPlayer::Init()))
 	{ // 初期化に失敗した場合
@@ -51,6 +66,14 @@ HRESULT CPlayerGame::Init(void)
 //============================================================
 void CPlayerGame::Uninit(void)
 {
+	// 強化マネージャーを破棄
+	if (FAILED(m_pLevelup->Release(m_pLevelup)))
+	{ // 破棄に失敗した場合
+
+		// 例外処理
+		assert(false);
+	}
+
 	// プレイヤーの終了
 	CPlayer::Uninit();
 }
@@ -139,6 +162,9 @@ void CPlayerGame::Update(void)
 
 	// プレイヤーの更新
 	CPlayer::Update();
+
+	// 強化マネージャーの更新
+	m_pLevelup->Update();
 
 	// モーション・オブジェクトキャラクターの更新
 	UpdateMotion(nCurrentMotion);

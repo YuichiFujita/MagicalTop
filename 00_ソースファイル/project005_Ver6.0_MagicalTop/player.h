@@ -29,7 +29,6 @@
 //************************************************************
 class CMagicManager;	// 魔法マネージャークラス
 class CExpManager;		// 経験値マネージャークラス
-class CLevelupManager;	// 強化マネージャークラス
 class CObjectGauge3D;	// オブジェクトゲージ3Dクラス
 class CGaugeStar;		// 星ゲージクラス
 class CShadow;			// 影クラス
@@ -148,6 +147,10 @@ public:
 	void SetDisp(const bool bDisp);				// 表示設定
 	void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
 	void SetEnableDraw(const bool bDraw);		// 描画状況設定
+	void SetEnableDrawMana(const bool bDraw);	// マナの描画状況設定
+	void SetEnableDrawExp(const bool bDraw);	// 経験値の描画状況設定
+	void SetEnableDrawLife(const bool bDraw);	// 体力の描画状況設定
+	void SetEnableDrawDash(const bool bDraw);	// ダッシュの描画状況設定
 	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
 	float GetDistanceTarget(void) const;		// ターゲットとの距離取得
 	int GetLevel(void) const;					// レベル取得
@@ -192,7 +195,6 @@ private:
 	// メンバ変数
 	CMagicManager	*m_pMagic;		// 魔法マネージャーの情報
 	CExpManager		*m_pExp;		// 経験値マネージャーの情報
-	CLevelupManager	*m_pLevelup;	// 強化マネージャーの情報
 	CObjectGauge3D	*m_pLife;		// 体力の情報
 	CGaugeStar		*m_pDash;		// ダッシュの情報
 	CShadow			*m_pShadow;		// 影の情報

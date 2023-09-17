@@ -42,6 +42,15 @@ HRESULT CPlayerTutorial::Init(void)
 		return E_FAIL;
 	}
 
+	// ŒoŒ±’l‚Ì•`‰æ‚ğ’â~
+	SetEnableDrawExp(false);
+
+	// ƒ_ƒbƒVƒ…‚Ì•`‰æ‚ğ’â~
+	SetEnableDrawDash(false);
+
+	// ƒ}ƒi‚Ì•`‰æ‚ğ’â~
+	SetEnableDrawMana(false);
+
 	// ¬Œ÷‚ğ•Ô‚·
 	return S_OK;
 }

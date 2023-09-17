@@ -39,7 +39,8 @@ public:
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
 	void AddExp(const int nAdd);	// 経験値加算
-	int GetLevel(void) const;		// レベル取得
+	int  GetLevel(void) const;		// レベル取得
+	void SetEnableExpDraw(const bool bDraw);	// 経験値描画状況の設定
 
 	// 静的メンバ関数
 	static CExpManager *Create(void);	// 生成
