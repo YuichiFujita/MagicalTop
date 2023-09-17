@@ -19,6 +19,7 @@
 
 #include "stage.h"
 #include "player.h"
+#include "target.h"
 #include "field.h"
 
 //************************************************************
@@ -26,6 +27,7 @@
 //************************************************************
 CStage *CScene::m_pStage = NULL;	// ステージ
 CPlayer	*CScene::m_pPlayer = NULL;	// プレイヤーオブジェクト
+CTarget *CScene::m_pTarget = NULL;	// ターゲットオブジェクト
 CField *CScene::m_pField = NULL;	// 地面オブジェクト
 
 //************************************************************
@@ -72,6 +74,16 @@ HRESULT CScene::Init(void)
 		return E_FAIL;
 	}
 
+	// ターゲットオブジェクトの生成
+	m_pTarget = CTarget::Create(CTarget::MODEL_NORMAL, GetStage()->GetStageLimit().center, VEC3_ZERO);
+	if (UNUSED(m_pTarget))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// プレイヤーオブジェクトの生成
 	m_pPlayer = CPlayer::Create(m_mode, VEC3_ZERO, VEC3_ZERO);
 
@@ -95,6 +107,7 @@ HRESULT CScene::Uninit(void)
 
 	// 終了済みのオブジェクトポインタをNULLにする
 	m_pPlayer = NULL;	// プレイヤーオブジェクト
+	m_pTarget = NULL;	// ターゲットオブジェクト
 	m_pField = NULL;	// 地面オブジェクト
 
 	// 成功を返す
@@ -266,6 +279,15 @@ CPlayer *CScene::GetPlayer(void)
 {
 	// プレイヤーのポインタを返す
 	return m_pPlayer;
+}
+
+//============================================================
+//	ターゲット取得処理
+//============================================================
+CTarget *CScene::GetTarget(void)
+{
+	// ターゲットのポインタを返す
+	return m_pTarget;
 }
 
 //============================================================

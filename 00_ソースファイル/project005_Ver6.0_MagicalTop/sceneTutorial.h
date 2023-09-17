@@ -19,7 +19,6 @@
 //************************************************************
 //	前方宣言
 //************************************************************
-class CTarget;	// ターゲットクラス
 class CScore;	// スコアクラス
 
 //************************************************************
@@ -42,12 +41,10 @@ public:
 	void Draw(void) override;		// 描画
 
 	// 静的メンバ関数
-	static CTarget *GetTarget(void);	// ターゲット取得
-	static CScore *GetScore(void);		// スコア取得
+	static CScore *GetScore(void);	// スコア取得
 
 private:
 	// 静的メンバ変数
-	static CTarget *m_pTarget;	// ターゲットオブジェクト
 	static CScore *m_pScore;	// スコアオブジェクト
 };
 

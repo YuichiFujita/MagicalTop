@@ -16,7 +16,6 @@
 #include "timerManager.h"
 #include "stage.h"
 #include "pause.h"
-#include "target.h"
 #include "score.h"
 
 #include "enemy.h"
@@ -47,7 +46,6 @@
 CWaveManager	*CSceneGame::m_pWaveManager  = NULL;	// ウェーブマネージャー
 CTimerManager	*CSceneGame::m_pTimerManager = NULL;	// タイマーマネージャー
 CPause	*CSceneGame::m_pPause	= NULL;					// ポーズ
-CTarget	*CSceneGame::m_pTarget	= NULL;					// ターゲットオブジェクト
 CScore	*CSceneGame::m_pScore	= NULL;					// スコアオブジェクト
 
 //************************************************************
@@ -75,7 +73,7 @@ CSceneGame::~CSceneGame()
 HRESULT CSceneGame::Init(void)
 {
 	//--------------------------------------------------------
-	//	オブジェクト生成
+	//	ゲームの初期化
 	//--------------------------------------------------------
 	// ウェーブマネージャーの生成
 	m_pWaveManager = CWaveManager::Create();
@@ -117,6 +115,9 @@ HRESULT CSceneGame::Init(void)
 	// シーンの初期化
 	CScene::Init();
 
+	//--------------------------------------------------------
+	//	オブジェクト生成
+	//--------------------------------------------------------
 	// 海オブジェクトの生成
 	CSea::Create();
 
@@ -133,16 +134,6 @@ HRESULT CSceneGame::Init(void)
 
 	// 空オブジェクトの生成
 	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
-
-	// ターゲットオブジェクトの生成
-	m_pTarget = CTarget::Create(CTarget::MODEL_NORMAL, GetStage()->GetStageLimit().center, VEC3_ZERO);
-	if (UNUSED(m_pTarget))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
 
 	// スコアオブジェクトの生成
 	m_pScore = CScore::Create
@@ -228,7 +219,6 @@ HRESULT CSceneGame::Uninit(void)
 	}
 
 	// 終了済みのオブジェクトポインタをNULLにする
-	m_pTarget = NULL;	// ターゲットオブジェクト
 	m_pScore = NULL;	// スコアオブジェクト
 
 	// シーンの終了
@@ -311,15 +301,6 @@ CPause *CSceneGame::GetPause(void)
 {
 	// ポーズのポインタを返す
 	return m_pPause;
-}
-
-//============================================================
-//	ターゲット取得処理
-//============================================================
-CTarget *CSceneGame::GetTarget(void)
-{
-	// ターゲットのポインタを返す
-	return m_pTarget;
 }
 
 //============================================================

@@ -54,11 +54,12 @@ CStage::CStage()
 	m_pHurricane = NULL;	// ハリケーンの情報
 	m_pStageBarrier = NULL;	// バリア表示の情報
 	m_pStageArea = NULL;	// ステージエリア表示の情報
+	m_area = AREA_NONE;		// プレイヤーの現在エリア
+	m_bWind = false;		// 風生成状況
 	memset(&m_stageWind, 0, sizeof(m_stageWind));		// 風速
 	memset(&m_stageBarrier, 0, sizeof(m_stageBarrier));	// バリア
 	memset(&m_aStageArea[0], 0, sizeof(m_aStageArea));	// エリア
 	memset(&m_stageLimit, 0, sizeof(m_stageLimit));		// 範囲
-	m_area = AREA_NONE;		// プレイヤーの現在エリア
 }
 
 //============================================================
@@ -81,11 +82,12 @@ HRESULT CStage::Init(void)
 	m_pHurricane = NULL;	// ハリケーンの情報
 	m_pStageBarrier = NULL;	// バリア表示の情報
 	m_pStageArea = NULL;	// ステージエリア表示の情報
+	m_area = AREA_NONE;		// プレイヤーの現在エリア
+	m_bWind = true;			// 風生成状況
 	memset(&m_stageWind, 0, sizeof(m_stageWind));		// 風速
 	memset(&m_stageBarrier, 0, sizeof(m_stageBarrier));	// バリア
 	memset(&m_aStageArea[0], 0, sizeof(m_aStageArea));	// エリア
 	memset(&m_stageLimit, 0, sizeof(m_stageLimit));		// 範囲
-	m_area = AREA_NONE;		// プレイヤーの現在エリア
 
 	// ハリケーンの生成
 	m_pHurricane = CHurricane::Create(VEC3_ZERO);
@@ -205,32 +207,36 @@ void CStage::Update(void)
 	//--------------------------------------------------------
 	//	風の生成
 	//--------------------------------------------------------
-	if (m_stageWind.nCounter < WIND_CNT)
-	{ // カウンターが一定値より小さい場合
+	if (m_bWind)
+	{ // 風を生成する場合
 
-		// カウンターを加算
-		m_stageWind.nCounter++;
-	}
-	else
-	{ // カウンターが一定値以上の場合
+		if (m_stageWind.nCounter < WIND_CNT)
+		{ // カウンターが一定値より小さい場合
 
-		// 変数を宣言
-		D3DXVECTOR3 spawnPos;	// 生成位置
-		float fRot = (float)(rand() % 629 - 314) * 0.01f;	// 向き
+			// カウンターを加算
+			m_stageWind.nCounter++;
+		}
+		else
+		{ // カウンターが一定値以上の場合
 
-		// カウンターを初期化
-		m_stageWind.nCounter = 0;
+			// 変数を宣言
+			D3DXVECTOR3 spawnPos;	// 生成位置
+			float fRot = (float)(rand() % 629 - 314) * 0.01f;	// 向き
 
-		for (int nCntWind = 0; nCntWind < WIND_SPAWN; nCntWind++)
-		{ // 風の生成数分繰り返す
+			// カウンターを初期化
+			m_stageWind.nCounter = 0;
 
-			// 生成位置を設定
-			spawnPos.x = sinf(fRot + ((D3DX_PI * 0.5f) * nCntWind)) * WIND_POS;
-			spawnPos.y = 0.0f;
-			spawnPos.z = cosf(fRot + ((D3DX_PI * 0.5f) * nCntWind)) * WIND_POS;
+			for (int nCntWind = 0; nCntWind < WIND_SPAWN; nCntWind++)
+			{ // 風の生成数分繰り返す
 
-			// 風の生成
-			CWind::Create(spawnPos);
+				// 生成位置を設定
+				spawnPos.x = sinf(fRot + ((D3DX_PI * 0.5f) * nCntWind)) * WIND_POS;
+				spawnPos.y = 0.0f;
+				spawnPos.z = cosf(fRot + ((D3DX_PI * 0.5f) * nCntWind)) * WIND_POS;
+
+				// 風の生成
+				CWind::Create(spawnPos);
+			}
 		}
 	}
 
@@ -457,6 +463,24 @@ D3DXVECTOR3 CStage::GetStageBarrierPosition(void) const
 {
 	// バリアの位置を返す
 	return m_pStageBarrier->GetPosition();
+}
+
+//============================================================
+//	ハリケーンの描画設定処理
+//============================================================
+void CStage::SetEnableDrawHurricane(const bool bDraw)
+{
+	// 引数の描画状況をハリケーンに設定
+	m_pHurricane->SetEnableDraw(bDraw);
+}
+
+//============================================================
+//	風の生成設定処理
+//============================================================
+void CStage::SetEnebleCreateWind(const bool bCreate)
+{
+	// 引数の生成状況を設定
+	m_bWind = bCreate;
 }
 
 //============================================================

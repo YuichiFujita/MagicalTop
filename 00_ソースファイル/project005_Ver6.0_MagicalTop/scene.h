@@ -20,6 +20,7 @@
 //************************************************************
 class CStage;	// ステージクラス
 class CPlayer;	// プレイヤークラス
+class CTarget;	// ターゲットクラス
 class CField;	// 地面クラス
 
 //************************************************************
@@ -59,6 +60,7 @@ public:
 
 	static CStage *GetStage(void);			// ステージ取得
 	static CPlayer *GetPlayer(void);		// プレイヤー取得
+	static CTarget *GetTarget(void);		// ターゲット取得
 	static HRESULT CreateField(MODE mode);	// 地面生成
 	static CField *GetField(void);			// 地面取得
 
@@ -70,6 +72,7 @@ private:
 	// 静的メンバ変数
 	static CStage *m_pStage;	// ステージ
 	static CPlayer *m_pPlayer;	// プレイヤーオブジェクト
+	static CTarget *m_pTarget;	// ターゲットオブジェクト
 	static CField *m_pField;	// 地面オブジェクト
 
 	// メンバ変数

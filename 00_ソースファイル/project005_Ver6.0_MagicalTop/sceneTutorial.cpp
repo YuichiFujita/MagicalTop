@@ -13,7 +13,6 @@
 #include "camera.h"
 
 #include "stage.h"
-#include "target.h"
 #include "score.h"
 
 #include "enemy.h"
@@ -35,7 +34,6 @@
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
-CTarget *CSceneTutorial::m_pTarget = NULL;	// ターゲットオブジェクト
 CScore *CSceneTutorial::m_pScore = NULL;	// スコアオブジェクト
 
 //************************************************************
@@ -62,6 +60,19 @@ CSceneTutorial::~CSceneTutorial()
 //============================================================
 HRESULT CSceneTutorial::Init(void)
 {
+	//--------------------------------------------------------
+	//	チュートリアルの初期化
+	//--------------------------------------------------------
+	//// リザルトマネージャーの生成
+	//m_pResultManager = CResultManager::Create();
+	//if (UNUSED(m_pResultManager))
+	//{ // 非使用中の場合
+
+	//	// 失敗を返す
+	//	assert(false);
+	//	return E_FAIL;
+	//}
+
 	// シーンの初期化
 	CScene::Init();
 
@@ -84,16 +95,6 @@ HRESULT CSceneTutorial::Init(void)
 
 	// 空オブジェクトの生成
 	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
-
-	// ターゲットオブジェクトの生成
-	m_pTarget = CTarget::Create(CTarget::MODEL_NORMAL, GetStage()->GetStageLimit().center, VEC3_ZERO);
-	if (UNUSED(m_pTarget))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
 
 	// スコアオブジェクトの生成
 	m_pScore = CScore::Create
@@ -148,7 +149,6 @@ HRESULT CSceneTutorial::Init(void)
 HRESULT CSceneTutorial::Uninit(void)
 {
 	// 終了済みのオブジェクトポインタをNULLにする
-	m_pTarget = NULL;	// ターゲットオブジェクト
 	m_pScore = NULL;	// スコアオブジェクト
 
 	// シーンの終了
@@ -173,15 +173,6 @@ void CSceneTutorial::Update(void)
 void CSceneTutorial::Draw(void)
 {
 
-}
-
-//============================================================
-//	ターゲット取得処理
-//============================================================
-CTarget *CSceneTutorial::GetTarget(void)
-{
-	// ターゲットのポインタを返す
-	return m_pTarget;
 }
 
 //============================================================

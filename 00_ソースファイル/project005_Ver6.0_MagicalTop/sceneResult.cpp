@@ -64,7 +64,6 @@ HRESULT CSceneResult::Init(void)
 
 	// ポインタを宣言
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
-	CTarget *pTarget = NULL;	// ターゲット設定用
 
 	//--------------------------------------------------------
 	//	リザルトの初期化
@@ -102,16 +101,6 @@ HRESULT CSceneResult::Init(void)
 	// 空オブジェクトの生成
 	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
 
-	// ターゲットオブジェクトの生成
-	pTarget = CTarget::Create(CTarget::MODEL_NORMAL, GetStage()->GetStageLimit().center, VEC3_ZERO);
-	if (UNUSED(pTarget))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
 	//--------------------------------------------------------
 	//	初期設定
 	//--------------------------------------------------------
@@ -119,8 +108,24 @@ HRESULT CSceneResult::Init(void)
 	GetStage()->SetEnableDrawArea(false);
 	GetStage()->SetEnableDrawBarrier(false);
 
-	// ターゲット体力の描画を停止
-	pTarget->SetEnableDrawLife(false);
+	if (CManager::GetGameManager()->GetResult() != CGameManager::RESULT_CLEAR)
+	{ // クリアしていなかった場合
+
+		// ターゲット本体の描画を停止
+		GetTarget()->SetEnableDraw(false);
+
+		// ハリケーンの描画を停止
+		GetStage()->SetEnableDrawHurricane(false);
+
+		// 風の生成を停止
+		GetStage()->SetEnebleCreateWind(false);
+	}
+	else
+	{ // クリアしていた場合
+
+		// ターゲットの体力表示の描画を停止
+		GetTarget()->SetEnableDrawLife(false);
+	}
 
 	// マナフラワーセットアップの読込
 	CFlower::LoadSetup();

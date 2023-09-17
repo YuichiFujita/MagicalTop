@@ -64,7 +64,6 @@ HRESULT CSceneTitle::Init(void)
 
 	// ポインタを宣言
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
-	CTarget *pTarget = NULL;	// ターゲット設定用
 
 	//--------------------------------------------------------
 	//	タイトルの初期化
@@ -102,16 +101,6 @@ HRESULT CSceneTitle::Init(void)
 	// 空オブジェクトの生成
 	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
 
-	// ターゲットオブジェクトの生成
-	pTarget = CTarget::Create(CTarget::MODEL_NORMAL, GetStage()->GetStageLimit().center, VEC3_ZERO);
-	if (UNUSED(pTarget))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
 	//--------------------------------------------------------
 	//	初期設定
 	//--------------------------------------------------------
@@ -120,7 +109,7 @@ HRESULT CSceneTitle::Init(void)
 	GetStage()->SetEnableDrawBarrier(false);
 
 	// ターゲット体力の描画を停止
-	pTarget->SetEnableDrawLife(false);
+	GetTarget()->SetEnableDrawLife(false);
 
 	// マナフラワーセットアップの読込
 	CFlower::LoadSetup();

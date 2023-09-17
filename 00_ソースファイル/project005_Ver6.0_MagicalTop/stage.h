@@ -109,6 +109,9 @@ public:
 	void SetEnableDrawBarrier(const bool bDraw);		// ステージバリア描画設定
 	D3DXVECTOR3 GetStageBarrierPosition(void) const;	// ステージバリアの位置取得
 
+	void SetEnableDrawHurricane(const bool bDraw);	// ハリケーン描画設定
+	void SetEnebleCreateWind(const bool bCreate);	// 風生成設定
+
 	// 静的メンバ関数
 	static CStage *Create(void);				// 生成
 	static HRESULT Release(CStage *&prStage);	// 破棄
@@ -128,7 +131,8 @@ private:
 	StageArea	m_stageBarrier;			// バリア
 	StageArea	m_aStageArea[AREA_MAX];	// エリア
 	StageLimit	m_stageLimit;			// 範囲
-	AREA m_area;						// プレイヤーの現在エリア
+	AREA m_area;	// プレイヤーの現在エリア
+	bool m_bWind;	// 風生成状況
 };
 
 #endif	// _STAGE_H_
