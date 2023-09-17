@@ -13,6 +13,7 @@
 #include "light.h"
 #include "camera.h"
 #include "sceneTitle.h"
+#include "sceneTutorial.h"
 #include "sceneGame.h"
 #include "sceneResult.h"
 
@@ -159,6 +160,13 @@ CScene *CScene::Create(MODE mode)
 
 			break;
 
+		case MODE_TUTORIAL:
+
+			// チュートリアル画面を生成
+			pScene = new CSceneTutorial(mode);
+
+			break;
+
 		case MODE_GAME:
 
 			// ゲーム画面を生成
@@ -268,6 +276,24 @@ HRESULT CScene::CreateField(MODE mode)
 	switch (mode)
 	{ // モードごとの処理
 	case MODE_TITLE:
+
+		// 地面オブジェクトの生成
+		m_pField = CField::Create(CField::TEXTURE_SPRING, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(6000.0f, 6000.0f), XCOL_WHITE, POSGRID2(120, 120));
+		if (UNUSED(m_pField))
+		{ // 非使用中の場合
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
+
+		// 地形を設定
+		m_pField->SetTerrain(CField::TERRAIN_120x120);
+
+		// 成功を返す
+		return S_OK;
+
+	case MODE_TUTORIAL:
 
 		// 地面オブジェクトの生成
 		m_pField = CField::Create(CField::TEXTURE_SPRING, D3DXVECTOR3(0.0f, 400.0f, 0.0f), VEC3_ZERO, D3DXVECTOR2(6000.0f, 6000.0f), XCOL_WHITE, POSGRID2(120, 120));

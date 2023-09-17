@@ -488,7 +488,7 @@ void CTitleManager::UpdateStart(void)
 			case SELECT_TUTORIAL:
 
 				// シーンの設定
-				CManager::SetScene(CScene::MODE_GAME);	// ゲーム画面
+				CManager::SetScene(CScene::MODE_TUTORIAL);	// チュートリアル画面
 
 				break;
 

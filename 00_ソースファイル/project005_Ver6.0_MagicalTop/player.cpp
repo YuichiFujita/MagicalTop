@@ -42,6 +42,8 @@
 #define PLAY_ORBIT_COL		(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f))	// 軌跡の色
 #define PLAY_ORBIT_PRIO		(4)		// 軌跡の優先順位
 
+#define RESPAWN_ROT	(D3DXVECTOR3(0.0f, -HALF_PI, 0.0f))	// 再出現時の向き
+
 #define GAUGE_PLUS_Y	(140.0f)	// ゲージY位置加算量
 #define GAUGE_GAUGESIZE	(D3DXVECTOR3(110.0f, 15.0f, 0.0f))	// ゲージ大きさ
 #define GAUGE_FRONTCOL	(D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f))	// 表ゲージ色
@@ -465,6 +467,13 @@ CPlayer *CPlayer::Create
 
 			break;
 
+		case CScene::MODE_TUTORIAL:
+
+			// メモリ確保
+			pPlayer = new CPlayerTutorial;	// チュートリアルプレイヤー
+
+			break;
+
 		case CScene::MODE_GAME:
 
 			// メモリ確保
@@ -619,6 +628,9 @@ void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 	CScene::GetStage()->LimitPosition(rPos, PLAY_RADIUS);	// ステージ範囲外の補正
 	UpdateLanding(rPos);	// 着地判定
 	SetPosition(rPos);		// 位置を設定
+
+	// 向きを設定
+	SetRotation(RESPAWN_ROT);
 
 	// ターゲットとの距離を設定
 	UpdateDisTarget();

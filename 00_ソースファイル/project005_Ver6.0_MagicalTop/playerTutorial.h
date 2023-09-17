@@ -35,7 +35,8 @@ public:
 	void Update(void);	// 更新
 
 private:
-
+	// メンバ関数
+	MOTION UpdateNormal(void);	// 通常状態時の更新
 };
 
 #endif	// _PLAYER_TUTORIAL_H_
