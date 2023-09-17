@@ -19,18 +19,6 @@
 #include "gameManager.h"
 
 //************************************************************
-//	静的メンバ変数宣言
-//************************************************************
-const char *CResultManager::mc_apTextureFile[] =	// テクスチャ定数
-{
-	"data\\TEXTURE\\result000.png",	// MISSIONテクスチャ
-	"data\\TEXTURE\\result001.png",	// CLEARテクスチャ
-	"data\\TEXTURE\\result002.png",	// FAILEDテクスチャ
-	"data\\TEXTURE\\result003.png",	// スコア表示テクスチャ
-	"data\\TEXTURE\\result004.png",	// タイム表示テクスチャ
-};
-
-//************************************************************
 //	マクロ定義
 //************************************************************
 #define RESULT_PRIO	(6)		// リザルトの優先順位
@@ -65,6 +53,18 @@ const char *CResultManager::mc_apTextureFile[] =	// テクスチャ定数
 #define SPACE_TIME_PART	(D3DXVECTOR3(SIZE_TIME_PART.x, 0.0f, 0.0f))	// タイム区切り空白
 #define SET_TIME_SCALE	(8.0f)	// タイム表示の初期拡大率
 #define SUB_TIME_SCALE	(0.4f)	// タイム表示拡大率の減算量
+
+//************************************************************
+//	静的メンバ変数宣言
+//************************************************************
+const char *CResultManager::mc_apTextureFile[] =	// テクスチャ定数
+{
+	"data\\TEXTURE\\result000.png",	// MISSIONテクスチャ
+	"data\\TEXTURE\\result001.png",	// CLEARテクスチャ
+	"data\\TEXTURE\\result002.png",	// FAILEDテクスチャ
+	"data\\TEXTURE\\result003.png",	// スコア表示テクスチャ
+	"data\\TEXTURE\\result004.png",	// タイム表示テクスチャ
+};
 
 //************************************************************
 //	親クラス [CResultManager] のメンバ関数

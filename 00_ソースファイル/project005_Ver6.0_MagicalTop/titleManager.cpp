@@ -16,20 +16,6 @@
 #include "object2D.h"
 
 //************************************************************
-//	静的メンバ変数宣言
-//************************************************************
-const char *CTitleManager::mc_apLogoTextureFile[] =	// ロゴテクスチャ定数
-{
-	"data\\TEXTURE\\title000.png",	// MAGICALテクスチャ
-	"data\\TEXTURE\\title001.png",	// TOPテクスチャ
-};
-const char *CTitleManager::mc_apSelectTextureFile[] =	// 選択テクスチャ定数
-{
-	"data\\TEXTURE\\title002.png",	// STARTテクスチャ
-	"data\\TEXTURE\\title003.png",	// MANUALテクスチャ
-};
-
-//************************************************************
 //	マクロ定義
 //************************************************************
 #define TITLE_PRIO	(6)	// タイトルの優先順位
@@ -53,6 +39,20 @@ const char *CTitleManager::mc_apSelectTextureFile[] =	// 選択テクスチャ定数
 
 #define CHOICE_COL	(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	// 選択中カラー
 #define DEFAULT_COL	(D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f))	// 非選択中カラー
+
+//************************************************************
+//	静的メンバ変数宣言
+//************************************************************
+const char *CTitleManager::mc_apLogoTextureFile[] =	// ロゴテクスチャ定数
+{
+	"data\\TEXTURE\\title000.png",	// MAGICALテクスチャ
+	"data\\TEXTURE\\title001.png",	// TOPテクスチャ
+};
+const char *CTitleManager::mc_apSelectTextureFile[] =	// 選択テクスチャ定数
+{
+	"data\\TEXTURE\\title002.png",	// STARTテクスチャ
+	"data\\TEXTURE\\title003.png",	// MANUALテクスチャ
+};
 
 //************************************************************
 //	親クラス [CTitleManager] のメンバ関数
