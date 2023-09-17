@@ -154,13 +154,6 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 	m_fVortexRot	= 0.0f;				// 渦巻き方向
 	m_fVortexDis	= 0.0f;				// 渦巻との距離
 	m_bJump			= false;			// ジャンプ状況
-
-	m_fInSideMove		= MOVE_INSIDE;			// 内側移動量
-	m_fOutSideMove		= MOVE_OUTSIDE;			// 外側移動量
-	m_fAddOutSideMove	= MOVE_OUTSIDE_ACCELE;	// 外側移動の加速量
-	m_fSideMove			= MOVE_LEFT;			// 横移動量
-	m_fAddMove			= MOVE_LEFT_ACCELE;		// 横移動の加速量
-	m_fSubMove			= MOVE_LEFT_DECELE;		// 横移動の減速量
 }
 
 //============================================================
@@ -198,13 +191,6 @@ HRESULT CPlayer::Init(void)
 	m_fVortexRot	= 0.0f;				// 渦巻き方向
 	m_fVortexDis	= 0.0f;				// 渦巻との距離
 	m_bJump			= true;				// ジャンプ状況
-
-	m_fInSideMove		= MOVE_INSIDE;			// 内側移動量
-	m_fOutSideMove		= MOVE_OUTSIDE;			// 外側移動量
-	m_fAddOutSideMove	= MOVE_OUTSIDE_ACCELE;	// 外側移動の加速量
-	m_fSideMove			= MOVE_LEFT;			// 横移動量
-	m_fAddMove			= MOVE_LEFT_ACCELE;		// 横移動の加速量
-	m_fSubMove			= MOVE_LEFT_DECELE;		// 横移動の減速量
 
 	// 魔法マネージャーの生成
 	m_pMagic = CMagicManager::Create(this);
@@ -377,89 +363,6 @@ void CPlayer::Uninit(void)
 //============================================================
 void CPlayer::Update(void)
 {
-	// 変数を宣言
-	int nCurrentMotion = NONE_IDX;	// 現在のモーション
-	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
-	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
-
-#if 0
-
-	// 過去位置を更新
-	m_oldPos = posPlayer;
-
-	// ターゲットとの距離を設定
-	m_fDisTarget = sqrtf((posPlayer.x - posTarget.x) * (posPlayer.x - posTarget.x)+ (posPlayer.z - posTarget.z) * (posPlayer.z - posTarget.z)) * 0.5f;
-
-	switch (m_state)
-	{ // 状態ごとの処理
-	case STATE_NONE:		// 何もしない状態
-
-		// 無し
-
-		break;
-
-	case STATE_FADEOUT:		// フェードアウト状態
-
-		// フェードアウト状態時の更新
-		UpdateFadeOut();
-
-		break;
-
-	case STATE_NORMAL:		// 通常状態
-
-		// 通常状態時の更新
-		nCurrentMotion = UpdateNormal();
-
-		break;
-
-	case STATE_DAMAGE:		// ダメージ状態
-
-		// ダメージ状態時の更新
-		nCurrentMotion = UpdateDamage();
-
-		break;
-
-	case STATE_INVULN:		// 無敵状態
-
-		// 無敵状態時の更新
-		nCurrentMotion = UpdateInvuln();
-
-		break;
-
-	case STATE_BLOW_AWAY:	// 吹っ飛び状態
-
-		// 吹っ飛び状態時の更新
-		UpdateBlowAway();
-
-		break;
-
-	case STATE_VORTEX:		// 渦巻きこまれ状態
-
-		// 渦巻きこまれ状態時の更新
-		UpdateVortex();
-
-		break;
-
-	case STATE_FADEIN:		// フェードイン状態
-
-		// フェードイン状態時の更新
-		UpdateFadeIn();
-
-		break;
-
-	case STATE_DEATH:		// 死亡状態
-
-		// 無し
-
-		break;
-
-	default:	// 例外処理
-		assert(false);
-		break;
-	}
-
-#endif
-
 	// 魔法マネージャーの更新
 	m_pMagic->Update();
 
@@ -474,9 +377,6 @@ void CPlayer::Update(void)
 
 	// 軌跡の更新
 	m_pOrbit->Update();
-
-	// モーション・オブジェクトキャラクターの更新
-	Motion(nCurrentMotion);
 }
 
 //============================================================
@@ -710,9 +610,6 @@ void CPlayer::AddExp(const int nAdd)
 //============================================================
 void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 {
-	// 変数を宣言
-	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
-
 	// 情報を初期化
 	SetMotion(CPlayer::MOTION_MOVE);	// 浮遊モーションを設定
 	m_state = STATE_NORMAL;	// 通常状態を設定
@@ -720,11 +617,11 @@ void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 
 	// 位置を補正・設定
 	CScene::GetStage()->LimitPosition(rPos, PLAY_RADIUS);	// ステージ範囲外の補正
-	Land(rPos);				// 着地判定
+	UpdateLanding(rPos);	// 着地判定
 	SetPosition(rPos);		// 位置を設定
 
 	// ターゲットとの距離を設定
-	m_fDisTarget = sqrtf((rPos.x - posTarget.x) * (rPos.x - posTarget.x) + (rPos.z - posTarget.z) * (rPos.z - posTarget.z)) * 0.5f;
+	UpdateDisTarget();
 
 	// 軌跡の初期化を行う状態にする
 	m_pOrbit->SetEnableInit(false);
@@ -853,308 +750,138 @@ float CPlayer::GetRadius(void) const
 }
 
 //============================================================
-//	通常状態時の更新処理
+//	過去位置の更新処理
 //============================================================
-CPlayer::MOTION CPlayer::UpdateNormal(void)
+void CPlayer::UpdateOldPosition(void)
+{
+	// 過去位置を更新
+	m_oldPos = GetPosition();
+}
+
+//============================================================
+//	ターゲット距離の更新処理
+//============================================================
+void CPlayer::UpdateDisTarget(void)
 {
 	// 変数を宣言
-	MOTION currentMotion;	// 現在のモーション
 	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
-	D3DXVECTOR3 rotPlayer = GetRotation();	// プレイヤー向き
+	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 
-	// 移動操作
-	currentMotion = Move();
-
-	// 向き更新
-	Rot(rotPlayer);
-
-	// 位置更新
-	Pos(posPlayer);
-
-	// ステージ範囲外の補正
-	CScene::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
-
-	// 着地判定
-	Land(posPlayer);
-
-	// 魔法発射操作
-	currentMotion = Magic(currentMotion);
-
-	// 当たり判定
-	CollisionTarget(posPlayer);	// ターゲット
-	CollisionEnemy(posPlayer);	// 敵
-
-	// バリアとの当たり判定
-	if (CScene::GetStage()->CollisionBarrier(posPlayer, PLAY_RADIUS))
-	{ // 当たっていた場合
-
-		// 渦巻きこまれヒット
-		HitVortex(posPlayer, CScene::GetStage()->GetStageBarrierPosition());
-	}
-
-	// 位置を更新
-	SetPosition(posPlayer);
-
-	// 向きを更新
-	SetRotation(rotPlayer);
-
-	// 現在のモーションを返す
-	return currentMotion;
+	// ターゲットとの距離を設定
+	m_fDisTarget = sqrtf((posPlayer.x - posTarget.x) * (posPlayer.x - posTarget.x)+ (posPlayer.z - posTarget.z) * (posPlayer.z - posTarget.z)) * 0.5f;
 }
 
 //============================================================
-//	ダメージ状態時の更新処理
+//	モーション・オブジェクトキャラクターの更新処理
 //============================================================
-CPlayer::MOTION CPlayer::UpdateDamage(void)
+void CPlayer::UpdateMotion(int nMotion)
 {
 	// 変数を宣言
-	MOTION currentMotion;	// 現在のモーション
+	int nAnimMotion = GetMotionType();	// 現在再生中のモーション
 
-	// 通常状態時の更新
-	currentMotion = UpdateNormal();
+	if (nMotion != NONE_IDX)
+	{ // モーションが設定されている場合
 
-	if (m_nCounterState < INVULN_CNT)
-	{ // カウンターが一定値より小さい場合
+		if (IsMotionLoop(nAnimMotion))
+		{ // ループするモーションだった場合
 
-		// カウンターを加算
-		m_nCounterState++;
+			if (nAnimMotion != nMotion)
+			{ // 現在のモーションが再生中のモーションと一致しない場合
 
-		// マテリアルを設定
-		SetMaterial(material::Red());	// 赤
-	}
-	else
-	{ // カウンターが一定値以上の場合
-
-		// カウンターを初期化
-		m_nCounterState = 0;
-
-		// マテリアル再設定
-		ResetMaterial();
-
-		// 状態を変更
-		m_state = STATE_INVULN;	// 無敵状態
-	}
-
-	// 現在のモーションを返す
-	return currentMotion;
-}
-
-//============================================================
-//	無敵状態時の更新処理
-//============================================================
-CPlayer::MOTION CPlayer::UpdateInvuln(void)
-{
-	// 変数を宣言
-	MOTION currentMotion;	// 現在のモーション
-
-	// 通常状態時の更新
-	currentMotion = UpdateNormal();
-
-	if (m_nCounterState < NORMAL_CNT)
-	{ // カウンターが一定値より小さい場合
-
-		// カウンターを加算
-		m_nCounterState++;
-
-		if (m_nCounterState % CHANGE_ALPHA_CNT == 0)
-		{ // 透明度の変更タイミングだった場合
-
-			if (GetAlpha() > INVULN_MIN_ALPHA)
-			{ // 透明度が上がっていない場合
-
-				// 透明度を上げる
-				SetAlpha(INVULN_MIN_ALPHA);
-			}
-			else
-			{ // 透明度が上がっている場合
-
-				// 透明度を下げる
-				SetAlpha(INVULN_MAX_ALPHA);
+				// 現在のモーションの設定
+				SetMotion(nMotion);
 			}
 		}
 	}
-	else
-	{ // カウンターが一定値以上の場合
 
-		// カウンターを初期化
-		m_nCounterState = 0;
+	// オブジェクトキャラクターの更新
+	CObjectChara::Update();
 
-		// 透明度を不透明に設定
-		SetAlpha(1.0f);
+	// モーションの遷移
+	if (IsMotionFinish())
+	{ // モーションが終了していた場合
 
-		// 状態を変更
-		m_state = STATE_NORMAL;	// 通常状態
+		switch (GetMotionType())
+		{ // モーションの種類ごとの処理
+		case MOTION_BLOW_AWAY:	// 吹っ飛び状態
+
+			// 無し
+
+			// 処理を抜ける
+			break;
+		}
 	}
+}
+
+//============================================================
+//	移動量・目標向きの更新処理
+//============================================================
+CPlayer::MOTION CPlayer::UpdateMove(void)
+{
+	// 変数を宣言
+	MOTION currentMotion = MOTION_MOVE;	// 現在のモーション
+	D3DXVECTOR3 vecTarg = VEC3_ZERO;	// ターゲット逆方向ベクトル
+	D3DXVECTOR3 vecSide = VEC3_ZERO;	// ターゲット横方向ベクトル
+
+	// 吸い込みの更新
+	UpdateAbsorb(vecTarg, vecSide);
+
+	// ターゲット逆方向への加減速の操作
+	currentMotion = ControlTargAccel(vecTarg);
+
+	// ターゲット横方向への加減速の操作
+	currentMotion = ControlSideAccel(vecSide);
 
 	// 現在のモーションを返す
 	return currentMotion;
 }
 
 //============================================================
-//	吹っ飛び状態時の更新処理
+//	吸い込みの更新処理
 //============================================================
-void CPlayer::UpdateBlowAway(void)
+void CPlayer::UpdateAbsorb(D3DXVECTOR3& rVecTarg, D3DXVECTOR3& rVecSide)
 {
-	// 変数を宣言
-	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
-
-	// 位置更新
-	Pos(posPlayer);
-
-	// ターゲットとの当たり判定
-	CollisionTarget(posPlayer);
-
-	// ステージ範囲外の補正
-	CScene::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
-
-	// 着地判定
-	if (Land(posPlayer))
-	{ // 着地していた場合
-
-		// 浮遊モーションに移行
-		SetMotion(MOTION_MOVE);
-
-		// 状態を設定
-		m_state = STATE_DAMAGE;	// ダメージ状態
-	}
-
-	// 位置を反映
-	SetPosition(posPlayer);
-
-	// 向きを設定
-	SetRotation(D3DXVECTOR3(0.0f, atan2f(m_move.x, m_move.z), 0.0f));
-}
-
-//============================================================
-//	渦巻きこまれ状態時の更新処理
-//============================================================
-void CPlayer::UpdateVortex(void)
-{
-	// 変数を宣言
-	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
-
-	// 向きを減算
-	m_fVortexRot -= VORTEX_ADDROT;
-	useful::NormalizeRot(m_fVortexRot);
-
-	// 距離を加算
-	m_fVortexDis += VORTEX_ADDDIS;
-
-	// 位置を設定
-	posPlayer.x = sinf(m_fVortexRot) * m_fVortexDis;
-	posPlayer.y += VORTEX_ADDPOSY;
-	posPlayer.z = cosf(m_fVortexRot) * m_fVortexDis;
-
-	// 位置を反映
-	SetPosition(posPlayer);
-
-	// フェードイン状態時の更新
-	UpdateFadeIn();
-
-	if (m_state == STATE_NONE)
-	{ // 透明になり切った場合
-
-		// プレイヤーを再出現させる
-		SetRespawn(PLAY_SPAWN_POS);
-	}
-}
-
-//============================================================
-//	フェードアウト状態時の更新処理
-//============================================================
-void CPlayer::UpdateFadeOut(void)
-{
-	// 変数を宣言
-	float fAlpha = GetAlpha();	// 透明度
-
-	// プレイヤー自身の描画を再開
-	CObject::SetEnableDraw(true);
-
-	// 透明度を上げる
-	fAlpha += FADE_LEVEL;
-
-	if (fAlpha >= GetMaxAlpha())
-	{ // 透明度が上がり切った場合
-
-		// 透明度を補正
-		fAlpha = GetMaxAlpha();
-
-		// 状態を設定
-		m_state = STATE_INVULN;	// 無敵状態
-	}
-
-	// 透明度を設定
-	SetAlpha(fAlpha);
-}
-
-//============================================================
-//	フェードイン状態時の更新処理
-//============================================================
-void CPlayer::UpdateFadeIn(void)
-{
-	// 変数を宣言
-	float fAlpha = GetAlpha();	// 透明度
-
-	// 透明度を下げる
-	fAlpha -= FADE_LEVEL;
-
-	if (fAlpha <= 0.0f)
-	{ // 透明度が下がり切った場合
-
-		// 透明度を補正
-		fAlpha = 0.0f;
-
-		// プレイヤー自身の描画を停止
-		CObject::SetEnableDraw(false);
-
-		// 状態を設定
-		m_state = STATE_NONE;	// 何もしない状態
-	}
-
-	// 透明度を設定
-	SetAlpha(fAlpha);
-}
-
-//============================================================
-//	移動処理
-//============================================================
-CPlayer::MOTION CPlayer::Move(void)
-{
-	// 変数を宣言
-	MOTION currentMotion = MOTION_MOVE;	// 現在のモーション
-	D3DXVECTOR3 vecTarg, vecSide;		// ターゲット方向ベクトル・横方向ベクトル
-
-	// ポインタを宣言
-	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
-	CInputPad		*pPad		= CManager::GetPad();		// パッド
-
-#if 1
-
 	// 変数を宣言
 	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
 	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
 	float fDisTargRate = (1.0f / CScene::GetStage()->GetStageLimit().fRadius) * m_fDisTarget;	// ターゲット距離の割合
 
-	// ターゲット方向のベクトルを計算
-	vecTarg = posTarget - posPlayer;
-	vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
-	D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトルの正規化
+	// ターゲット逆方向のベクトルを計算
+	rVecTarg = posTarget - posPlayer;
+	rVecTarg.y = 0.0f;							// ベクトルの縦方向を無視
+	D3DXVec3Normalize(&rVecTarg, &rVecTarg);	// ベクトルの正規化
 
-	// 横方向ベクトルを計算
-	vecSide = D3DXVECTOR3(vecTarg.z, 0.0f, -vecTarg.x);
+	// ターゲット横方向ベクトルを計算
+	rVecSide = D3DXVECTOR3(rVecTarg.z, 0.0f, -rVecTarg.x);
 
 	// 目標向きを設定
 	m_destRot.y = atan2f(posTarget.x - posPlayer.x, posTarget.z - posPlayer.z);
 	m_destRot.y -= D3DX_PI * 0.5f;	// 左を向かせる
-	m_destRot.y -= ALWAYS_ADDROT;	// 内側を向かせる
+	m_destRot.y -= ALWAYS_ADDROT;	// 向きをほんのり内側よりにする
 
 	// 内側への移動量を設定
-	m_move += vecTarg * (m_fInSideMove + (fDisTargRate * PLUS_INSIDE_MOVE));
+	m_move += rVecTarg * (MOVE_INSIDE + (fDisTargRate * PLUS_INSIDE_MOVE));
+
+	// 左側への移動量を設定
+	m_move += rVecSide * MOVE_LEFT;
+}
+
+//============================================================
+//	ターゲット逆方向への加減速の操作処理
+//============================================================
+CPlayer::MOTION CPlayer::ControlTargAccel(const D3DXVECTOR3& rVecTarg)
+{
+	// 変数を宣言
+	float fDisTargRate = (1.0f / CScene::GetStage()->GetStageLimit().fRadius) * m_fDisTarget;	// ターゲット距離の割合
+
+	// ポインタを宣言
+	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
+	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
 	if (pKeyboard->GetPress(DIK_W) || pPad->GetPressLStickY() > 0.0f)
 	{
 		// 外側への移動量を追加
-		m_move -= vecTarg * (m_fOutSideMove + (fDisTargRate * PLUS_OUTSIDE_MOVE));
+		m_move -= rVecTarg * (MOVE_OUTSIDE + (fDisTargRate * PLUS_OUTSIDE_MOVE));
 
 		// 外側を向かせる
 		m_destRot.y += INSIDE_ADDROT;
@@ -1162,14 +889,27 @@ CPlayer::MOTION CPlayer::Move(void)
 	else if (pKeyboard->GetPress(DIK_S) || pPad->GetPressLStickY() < 0.0f)
 	{
 		// 内側への移動量を追加
-		m_move += vecTarg * m_fAddOutSideMove;
+		m_move += rVecTarg * MOVE_OUTSIDE_ACCELE;
 
 		// 内側を向かせる
 		m_destRot.y -= OUTSIDE_SUBROT;
 	}
 
-	// 左側への移動量を設定
-	m_move += vecSide * m_fSideMove;
+	// 浮遊モーションを返す
+	return MOTION_MOVE;
+}
+
+//============================================================
+//	ターゲット横方向への加減速の操作処理
+//============================================================
+CPlayer::MOTION CPlayer::ControlSideAccel(const D3DXVECTOR3& rVecSide)
+{
+	// 変数を宣言
+	MOTION currentMotion = MOTION_MOVE;	// 現在のモーション
+
+	// ポインタを宣言
+	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
+	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
 	if (pKeyboard->GetPress(DIK_A) || pPad->GetPress(CInputPad::KEY_L1))
 	{
@@ -1177,7 +917,7 @@ CPlayer::MOTION CPlayer::Move(void)
 		{ // ゲージが使用できた場合
 
 			// 左移動量を加速
-			m_move += vecSide * m_fAddMove;
+			m_move += rVecSide * MOVE_LEFT_ACCELE;
 
 			// 現在のモーションを設定
 			currentMotion = MOTION_ACCELE;	// 加速モーション
@@ -1186,190 +926,20 @@ CPlayer::MOTION CPlayer::Move(void)
 	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPress(CInputPad::KEY_R1))
 	{
 		// 左移動量を減速
-		m_move -= vecSide * m_fSubMove;
+		m_move -= rVecSide * MOVE_LEFT_DECELE;
 
 		// 現在のモーションを設定
 		currentMotion = MOTION_DECELE;	// 減速モーション
 	}
-
-#if 0
-
-	// TODO：速度決める
-	if (pKeyboard->GetPress(DIK_R))
-	{
-		m_fAddOutSideMove += 0.1f;
-	}
-	else if (pKeyboard->GetPress(DIK_F))
-	{
-		m_fAddOutSideMove -= 0.1f;
-	}
-	if (pKeyboard->GetPress(DIK_T))
-	{
-		m_fSideMove += 0.1f;
-	}
-	else if (pKeyboard->GetPress(DIK_G))
-	{
-		m_fSideMove -= 0.1f;
-	}
-	if (pKeyboard->GetPress(DIK_Y))
-	{
-		m_fAddMove += 0.1f;
-	}
-	else if (pKeyboard->GetPress(DIK_H))
-	{
-		m_fAddMove -= 0.1f;
-	}
-	if (pKeyboard->GetPress(DIK_U))
-	{
-		m_fSubMove += 0.1f;
-	}
-	else if (pKeyboard->GetPress(DIK_J))
-	{
-		m_fSubMove -= 0.1f;
-	}
-	if (pKeyboard->GetPress(DIK_I))
-	{
-		m_fInSideMove += 0.1f;
-	}
-	else if (pKeyboard->GetPress(DIK_K))
-	{
-		m_fInSideMove -= 0.1f;
-	}
-	if (pKeyboard->GetPress(DIK_O))
-	{
-		m_fOutSideMove += 0.1f;
-	}
-	else if (pKeyboard->GetPress(DIK_L))
-	{
-		m_fOutSideMove -= 0.1f;
-	}
-
-	useful::LimitNum(m_fAddOutSideMove, 0.1f, 100.0f);
-	useful::LimitNum(m_fSideMove, 0.1f, 100.0f);
-	useful::LimitNum(m_fAddMove, 0.1f, 100.0f);
-	useful::LimitNum(m_fSubMove, 0.1f, 100.0f);
-	useful::LimitNum(m_fInSideMove, 0.1f, 100.0f);
-	useful::LimitNum(m_fOutSideMove, 0.1f, 100.0f);
-
-	CManager::GetDebugProc()->Print("----------------------------------\n");
-	CManager::GetDebugProc()->Print("内側加速量 加減操作：[R/F]\n");
-	CManager::GetDebugProc()->Print("横移動量   加減操作：[T/G]\n");
-	CManager::GetDebugProc()->Print("加速移動量 加減操作：[Y/H]\n");
-	CManager::GetDebugProc()->Print("減速移動量 加減操作：[U/J]\n");
-	CManager::GetDebugProc()->Print("内側移動量 加減操作：[I/K]\n");
-	CManager::GetDebugProc()->Print("外側移動量 加減操作：[O/L]\n");
-	CManager::GetDebugProc()->Print("----------------------------------\n");
-	CManager::GetDebugProc()->Print("内側加速量：%f\n", m_fAddOutSideMove);
-	CManager::GetDebugProc()->Print("横移動量  ：%f\n", m_fSideMove);
-	CManager::GetDebugProc()->Print("加速移動量：%f\n", m_fAddMove);
-	CManager::GetDebugProc()->Print("減速移動量：%f\n", m_fSubMove);
-	CManager::GetDebugProc()->Print("内側移動量：%f\n", m_fInSideMove);
-	CManager::GetDebugProc()->Print("外側移動量：%f\n", m_fOutSideMove);
-
-#endif
-
-#else	// デバッグ用歩行
-
-	// 移動操作
-	if (pKeyboard->GetPress(DIK_W))
-	{ // 奥移動の操作が行われた場合
-
-		if (pKeyboard->GetPress(DIK_A))
-		{ // 左移動の操作も行われた場合 (左奥移動)
-
-			// 移動量を更新
-			m_move.x += sinf(rot.y - (D3DX_PI * 0.25f)) * 2.0f;
-			m_move.z += cosf(rot.y - (D3DX_PI * 0.25f)) * 2.0f;
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(135) + rot.y;
-		}
-		else if (pKeyboard->GetPress(DIK_D))
-		{ // 右移動の操作も行われた場合 (右奥移動)
-
-			// 移動量を更新
-			m_move.x -= sinf(rot.y - (D3DX_PI * 0.75f)) * 2.0f;
-			m_move.z -= cosf(rot.y - (D3DX_PI * 0.75f)) * 2.0f;
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(225) + rot.y;
-		}
-		else
-		{ // 奥移動の操作だけが行われた場合 (奥移動)
-
-			// 移動量を更新
-			m_move.x += sinf(rot.y) * 2.0f;
-			m_move.z += cosf(rot.y) * 2.0f;
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(180) + rot.y;
-		}
-	}
-	else if (pKeyboard->GetPress(DIK_S))
-	{ // 手前移動の操作が行われた場合
-
-		if (pKeyboard->GetPress(DIK_A))
-		{ // 左移動の操作も行われた場合 (左手前移動)
-
-			// 移動量を更新
-			m_move.x += sinf(rot.y - (D3DX_PI * 0.75f)) * 2.0f;
-			m_move.z += cosf(rot.y - (D3DX_PI * 0.75f)) * 2.0f;
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(45) + rot.y;
-		}
-		else if (pKeyboard->GetPress(DIK_D))
-		{ // 右移動の操作も行われた場合 (右手前移動)
-
-			// 移動量を更新
-			m_move.x -= sinf(rot.y - (D3DX_PI * 0.25f)) * 2.0f;
-			m_move.z -= cosf(rot.y - (D3DX_PI * 0.25f)) * 2.0f;
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(315) + rot.y;
-		}
-		else
-		{ // 手前移動の操作だけが行われた場合 (手前移動)
-
-			// 移動量を更新
-			m_move.x -= sinf(rot.y) * 2.0f;
-			m_move.z -= cosf(rot.y) * 2.0f;
-
-			// 目標向きを更新
-			m_destRot.y = D3DXToRadian(0) + rot.y;
-		}
-	}
-	else if (pKeyboard->GetPress(DIK_A))
-	{ // 左移動の操作が行われた場合
-
-		// 移動量を更新
-		m_move.x += sinf(rot.y - (D3DX_PI * 0.5f)) * 2.0f;
-		m_move.z += cosf(rot.y - (D3DX_PI * 0.5f)) * 2.0f;
-
-		// 目標向きを更新
-		m_destRot.y = D3DXToRadian(90) + rot.y;
-	}
-	else if (pKeyboard->GetPress(DIK_D))
-	{ // 右移動の操作が行われた場合
-
-		// 移動量を更新
-		m_move.x -= sinf(rot.y - (D3DX_PI * 0.5f)) * 2.0f;
-		m_move.z -= cosf(rot.y - (D3DX_PI * 0.5f)) * 2.0f;
-
-		// 目標向きを更新
-		m_destRot.y = D3DXToRadian(270) + rot.y;
-	}
-
-#endif
 
 	// 現在のモーションを返す
 	return currentMotion;
 }
 
 //============================================================
-//	魔法処理
+//	魔法攻撃の操作処理
 //============================================================
-CPlayer::MOTION CPlayer::Magic(MOTION motion)
+CPlayer::MOTION CPlayer::ControlShotMagic(MOTION motion)
 {
 	// 変数を宣言
 	MOTION currentMotion = motion;	// 現在のモーション
@@ -1416,9 +986,9 @@ CPlayer::MOTION CPlayer::Magic(MOTION motion)
 }
 
 //============================================================
-//	着地処理
+//	着地状況の更新処理
 //============================================================
-bool CPlayer::Land(D3DXVECTOR3& rPos)
+bool CPlayer::UpdateLanding(D3DXVECTOR3& rPos)
 {
 	// 変数を宣言
 	bool bLand = false;	// 着地状況
@@ -1446,51 +1016,9 @@ bool CPlayer::Land(D3DXVECTOR3& rPos)
 }
 
 //============================================================
-//	モーション処理
+//	位置の更新処理
 //============================================================
-void CPlayer::Motion(int nMotion)
-{
-	// 変数を宣言
-	int nAnimMotion = GetMotionType();	// 現在再生中のモーション
-
-	if (nMotion != NONE_IDX)
-	{ // モーションが設定されている場合
-
-		if (IsMotionLoop(nAnimMotion))
-		{ // ループするモーションだった場合
-
-			if (nAnimMotion != nMotion)
-			{ // 現在のモーションが再生中のモーションと一致しない場合
-
-				// 現在のモーションの設定
-				SetMotion(nMotion);
-			}
-		}
-	}
-
-	// オブジェクトキャラクターの更新
-	CObjectChara::Update();
-
-	// モーションの遷移
-	if (IsMotionFinish())
-	{ // モーションが終了していた場合
-
-		switch (GetMotionType())
-		{ // モーションの種類ごとの処理
-		case MOTION_BLOW_AWAY:	// 吹っ飛び状態
-
-			// 無し
-
-			// 処理を抜ける
-			break;
-		}
-	}
-}
-
-//============================================================
-//	位置処理
-//============================================================
-void CPlayer::Pos(D3DXVECTOR3& rPos)
+void CPlayer::UpdatePosition(D3DXVECTOR3& rPos)
 {
 	// 重力を加算
 	m_move.y -= PLAY_GRAVITY;
@@ -1514,9 +1042,9 @@ void CPlayer::Pos(D3DXVECTOR3& rPos)
 }
 
 //============================================================
-//	向き処理
+//	向きの更新処理
 //============================================================
-void CPlayer::Rot(D3DXVECTOR3& rRot)
+void CPlayer::UpdateRotation(D3DXVECTOR3& rRot)
 {
 	// 変数を宣言
 	float fDiffRot = 0.0f;	// 差分向き
@@ -1622,6 +1150,219 @@ void CPlayer::CollisionEnemy(D3DXVECTOR3& rPos)
 			}
 		}
 	}
+}
+
+//============================================================
+//	ダメージ状態時の更新処理
+//============================================================
+CPlayer::MOTION CPlayer::UpdateDamage(void)
+{
+	// 変数を宣言
+	MOTION currentMotion;	// 現在のモーション
+
+	// 通常状態時の更新
+	currentMotion = UpdateNormal();
+
+	if (m_nCounterState < INVULN_CNT)
+	{ // カウンターが一定値より小さい場合
+
+		// カウンターを加算
+		m_nCounterState++;
+
+		// マテリアルを設定
+		SetMaterial(material::Red());	// 赤
+	}
+	else
+	{ // カウンターが一定値以上の場合
+
+		// カウンターを初期化
+		m_nCounterState = 0;
+
+		// マテリアル再設定
+		ResetMaterial();
+
+		// 状態を変更
+		m_state = STATE_INVULN;	// 無敵状態
+	}
+
+	// 現在のモーションを返す
+	return currentMotion;
+}
+
+//============================================================
+//	無敵状態時の更新処理
+//============================================================
+CPlayer::MOTION CPlayer::UpdateInvuln(void)
+{
+	// 変数を宣言
+	MOTION currentMotion;	// 現在のモーション
+
+	// 通常状態時の更新
+	currentMotion = UpdateNormal();
+
+	if (m_nCounterState < NORMAL_CNT)
+	{ // カウンターが一定値より小さい場合
+
+		// カウンターを加算
+		m_nCounterState++;
+
+		if (m_nCounterState % CHANGE_ALPHA_CNT == 0)
+		{ // 透明度の変更タイミングだった場合
+
+			if (GetAlpha() > INVULN_MIN_ALPHA)
+			{ // 透明度が上がっていない場合
+
+				// 透明度を上げる
+				SetAlpha(INVULN_MIN_ALPHA);
+			}
+			else
+			{ // 透明度が上がっている場合
+
+				// 透明度を下げる
+				SetAlpha(INVULN_MAX_ALPHA);
+			}
+		}
+	}
+	else
+	{ // カウンターが一定値以上の場合
+
+		// カウンターを初期化
+		m_nCounterState = 0;
+
+		// 透明度を不透明に設定
+		SetAlpha(1.0f);
+
+		// 状態を変更
+		m_state = STATE_NORMAL;	// 通常状態
+	}
+
+	// 現在のモーションを返す
+	return currentMotion;
+}
+
+//============================================================
+//	吹っ飛び状態時の更新処理
+//============================================================
+void CPlayer::UpdateBlowAway(void)
+{
+	// 変数を宣言
+	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
+
+	// 位置更新
+	UpdatePosition(posPlayer);
+
+	// ターゲットとの当たり判定
+	CollisionTarget(posPlayer);
+
+	// ステージ範囲外の補正
+	CScene::GetStage()->LimitPosition(posPlayer, PLAY_RADIUS);
+
+	// 着地判定
+	if (UpdateLanding(posPlayer))
+	{ // 着地していた場合
+
+		// 浮遊モーションに移行
+		SetMotion(MOTION_MOVE);
+
+		// 状態を設定
+		m_state = STATE_DAMAGE;	// ダメージ状態
+	}
+
+	// 位置を反映
+	SetPosition(posPlayer);
+
+	// 向きを設定
+	SetRotation(D3DXVECTOR3(0.0f, atan2f(m_move.x, m_move.z), 0.0f));
+}
+
+//============================================================
+//	渦巻きこまれ状態時の更新処理
+//============================================================
+void CPlayer::UpdateVortex(void)
+{
+	// 変数を宣言
+	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
+
+	// 向きを減算
+	m_fVortexRot -= VORTEX_ADDROT;
+	useful::NormalizeRot(m_fVortexRot);
+
+	// 距離を加算
+	m_fVortexDis += VORTEX_ADDDIS;
+
+	// 位置を設定
+	posPlayer.x = sinf(m_fVortexRot) * m_fVortexDis;
+	posPlayer.y += VORTEX_ADDPOSY;
+	posPlayer.z = cosf(m_fVortexRot) * m_fVortexDis;
+
+	// 位置を反映
+	SetPosition(posPlayer);
+
+	// フェードイン状態時の更新
+	UpdateFadeIn();
+
+	if (m_state == STATE_NONE)
+	{ // 透明になり切った場合
+
+		// プレイヤーを再出現させる
+		SetRespawn(PLAY_SPAWN_POS);
+	}
+}
+
+//============================================================
+//	フェードアウト状態時の更新処理
+//============================================================
+void CPlayer::UpdateFadeOut(void)
+{
+	// 変数を宣言
+	float fAlpha = GetAlpha();	// 透明度
+
+	// プレイヤー自身の描画を再開
+	CObject::SetEnableDraw(true);
+
+	// 透明度を上げる
+	fAlpha += FADE_LEVEL;
+
+	if (fAlpha >= GetMaxAlpha())
+	{ // 透明度が上がり切った場合
+
+		// 透明度を補正
+		fAlpha = GetMaxAlpha();
+
+		// 状態を設定
+		m_state = STATE_INVULN;	// 無敵状態
+	}
+
+	// 透明度を設定
+	SetAlpha(fAlpha);
+}
+
+//============================================================
+//	フェードイン状態時の更新処理
+//============================================================
+void CPlayer::UpdateFadeIn(void)
+{
+	// 変数を宣言
+	float fAlpha = GetAlpha();	// 透明度
+
+	// 透明度を下げる
+	fAlpha -= FADE_LEVEL;
+
+	if (fAlpha <= 0.0f)
+	{ // 透明度が下がり切った場合
+
+		// 透明度を補正
+		fAlpha = 0.0f;
+
+		// プレイヤー自身の描画を停止
+		CObject::SetEnableDraw(false);
+
+		// 状態を設定
+		m_state = STATE_NONE;	// 何もしない状態
+	}
+
+	// 透明度を設定
+	SetAlpha(fAlpha);
 }
 
 //============================================================

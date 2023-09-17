@@ -154,9 +154,26 @@ public:
 	int GetState(void) const;					// 状態取得
 	float GetRadius(void) const;				// 半径取得
 
-private:
+protected:
+	// 純粋仮想関数
+	virtual MOTION UpdateNormal(void) = 0;	// 通常状態時の更新
+
 	// メンバ関数
-	MOTION UpdateNormal(void);	// 通常状態時の更新
+	void UpdateOldPosition(void);	// 過去位置の更新
+	void UpdateDisTarget(void);		// ターゲット距離の更新
+	void UpdateMotion(int nMotion);	// モーション・オブジェクトキャラクターの更新
+
+	MOTION UpdateMove(void);	// 移動量・目標向きの更新
+	void UpdateAbsorb(D3DXVECTOR3& rVecTarg, D3DXVECTOR3& rVecSide);	// 吸い込みの更新
+	MOTION ControlTargAccel(const D3DXVECTOR3& rVecTarg);	// ターゲット逆方向への加減速の操作
+	MOTION ControlSideAccel(const D3DXVECTOR3& rVecSide);	// ターゲット横方向への加減速の操作
+	MOTION ControlShotMagic(MOTION motion);		// 魔法攻撃の操作
+	bool UpdateLanding(D3DXVECTOR3& rPos);		// 着地状況の更新
+	void UpdatePosition(D3DXVECTOR3& rPos);		// 位置の更新
+	void UpdateRotation(D3DXVECTOR3& rRot);		// 向きの更新
+	void CollisionTarget(D3DXVECTOR3& rPos);	// ターゲットとの当たり判定
+	void CollisionEnemy(D3DXVECTOR3& rPos);		// 敵との当たり判定
+
 	MOTION UpdateDamage(void);	// ダメージ状態時の更新
 	MOTION UpdateInvuln(void);	// 無敵状態時の更新
 	void UpdateBlowAway(void);	// 吹っ飛び状態時の更新
@@ -164,15 +181,9 @@ private:
 	void UpdateFadeOut(void);	// フェードアウト状態時の更新
 	void UpdateFadeIn(void);	// フェードイン状態時の更新
 
-	MOTION Move(void);				// 移動
-	MOTION Magic(MOTION motion);	// 魔法
-	bool Land(D3DXVECTOR3& rPos);	// 着地
-	void Motion(int nMotion);		// モーション
-	void Pos(D3DXVECTOR3& rPos);	// 位置
-	void Rot(D3DXVECTOR3& rRot);	// 向き
-	void CollisionTarget(D3DXVECTOR3& rPos);	// ターゲットとの当たり判定
-	void CollisionEnemy(D3DXVECTOR3& rPos);		// 敵との当たり判定
-	void LoadSetup(void);						// セットアップ
+private:
+	// メンバ関数
+	void LoadSetup(void);	// セットアップ
 
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];	// テクスチャ定数
@@ -198,14 +209,6 @@ private:
 	float m_fVortexRot;		// 渦巻き方向
 	float m_fVortexDis;		// 渦巻との距離
 	bool  m_bJump;			// ジャンプ状況
-
-	// TODO：デバッグ用
-	float m_fInSideMove;		// 内側移動量
-	float m_fOutSideMove;		// 外側移動量
-	float m_fAddOutSideMove;	// 外側移動の加速量
-	float m_fSideMove;			// 横移動量
-	float m_fAddMove;			// 横移動の加速量
-	float m_fSubMove;			// 横移動の減速量
 };
 
 #endif	// _PLAYER_H_
