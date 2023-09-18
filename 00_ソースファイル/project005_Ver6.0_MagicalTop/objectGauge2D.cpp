@@ -334,12 +334,18 @@ void CObjectGauge2D::SetNum(const int nNum)
 {
 	// 引数の表示値を設定
 	m_nNumGauge = nNum;
+	useful::LimitNum(m_nNumGauge, 0, m_nMaxNumGauge);	// 表示値の制限
 
-	// 表示値の制限
-	useful::LimitNum(m_nNumGauge, 0, m_nMaxNumGauge);
+	// 現在の表示値を設定
+	m_fCurrentNumGauge = (float)m_nNumGauge;
+	useful::LimitNum(m_fCurrentNumGauge, 0.0f, (float)m_nMaxNumGauge);	// 現在の表示値の制限
+
+	// 情報を設定
+	m_state = STATE_NONE;	// ゲージ変動状態
+	m_nCounterState = 0;	// 状態管理カウンター
 
 	// ゲージの横幅加算量を設定
-	m_fAddRight = ((float)m_nNumGauge * ((m_sizeGauge.x * 2.0f) / (float)m_nMaxNumGauge)) - m_sizeGauge.x;
+	m_fAddRight = (m_fCurrentNumGauge * ((m_sizeGauge.x * 2.0f) / (float)m_nMaxNumGauge)) - m_sizeGauge.x;
 
 	// 頂点情報の設定
 	SetVtx();

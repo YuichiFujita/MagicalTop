@@ -131,6 +131,13 @@ void CPlayerTutorial::Update(void)
 		// 渦巻きこまれ状態時の更新
 		UpdateVortex();
 
+		if (CSceneTutorial::GetTutorialManager()->GetLesson() == CTutorialManager::LESSON_01)
+		{ // レッスン01：吸い込まれるの場合
+
+			// レッスンカウンター加算
+			CSceneTutorial::GetTutorialManager()->AddLessonCounter();
+		}
+
 		break;
 
 	case STATE_FADEIN:		// フェードイン状態
@@ -170,14 +177,9 @@ void CPlayerTutorial::HitBlowAway
 {
 	// 変数を宣言
 	D3DXVECTOR3 vecAway = VEC3_ZERO;	// 吹っ飛びベクトル
-	STATE oldState = (STATE)GetState();	// 過去の状態
 
-	// ヒット処理
-	Hit(nDmg);
-
-	if (oldState   == STATE_NORMAL
-	&&  GetState() == STATE_DAMAGE)
-	{ // 元の状態が通常状態且つ、現在の状態がダメージ状態の場合
+	if (GetState() == STATE_NORMAL)
+	{ // 通常状態の場合
 
 		// 吹っ飛びベクトルを求める
 		vecAway = rPlayerPos - rHitObjPos;
@@ -214,27 +216,20 @@ void CPlayerTutorial::HitVortex
 		CScene::GetStage()->GetStageBarrier().fRadius	// 判定目標半径
 	);
 
-	if (GetState() == STATE_NORMAL)
-	{ // 通常状態の場合
+	if (GetState() == STATE_NORMAL || GetState() == STATE_DAMAGE || GetState() == STATE_INVULN)
+	{ // 通常・ダメージ・無敵状態のどれかの場合
 
-		// ヒット処理
-		Hit(nDmg);
+		// 渦巻きこまれの設定処理
+		SetVortex(rPlayerPos, rHitPos);
 
-		if (GetState() != STATE_DEATH)
-		{ // 死亡状態の場合
+		// カメラ更新をOFFにする
+		CManager::GetCamera()->SetEnableUpdate(false);
 
-			// 渦巻きこまれの設定処理
-			SetVortex(rPlayerPos, rHitPos);
+		// 状態を設定
+		SetState(STATE_VORTEX);	// 渦巻きこまれ状態
 
-			// カメラ更新をOFFにする
-			CManager::GetCamera()->SetEnableUpdate(false);
-
-			// 状態を設定
-			SetState(STATE_VORTEX);	// 渦巻きこまれ状態
-
-			// 吹っ飛びモーションに移行
-			SetMotion(MOTION_BLOW_AWAY);
-		}
+		// 吹っ飛びモーションに移行
+		SetMotion(MOTION_BLOW_AWAY);
 	}
 }
 
@@ -283,14 +278,6 @@ CPlayer::MOTION CPlayerTutorial::UpdateNormal(void)
 
 			// 渦巻きこまれヒット
 			HitVortex(posPlayer, pStage->GetStageBarrierPosition(), 0);
-
-			// TOMORROW:レッスン移行どうするかぁ
-			if (CSceneTutorial::GetTutorialManager()->GetLesson() == CTutorialManager::LESSON_01)
-			{ // レッスン01：吸い込まれるの場合
-
-				// 次のレッスンへ移行
-				CSceneTutorial::GetTutorialManager()->NextLesson();
-			}
 		}
 
 		// 位置を更新
@@ -314,15 +301,47 @@ CPlayer::MOTION CPlayerTutorial::UpdateMove(void)
 	MOTION currentMotion = MOTION_MOVE;	// 現在のモーション
 	D3DXVECTOR3 vecTarg = VEC3_ZERO;	// ターゲット逆方向ベクトル
 	D3DXVECTOR3 vecSide = VEC3_ZERO;	// ターゲット横方向ベクトル
+	bool bTargMove = false;	// ターゲット逆方向への操作状況
+	bool bSideMove = false;	// ターゲット横方向への操作状況
 
 	// 吸い込みの更新
 	UpdateAbsorb(vecTarg, vecSide);
 
-	// ターゲット逆方向への加減速の操作
-	currentMotion = ControlTargAccel(vecTarg);
+	if (CSceneTutorial::GetTutorialManager()->GetLesson() > CTutorialManager::LESSON_01)
+	{ // レッスン01：吸い込まれるを終了している場合
 
-	// ターゲット横方向への加減速の操作
-	currentMotion = ControlSideAccel(vecSide);
+		// ターゲット逆方向への加減速の操作
+		currentMotion = ControlTargAccel(vecTarg, &bTargMove);
+
+		if (CSceneTutorial::GetTutorialManager()->GetLesson() == CTutorialManager::LESSON_02)
+		{ // レッスン02：前後加速の場合
+
+			if (bTargMove)
+			{ // ターゲット逆方向への操作が行われていた場合
+
+				// レッスンカウンター加算
+				CSceneTutorial::GetTutorialManager()->AddLessonCounter();
+			}
+		}
+	}
+
+	if (CSceneTutorial::GetTutorialManager()->GetLesson() > CTutorialManager::LESSON_02)
+	{ // レッスン02：前後加速を終了している場合
+
+		// ターゲット横方向への加減速の操作
+		currentMotion = ControlSideAccel(vecSide, &bSideMove);
+
+		if (CSceneTutorial::GetTutorialManager()->GetLesson() == CTutorialManager::LESSON_03)
+		{ // レッスン03：左右加速の場合
+
+			if (bSideMove)
+			{ // ターゲット横方向への操作が行われていた場合
+
+				// レッスンカウンター加算
+				CSceneTutorial::GetTutorialManager()->AddLessonCounter();
+			}
+		}
+	}
 
 	// 現在のモーションを返す
 	return currentMotion;

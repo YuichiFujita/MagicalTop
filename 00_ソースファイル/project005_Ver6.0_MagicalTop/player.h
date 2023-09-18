@@ -173,9 +173,9 @@ protected:
 	void UpdateDisTarget(void);		// ターゲット距離の更新
 	void UpdateMotion(int nMotion);	// モーション・オブジェクトキャラクターの更新
 
-	void UpdateAbsorb(D3DXVECTOR3& rVecTarg, D3DXVECTOR3& rVecSide);	// 吸い込みの更新
-	MOTION ControlTargAccel(const D3DXVECTOR3& rVecTarg);	// ターゲット逆方向への加減速の操作
-	MOTION ControlSideAccel(const D3DXVECTOR3& rVecSide);	// ターゲット横方向への加減速の操作
+	void UpdateAbsorb(D3DXVECTOR3& rVecTarg, D3DXVECTOR3& rVecSide);			// 吸い込みの更新
+	MOTION ControlTargAccel(const D3DXVECTOR3& rVecTarg, bool *pMove = NULL);	// ターゲット逆方向への加減速の操作
+	MOTION ControlSideAccel(const D3DXVECTOR3& rVecSide, bool *pMove = NULL);	// ターゲット横方向への加減速の操作
 	MOTION ControlShotMagic(MOTION motion);		// 魔法攻撃の操作
 	bool UpdateLanding(D3DXVECTOR3& rPos);		// 着地状況の更新
 	void UpdatePosition(D3DXVECTOR3& rPos);		// 位置の更新

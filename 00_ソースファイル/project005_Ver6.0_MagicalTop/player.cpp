@@ -817,7 +817,7 @@ void CPlayer::UpdateAbsorb(D3DXVECTOR3& rVecTarg, D3DXVECTOR3& rVecSide)
 //============================================================
 //	ターゲット逆方向への加減速の操作処理
 //============================================================
-CPlayer::MOTION CPlayer::ControlTargAccel(const D3DXVECTOR3& rVecTarg)
+CPlayer::MOTION CPlayer::ControlTargAccel(const D3DXVECTOR3& rVecTarg, bool *pMove)
 {
 	// 変数を宣言
 	float fDisTargRate = (1.0f / CScene::GetStage()->GetStageLimit().fRadius) * m_fDisTarget;	// ターゲット距離の割合
@@ -833,6 +833,13 @@ CPlayer::MOTION CPlayer::ControlTargAccel(const D3DXVECTOR3& rVecTarg)
 
 		// 外側を向かせる
 		m_destRot.y += INSIDE_ADDROT;
+
+		if (USED(pMove))
+		{ // 移動判定の引数が使用されていた場合
+
+			// 移動している状態にする
+			*pMove = true;
+		}
 	}
 	else if (pKeyboard->GetPress(DIK_S) || pPad->GetPressLStickY() < 0.0f)
 	{
@@ -841,6 +848,22 @@ CPlayer::MOTION CPlayer::ControlTargAccel(const D3DXVECTOR3& rVecTarg)
 
 		// 内側を向かせる
 		m_destRot.y -= OUTSIDE_SUBROT;
+
+		if (USED(pMove))
+		{ // 移動判定の引数が使用されていた場合
+
+			// 移動している状態にする
+			*pMove = true;
+		}
+	}
+	else
+	{
+		if (USED(pMove))
+		{ // 移動判定の引数が使用されていた場合
+
+			// 移動していない状態にする
+			*pMove = false;
+		}
 	}
 
 	// 浮遊モーションを返す
@@ -850,7 +873,7 @@ CPlayer::MOTION CPlayer::ControlTargAccel(const D3DXVECTOR3& rVecTarg)
 //============================================================
 //	ターゲット横方向への加減速の操作処理
 //============================================================
-CPlayer::MOTION CPlayer::ControlSideAccel(const D3DXVECTOR3& rVecSide)
+CPlayer::MOTION CPlayer::ControlSideAccel(const D3DXVECTOR3& rVecSide, bool *pMove)
 {
 	// 変数を宣言
 	MOTION currentMotion = MOTION_MOVE;	// 現在のモーション
@@ -869,6 +892,13 @@ CPlayer::MOTION CPlayer::ControlSideAccel(const D3DXVECTOR3& rVecSide)
 
 			// 現在のモーションを設定
 			currentMotion = MOTION_ACCELE;	// 加速モーション
+
+			if (USED(pMove))
+			{ // 移動判定の引数が使用されていた場合
+
+				// 移動している状態にする
+				*pMove = true;
+			}
 		}
 	}
 	else if (pKeyboard->GetPress(DIK_D) || pPad->GetPress(CInputPad::KEY_R1))
@@ -878,6 +908,22 @@ CPlayer::MOTION CPlayer::ControlSideAccel(const D3DXVECTOR3& rVecSide)
 
 		// 現在のモーションを設定
 		currentMotion = MOTION_DECELE;	// 減速モーション
+
+		if (USED(pMove))
+		{ // 移動判定の引数が使用されていた場合
+
+			// 移動している状態にする
+			*pMove = true;
+		}
+	}
+	else
+	{
+		if (USED(pMove))
+		{ // 移動判定の引数が使用されていた場合
+
+			// 移動していない状態にする
+			*pMove = false;
+		}
 	}
 
 	// 現在のモーションを返す

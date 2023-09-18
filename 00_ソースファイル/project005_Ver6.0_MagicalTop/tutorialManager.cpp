@@ -19,9 +19,10 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define TUTORIAL_PRIO	(5)	// チュートリアルの優先順位
+#define TUTORIAL_PRIO	(6)	// チュートリアルの優先順位
 
-#define WAIT_CNT	(90)	// 待機状態の待機フレーム
+#define LETTER_WAIT_CNT	(90)	// 待機状態の待機フレーム
+#define TITLE_WAIT_CNT	(90)	// タイトル遷移の余韻フレーム
 
 #define COL_FADE_MIN	(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f))	// フェードのα値の最小
 #define COL_FADE_MAX	(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.8f))	// フェードのα値の最大
@@ -50,9 +51,17 @@ const char *CTutorialManager::mc_apLessonTextureFile[] =	// レッスンテクスチャ定
 const int CTutorialManager::mc_aNextLesson[] =	// レッスン移行カウント
 {
 	0,		// レッスンなし
-	1,		// レッスン01：吸い込まれる終了カウント
-	60,		// レッスン02：前後加速の終了カウント
-	60,		// レッスン03：左右加速の終了カウント
+	30,		// レッスン01：吸い込まれる終了カウント
+	360,	// レッスン02：前後加速の終了カウント
+	360,	// レッスン03：左右加速の終了カウント
+};
+
+const int CTutorialManager::mc_aNextLessonWait[] =	// 次レッスン余韻カウント
+{
+	0,		// レッスンなし
+	60,		// レッスン01：吸い込まれる終了時の余韻カウント
+	90,		// レッスン02：前後加速の終了時の余韻カウント
+	90,		// レッスン03：左右加速の終了時の余韻カウント
 };
 
 //************************************************************
@@ -106,7 +115,7 @@ HRESULT CTutorialManager::Init(void)
 	( // 引数
 		CObject::LABEL_GAUGE,
 		mc_aNextLesson[0],
-		20,
+		1,
 		D3DXVECTOR3(200.0f, 200.0f, 0.0f),
 		D3DXVECTOR3(100.0f, 20.0f, 0.0f)
 	);
@@ -220,12 +229,6 @@ void CTutorialManager::Update(void)
 
 		break;
 
-	case STATE_PROGRESSION:	// 進行状態
-
-		// 無し
-
-		break;
-
 	case STATE_FADEOUT:		// フェードアウト状態
 
 		// フェードアウトの更新
@@ -233,9 +236,23 @@ void CTutorialManager::Update(void)
 
 		break;
 
-	case STATE_END:			// 終了状態
+	case STATE_PROGRESSION:	// 進行状態
 
 		// 無し
+
+		break;
+
+	case STATE_NEXTWAIT:	// 次レッスン待機状態
+
+		// 次レッスン待機の更新
+		UpdateNextWait();
+
+		break;
+
+	case STATE_END:			// 終了状態
+
+		// シーンの設定
+		CManager::SetScene(CScene::MODE_TITLE, TITLE_WAIT_CNT);	// タイトル画面
 
 		break;
 
@@ -246,20 +263,11 @@ void CTutorialManager::Update(void)
 }
 
 //============================================================
-//	レッスン取得処理
+//	レッスンカウンターの加算処理
 //============================================================
-int CTutorialManager::GetLesson(void) const
+void CTutorialManager::AddLessonCounter(void)
 {
-	// 現在のレッスンを返す
-	return m_nLesson;
-}
-
-//============================================================
-//	次レッスンへの移行処理
-//============================================================
-void CTutorialManager::NextLesson(void)
-{
-	if (m_nLesson < LESSON_MAX - 1)
+	if (m_nLesson < LESSON_MAX)
 	{ // レッスンがまだある場合
 
 		// レッスンカウンターを加算
@@ -268,53 +276,19 @@ void CTutorialManager::NextLesson(void)
 		if (m_pConterLesson->GetNum() >= mc_aNextLesson[m_nLesson])
 		{ // レッスンを次に進めるカウントまで到達した場合
 
-			// レッスンを次に進める
-			m_nLesson++;
-
-			switch (m_nLesson)
-			{ // レッスンごとの処理
-			case LESSON_01:	// レッスン01：吸い込まれる
-
-				// 無し
-
-				// 処理を抜ける
-				break;
-
-			case LESSON_02:	// レッスン02：前後加速
-
-				// 無し
-
-				// 処理を抜ける
-				break;
-
-			case LESSON_03:	// レッスン03：左右加速
-
-				// 無し
-
-				// 処理を抜ける
-				break;
-
-			default:	// 例外処理
-				assert(false);
-				break;
-			}
-
-			// レッスンカウンターの最大値を設定
-			m_pConterLesson->SetMaxNum(mc_aNextLesson[m_nLesson]);
-
-			// レッスンカウンターを初期化
-			m_pConterLesson->SetNum(0);
-
-			// プレイヤーを見えなくする
-			CScene::GetPlayer()->SetDisp(false);
-
 			// 状態を設定
-			m_state = STATE_FADEIN;	// フェードイン状態
-
-			//// サウンドの再生
-			//PlaySound(SOUND_LABEL_SE_SCORE_000);	// SE (決定00)
+			m_state = STATE_NEXTWAIT;	// 次レッスン待機状態
 		}
 	}
+}
+
+//============================================================
+//	レッスン取得処理
+//============================================================
+int CTutorialManager::GetLesson(void) const
+{
+	// 現在のレッスンを返す
+	return m_nLesson;
 }
 
 //============================================================
@@ -380,7 +354,7 @@ HRESULT CTutorialManager::Release(CTutorialManager *&prTutorialManager)
 //============================================================
 void CTutorialManager::UpdateWait(void)
 {
-	if (m_nCounterState < WAIT_CNT)
+	if (m_nCounterState < LETTER_WAIT_CNT)
 	{ // カウンターが待機時間未満の場合
 
 		// カウンターを加算
@@ -517,4 +491,72 @@ void CTutorialManager::UpdateFadeOut(void)
 
 	// 透明度を反映
 	m_pFade->SetColor(colFade);
+}
+
+//============================================================
+//	次レッスン待機の更新処理
+//============================================================
+void CTutorialManager::UpdateNextWait(void)
+{
+	if (m_nCounterState < mc_aNextLessonWait[m_nLesson])
+	{ // カウンターが余韻時間未満の場合
+
+		// カウンターを加算
+		m_nCounterState++;
+	}
+	else
+	{ // 余韻時間が終了した場合
+
+		// カウンターを初期化
+		m_nCounterState = 0;
+
+		// 次レッスンへの移行
+		NextLesson();
+	}
+}
+
+//============================================================
+//	次レッスンへの移行処理
+//============================================================
+void CTutorialManager::NextLesson(void)
+{
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
+	//--------------------------------------------------------
+	//	レッスン・カウンターを更新
+	//--------------------------------------------------------
+	// レッスンを次に進める
+	m_nLesson++;
+
+	// レッスンカウンターの最大値を設定
+	m_pConterLesson->SetMaxNum(mc_aNextLesson[m_nLesson]);
+
+	// レッスンカウンターを初期化
+	m_pConterLesson->SetNum(0);
+
+	//--------------------------------------------------------
+	//	レッスン表示を更新
+	//--------------------------------------------------------
+	// レッスン説明テクスチャを登録・割当
+	m_pExplain->BindTexture(pTexture->Regist(mc_apLessonTextureFile[m_nLesson]));
+
+	//--------------------------------------------------------
+	//	状態を更新
+	//--------------------------------------------------------
+	// プレイヤーを見えなくする
+	CScene::GetPlayer()->SetDisp(false);
+
+	if (m_nLesson < LESSON_MAX)
+	{ // レッスンがまだある場合
+
+		// 状態を設定
+		m_state = STATE_FADEIN;	// フェードイン状態
+	}
+	else
+	{ // レッスンがもうない場合
+
+		// 状態を設定
+		m_state = STATE_END;	// 終了状態
+	}
 }
