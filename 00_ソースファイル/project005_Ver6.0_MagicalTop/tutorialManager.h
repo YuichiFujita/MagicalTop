@@ -67,13 +67,14 @@ public:
 	HRESULT Init(void);		// 初期化
 	HRESULT Uninit(void);	// 終了
 	void Update(void);		// 更新
-
 	void AddLessonCounter(void);	// レッスンカウンター加算
 	int GetLesson(void) const;		// レッスン取得
+	STATE GetState(void) const;		// 状態取得
 
 	// 静的メンバ関数
 	static CTutorialManager *Create(void);	// 生成
 	static HRESULT Release(CTutorialManager *&prTutorialManager);	// 破棄
+	static int GetNextLessonCounter(const int nID);	// レッスン移行カウント取得
 
 private:
 	// メンバ関数

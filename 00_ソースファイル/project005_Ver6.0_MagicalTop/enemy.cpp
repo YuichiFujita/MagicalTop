@@ -812,8 +812,12 @@ bool CEnemy::Death(void)
 	if (posEnemy.y > ENE_DEATH_POSY)
 	{ // 座標が上に行き切った場合
 
-		// スコアを加算
-		CSceneGame::GetScore()->Add(m_status.nScore);
+		if (CManager::GetScene()->GetMode() == CScene::MODE_GAME)
+		{ // モードがゲームの場合
+
+			// スコアを加算
+			CSceneGame::GetScore()->Add(m_status.nScore);
+		}
 
 		// 経験値のランダム生成
 		CExpOrb::RandomSpawn(m_status.nExp, posEnemy);

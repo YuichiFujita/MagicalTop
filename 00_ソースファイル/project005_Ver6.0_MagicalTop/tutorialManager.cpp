@@ -16,6 +16,7 @@
 #include "object2D.h"
 #include "objectGauge2D.h"
 #include "player.h"
+#include "enemy.h"
 
 //************************************************************
 //	マクロ定義
@@ -56,10 +57,10 @@ const int CTutorialManager::mc_aNextLesson[] =	// レッスン移行カウント
 {
 	0,		// レッスンなし
 	30,		// レッスン01：吸い込まれる終了カウント
-	360,	// レッスン02：前後加速の終了カウント
-	360,	// レッスン03：左右加速の終了カウント
+	320,	// レッスン02：前後加速の終了カウント
+	320,	// レッスン03：左右加速の終了カウント
 	240,	// レッスン04：攻撃の終了カウント
-	1,		// レッスン05：敵への攻撃の終了カウント
+	3,		// レッスン05：敵への攻撃の終了カウント
 	60,		// レッスン06：マナ回復の終了カウント
 };
 
@@ -112,7 +113,7 @@ HRESULT CTutorialManager::Init(void)
 	m_pFade		= NULL;			// フェードの情報
 	m_pExplain	= NULL;			// 説明表示の情報
 	m_state		= STATE_WAIT;	// 状態
-	m_nLesson	= LESSON_NONE;	// レッスン
+	m_nLesson	= LESSON_04;	// レッスン
 	m_fScale	= 0.0f;			// ポリゴン拡大率
 	m_nCounterState	= 0;		// 状態管理カウンター
 
@@ -340,6 +341,15 @@ int CTutorialManager::GetLesson(void) const
 }
 
 //============================================================
+//	状態取得処理
+//============================================================
+CTutorialManager::STATE CTutorialManager::GetState(void) const
+{
+	// 状態を返す
+	return m_state;
+}
+
+//============================================================
 //	生成処理
 //============================================================
 CTutorialManager *CTutorialManager::Create(void)
@@ -405,6 +415,20 @@ HRESULT CTutorialManager::Release(CTutorialManager *&prTutorialManager)
 		return S_OK;
 	}
 	else { assert(false); return E_FAIL; }	// 非使用中
+}
+
+//============================================================
+//	レッスン移行カウント取得処理
+//============================================================
+int CTutorialManager::GetNextLessonCounter(const int nID)
+{
+	if (nID < LESSON_MAX)
+	{ // インデックスが範囲内の場合
+
+		// 引数のインデックスのレッスン移行カウントを返す
+		return mc_aNextLesson[nID];
+	}
+	else { assert(false); return NONE_IDX; }	// 範囲外
 }
 
 //============================================================
@@ -540,6 +564,26 @@ void CTutorialManager::UpdateFadeOut(void)
 		// プレイヤーを再出現させる
 		CScene::GetPlayer()->SetRespawn(PLAY_SPAWN_POS);
 
+		switch (m_nLesson)
+		{ // レッスンごとの処理
+		case LESSON_05:	// レッスン05：敵への攻撃
+
+			// 敵ランダム生成
+			CEnemy::RandomSpawn(mc_aNextLesson[LESSON_05], CEnemy::TYPE_HUMAN);
+
+			break;
+
+		case LESSON_06:	// レッスン06：マナ回復
+
+			// マナの回復をできるように変更
+			CScene::GetPlayer()->SetEnableHealMana(true);
+
+			// マナを空にする
+			CScene::GetPlayer()->SetMana(0);
+
+			break;
+		}
+
 		// 状態を設定
 		m_state = STATE_PROGRESSION;	// 進行状態
 	}
@@ -595,26 +639,6 @@ void CTutorialManager::NextLesson(void)
 	//--------------------------------------------------------
 	// レッスン説明テクスチャを登録・割当
 	m_pExplain->BindTexture(pTexture->Regist(mc_apLessonTextureFile[m_nLesson]));
-
-	//--------------------------------------------------------
-	//	レッスン開始時の設定
-	//--------------------------------------------------------
-	switch (m_nLesson)
-	{ // レッスンごとの処理
-	case LESSON_05:	// レッスン05：敵への攻撃
-
-		break;
-
-	case LESSON_06:	// レッスン06：マナ回復
-
-		// マナの回復をできるように変更
-		CScene::GetPlayer()->SetEnableHealMana(true);
-
-		// マナを空にする
-		CScene::GetPlayer()->SetMana(0);
-
-		break;
-	}
 
 	//--------------------------------------------------------
 	//	状態を更新

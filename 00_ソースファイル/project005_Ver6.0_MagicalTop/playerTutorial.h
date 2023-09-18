@@ -52,6 +52,9 @@ private:
 	// メンバ関数
 	MOTION UpdateNormal(void);	// 通常状態時の更新
 	MOTION UpdateMove(void);	// 移動量・目標向きの更新
+
+	// メンバ変数
+	int m_nOldNumEnemy;	// 過去の敵の総数
 };
 
 #endif	// _PLAYER_TUTORIAL_H_

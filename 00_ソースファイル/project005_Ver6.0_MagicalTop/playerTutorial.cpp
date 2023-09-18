@@ -14,6 +14,7 @@
 #include "camera.h"
 #include "collision.h"
 #include "stage.h"
+#include "enemy.h"
 
 //************************************************************
 //	子クラス [CPlayerTutorial] のメンバ関数
@@ -23,7 +24,8 @@
 //============================================================
 CPlayerTutorial::CPlayerTutorial()
 {
-
+	// メンバ変数をクリア
+	m_nOldNumEnemy = 0;	// 過去の敵の総数
 }
 
 //============================================================
@@ -39,6 +41,9 @@ CPlayerTutorial::~CPlayerTutorial()
 //============================================================
 HRESULT CPlayerTutorial::Init(void)
 {
+	// メンバ変数を初期化
+	m_nOldNumEnemy = CTutorialManager::GetNextLessonCounter(CTutorialManager::LESSON_05);	// 過去の敵の総数
+
 	// プレイヤーの初期化
 	if (FAILED(CPlayer::Init()))
 	{ // 初期化に失敗した場合
@@ -79,7 +84,30 @@ void CPlayerTutorial::Update(void)
 {
 	// 変数を宣言
 	int nCurrentMotion = NONE_IDX;	// 現在のモーション
+	int nNumEnemy = 0;	// 現在の敵の総数
 	int nOldMana = 0;	// 回復前のマナ
+
+	if (CSceneTutorial::GetTutorialManager()->GetLesson() == CTutorialManager::LESSON_05
+	&&  CSceneTutorial::GetTutorialManager()->GetState()  == CTutorialManager::STATE_PROGRESSION)
+	{ // チュートリアルが進行状態且つ、レッスン05：敵への攻撃の場合
+
+		// 現在の敵の総数を取得
+		nNumEnemy = CEnemy::GetNumAll();
+
+		if (nNumEnemy < m_nOldNumEnemy)
+		{ // 敵を倒せている場合
+
+			for (int nCntPlayer = 0; nCntPlayer < m_nOldNumEnemy - nNumEnemy; nCntPlayer++)
+			{ // 同フレームに倒した敵の数分繰り返す
+
+				// レッスンカウンター加算
+				CSceneTutorial::GetTutorialManager()->AddLessonCounter();
+			}
+		}
+
+		// 過去の敵の総数を更新
+		m_nOldNumEnemy = nNumEnemy;
+	}
 
 	// 過去位置の更新
 	UpdateOldPosition();
