@@ -279,7 +279,7 @@ bool CBullet::CollisionTarget(void)
 	bool bHit = false;	// 判定状況
 
 	// ポインタを宣言
-	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
+	CTarget *pTarget = CScene::GetTarget();	// ターゲット情報
 
 	if (USED(pTarget))
 	{ // ターゲットが使用されている場合

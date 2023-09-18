@@ -609,8 +609,8 @@ HRESULT CGaugeStar::SetDrawInfo(void)
 	{ // 親オブジェクトが使用されていた場合
 
 		// 変数を宣言
-		D3DXVECTOR3 posParent = m_pParentObject->GetPosition();			// 親オブジェクト位置
-		D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+		D3DXVECTOR3 posParent = m_pParentObject->GetPosition();		// 親オブジェクト位置
+		D3DXVECTOR3 posTarget = CScene::GetTarget()->GetPosition();	// ターゲット位置
 		float fPartRot = (D3DX_PI * 2) / MAX_STAR;	// 分割向き
 
 		// 星の描画情報を設定

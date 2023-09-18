@@ -142,7 +142,7 @@ void CMagic::Update(void)
 	D3DXVECTOR3 vecTarg, vecSide;	// 吸い込み方向ベクトル
 
 	// ターゲット方向のベクトルを計算
-	vecTarg = CSceneGame::GetTarget()->GetPosition() - m_pos;
+	vecTarg = CScene::GetTarget()->GetPosition() - m_pos;
 	vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
 	D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトル正規化
 

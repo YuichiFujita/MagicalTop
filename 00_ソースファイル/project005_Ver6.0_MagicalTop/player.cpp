@@ -743,7 +743,7 @@ void CPlayer::UpdateDisTarget(void)
 {
 	// 変数を宣言
 	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
-	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+	D3DXVECTOR3 posTarget = CScene::GetTarget()->GetPosition();	// ターゲット位置
 
 	// ターゲットとの距離を設定
 	m_fDisTarget = sqrtf((posPlayer.x - posTarget.x) * (posPlayer.x - posTarget.x)+ (posPlayer.z - posTarget.z) * (posPlayer.z - posTarget.z)) * 0.5f;
@@ -798,7 +798,7 @@ void CPlayer::UpdateAbsorb(D3DXVECTOR3& rVecTarg, D3DXVECTOR3& rVecSide)
 {
 	// 変数を宣言
 	D3DXVECTOR3 posPlayer = GetPosition();	// プレイヤー位置
-	D3DXVECTOR3 posTarget = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+	D3DXVECTOR3 posTarget = CScene::GetTarget()->GetPosition();	// ターゲット位置
 	float fDisTargRate = (1.0f / CScene::GetStage()->GetStageLimit().fRadius) * m_fDisTarget;	// ターゲット距離の割合
 
 	// ターゲット逆方向のベクトルを計算
@@ -1089,7 +1089,7 @@ void CPlayer::UpdateRotation(D3DXVECTOR3& rRot)
 void CPlayer::CollisionTarget(D3DXVECTOR3& rPos)
 {
 	// ポインタを宣言
-	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
+	CTarget *pTarget = CScene::GetTarget();	// ターゲット情報
 
 	if (pTarget->GetState() != CTarget::STATE_DESTROY)
 	{ // ターゲットが破壊されていない場合

@@ -352,7 +352,7 @@ void CWaveManager::Update(void)
 	}
 
 	if (CScene::GetPlayer()->GetState() == CPlayer::STATE_DEATH
-	||  CSceneGame::GetTarget()->GetState() == CTarget::STATE_DESTROY)
+	||  CScene::GetTarget()->GetState() == CTarget::STATE_DESTROY)
 	{ // プレイヤーが死亡状態、またはターゲットが破壊状態の場合
 
 		// リザルト遷移

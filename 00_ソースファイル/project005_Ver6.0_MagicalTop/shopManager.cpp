@@ -292,7 +292,7 @@ void CShopManager::Update(void)
 	m_nOldSelect = m_nSelect;
 
 	// ”’l‚É‘Ì—Í‚ðÝ’è
-	m_pLife->GetMultiValue()->SetNum(CSceneGame::GetTarget()->GetLife());
+	m_pLife->GetMultiValue()->SetNum(CScene::GetTarget()->GetLife());
 
 	// ”’l‚ÉƒŒƒxƒ‹‚ðÝ’è
 	m_pLv->GetMultiValue()->SetNum(CScene::GetPlayer()->GetLevel());

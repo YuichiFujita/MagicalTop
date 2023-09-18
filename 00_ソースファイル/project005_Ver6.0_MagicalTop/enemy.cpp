@@ -444,9 +444,9 @@ void CEnemy::RandomSpawn
 	D3DXVECTOR3 posTarget;	// ターゲット位置
 
 	// ポインタを宣言
-	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
+	CTarget *pTarget = CScene::GetTarget();	// ターゲット情報
 
-	if (USED(CSceneGame::GetTarget()))
+	if (USED(CScene::GetTarget()))
 	{ // ターゲットが使用されている場合
 
 		for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
@@ -943,7 +943,7 @@ void CEnemy::Attack(const D3DXVECTOR3& rLookPos, const D3DXVECTOR3& rThisPos, co
 void CEnemy::CollisionTarget(D3DXVECTOR3& rPos)
 {
 	// ポインタを宣言
-	CTarget *pTarget = CSceneGame::GetTarget();	// ターゲット情報
+	CTarget *pTarget = CScene::GetTarget();	// ターゲット情報
 
 	if (USED(pTarget))
 	{ // ターゲットが使用されている場合
@@ -1353,14 +1353,14 @@ void CEnemyHuman::CollisionFind(void)
 	// 過去位置の更新
 	UpdateOldPosition();
 
-	if (CSceneGame::GetTarget()->GetState() != CTarget::STATE_DESTROY)
+	if (CScene::GetTarget()->GetState() != CTarget::STATE_DESTROY)
 	{ // ターゲットが壊されていないる場合
 
 		// 視認対象位置を設定
-		posLook = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+		posLook = CScene::GetTarget()->GetPosition();	// ターゲット位置
 
 		// 視認対象半径を設定
-		fLookRadius = CSceneGame::GetTarget()->GetRadius();	// ターゲット半径
+		fLookRadius = CScene::GetTarget()->GetRadius();	// ターゲット半径
 
 		// 視認対象の攻撃判定
 		if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, status.fAttackRadius) == false)
@@ -1694,14 +1694,14 @@ void CEnemyCar::CollisionFind(void)
 	// 過去位置の更新
 	UpdateOldPosition();
 
-	if (CSceneGame::GetTarget()->GetState() != CTarget::STATE_DESTROY)
+	if (CScene::GetTarget()->GetState() != CTarget::STATE_DESTROY)
 	{ // ターゲットが壊されていないる場合
 
 		// 視認対象位置を設定
-		posLook = CSceneGame::GetTarget()->GetPosition();	// ターゲット位置
+		posLook = CScene::GetTarget()->GetPosition();	// ターゲット位置
 
 		// 視認対象半径を設定
-		fLookRadius = CSceneGame::GetTarget()->GetRadius();	// ターゲット半径
+		fLookRadius = CScene::GetTarget()->GetRadius();	// ターゲット半径
 
 		// 視認対象の攻撃判定
 		if (collision::Circle2D(posLook, posEnemy, fPlayerRadius, status.fAttackRadius) == false)
