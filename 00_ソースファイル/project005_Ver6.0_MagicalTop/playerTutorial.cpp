@@ -42,7 +42,7 @@ CPlayerTutorial::~CPlayerTutorial()
 HRESULT CPlayerTutorial::Init(void)
 {
 	// メンバ変数を初期化
-	m_nOldNumEnemy = CTutorialManager::GetNextLessonCounter(CTutorialManager::LESSON_05);	// 過去の敵の総数
+	m_nOldNumEnemy = CTutorialManager::GetNextLessonCounter(CTutorialManager::LESSON_06);	// 過去の敵の総数
 
 	// プレイヤーの初期化
 	if (FAILED(CPlayer::Init()))
@@ -87,9 +87,9 @@ void CPlayerTutorial::Update(void)
 	int nNumEnemy = 0;	// 現在の敵の総数
 	int nOldMana = 0;	// 回復前のマナ
 
-	if (CSceneTutorial::GetTutorialManager()->GetLesson() == CTutorialManager::LESSON_05
+	if (CSceneTutorial::GetTutorialManager()->GetLesson() == CTutorialManager::LESSON_06
 	&&  CSceneTutorial::GetTutorialManager()->GetState()  == CTutorialManager::STATE_PROGRESSION)
-	{ // チュートリアルが進行状態且つ、レッスン05：敵への攻撃の場合
+	{ // チュートリアルが進行状態且つ、レッスン06：敵への攻撃の場合
 
 		// 現在の敵の総数を取得
 		nNumEnemy = CEnemy::GetNumAll();
@@ -196,8 +196,8 @@ void CPlayerTutorial::Update(void)
 	// プレイヤーの更新
 	CPlayer::Update();
 
-	if (CSceneTutorial::GetTutorialManager()->GetLesson() == CTutorialManager::LESSON_06)
-	{ // レッスン06：マナ回復の場合
+	if (CSceneTutorial::GetTutorialManager()->GetLesson() == CTutorialManager::LESSON_05)
+	{ // レッスン05：マナ回復の場合
 
 		if (GetMana() > nOldMana)
 		{ // マナが回復できている場合

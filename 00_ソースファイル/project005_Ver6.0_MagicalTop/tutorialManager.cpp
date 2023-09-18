@@ -60,8 +60,8 @@ const int CTutorialManager::mc_aNextLesson[] =	// レッスン移行カウント
 	320,	// レッスン02：前後加速の終了カウント
 	320,	// レッスン03：左右加速の終了カウント
 	240,	// レッスン04：攻撃の終了カウント
-	3,		// レッスン05：敵への攻撃の終了カウント
-	60,		// レッスン06：マナ回復の終了カウント
+	60,		// レッスン05：マナ回復の終了カウント
+	3,		// レッスン06：敵への攻撃の終了カウント
 };
 
 const int CTutorialManager::mc_aNextLessonWait[] =	// 次レッスン余韻カウント
@@ -71,8 +71,8 @@ const int CTutorialManager::mc_aNextLessonWait[] =	// 次レッスン余韻カウント
 	90,		// レッスン02：前後加速の終了時の余韻カウント
 	90,		// レッスン03：左右加速の終了時の余韻カウント
 	90,		// レッスン04：攻撃の終了時の余韻カウント
-	90,		// レッスン05：敵への攻撃の終了時の余韻カウント
-	120,	// レッスン06：マナ回復の終了時の余韻カウント
+	120,	// レッスン05：マナ回復の終了時の余韻カウント
+	90,		// レッスン06：敵への攻撃の終了時の余韻カウント
 };
 
 //************************************************************
@@ -113,7 +113,7 @@ HRESULT CTutorialManager::Init(void)
 	m_pFade		= NULL;			// フェードの情報
 	m_pExplain	= NULL;			// 説明表示の情報
 	m_state		= STATE_WAIT;	// 状態
-	m_nLesson	= LESSON_04;	// レッスン
+	m_nLesson	= LESSON_NONE;	// レッスン
 	m_fScale	= 0.0f;			// ポリゴン拡大率
 	m_nCounterState	= 0;		// 状態管理カウンター
 
@@ -566,20 +566,20 @@ void CTutorialManager::UpdateFadeOut(void)
 
 		switch (m_nLesson)
 		{ // レッスンごとの処理
-		case LESSON_05:	// レッスン05：敵への攻撃
-
-			// 敵ランダム生成
-			CEnemy::RandomSpawn(mc_aNextLesson[LESSON_05], CEnemy::TYPE_HUMAN);
-
-			break;
-
-		case LESSON_06:	// レッスン06：マナ回復
+		case LESSON_05:	// レッスン05：マナ回復
 
 			// マナの回復をできるように変更
 			CScene::GetPlayer()->SetEnableHealMana(true);
 
 			// マナを空にする
 			CScene::GetPlayer()->SetMana(0);
+
+			break;
+
+		case LESSON_06:	// レッスン06：敵への攻撃
+
+			// 敵ランダム生成
+			CEnemy::RandomSpawn(mc_aNextLesson[LESSON_06], CEnemy::TYPE_HUMAN);
 
 			break;
 		}
