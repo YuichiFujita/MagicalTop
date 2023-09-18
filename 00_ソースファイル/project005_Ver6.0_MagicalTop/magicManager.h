@@ -56,6 +56,7 @@ public:
 	void Uninit(void);		// 終了
 	void Update(void);		// 更新
 	Shot ShotMagic(void);	// 魔法発射
+	void SetEnableHealMana(const bool bHeal);	// マナ回復状況設定
 	void SetEnableManaDraw(const bool bDraw);	// マナ描画状況設定
 	void SetMana(const int nMana);	// マナ設定
 	int GetMana(void) const;		// マナ残量取得
@@ -72,6 +73,7 @@ private:
 	int m_nCounterMagic;		// 魔法管理カウンター
 	int m_nCounterState;		// 状態管理カウンター
 	int m_nCounterHeal;			// 回復管理カウンター
+	bool m_bHeal;				// 回復状況
 };
 
 #endif	// _MAGICMANAGER_H_

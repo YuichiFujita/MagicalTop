@@ -56,6 +56,9 @@ HRESULT CPlayerTutorial::Init(void)
 	// マナの描画を停止
 	SetEnableDrawMana(false);
 
+	// マナの回復をできないように変更
+	SetEnableHealMana(false);
+
 	// 成功を返す
 	return S_OK;
 }
@@ -76,6 +79,7 @@ void CPlayerTutorial::Update(void)
 {
 	// 変数を宣言
 	int nCurrentMotion = NONE_IDX;	// 現在のモーション
+	int nOldMana = 0;	// 回復前のマナ
 
 	// 過去位置の更新
 	UpdateOldPosition();
@@ -158,8 +162,22 @@ void CPlayerTutorial::Update(void)
 		break;
 	}
 
+	// 回復前のマナを設定
+	nOldMana = GetMana();
+
 	// プレイヤーの更新
 	CPlayer::Update();
+
+	if (CSceneTutorial::GetTutorialManager()->GetLesson() == CTutorialManager::LESSON_06)
+	{ // レッスン06：マナ回復の場合
+
+		if (GetMana() > nOldMana)
+		{ // マナが回復できている場合
+
+			// レッスンカウンター加算
+			CSceneTutorial::GetTutorialManager()->AddLessonCounter();
+		}
+	}
 
 	// モーション・オブジェクトキャラクターの更新
 	UpdateMotion(nCurrentMotion);

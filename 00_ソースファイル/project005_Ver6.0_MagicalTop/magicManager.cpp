@@ -53,6 +53,7 @@ CMagicManager::CMagicManager()
 	m_nCounterMagic = 0;	// 魔法管理カウンター
 	m_nCounterState = 0;	// 状態管理カウンター
 	m_nCounterHeal = 0;		// 回復管理カウンター
+	m_bHeal = false;		// 回復状況
 }
 
 //============================================================
@@ -74,6 +75,7 @@ HRESULT CMagicManager::Init(void)
 	m_nCounterMagic = 0;	// 魔法管理カウンター
 	m_nCounterState = 0;	// 状態管理カウンター
 	m_nCounterHeal = 0;		// 回復管理カウンター
+	m_bHeal = true;			// 回復状況
 
 	// マナの生成
 	m_pMana = CObjectGauge3D::Create
@@ -187,8 +189,12 @@ void CMagicManager::Update(void)
 				if (m_pMana->GetNum() < MAX_MANA)
 				{ // マナが減っている場合
 
-					// マナを回復
-					m_pMana->AddNum(1);
+					if (m_bHeal)
+					{ // 回復する状況の場合
+
+						// マナを回復
+						m_pMana->AddNum(1);
+					}
 				}
 			}
 			else
@@ -382,6 +388,15 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 
 	// 射撃状況を返す
 	return bShot;
+}
+
+//============================================================
+//	マナ回復状況の設定処理
+//============================================================
+void CMagicManager::SetEnableHealMana(const bool bHeal)
+{
+	// 引数の回復状況をマナの回復状況に設定
+	m_bHeal = bHeal;
 }
 
 //============================================================

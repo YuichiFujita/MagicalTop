@@ -198,11 +198,15 @@ void CSceneTutorial::UpdateLimitPlayerMana(void)
 	// ポインタを宣言
 	CPlayer *pPlayer = GetPlayer();	// プレイヤー情報
 
-	if (pPlayer->GetMana() < pPlayer->GetMaxMana() / 2)
-	{ // プレイヤーのマナが半分を切った場合
+	if (CSceneTutorial::GetTutorialManager()->GetLesson() != CTutorialManager::LESSON_06)
+	{ // レッスン06：マナ回復ではない場合
 
-		// プレイヤーのマナを半分に設定
-		pPlayer->SetMana(pPlayer->GetMaxMana() / 2);
+		if (pPlayer->GetMana() < pPlayer->GetMaxMana() / 2)
+		{ // プレイヤーのマナが半分を切った場合
+
+			// プレイヤーのマナを半分に設定
+			pPlayer->SetMana(pPlayer->GetMaxMana() / 2);
+		}
 	}
 }
 

@@ -156,6 +156,7 @@ public:
 	void SetEnableDrawExp(const bool bDraw);	// 経験値の描画状況設定
 	void SetEnableDrawLife(const bool bDraw);	// 体力の描画状況設定
 	void SetEnableDrawDash(const bool bDraw);	// ダッシュの描画状況設定
+	void SetEnableHealMana(const bool bHeal);	// マナ回復状況設定
 	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
 	float GetDistanceTarget(void) const;		// ターゲットとの距離取得
 	int GetLevel(void) const;					// レベル取得

@@ -618,6 +618,15 @@ void CPlayer::SetEnableDrawDash(const bool bDraw)
 }
 
 //============================================================
+//	マナの回復状況の設定処理
+//============================================================
+void CPlayer::SetEnableHealMana(const bool bHeal)
+{
+	// 引数の回復状況をマナの回復状況に設定
+	m_pMagic->SetEnableHealMana(bHeal);
+}
+
+//============================================================
 //	マトリックス取得処理
 //============================================================
 D3DXMATRIX CPlayer::GetMtxWorld(void) const
