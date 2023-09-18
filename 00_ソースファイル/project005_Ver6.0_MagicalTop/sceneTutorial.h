@@ -44,6 +44,10 @@ public:
 	static CTutorialManager *GetTutorialManager(void);	// チュートリアルマネージャー取得
 
 private:
+	// メンバ関数
+	void UpdateLimitPlayerMana(void);	// プレイヤーのマナ消費制限
+	void UpdateLimitTargetLife(void);	// ターゲットの体力消費制限
+
 	// 静的メンバ変数
 	static CTutorialManager *m_pTutorialManager;	// チュートリアルマネージャー
 };

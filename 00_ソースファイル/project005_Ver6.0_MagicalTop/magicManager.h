@@ -57,7 +57,9 @@ public:
 	void Update(void);		// 更新
 	Shot ShotMagic(void);	// 魔法発射
 	void SetEnableManaDraw(const bool bDraw);	// マナ描画状況設定
-	int GetMana(void) const;	// マナ残量取得
+	void SetMana(const int nMana);	// マナ設定
+	int GetMana(void) const;		// マナ残量取得
+	int GetMaxMana(void) const;		// 最大マナ取得
 
 	// 静的メンバ関数
 	static CMagicManager *Create(CObject *pPlayer);			// 生成

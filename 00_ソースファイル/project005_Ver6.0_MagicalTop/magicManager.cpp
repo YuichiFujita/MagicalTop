@@ -33,10 +33,9 @@
 #define GAUGE_FRONTCOL	(D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f))	// 表ゲージ色
 #define GAUGE_BACKCOL	(D3DXCOLOR(0.0f, 0.0f, 0.5f, 1.0f))	// 裏ゲージ色
 
-#define HEAL_CNT	(120)	// 回復状態に移行するまでのカウンター
+#define HEAL_CNT	(60)	// 回復状態に移行するまでのカウンター
 #define NORMAL_CNT	(40)	// 通常状態に移行するまでのカウンター
 
-#define HEAL_SAFE_PLUS	(2)		// 回復状態移行カウンターのセーフエリア時の加算量
 #define HEALCNT_AREAMUL	(10)	// セーフエリア外での回復カウンター設定用係数
 #define NUM_DEADZONE	(100)	// デッドゾーンの値
 
@@ -139,13 +138,13 @@ void CMagicManager::Update(void)
 				{ // セーフエリアにいる場合
 
 					// カウンターを加算
-					m_nCounterState += HEAL_SAFE_PLUS;
+					m_nCounterState++;
 				}
 				else
 				{ // セーフエリアにいない場合
 
-					// カウンターを加算
-					m_nCounterState++;
+					// カウンターを初期化
+					m_nCounterState = 0;
 				}
 			}
 			else
@@ -195,21 +194,8 @@ void CMagicManager::Update(void)
 			else
 			{ // セーフエリアにいない場合
 
-				if (m_nCounterHeal < HEALCNT_AREAMUL * CScene::GetStage()->GetAreaPlayer())
-				{ // カウンターが一定値より小さい場合
-
-					// カウンターを加算
-					m_nCounterHeal++;
-				}
-				else
-				{ // カウンターが一定値以上の場合
-
-					// カウンターを初期化
-					m_nCounterHeal = 0;
-
-					// マナを回復
-					m_pMana->AddNum(1);
-				}
+				// 状態を変更
+				m_state = STATE_NORMAL;	// 通常状態
 			}
 
 			break;
@@ -408,12 +394,30 @@ void CMagicManager::SetEnableManaDraw(const bool bDraw)
 }
 
 //============================================================
+//	マナの設定処理
+//============================================================
+void CMagicManager::SetMana(const int nMana)
+{
+	// マナを設定
+	m_pMana->SetNum(nMana);
+}
+
+//============================================================
 //	マナ残量取得処理
 //============================================================
 int CMagicManager::GetMana(void) const
 {
 	// マナの残量を返す
 	return m_pMana->GetNum();
+}
+
+//============================================================
+//	最大マナ取得処理
+//============================================================
+int CMagicManager::GetMaxMana(void) const
+{
+	// 最大マナを返す
+	return m_pMana->GetMaxNum();
 }
 
 //============================================================

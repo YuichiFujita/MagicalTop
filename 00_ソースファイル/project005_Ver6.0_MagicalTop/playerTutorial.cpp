@@ -264,9 +264,9 @@ void CPlayerTutorial::SetDisp(const bool bDisp)
 //============================================================
 void CPlayerTutorial::SetEnableDraw(const bool bDraw)
 {
-	// 変数を宣言	// TODO：レッスン追加したらここ変更
-	bool bMana = (CSceneTutorial::GetTutorialManager()->GetLesson() >= CTutorialManager::LESSON_01) ? bDraw : false;	// マナの描画状況
-	bool bDash = (CSceneTutorial::GetTutorialManager()->GetLesson() >= CTutorialManager::LESSON_01) ? bDraw : false;	// ダッシュの描画状況
+	// 変数を宣言
+	bool bMana = (CSceneTutorial::GetTutorialManager()->GetLesson() >= CTutorialManager::LESSON_04) ? bDraw : false;	// マナの描画状況
+	bool bDash = (CSceneTutorial::GetTutorialManager()->GetLesson() >= CTutorialManager::LESSON_03) ? bDraw : false;	// ダッシュの描画状況
 
 	// 引数の描画状況を設定
 	CPlayer::SetEnableDraw(bDraw);	// 自身

@@ -192,93 +192,96 @@ void CTarget::Update(void)
 	D3DXVECTOR3 rot = m_pMeshCube->GetRotation();	// キューブ向き
 	int nNumFlower = CFlower::GetNumAll();			// マナフラワーの総数
 
-	// 状態管理
-	switch (m_state)
-	{ // 状態ごとの処理
-	case STATE_NORMAL:	// 通常状態
+	if (CManager::GetMode() == CScene::MODE_GAME)
+	{ // モードがゲームの場合
 
-		if (m_pLife->GetNum() < TARG_LIFE && nNumFlower > 0)
-		{ // 体力が減少している且つ、マナフラワーが一本でも生えている場合
+		// 状態管理
+		switch (m_state)
+		{ // 状態ごとの処理
+		case STATE_NORMAL:	// 通常状態
 
-			if (CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
-			{ // ウェーブ進行状態の場合
+			if (m_pLife->GetNum() < TARG_LIFE && nNumFlower > 0)
+			{ // 体力が減少している且つ、マナフラワーが一本でも生えている場合
 
-				if (m_nCounterState < STATE_HEAL_CNT)
-				{ // カウンターが一定値より小さい場合
+				if (CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
+				{ // ウェーブ進行状態の場合
 
-					// カウンターを加算
-					m_nCounterState++;
-				}
-				else
-				{ // カウンターが一定値以上の場合
+					if (m_nCounterState < STATE_HEAL_CNT)
+					{ // カウンターが一定値より小さい場合
 
-					// カウンターを初期化
-					m_nCounterState = 0;
+						// カウンターを加算
+						m_nCounterState++;
+					}
+					else
+					{ // カウンターが一定値以上の場合
 
-					// 状態を変更
-					m_state = STATE_HEAL;	// 回復状態
+						// カウンターを初期化
+						m_nCounterState = 0;
+
+						// 状態を変更
+						m_state = STATE_HEAL;	// 回復状態
+					}
 				}
 			}
-		}
 
-		break;
+			break;
 
-	case STATE_DAMAGE:	// ダメージ状態
+		case STATE_DAMAGE:	// ダメージ状態
 
-		if (m_nCounterState < NORMAL_CNT)
-		{ // カウンターが一定値より小さい場合
-
-			// カウンターを加算
-			m_nCounterState++;
-		}
-		else
-		{ // カウンターが一定値以上の場合
-
-			// カウンターを初期化
-			m_nCounterState = 0;
-
-			// 状態を変更
-			m_state = STATE_NORMAL;	// 通常状態
-		}
-
-		break;
-
-	case STATE_HEAL:	// 回復状態
-
-		if (m_pLife->GetNum() < TARG_LIFE
-		&&  CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
-		{ // 体力が最大値より少ない且つ、ウェーブ進行状態の場合
-
-			if (m_nCounterHeal < WAIT_HEAL_CNT)
+			if (m_nCounterState < NORMAL_CNT)
 			{ // カウンターが一定値より小さい場合
 
 				// カウンターを加算
-				m_nCounterHeal++;
+				m_nCounterState++;
 			}
 			else
 			{ // カウンターが一定値以上の場合
 
 				// カウンターを初期化
-				m_nCounterHeal = 0;
+				m_nCounterState = 0;
 
-				// 体力を回復
-				m_pLife->AddNum(nNumFlower);	// マナフラワー量に応じて回復量増加
+				// 状態を変更
+				m_state = STATE_NORMAL;	// 通常状態
 			}
+
+			break;
+
+		case STATE_HEAL:	// 回復状態
+
+			if (m_pLife->GetNum() < TARG_LIFE
+			&&  CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
+			{ // 体力が最大値より少ない且つ、ウェーブ進行状態の場合
+
+				if (m_nCounterHeal < WAIT_HEAL_CNT)
+				{ // カウンターが一定値より小さい場合
+
+					// カウンターを加算
+					m_nCounterHeal++;
+				}
+				else
+				{ // カウンターが一定値以上の場合
+
+					// カウンターを初期化
+					m_nCounterHeal = 0;
+
+					// 体力を回復
+					m_pLife->AddNum(nNumFlower);	// マナフラワー量に応じて回復量増加
+				}
+			}
+			else
+			{ // 体力が全回復した場合
+
+				// 状態を変更
+				m_state = STATE_NORMAL;	// 通常状態
+			}
+
+			break;
+
+		default:	// 例外処理
+			assert(false);
+			break;
 		}
-		else
-		{ // 体力が全回復した場合
-
-			// 状態を変更
-			m_state = STATE_NORMAL;	// 通常状態
-		}
-
-		break;
-
-	default:	// 例外処理
-		assert(false);
-		break;
 	}
-
 	// キューブの縦位置を変更
 	pos.y += ADD_POS_Y + sinf(m_fSinRot) * MUL_SIN_POS;
 
@@ -431,28 +434,6 @@ CTarget *CTarget::Create
 }
 
 //============================================================
-//	体力の加算処理
-//============================================================
-void CTarget::AddLife(const int nAdd)
-{
-	// 変数を宣言
-	int nLife = m_pLife->GetNum();	// 現在の体力
-
-	// 体力に引数の値を加算
-	nLife += nAdd;
-
-	if (nLife < 1)
-	{ // 死んでしまった場合
-
-		// 死ぬ寸前の体力に補正
-		nLife = 1;
-	}
-
-	// 体力を設定
-	m_pLife->SetNum(nLife);
-}
-
-//============================================================
 //	更新状況の設定処理
 //============================================================
 void CTarget::SetEnableUpdate(const bool bUpdate)
@@ -486,12 +467,52 @@ void CTarget::SetEnableDrawLife(const bool bDraw)
 }
 
 //============================================================
+//	体力の加算処理
+//============================================================
+void CTarget::AddLife(const int nAdd)
+{
+	// 変数を宣言
+	int nLife = m_pLife->GetNum();	// 現在の体力
+
+	// 体力に引数の値を加算
+	nLife += nAdd;
+
+	if (nLife < 1)
+	{ // 死んでしまった場合
+
+		// 死ぬ寸前の体力に補正
+		nLife = 1;
+	}
+
+	// 体力を設定
+	m_pLife->SetNum(nLife);
+}
+
+//============================================================
+//	体力設定の設定処理
+//============================================================
+void CTarget::SetLife(const int nLife)
+{
+	// 引数の体力を設定
+	m_pLife->SetNum(nLife);
+}
+
+//============================================================
 //	体力取得処理
 //============================================================
 int CTarget::GetLife(void) const
 {
 	// 体力を返す
 	return m_pLife->GetNum();
+}
+
+//============================================================
+//	最大体力取得処理
+//============================================================
+int CTarget::GetMaxLife(void) const
+{
+	// 最大体力を返す
+	return m_pLife->GetMaxNum();
 }
 
 //============================================================

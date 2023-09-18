@@ -13,6 +13,8 @@
 #include "camera.h"
 #include "tutorialManager.h"
 
+#include "player.h"
+#include "target.h"
 #include "stage.h"
 #include "enemy.h"
 #include "magic.h"
@@ -161,6 +163,12 @@ void CSceneTutorial::Update(void)
 	}
 	else { assert(false); }	// 非使用中
 
+	// プレイヤーのマナ消費制限
+	UpdateLimitPlayerMana();
+
+	// ターゲットの体力消費制限
+	UpdateLimitTargetLife();
+
 	// シーンの更新
 	CScene::Update();
 }
@@ -180,4 +188,36 @@ CTutorialManager *CSceneTutorial::GetTutorialManager(void)
 {
 	// チュートリアルマネージャーのポインタを返す
 	return m_pTutorialManager;
+}
+
+//============================================================
+//	プレイヤーのマナ消費制限処理
+//============================================================
+void CSceneTutorial::UpdateLimitPlayerMana(void)
+{
+	// ポインタを宣言
+	CPlayer *pPlayer = GetPlayer();	// プレイヤー情報
+
+	if (pPlayer->GetMana() < pPlayer->GetMaxMana() / 2)
+	{ // プレイヤーのマナが半分を切った場合
+
+		// プレイヤーのマナを半分に設定
+		pPlayer->SetMana(pPlayer->GetMaxMana() / 2);
+	}
+}
+
+//============================================================
+//	ターゲットの体力消費制限処理
+//============================================================
+void CSceneTutorial::UpdateLimitTargetLife(void)
+{
+	// ポインタを宣言
+	CTarget *pTarget = GetTarget();	// ターゲット情報
+
+	if (pTarget->GetLife() < pTarget->GetMaxLife() / 2)
+	{ // ターゲットの体力が半分を切った場合
+
+		// ターゲットの体力を半分に設定
+		pTarget->SetLife(pTarget->GetMaxLife() / 2);
+	}
 }

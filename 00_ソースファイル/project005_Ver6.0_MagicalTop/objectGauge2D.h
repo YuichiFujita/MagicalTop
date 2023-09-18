@@ -106,8 +106,8 @@ private:
 	int m_nCounterState;				// 状態管理カウンター
 	int m_nNumGauge;					// 表示値
 	int m_nMaxNumGauge;					// 表示値の最大値
-	const int m_nFrame;					// 表示値の変動フレーム定数
 	int m_aTextureID[POLYGON_MAX];		// テクスチャインデックス
+	const int m_nFrame;					// 表示値の変動フレーム定数
 };
 
 #endif	// _OBJECTGAUGE2D_H_

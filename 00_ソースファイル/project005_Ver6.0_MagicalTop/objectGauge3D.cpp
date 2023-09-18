@@ -34,7 +34,7 @@ const char *CObjectGauge3D::mc_apTextureFile[] =	// テクスチャ定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CObjectGauge3D::CObjectGauge3D() : m_nMaxNumGauge(0), m_nFrame(0)
+CObjectGauge3D::CObjectGauge3D() : m_nFrame(0)
 {
 	// メンバ変数をクリア
 	m_pVtxBuff	= NULL;			// 頂点バッファへのポインタ
@@ -50,6 +50,7 @@ CObjectGauge3D::CObjectGauge3D() : m_nMaxNumGauge(0), m_nFrame(0)
 	m_fAddRight = 0.0f;			// 横幅加算量
 	m_nCounterState = 0;		// 状態管理カウンター
 	m_nNumGauge = 0;			// 表示値
+	m_nMaxNumGauge = 0;			// 表示値の最大値
 
 	for (int nCntGauge = 0; nCntGauge < POLYGON_MAX; nCntGauge++)
 	{ // 使用する四角形ポリゴン数分繰り返す
@@ -62,7 +63,7 @@ CObjectGauge3D::CObjectGauge3D() : m_nMaxNumGauge(0), m_nFrame(0)
 //============================================================
 //	オーバーロードコンストラクタ
 //============================================================
-CObjectGauge3D::CObjectGauge3D(const int nMax, const int nFrame, const CObject::LABEL label, const int nPriority) : CObject(label, nPriority), m_nMaxNumGauge(nMax), m_nFrame(nFrame)
+CObjectGauge3D::CObjectGauge3D(const int nFrame, const CObject::LABEL label, const int nPriority) : CObject(label, nPriority), m_nFrame(nFrame)
 {
 	// メンバ変数をクリア
 	m_pVtxBuff	= NULL;			// 頂点バッファへのポインタ
@@ -78,6 +79,7 @@ CObjectGauge3D::CObjectGauge3D(const int nMax, const int nFrame, const CObject::
 	m_fAddRight = 0.0f;			// 横幅加算量
 	m_nCounterState = 0;		// 状態管理カウンター
 	m_nNumGauge = 0;			// 表示値
+	m_nMaxNumGauge = 0;			// 表示値の最大値
 
 	for (int nCntGauge = 0; nCntGauge < POLYGON_MAX; nCntGauge++)
 	{ // 使用する四角形ポリゴン数分繰り返す
@@ -101,19 +103,20 @@ CObjectGauge3D::~CObjectGauge3D()
 HRESULT CObjectGauge3D::Init(void)
 {
 	// メンバ変数を初期化
-	m_pVtxBuff	= NULL;				// 頂点バッファへのポインタ
-	m_pos		= VEC3_ZERO;		// 位置
-	m_sizeGauge = VEC3_ZERO;		// ゲージ大きさ
-	m_sizeFrame = VEC3_ZERO;		// 枠大きさ
-	m_colFront	= XCOL_WHITE;		// 表ゲージ色
-	m_colBack	= XCOL_WHITE;		// 裏ゲージ色
-	m_state = STATE_NONE;			// 状態
-	m_bDrawFrame = false;			// 枠表示状況
-	m_fChange = 0.0f;				// ゲージ変動量
-	m_fCurrentNumGauge = 0.0f;		// 現在表示値
-	m_fAddRight = 0.0f;				// 横幅加算量
-	m_nCounterState = 0;			// 状態管理カウンター
-	m_nNumGauge = m_nMaxNumGauge;	// 表示値
+	m_pVtxBuff	= NULL;			// 頂点バッファへのポインタ
+	m_pos		= VEC3_ZERO;	// 位置
+	m_sizeGauge = VEC3_ZERO;	// ゲージ大きさ
+	m_sizeFrame = VEC3_ZERO;	// 枠大きさ
+	m_colFront	= XCOL_WHITE;	// 表ゲージ色
+	m_colBack	= XCOL_WHITE;	// 裏ゲージ色
+	m_state = STATE_NONE;		// 状態
+	m_bDrawFrame = false;		// 枠表示状況
+	m_fChange = 0.0f;			// ゲージ変動量
+	m_fCurrentNumGauge = 0.0f;	// 現在表示値
+	m_fAddRight = 0.0f;			// 横幅加算量
+	m_nCounterState = 0;		// 状態管理カウンター
+	m_nNumGauge = 0;			// 表示値
+	m_nMaxNumGauge = 0;			// 表示値の最大値
 
 	for (int nCntTexture = 0; nCntTexture < POLYGON_MAX; nCntTexture++)
 	{ // 使用する四角形ポリゴン数分繰り返す
@@ -344,7 +347,7 @@ CObjectGauge3D *CObjectGauge3D::Create
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pObjectGauge3D = new CObjectGauge3D(nMax, nFrame, label, GAUGE_PRIO);	// オブジェクトゲージ3D
+		pObjectGauge3D = new CObjectGauge3D(nFrame, label, GAUGE_PRIO);	// オブジェクトゲージ3D
 	}
 	else { assert(false); return NULL; }	// 使用中
 
@@ -371,6 +374,9 @@ CObjectGauge3D *CObjectGauge3D::Create
 
 		// Y位置加算量を設定
 		pObjectGauge3D->SetPositionUp(fPosUp);
+
+		// ゲージ最大値を設定
+		pObjectGauge3D->SetMaxNum(nMax);
 
 		// 大きさを設定
 		pObjectGauge3D->SetScalingGauge(rSizeGauge);	// ゲージ大きさ
@@ -418,12 +424,18 @@ void CObjectGauge3D::SetNum(const int nNum)
 {
 	// 引数の表示値を設定
 	m_nNumGauge = nNum;
+	useful::LimitNum(m_nNumGauge, 0, m_nMaxNumGauge);	// 表示値の制限
 
-	// 表示値の制限
-	useful::LimitNum(m_nNumGauge, 0, m_nMaxNumGauge);
+	// 現在の表示値を設定
+	m_fCurrentNumGauge = (float)m_nNumGauge;
+	useful::LimitNum(m_fCurrentNumGauge, 0.0f, (float)m_nMaxNumGauge);	// 現在の表示値の制限
+
+	// 情報を設定
+	m_state = STATE_NONE;	// ゲージ変動状態
+	m_nCounterState = 0;	// 状態管理カウンター
 
 	// ゲージの横幅加算量を設定
-	m_fAddRight = ((float)m_nNumGauge * ((m_sizeGauge.x * 2.0f) / (float)m_nMaxNumGauge)) - m_sizeGauge.x;
+	m_fAddRight = (m_fCurrentNumGauge * ((m_sizeGauge.x * 2.0f) / (float)m_nMaxNumGauge)) - m_sizeGauge.x;
 
 	// 頂点情報の設定
 	SetVtx();
@@ -436,6 +448,27 @@ int CObjectGauge3D::GetNum(void) const
 {
 	// 表示値を返す
 	return m_nNumGauge;
+}
+
+//============================================================
+//	ゲージ最大値の設定処理
+//============================================================
+void CObjectGauge3D::SetMaxNum(const int nMax)
+{
+	// 引数の表示最大値を設定
+	m_nMaxNumGauge = nMax;
+
+	// ゲージの設定
+	SetNum(m_nMaxNumGauge);
+}
+
+//============================================================
+//	ゲージ最大値取得処理
+//============================================================
+int CObjectGauge3D::GetMaxNum(void) const
+{
+	// 表示最大値を返す
+	return m_nMaxNumGauge;
 }
 
 //============================================================

@@ -24,7 +24,7 @@
 //============================================================
 //	コンストラクタ
 //============================================================
-CObjectGauge2D::CObjectGauge2D() : m_nMaxNumGauge(0), m_nFrame(0)
+CObjectGauge2D::CObjectGauge2D() : m_nFrame(0)
 {
 	// メンバ変数をクリア
 	m_pVtxBuff	= NULL;			// 頂点バッファへのポインタ
@@ -106,6 +106,7 @@ HRESULT CObjectGauge2D::Init(void)
 	m_fAddRight = 0.0f;				// 横幅加算量
 	m_nCounterState = 0;			// 状態管理カウンター
 	m_nNumGauge = 0;				// 表示値
+	m_nMaxNumGauge = 0;				// 表示値の最大値
 
 	for (int nCntTexture = 0; nCntTexture < POLYGON_MAX; nCntTexture++)
 	{ // 使用する四角形ポリゴン数分繰り返す
@@ -368,14 +369,8 @@ void CObjectGauge2D::SetMaxNum(const int nMax)
 	// 引数の表示最大値を設定
 	m_nMaxNumGauge = nMax;
 
-	// 表示値の制限
-	useful::LimitNum(m_nNumGauge, 0, m_nMaxNumGauge);
-
-	// ゲージの横幅加算量を設定
-	m_fAddRight = ((float)m_nNumGauge * ((m_sizeGauge.x * 2.0f) / (float)m_nMaxNumGauge)) - m_sizeGauge.x;
-
-	// 頂点情報の設定
-	SetVtx();
+	// ゲージの設定
+	SetNum(m_nMaxNumGauge);
 }
 
 //============================================================

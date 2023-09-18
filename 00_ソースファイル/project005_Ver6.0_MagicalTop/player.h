@@ -148,6 +148,7 @@ public:
 	// メンバ関数
 	void AddExp(const int nAdd);				// 経験値加算
 	void SetRespawn(D3DXVECTOR3& rPos);			// 再出現設定
+	void SetMana(const int nMana);				// マナ設定
 	void SetState(const int nState);			// 状態設定
 	void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
 	void SetEnableDraw(const bool bDraw);		// 描画状況設定
@@ -158,6 +159,8 @@ public:
 	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
 	float GetDistanceTarget(void) const;		// ターゲットとの距離取得
 	int GetLevel(void) const;					// レベル取得
+	int GetMana(void) const;					// マナ取得
+	int GetMaxMana(void) const;					// 最大マナ取得
 	int GetState(void) const;					// 状態取得
 	float GetRadius(void) const;				// 半径取得
 
