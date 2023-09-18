@@ -125,7 +125,7 @@ HRESULT CTutorialManager::Init(void)
 	( // à¯êî
 		CObject::LABEL_GAUGE,
 		mc_aNextLesson[0],
-		1,
+		10,
 		D3DXVECTOR3(200.0f, 200.0f, 0.0f),
 		D3DXVECTOR3(100.0f, 20.0f, 0.0f)
 	);
