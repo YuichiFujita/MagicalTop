@@ -38,13 +38,15 @@ public:
 		const D3DXVECTOR3& rPlayerPos,	// プレイヤー位置
 		const D3DXVECTOR3& rHitObjPos,	// オブジェクト位置
 		const int nDmg					// ダメージ量
-	);
+	) override;
 	void HitVortex		// 渦巻きこまれヒット
 	( // 引数
 		D3DXVECTOR3& rPlayerPos,	// プレイヤー位置
 		const D3DXVECTOR3& rHitPos,	// 当たり判定位置
 		const int nDmg				// ダメージ量
-	);
+	) override;
+	void SetDisp(const bool bDisp) override;		// 表示設定
+	void SetEnableDraw(const bool bDraw) override;	// 描画状況設定
 
 private:
 	// メンバ関数

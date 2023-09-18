@@ -234,6 +234,50 @@ void CPlayerTutorial::HitVortex
 }
 
 //============================================================
+//	表示の設定処理
+//============================================================
+void CPlayerTutorial::SetDisp(const bool bDisp)
+{
+	if (bDisp)
+	{ // 表示する状態の場合
+
+		// 状態を設定
+		SetState(STATE_FADEOUT);	// フェードアウト状態
+
+		// 描画する設定にする
+		SetEnableDraw(true);
+	}
+	else
+	{ // 表示しない状態の場合
+
+		// 状態を設定
+		SetState(STATE_FADEIN);		// フェードイン状態
+
+		// 描画しない設定にする
+		SetEnableDraw(false);
+		CObject::SetEnableDraw(true);	// プレイヤーの描画はONにする
+	}
+}
+
+//============================================================
+//	描画状況の設定処理
+//============================================================
+void CPlayerTutorial::SetEnableDraw(const bool bDraw)
+{
+	// 変数を宣言	// TODO：レッスン追加したらここ変更
+	bool bMana = (CSceneTutorial::GetTutorialManager()->GetLesson() >= CTutorialManager::LESSON_01) ? bDraw : false;	// マナの描画状況
+	bool bDash = (CSceneTutorial::GetTutorialManager()->GetLesson() >= CTutorialManager::LESSON_01) ? bDraw : false;	// ダッシュの描画状況
+
+	// 引数の描画状況を設定
+	CPlayer::SetEnableDraw(bDraw);	// 自身
+	SetEnableDrawLife(bDraw);		// 体力
+
+	// レッスンに応じた描画状況を設定
+	SetEnableDrawMana(bMana);	// マナ
+	SetEnableDrawDash(bDash);	// ダッシュ
+}
+
+//============================================================
 //	通常状態時の更新処理
 //============================================================
 CPlayer::MOTION CPlayerTutorial::UpdateNormal(void)
@@ -266,7 +310,26 @@ CPlayer::MOTION CPlayerTutorial::UpdateNormal(void)
 		UpdateLanding(posPlayer);
 
 		// 魔法発射操作
-		currentMotion = ControlShotMagic(currentMotion);
+		if (CSceneTutorial::GetTutorialManager()->GetLesson() > CTutorialManager::LESSON_03)
+		{ // レッスン03：左右加速を終了している場合
+
+			// 変数を宣言
+			bool bShot = false;	// 魔法の発射状況
+
+			// 魔法発射操作
+			currentMotion = ControlShotMagic(currentMotion, &bShot);
+
+			if (CSceneTutorial::GetTutorialManager()->GetLesson() == CTutorialManager::LESSON_04)
+			{ // レッスン04：攻撃の場合
+
+				if (bShot)
+				{ // 攻撃操作が行われていた場合
+
+					// レッスンカウンター加算
+					CSceneTutorial::GetTutorialManager()->AddLessonCounter();
+				}
+			}
+		}
 
 		// 当たり判定
 		CollisionTarget(posPlayer);	// ターゲット

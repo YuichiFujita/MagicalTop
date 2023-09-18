@@ -143,11 +143,11 @@ public:
 		const D3DXVECTOR3& rHitPos,	// 当たり判定位置
 		const int nDmg				// ダメージ量
 	) = 0;
+	virtual void SetDisp(const bool bDisp) = 0;	// 表示設定
 
 	// メンバ関数
 	void AddExp(const int nAdd);				// 経験値加算
 	void SetRespawn(D3DXVECTOR3& rPos);			// 再出現設定
-	void SetDisp(const bool bDisp);				// 表示設定
 	void SetState(const int nState);			// 状態設定
 	void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
 	void SetEnableDraw(const bool bDraw);		// 描画状況設定
@@ -176,7 +176,7 @@ protected:
 	void UpdateAbsorb(D3DXVECTOR3& rVecTarg, D3DXVECTOR3& rVecSide);			// 吸い込みの更新
 	MOTION ControlTargAccel(const D3DXVECTOR3& rVecTarg, bool *pMove = NULL);	// ターゲット逆方向への加減速の操作
 	MOTION ControlSideAccel(const D3DXVECTOR3& rVecSide, bool *pMove = NULL);	// ターゲット横方向への加減速の操作
-	MOTION ControlShotMagic(MOTION motion);		// 魔法攻撃の操作
+	MOTION ControlShotMagic(MOTION motion, bool *pShot = NULL);					// 魔法攻撃の操作
 	bool UpdateLanding(D3DXVECTOR3& rPos);		// 着地状況の更新
 	void UpdatePosition(D3DXVECTOR3& rPos);		// 位置の更新
 	void UpdateRotation(D3DXVECTOR3& rRot);		// 向きの更新

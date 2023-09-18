@@ -541,32 +541,6 @@ void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 }
 
 //============================================================
-//	表示の設定処理
-//============================================================
-void CPlayer::SetDisp(const bool bDisp)
-{
-	if (bDisp)
-	{ // 表示する状態の場合
-
-		// 状態を設定
-		m_state = STATE_FADEOUT;	// フェードアウト状態
-
-		// 描画する設定にする
-		SetEnableDraw(true);
-	}
-	else
-	{ // 表示しない状態の場合
-
-		// 状態を設定
-		m_state = STATE_FADEIN;		// フェードイン状態
-
-		// 描画しない設定にする
-		SetEnableDraw(false);
-		CObject::SetEnableDraw(true);	// プレイヤーの描画はONにする
-	}
-}
-
-//============================================================
 //	状態の設定処理
 //============================================================
 void CPlayer::SetState(const int nState)
@@ -596,9 +570,6 @@ void CPlayer::SetEnableDraw(const bool bDraw)
 	CObject::SetEnableDraw(bDraw);		// 自身
 	m_pShadow->SetEnableDraw(bDraw);	// 影
 	m_pOrbit->SetEnableDraw(bDraw);		// 軌跡
-	m_pDash->SetEnableDraw(bDraw);		// ダッシュ
-	m_pLife->SetEnableDraw(bDraw);		// 体力
-	m_pMagic->SetEnableManaDraw(bDraw);	// マナ
 }
 
 //============================================================
@@ -933,7 +904,7 @@ CPlayer::MOTION CPlayer::ControlSideAccel(const D3DXVECTOR3& rVecSide, bool *pMo
 //============================================================
 //	魔法攻撃の操作処理
 //============================================================
-CPlayer::MOTION CPlayer::ControlShotMagic(MOTION motion)
+CPlayer::MOTION CPlayer::ControlShotMagic(MOTION motion, bool *pShot)
 {
 	// 変数を宣言
 	MOTION currentMotion = motion;	// 現在のモーション
@@ -972,6 +943,23 @@ CPlayer::MOTION CPlayer::ControlShotMagic(MOTION motion)
 		{
 			// 例外処理
 			assert(false);	// 向きの正規化ミス
+		}
+
+		if (USED(pShot))
+		{ // 射撃判定の引数が使用されていた場合
+
+			// 射撃している状態にする
+			*pShot = true;
+		}
+	}
+	else
+	{ // 発射できていない場合
+
+		if (USED(pShot))
+		{ // 射撃判定の引数が使用されていた場合
+
+			// 射撃していない状態にする
+			*pShot = false;
 		}
 	}
 

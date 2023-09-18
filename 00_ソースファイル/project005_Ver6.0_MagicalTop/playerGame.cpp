@@ -259,6 +259,44 @@ void CPlayerGame::HitVortex
 }
 
 //============================================================
+//	表示の設定処理
+//============================================================
+void CPlayerGame::SetDisp(const bool bDisp)
+{
+	if (bDisp)
+	{ // 表示する状態の場合
+
+		// 状態を設定
+		SetState(STATE_FADEOUT);	// フェードアウト状態
+
+		// 描画する設定にする
+		SetEnableDraw(true);
+	}
+	else
+	{ // 表示しない状態の場合
+
+		// 状態を設定
+		SetState(STATE_FADEIN);		// フェードイン状態
+
+		// 描画しない設定にする
+		SetEnableDraw(false);
+		CObject::SetEnableDraw(true);	// プレイヤーの描画はONにする
+	}
+}
+
+//============================================================
+//	描画状況の設定処理
+//============================================================
+void CPlayerGame::SetEnableDraw(const bool bDraw)
+{
+	// 引数の描画状況を設定
+	CPlayer::SetEnableDraw(bDraw);	// 自身
+	SetEnableDrawMana(bDraw);		// マナ
+	SetEnableDrawLife(bDraw);		// 体力
+	SetEnableDrawDash(bDraw);		// ダッシュ
+}
+
+//============================================================
 //	通常状態時の更新処理
 //============================================================
 CPlayer::MOTION CPlayerGame::UpdateNormal(void)

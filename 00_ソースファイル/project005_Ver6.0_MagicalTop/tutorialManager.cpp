@@ -47,6 +47,9 @@ const char *CTutorialManager::mc_apLessonTextureFile[] =	// レッスンテクスチャ定
 	"data\\TEXTURE\\lesson000.png",	// レッスン01：吸い込まれる説明のテクスチャ
 	"data\\TEXTURE\\lesson001.png",	// レッスン02：前後加速の説明のテクスチャ
 	"data\\TEXTURE\\lesson002.png",	// レッスン03：左右加速の説明のテクスチャ
+	"data\\TEXTURE\\lesson003.png",	// レッスン04：攻撃の説明のテクスチャ
+	"data\\TEXTURE\\lesson004.png",	// レッスン05：敵への攻撃の説明のテクスチャ
+	"data\\TEXTURE\\lesson005.png",	// レッスン06：マナ回復の説明のテクスチャ
 };
 
 const int CTutorialManager::mc_aNextLesson[] =	// レッスン移行カウント
@@ -55,6 +58,9 @@ const int CTutorialManager::mc_aNextLesson[] =	// レッスン移行カウント
 	30,		// レッスン01：吸い込まれる終了カウント
 	360,	// レッスン02：前後加速の終了カウント
 	360,	// レッスン03：左右加速の終了カウント
+	360,	// レッスン04：攻撃の終了カウント
+	360,	// レッスン05：敵への攻撃の終了カウント
+	360,	// レッスン06：マナ回復の終了カウント
 };
 
 const int CTutorialManager::mc_aNextLessonWait[] =	// 次レッスン余韻カウント
@@ -63,6 +69,9 @@ const int CTutorialManager::mc_aNextLessonWait[] =	// 次レッスン余韻カウント
 	60,		// レッスン01：吸い込まれる終了時の余韻カウント
 	90,		// レッスン02：前後加速の終了時の余韻カウント
 	90,		// レッスン03：左右加速の終了時の余韻カウント
+	90,		// レッスン04：攻撃の終了時の余韻カウント
+	90,		// レッスン05：敵への攻撃の終了時の余韻カウント
+	90,		// レッスン06：マナ回復の終了時の余韻カウント
 };
 
 //************************************************************
