@@ -173,6 +173,7 @@
     <ClCompile Include="gaugeStar.cpp" />
     <ClCompile Include="hurricane.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="letterManager.cpp" />
     <ClCompile Include="levelupManager.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="lockCursor.cpp" />
@@ -261,6 +262,7 @@
     <ClInclude Include="gaugeStar.h" />
     <ClInclude Include="hurricane.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="letterManager.h" />
     <ClInclude Include="levelupManager.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="lockCursor.h" />

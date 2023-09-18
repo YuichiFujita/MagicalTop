@@ -18,6 +18,7 @@
 //************************************************************
 //	前方宣言
 //************************************************************
+class CLetterManager;	// 手紙マネージャークラス
 class CObject2D;		// オブジェクト2Dクラス
 class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
 
@@ -60,9 +61,9 @@ public:
 	~CTutorialManager();
 
 	// メンバ関数
-	HRESULT Init(void);	// 初期化
-	void Uninit(void);	// 終了
-	void Update(void);	// 更新
+	HRESULT Init(void);		// 初期化
+	HRESULT Uninit(void);	// 終了
+	void Update(void);		// 更新
 
 	void AddLessonCounter(void);	// レッスンカウンター加算
 	int GetLesson(void) const;		// レッスン取得
@@ -88,6 +89,7 @@ private:
 	static const int mc_aNextLessonWait[];			// 次レッスン余韻カウント
 
 	// メンバ変数
+	CLetterManager *m_pLetterManager;	// 手紙マネージャーの情報
 	CObjectGauge2D *m_pConterLesson;	// レッスン管理カウンターの情報
 	CObject2D *m_pFade;		// フェードの情報
 	CObject2D *m_pExplain;	// 説明表示の情報

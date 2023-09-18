@@ -12,6 +12,7 @@
 #include "input.h"
 #include "camera.h"
 #include "texture.h"
+#include "letterManager.h"
 #include "object2D.h"
 #include "objectGauge2D.h"
 #include "player.h"
@@ -73,7 +74,8 @@ const int CTutorialManager::mc_aNextLessonWait[] =	// 次レッスン余韻カウント
 CTutorialManager::CTutorialManager()
 {
 	// メンバ変数をクリア
-	m_pConterLesson	= NULL;		// レッスン管理カウンターの情報
+	m_pLetterManager	= NULL;	// 手紙マネージャーの情報
+	m_pConterLesson		= NULL;	// レッスン管理カウンターの情報
 	m_pFade		= NULL;			// フェードの情報
 	m_pExplain	= NULL;			// 説明表示の情報
 	m_state		= STATE_NONE;	// 状態
@@ -95,11 +97,9 @@ CTutorialManager::~CTutorialManager()
 //============================================================
 HRESULT CTutorialManager::Init(void)
 {
-	// ポインタを宣言
-	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
-
 	// メンバ変数を初期化
-	m_pConterLesson	= NULL;		// レッスン管理カウンターの情報
+	m_pLetterManager	= NULL;	// 手紙マネージャーの情報
+	m_pConterLesson		= NULL;	// レッスン管理カウンターの情報
 	m_pFade		= NULL;			// フェードの情報
 	m_pExplain	= NULL;			// 説明表示の情報
 	m_state		= STATE_WAIT;	// 状態
@@ -172,6 +172,19 @@ HRESULT CTutorialManager::Init(void)
 	// 描画を停止
 	m_pExplain->SetEnableDraw(false);
 
+	//--------------------------------------------------------
+	//	手紙マネージャーの生成・設定
+	//--------------------------------------------------------
+	// 手紙マネージャーの生成
+	m_pLetterManager = CLetterManager::Create();
+	if (UNUSED(m_pLetterManager))
+	{ // 生成に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// 成功を返す
 	return S_OK;
 }
@@ -179,13 +192,25 @@ HRESULT CTutorialManager::Init(void)
 //============================================================
 //	終了処理
 //============================================================
-void CTutorialManager::Uninit(void)
+HRESULT CTutorialManager::Uninit(void)
 {
+	// 手紙マネージャーの破棄
+	if (FAILED(CLetterManager::Release(m_pLetterManager)))
+	{ // 破棄に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// フェードの終了
 	m_pFade->Uninit();
 
 	// 選択背景の終了
 	m_pExplain->Uninit();
+
+	// 成功を返す
+	return S_OK;
 }
 
 //============================================================
@@ -260,6 +285,20 @@ void CTutorialManager::Update(void)
 		assert(false);
 		break;
 	}
+
+	if (USED(m_pLetterManager))
+	{ // 使用中の場合
+
+		// 手紙マネージャーの更新
+		m_pLetterManager->Update();
+	}
+	else { assert(false); }	// 非使用中
+
+	// フェードの更新
+	m_pFade->Update();
+
+	// 選択背景の更新
+	m_pExplain->Update();
 }
 
 //============================================================
@@ -337,7 +376,17 @@ HRESULT CTutorialManager::Release(CTutorialManager *&prTutorialManager)
 	{ // 使用中の場合
 
 		// チュートリアルマネージャーの終了
-		prTutorialManager->Uninit();
+		if (FAILED(prTutorialManager->Uninit()))
+		{ // 破棄に失敗した場合
+
+			// メモリ開放
+			delete prTutorialManager;
+			prTutorialManager = NULL;
+
+			// 失敗を返す
+			assert(false);
+			return E_FAIL;
+		}
 
 		// メモリ開放
 		delete prTutorialManager;
@@ -366,8 +415,11 @@ void CTutorialManager::UpdateWait(void)
 		// カウンターを初期化
 		m_nCounterState = 0;
 
+		// 手紙マネージャーの状態を設定
+		m_pLetterManager->SetState(CLetterManager::STATE_LETTER);	// 手紙の表示状態
+
 		// 状態を設定
-		m_state = STATE_FADEIN;	// フェードイン状態
+		m_state = STATE_LETTER;	// 手紙表示状態
 	}
 }
 
@@ -376,8 +428,12 @@ void CTutorialManager::UpdateWait(void)
 //============================================================
 void CTutorialManager::UpdateLetter(void)
 {
-	// 次レッスンへの移行
-	NextLesson();
+	if (m_pLetterManager->GetState() == CLetterManager::STATE_END)
+	{ // 手紙を読み終えた場合
+
+		// 次レッスンへの移行
+		NextLesson();
+	}
 }
 
 //============================================================
@@ -400,24 +456,14 @@ void CTutorialManager::UpdateFadeIn(void)
 		// 透明度を補正
 		colFade.a = COL_FADE_MAX.a;
 
-		if (m_nLesson == LESSON_NONE)
-		{ // レッスンが初回の場合
+		// 説明表示の描画を再開
+		m_pExplain->SetEnableDraw(true);
 
-			// 状態を設定
-			m_state = STATE_LETTER;		// 手紙表示状態
-		}
-		else
-		{ // レッスンが初回ではない場合
+		// 説明表示の初期ポリゴン拡大率を設定
+		m_fScale = SET_SCALE;
 
-			// 説明表示の描画を再開
-			m_pExplain->SetEnableDraw(true);
-
-			// 説明表示の初期ポリゴン拡大率を設定
-			m_fScale = SET_SCALE;
-
-			// 状態を設定
-			m_state = STATE_EXPLAIN;	// 説明表示状態
-		}
+		// 状態を設定
+		m_state = STATE_EXPLAIN;	// 説明表示状態
 	}
 
 	// 透明度を反映
