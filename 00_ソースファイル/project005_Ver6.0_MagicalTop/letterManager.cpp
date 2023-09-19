@@ -19,7 +19,7 @@
 //************************************************************
 #define LETTER_PRIO	(6)	// 手紙の優先順位
 
-#define SIZE_LETTER		(D3DXVECTOR3(1000.0f, 597.5f, 0.0f))		// 手紙の大きさ
+#define SIZE_LETTER		(D3DXVECTOR3(1150.0f, 687.0f, 0.0f))		// 手紙の大きさ
 #define COL_LETTER		(XCOL_AWHITE)								// 手紙の色
 #define COL_FADE		(XCOL_ABLACK)								// フェードの色
 #define POS_PAPER		(D3DXVECTOR3(SCREEN_CENT.x, 1020.0f, 0.0f))	// 便箋の初期座標
@@ -43,7 +43,7 @@
 //************************************************************
 const char *CLetterManager::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\letter000.tga",	// 手紙のテクスチャ相対パス
+	"data\\TEXTURE\\letter000.png",	// 手紙のテクスチャ相対パス
 	"data\\TEXTURE\\letter001.png",	// 操作表示のテクスチャ相対パス
 };
 
