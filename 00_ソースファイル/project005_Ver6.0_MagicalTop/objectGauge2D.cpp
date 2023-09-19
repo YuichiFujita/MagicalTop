@@ -251,8 +251,8 @@ CObjectGauge2D *CObjectGauge2D::Create
 	const int nFrame,				// 表示値変動フレーム
 	const D3DXVECTOR3& rPos,		// 位置
 	const D3DXVECTOR3& rSizeGauge,	// ゲージ大きさ
-	const D3DXCOLOR& rColFront,		// 表表ゲージ色
-	const D3DXCOLOR& rColBack,		// 裏表ゲージ色
+	const D3DXCOLOR& rColFront,		// 表ゲージ色
+	const D3DXCOLOR& rColBack,		// 裏ゲージ色
 	const bool bDrawFrame,			// 枠描画状況
 	const D3DXVECTOR3& rSizeFrame	// 枠大きさ
 )

@@ -19,25 +19,21 @@
 //************************************************************
 #define LETTER_PRIO	(6)	// 手紙の優先順位
 
-#define SIZE_LETTER		(D3DXVECTOR3(1000.0f, 597.5f, 0.0f))				// 手紙の大きさ
-#define POS_PAPER		(D3DXVECTOR3(SCREEN_WIDTH * 0.5f, 1020.0f, 0.0f))	// 便箋の初期座標
-#define SIZE_PAPER		(D3DXVECTOR3(1000.0f, 597.5f, 0.0f))				// 便箋の大きさ
-#define POS_CONTROL		(D3DXVECTOR3(SCREEN_WIDTH * 0.5f, 665.0f, 0.0f))	// 操作の初期座標
-#define SIZE_CONTROL	(D3DXVECTOR3(SCREEN_WIDTH, 100.0f, 0.0f))			// 操作の大きさ
+#define SIZE_LETTER		(D3DXVECTOR3(1000.0f, 597.5f, 0.0f))		// 手紙の大きさ
+#define POS_PAPER		(D3DXVECTOR3(SCREEN_CENT.x, 1020.0f, 0.0f))	// 便箋の初期座標
+#define SIZE_PAPER		(D3DXVECTOR3(1000.0f, 597.5f, 0.0f))		// 便箋の大きさ
+#define POS_CONTROL		(D3DXVECTOR3(SCREEN_CENT.x, 665.0f, 0.0f))	// 操作の初期座標
+#define SIZE_CONTROL	(D3DXVECTOR3(SCREEN_WIDTH, 100.0f, 0.0f))	// 操作の大きさ
 
-#define TUTO_LETTER_CHAN	(0.04f)		// 手紙のα値変更量
-#define TUTO_LETTER_STOP	(1.0f)		// 手紙の最大α値
+#define LETTER_CHAN	(0.04f)		// 手紙のα値変更量
+#define LETTER_STOP	(1.0f)		// 手紙の最大α値
+#define FADE_CHAN	(0.02f)		// フェードのα値変更量
+#define FADE_STOP	(0.6f)		// フェードの最大α値
+#define PAPER_MOVE	(0.5f)		// 便箋の位置の更新量
+#define PAPER_STOP	(315.0f)	// 便箋の停止Y位置
 
-#define TUTO_FADE_CHAN	(0.02f)		// フェードのα値変更量
-#define TUTO_FADE_STOP	(0.6f)		// フェードの最大α値
-
-#define TUTO_PAPER_MOVE	(0.5f)		// 便箋の位置の更新量
-#define TUTO_PAPER_STOP	(315.0f)	// 便箋の停止位置 (y)
-
-#define TUTO_CONTROL_CHAN			(0.008f)	// 操作説明のα値の変更量
-#define TUTO_CONTROL_MAX_ALPHA		(1.0f)		// 操作説明のα値の最大値
-#define TUTO_CONTROL_MIN_ALPHA		(0.2f)		// 操作説明のα値の最小値
-#define TUTO_CONTROL_CHAN_RETURN	(0.06f)		// 操作説明のしまい時のα値の変更量
+#define CONTROL_ADD_ROT		(0.02f)	// 操作説明の点滅向きの加算量
+#define CONTROL_SUB_ALPHA	(0.06f)	// 操作説明のしまい時のα値の変更量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -46,7 +42,7 @@ const char *CLetterManager::mc_apTextureFile[] =	// テクスチャ定数
 {
 	"data\\TEXTURE\\tutorial000.tga",	// 手紙のテクスチャ相対パス
 	"data\\TEXTURE\\tutorial000.png",	// 便箋のテクスチャ相対パス
-	"data\\TEXTURE\\tutorial001.tga",	// 操作表示のテクスチャ相対パス
+	"data\\TEXTURE\\tutorial001.png",	// 操作表示のテクスチャ相対パス
 };
 
 //************************************************************
@@ -91,7 +87,7 @@ HRESULT CLetterManager::Init(void)
 	m_pControl	= NULL;			// 操作方法の情報
 	m_state		= STATE_NONE;	// 状態
 	m_fMove		= 0.0f;			// 便箋の移動量
-	m_fSinRot	= 0.0f;			// 操作方法の点滅向き
+	m_fSinRot	= -HALF_PI;		// 操作方法の点滅向き
 	m_nCounterState	= 0;		// 状態管理カウンター
 
 	//--------------------------------------------------------
@@ -375,13 +371,13 @@ void CLetterManager::UpdateLetter(void)
 	D3DXCOLOR colLetter = m_pLetter->GetColor();	// 手紙の色
 
 	// 手紙のα値を加算
-	colLetter.a += TUTO_LETTER_CHAN;
+	colLetter.a += LETTER_CHAN;
 
-	if (colLetter.a >= TUTO_LETTER_STOP)
+	if (colLetter.a >= LETTER_STOP)
 	{ // 手紙のα値が一定値以上の場合
 
 		// 手紙のα値を補正
-		colLetter.a = TUTO_LETTER_STOP;
+		colLetter.a = LETTER_STOP;
 
 		// フェードイン状態にする
 		m_state = STATE_FADEIN;
@@ -400,13 +396,13 @@ void CLetterManager::UpdateFade(void)
 	D3DXCOLOR colFade = m_pFade->GetColor();	// フェードの色
 
 	// フェードのα値を加算
-	colFade.a += TUTO_FADE_CHAN;
+	colFade.a += FADE_CHAN;
 	
-	if (colFade.a >= TUTO_FADE_STOP)
+	if (colFade.a >= FADE_STOP)
 	{ // フェードのα値が一定値以上の場合
 
 		// フェードのα値を補正
-		colFade.a = TUTO_FADE_STOP;
+		colFade.a = FADE_STOP;
 
 		// 便箋の取り出し状態にする
 		m_state = STATE_PAPER_TAKE;
@@ -425,16 +421,16 @@ void CLetterManager::UpdatePaperTake(void)
 	D3DXVECTOR3 posPaper = m_pPaper->GetPosition();	// 便箋の位置
 
 	// 便箋の位置減算量を設定
-	m_fMove += TUTO_PAPER_MOVE;
+	m_fMove += PAPER_MOVE;
 
 	// 便箋の位置を減算
 	posPaper.y -= m_fMove;
 
-	if (posPaper.y <= TUTO_PAPER_STOP)
+	if (posPaper.y <= PAPER_STOP)
 	{ // 便箋の位置が一定値以下の場合
 
 		// 便箋の位置を補正
-		posPaper.y = TUTO_PAPER_STOP;
+		posPaper.y = PAPER_STOP;
 
 		// 便箋の移動量を初期化
 		m_fMove = 0.0f;
@@ -462,14 +458,12 @@ void CLetterManager::UpdateWait(void)
 		m_state = STATE_PAPER_RETURN;
 	}
 
-#if 0
 	// 操作方法の点滅向きを加算
-	m_fSinRot += 0.2f;
+	m_fSinRot += CONTROL_ADD_ROT;
 	useful::NormalizeRot(m_fSinRot);	// 向きを補正
 
 	// 操作説明のα値を変更
-	colControl.a = (0.8f / (D3DX_PI * 2.0f)) * ;
-#endif
+	colControl.a = (1.0f / 2.0f) * (sinf(m_fSinRot) + 1.0f);
 
 	// 操作方法の色を反映
 	m_pControl->SetColor(colControl);
@@ -493,7 +487,7 @@ void CLetterManager::UpdatePaperReturn(void)
 	{ // 手紙のα値が一定値より大きい場合
 
 		// 手紙のα値を減算
-		colLetter.a -= TUTO_LETTER_CHAN;
+		colLetter.a -= LETTER_CHAN;
 
 		if (colLetter.a <= 0.0f)
 		{ // 手紙のα値が一定値以下の場合
@@ -513,7 +507,7 @@ void CLetterManager::UpdatePaperReturn(void)
 	{ // フェードのα値が一定値より大きい場合
 
 		// フェードのα値を減算
-		colFade.a -= TUTO_FADE_CHAN;
+		colFade.a -= FADE_CHAN;
 
 		if (colFade.a <= 0.0f)
 		{ // フェードのα値が一定値以下の場合
@@ -533,7 +527,7 @@ void CLetterManager::UpdatePaperReturn(void)
 	{ // 操作説明のα値が一定値より大きい場合
 
 		// 操作説明のα値を減算
-		colControl.a -= TUTO_CONTROL_CHAN_RETURN;
+		colControl.a -= CONTROL_SUB_ALPHA;
 
 		if (colControl.a <= 0.0f)
 		{ // 操作説明のα値が一定値以下の場合
@@ -553,7 +547,7 @@ void CLetterManager::UpdatePaperReturn(void)
 	{ // 便箋の位置が一定値より小さい場合
 
 		// 便箋の移動量を加算
-		m_fMove += TUTO_PAPER_MOVE;
+		m_fMove += PAPER_MOVE;
 
 		// 便箋の位置を加算
 		posPaper.y += m_fMove;

@@ -272,7 +272,7 @@ void CTarget::Update(void)
 					m_nCounterHeal = 0;
 
 					// 体力を回復
-					m_pLife->AddNum(nNumFlower);	// マナフラワー量に応じて回復量増加
+					m_pLife->AddNum(nNumFlower * 2);	// マナフラワー量に応じて回復量増加
 				}
 			}
 			else

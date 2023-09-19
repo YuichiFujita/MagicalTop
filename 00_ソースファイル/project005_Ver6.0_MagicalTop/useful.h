@@ -136,7 +136,7 @@ namespace useful
 		const T min,	// 最小範囲
 		const T max		// 最大範囲
 	);
-	template<class T> void SortNum	// ソート
+	template<class T> void SortNum	// 値のソート
 	( // 引数
 		T *pSortNum,		// ソート配列
 		const int nMaxKeep	// 配列サイズ

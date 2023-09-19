@@ -29,6 +29,13 @@ class CObjectGauge2D;	// オブジェクトゲージ2Dクラス
 class CTutorialManager
 {
 public:
+	// テクスチャ列挙
+	enum TEXTURE
+	{
+		TEXTURE_CONTROL = 0,	// 操作方法表示のテクスチャ
+		TEXTURE_MAX				// この列挙型の総数
+	};
+
 	// 状態列挙
 	enum STATE
 	{
@@ -37,6 +44,7 @@ public:
 		STATE_LETTER,		// 手紙表示状態
 		STATE_FADEIN,		// フェードイン状態
 		STATE_EXPLAIN,		// 説明表示状態
+		STATE_FADEWAIT,		// フェード待機状態
 		STATE_FADEOUT,		// フェードアウト状態
 		STATE_PROGRESSION,	// 進行状態
 		STATE_NEXTWAIT,		// 次レッスン待機状態
@@ -78,10 +86,13 @@ public:
 
 private:
 	// メンバ関数
+	void SetEnableProgressionDraw(const bool bDraw);	// 進行状態時に表示するUIの描画状況設定
+
 	void UpdateWait(void);		// 待機
 	void UpdateLetter(void);	// 手紙表示
 	void UpdateFadeIn(void);	// フェードイン
 	void UpdateExplain(void);	// 説明表示
+	void UpdateFadeWait(void);	// フェード待機
 	void UpdateFadeOut(void);	// フェードアウト
 	void UpdateNextWait(void);	// 次レッスン待機
 	void NextLesson(void);		// 次レッスンへの移行
@@ -89,18 +100,26 @@ private:
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];			// テクスチャ定数
 	static const char *mc_apLessonTextureFile[];	// レッスンテクスチャ定数
+	static const char *mc_apGuideTextureFile[];		// 小説明テクスチャ定数
+	static const char *mc_apControlTextureFile[];	// 操作方法テクスチャ定数
 	static const int mc_aNextLesson[];				// レッスン移行カウント
 	static const int mc_aNextLessonWait[];			// 次レッスン余韻カウント
 
 	// メンバ変数
 	CLetterManager *m_pLetterManager;	// 手紙マネージャーの情報
-	CObjectGauge2D *m_pConterLesson;	// レッスン管理カウンターの情報
-	CObject2D *m_pFade;		// フェードの情報
-	CObject2D *m_pExplain;	// 説明表示の情報
-	STATE m_state;			// 状態
-	int m_nCounterState;	// 状態管理カウンター
-	int m_nLesson;			// レッスン
-	float m_fScale;			// ポリゴン拡大率
+	CObjectGauge2D *m_pCounterLesson;	// レッスン管理カウンターの情報
+	CObject2D *m_pFade;			// フェードの情報
+	CObject2D *m_pExplain;		// 説明表示の情報
+	CObject2D *m_pClose;		// 説明終了表示の情報
+	CObject2D *m_pGuide;		// 小説明表示の情報
+	CObject2D *m_pGuideBG;		// 小説明表示の背景情報
+	CObject2D *m_pControl;		// 操作方法表示の情報
+	CObject2D *m_pControlBG;	// 操作方法表示の背景情報
+	STATE m_state;				// 状態
+	int m_nCounterState;		// 状態管理カウンター
+	int m_nLesson;				// レッスン
+	float m_fScale;				// ポリゴン拡大率
+	float m_fSinRot;			// ポリゴン点滅向き
 };
 
 #endif	// _TUTORIAL_MANAGER_H_
