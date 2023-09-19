@@ -191,9 +191,21 @@ void CTarget::Update(void)
 	D3DXVECTOR3 pos = GetPosition();				// 台座位置
 	D3DXVECTOR3 rot = m_pMeshCube->GetRotation();	// キューブ向き
 	int nNumFlower = CFlower::GetNumAll();			// マナフラワーの総数
+	bool bUpdate = true;	// 更新状況
 
 	if (CManager::GetMode() == CScene::MODE_GAME)
 	{ // モードがゲームの場合
+
+		if (CSceneGame::GetWaveManager()->GetState() != CWaveManager::STATE_PROGRESSION)
+		{ // ウェーブ進行状態ではない場合
+
+			// 更新できない状態にする
+			bUpdate = false;
+		}
+	}
+
+	if (bUpdate)
+	{ // 更新できる状態の場合
 
 		// 状態管理
 		switch (m_state)
@@ -203,24 +215,20 @@ void CTarget::Update(void)
 			if (m_pLife->GetNum() < TARG_LIFE && nNumFlower > 0)
 			{ // 体力が減少している且つ、マナフラワーが一本でも生えている場合
 
-				if (CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
-				{ // ウェーブ進行状態の場合
+				if (m_nCounterState < STATE_HEAL_CNT)
+				{ // カウンターが一定値より小さい場合
 
-					if (m_nCounterState < STATE_HEAL_CNT)
-					{ // カウンターが一定値より小さい場合
+					// カウンターを加算
+					m_nCounterState++;
+				}
+				else
+				{ // カウンターが一定値以上の場合
 
-						// カウンターを加算
-						m_nCounterState++;
-					}
-					else
-					{ // カウンターが一定値以上の場合
+					// カウンターを初期化
+					m_nCounterState = 0;
 
-						// カウンターを初期化
-						m_nCounterState = 0;
-
-						// 状態を変更
-						m_state = STATE_HEAL;	// 回復状態
-					}
+					// 状態を変更
+					m_state = STATE_HEAL;	// 回復状態
 				}
 			}
 
@@ -248,9 +256,8 @@ void CTarget::Update(void)
 
 		case STATE_HEAL:	// 回復状態
 
-			if (m_pLife->GetNum() < TARG_LIFE
-			&&  CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_PROGRESSION)
-			{ // 体力が最大値より少ない且つ、ウェーブ進行状態の場合
+			if (m_pLife->GetNum() < TARG_LIFE)
+			{ // 体力が最大値より少ない場合
 
 				if (m_nCounterHeal < WAIT_HEAL_CNT)
 				{ // カウンターが一定値より小さい場合
@@ -282,6 +289,7 @@ void CTarget::Update(void)
 			break;
 		}
 	}
+
 	// キューブの縦位置を変更
 	pos.y += ADD_POS_Y + sinf(m_fSinRot) * MUL_SIN_POS;
 
