@@ -33,6 +33,8 @@ public:
 	enum TEXTURE
 	{
 		TEXTURE_CONTROL = 0,	// 操作方法表示のテクスチャ
+		TEXTURE_START,			// 開始時の便箋テクスチャ
+		TEXTURE_END,			// 終了時の便箋テクスチャ
 		TEXTURE_MAX				// この列挙型の総数
 	};
 

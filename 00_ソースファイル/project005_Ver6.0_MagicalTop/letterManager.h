@@ -31,7 +31,6 @@ public:
 	enum TEXTURE
 	{
 		TEXTURE_LETTER = 0,	// 手紙のテクスチャ
-		TEXTURE_PAPER,		// 便箋のテクスチャ
 		TEXTURE_CONTROL,	// 操作表示のテクスチャ
 		TEXTURE_MAX			// この列挙型の総数
 	};
@@ -59,8 +58,10 @@ public:
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
-	void SetState(const STATE state);	// 状態設定
-	STATE GetState(void) const;			// 状態取得
+	void SetPaper(const char *pPassTex);	// 便箋設定
+	void SetLook(const char *pPassTex);		// 手紙表示開始
+	void SetState(const STATE state);		// 状態設定
+	STATE GetState(void) const;				// 状態取得
 
 	// 静的メンバ関数
 	static CLetterManager *Create(void);	// 生成

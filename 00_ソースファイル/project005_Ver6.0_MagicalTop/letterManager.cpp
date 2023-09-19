@@ -20,10 +20,13 @@
 #define LETTER_PRIO	(6)	// 手紙の優先順位
 
 #define SIZE_LETTER		(D3DXVECTOR3(1000.0f, 597.5f, 0.0f))		// 手紙の大きさ
+#define COL_LETTER		(XCOL_AWHITE)								// 手紙の色
+#define COL_FADE		(XCOL_ABLACK)								// フェードの色
 #define POS_PAPER		(D3DXVECTOR3(SCREEN_CENT.x, 1020.0f, 0.0f))	// 便箋の初期座標
 #define SIZE_PAPER		(D3DXVECTOR3(1000.0f, 597.5f, 0.0f))		// 便箋の大きさ
 #define POS_CONTROL		(D3DXVECTOR3(SCREEN_CENT.x, 665.0f, 0.0f))	// 操作の初期座標
 #define SIZE_CONTROL	(D3DXVECTOR3(SCREEN_WIDTH, 100.0f, 0.0f))	// 操作の大きさ
+#define COL_CONTROL		(XCOL_AWHITE)								// 操作の色
 
 #define LETTER_CHAN	(0.04f)		// 手紙のα値変更量
 #define LETTER_STOP	(1.0f)		// 手紙の最大α値
@@ -40,9 +43,8 @@
 //************************************************************
 const char *CLetterManager::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\tutorial000.tga",	// 手紙のテクスチャ相対パス
-	"data\\TEXTURE\\tutorial000.png",	// 便箋のテクスチャ相対パス
-	"data\\TEXTURE\\tutorial001.png",	// 操作表示のテクスチャ相対パス
+	"data\\TEXTURE\\letter000.tga",	// 手紙のテクスチャ相対パス
+	"data\\TEXTURE\\letter001.png",	// 操作表示のテクスチャ相対パス
 };
 
 //************************************************************
@@ -99,7 +101,7 @@ HRESULT CLetterManager::Init(void)
 		SCREEN_CENT,	// 位置
 		SIZE_LETTER,	// 大きさ
 		VEC3_ZERO,		// 向き
-		XCOL_AWHITE		// 色
+		COL_LETTER		// 色
 	);
 	if (UNUSED(m_pLetter))
 	{ // 生成に失敗した場合
@@ -124,7 +126,7 @@ HRESULT CLetterManager::Init(void)
 		SCREEN_CENT,	// 位置
 		SCREEN_SIZE,	// 大きさ
 		VEC3_ZERO,		// 向き
-		XCOL_ABLACK		// 色
+		COL_FADE		// 色
 	);
 	if (UNUSED(m_pFade))
 	{ // 生成に失敗した場合
@@ -154,9 +156,6 @@ HRESULT CLetterManager::Init(void)
 		return E_FAIL;
 	}
 
-	// テクスチャを登録・割当
-	m_pPaper->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_PAPER]));
-
 	// 優先順位を設定
 	m_pPaper->SetPriority(LETTER_PRIO);
 
@@ -169,7 +168,7 @@ HRESULT CLetterManager::Init(void)
 		POS_CONTROL,	// 位置
 		SIZE_CONTROL,	// 大きさ
 		VEC3_ZERO,		// 向き
-		XCOL_AWHITE		// 色
+		COL_CONTROL		// 色
 	);
 	if (UNUSED(m_pControl))
 	{ // 生成に失敗した場合
@@ -284,6 +283,43 @@ void CLetterManager::Update(void)
 
 	// 操作方法の更新
 	m_pControl->Update();
+}
+
+//============================================================
+//	手紙表示の開始処理
+//============================================================
+void CLetterManager::SetLook(const char *pPassTex)
+{
+	// 便箋の設定
+	SetPaper(pPassTex);
+
+	// 便箋の位置を初期化
+	m_pPaper->SetPosition(POS_PAPER);
+
+	// ポリゴンの色情報を初期化
+	m_pLetter->SetColor(COL_LETTER);	// 手紙
+	m_pFade->SetColor(COL_FADE);		// フェード
+	m_pControl->SetColor(COL_CONTROL);	// 操作方法
+
+	// 情報を初期化
+	m_fMove = 0.0f;			// 便箋の移動量
+	m_fSinRot = -HALF_PI;	// 操作方法の点滅向き
+	m_nCounterState = 0;	// 状態管理カウンター
+
+	// 状態を設定
+	m_state = STATE_LETTER;	// 手紙の表示状態
+}
+
+//============================================================
+//	便箋の設定処理
+//============================================================
+void CLetterManager::SetPaper(const char *pPassTex)
+{
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
+	// 便箋のテクスチャを登録・割当
+	m_pPaper->BindTexture(pTexture->Regist(pPassTex));
 }
 
 //============================================================
@@ -453,6 +489,9 @@ void CLetterManager::UpdateWait(void)
 
 	if (CManager::GetKeyboard()->GetTrigger(DIK_0))
 	{ // TODO：操作
+
+		// 操作方法の点滅向きを初期化
+		m_fSinRot = -HALF_PI;
 
 		// 便箋のしまい状態にする
 		m_state = STATE_PAPER_RETURN;

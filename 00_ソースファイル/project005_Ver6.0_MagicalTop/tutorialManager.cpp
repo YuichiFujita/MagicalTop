@@ -24,7 +24,7 @@
 #define TUTORIAL_PRIO	(6)	// チュートリアルの優先順位
 
 #define LETTER_WAIT_CNT	(90)	// 待機状態の待機フレーム
-#define TITLE_WAIT_CNT	(90)	// タイトル遷移の余韻フレーム
+#define TITLE_WAIT_CNT	(30)	// タイトル遷移の余韻フレーム
 
 #define POS_GUIDE		(D3DXVECTOR3(1020.0f, 585.0f, 0.0f))	// 小説明表示の位置
 #define POS_CONTROL		(D3DXVECTOR3(260.0f, 585.0f, 0.0f))		// 操作方法表示の位置
@@ -56,62 +56,64 @@
 //************************************************************
 const char *CTutorialManager::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\tutorial001.png",	// 操作方法表示のテクスチャ
+	"data\\TEXTURE\\letter001.png",	// 操作方法表示のテクスチャ
+	"data\\TEXTURE\\letter002.png",	// 開始時の便箋テクスチャ
+	"data\\TEXTURE\\letter003.png",	// 終了時の便箋テクスチャ
 };
 
 const char *CTutorialManager::mc_apLessonTextureFile[] =	// レッスンテクスチャ定数
 {
 	NULL,	// レッスン00：テクスチャなし
-	"data\\TEXTURE\\lesson000.png",	// レッスン01：吸い込まれる説明のテクスチャ
-	"data\\TEXTURE\\lesson001.png",	// レッスン02：前後加速の説明のテクスチャ
-	"data\\TEXTURE\\lesson002.png",	// レッスン03：左右加速の説明のテクスチャ
-	"data\\TEXTURE\\lesson003.png",	// レッスン04：攻撃の説明のテクスチャ
-	"data\\TEXTURE\\lesson004.png",	// レッスン05：マナ回復の説明のテクスチャ
-	"data\\TEXTURE\\lesson005.png",	// レッスン06：敵への攻撃の説明のテクスチャ
+	"data\\TEXTURE\\lesson000.png",	// レッスン01：吸い込まれる	説明テクスチャ
+	"data\\TEXTURE\\lesson001.png",	// レッスン02：前後加速		説明テクスチャ
+	"data\\TEXTURE\\lesson002.png",	// レッスン03：左右加速		説明テクスチャ
+	"data\\TEXTURE\\lesson003.png",	// レッスン04：攻撃			説明テクスチャ
+	"data\\TEXTURE\\lesson004.png",	// レッスン05：マナ回復		説明テクスチャ
+	"data\\TEXTURE\\lesson005.png",	// レッスン06：敵への攻撃	説明テクスチャ
 };
 
 const char *CTutorialManager::mc_apGuideTextureFile[] =	// 小説明テクスチャ定数
 {
 	NULL,	// レッスン00：テクスチャなし
-	"data\\TEXTURE\\guide000.png",	// レッスン01：吸い込まれる小説明のテクスチャ
-	"data\\TEXTURE\\guide001.png",	// レッスン02：前後加速の小説明のテクスチャ
-	"data\\TEXTURE\\guide002.png",	// レッスン03：左右加速の小説明のテクスチャ
-	"data\\TEXTURE\\guide003.png",	// レッスン04：攻撃の小説明のテクスチャ
-	"data\\TEXTURE\\guide004.png",	// レッスン05：マナ回復の小説明のテクスチャ
-	"data\\TEXTURE\\guide005.png",	// レッスン06：敵への攻撃の小説明のテクスチャ
+	"data\\TEXTURE\\guide000.png",	// レッスン01：吸い込まれる	小説明のテクスチャ
+	"data\\TEXTURE\\guide001.png",	// レッスン02：前後加速		小説明のテクスチャ
+	"data\\TEXTURE\\guide002.png",	// レッスン03：左右加速		小説明のテクスチャ
+	"data\\TEXTURE\\guide003.png",	// レッスン04：攻撃			小説明のテクスチャ
+	"data\\TEXTURE\\guide004.png",	// レッスン05：マナ回復		小説明のテクスチャ
+	"data\\TEXTURE\\guide005.png",	// レッスン06：敵への攻撃	小説明のテクスチャ
 };
 
 const char *CTutorialManager::mc_apControlTextureFile[] =	// 操作方法テクスチャ定数
 {
 	NULL,	// レッスン00：テクスチャなし
 	NULL,	// レッスン01：テクスチャなし
-	"data\\TEXTURE\\guide000.png",	// レッスン02：前後加速の操作方法のテクスチャ
-	"data\\TEXTURE\\guide001.png",	// レッスン03：左右加速の操作方法のテクスチャ
-	"data\\TEXTURE\\guide002.png",	// レッスン04：攻撃の操作方法のテクスチャ
-	NULL,	// レッスン06：テクスチャなし
+	"data\\TEXTURE\\guide000.png",	// レッスン02：前後加速	操作方法のテクスチャ
+	"data\\TEXTURE\\guide001.png",	// レッスン03：左右加速	操作方法のテクスチャ
+	"data\\TEXTURE\\guide002.png",	// レッスン04：攻撃		操作方法のテクスチャ
 	NULL,	// レッスン05：テクスチャなし
+	NULL,	// レッスン06：テクスチャなし
 };
 
 const int CTutorialManager::mc_aNextLesson[] =	// レッスン移行カウント
 {
 	0,		// レッスンなし
-	30,		// レッスン01：吸い込まれる終了カウント
-	320,	// レッスン02：前後加速の終了カウント
-	320,	// レッスン03：左右加速の終了カウント
-	240,	// レッスン04：攻撃の終了カウント
-	90,		// レッスン05：マナ回復の終了カウント
-	3,		// レッスン06：敵への攻撃の終了カウント
+	30,		// レッスン01：吸い込まれる	終了カウント
+	320,	// レッスン02：前後加速		終了カウント
+	320,	// レッスン03：左右加速		終了カウント
+	240,	// レッスン04：攻撃			終了カウント
+	90,		// レッスン05：マナ回復		終了カウント
+	3,		// レッスン06：敵への攻撃	終了カウント
 };
 
 const int CTutorialManager::mc_aNextLessonWait[] =	// 次レッスン余韻カウント
 {
 	0,		// レッスンなし
-	60,		// レッスン01：吸い込まれる終了時の余韻カウント
-	90,		// レッスン02：前後加速の終了時の余韻カウント
-	90,		// レッスン03：左右加速の終了時の余韻カウント
-	90,		// レッスン04：攻撃の終了時の余韻カウント
-	120,	// レッスン05：マナ回復の終了時の余韻カウント
-	90,		// レッスン06：敵への攻撃の終了時の余韻カウント
+	60,		// レッスン01：吸い込まれる	終了時の余韻カウント
+	90,		// レッスン02：前後加速		終了時の余韻カウント
+	90,		// レッスン03：左右加速		終了時の余韻カウント
+	90,		// レッスン04：攻撃			終了時の余韻カウント
+	120,	// レッスン05：マナ回復		終了時の余韻カウント
+	90,		// レッスン06：敵への攻撃	終了時の余韻カウント
 };
 
 //************************************************************
@@ -695,8 +697,8 @@ void CTutorialManager::UpdateWait(void)
 		// カウンターを初期化
 		m_nCounterState = 0;
 
-		// 手紙マネージャーの状態を設定
-		m_pLetterManager->SetState(CLetterManager::STATE_LETTER);	// 手紙の表示状態
+		// 手紙表示の開始
+		m_pLetterManager->SetLook(mc_apTextureFile[TEXTURE_START]);
 
 		// 状態を設定
 		m_state = STATE_LETTER;	// 手紙表示状態
@@ -711,8 +713,18 @@ void CTutorialManager::UpdateLetter(void)
 	if (m_pLetterManager->GetState() == CLetterManager::STATE_END)
 	{ // 手紙を読み終えた場合
 
-		// 次レッスンへの移行
-		NextLesson();
+		if (m_nLesson == LESSON_NONE)
+		{ // レッスン開始前の場合
+
+			// 次レッスンへの移行
+			NextLesson();
+		}
+		else
+		{ // レッスン終了後の場合
+
+			// 状態を設定
+			m_state = STATE_END;	// 終了状態
+		}
 	}
 }
 
@@ -939,7 +951,10 @@ void CTutorialManager::NextLesson(void)
 	else
 	{ // レッスンがもうない場合
 
+		// 手紙表示の開始
+		m_pLetterManager->SetLook(mc_apTextureFile[TEXTURE_END]);
+
 		// 状態を設定
-		m_state = STATE_END;	// 終了状態
+		m_state = STATE_LETTER;	// 手紙表示状態
 	}
 }
