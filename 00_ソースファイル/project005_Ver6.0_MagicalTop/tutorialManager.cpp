@@ -87,9 +87,9 @@ const char *CTutorialManager::mc_apControlTextureFile[] =	// ‘€ì•û–@ƒeƒNƒXƒ`ƒƒ’
 {
 	NULL,	// ƒŒƒbƒXƒ“00FƒeƒNƒXƒ`ƒƒ‚È‚µ
 	NULL,	// ƒŒƒbƒXƒ“01FƒeƒNƒXƒ`ƒƒ‚È‚µ
-	"data\\TEXTURE\\guide000.png",	// ƒŒƒbƒXƒ“02F‘OŒã‰Á‘¬	‘€ì•û–@‚ÌƒeƒNƒXƒ`ƒƒ
-	"data\\TEXTURE\\guide001.png",	// ƒŒƒbƒXƒ“03F¶‰E‰Á‘¬	‘€ì•û–@‚ÌƒeƒNƒXƒ`ƒƒ
-	"data\\TEXTURE\\guide002.png",	// ƒŒƒbƒXƒ“04FUŒ‚		‘€ì•û–@‚ÌƒeƒNƒXƒ`ƒƒ
+	"data\\TEXTURE\\control000.png",	// ƒŒƒbƒXƒ“02F‘OŒã‰Á‘¬	‘€ì•û–@‚ÌƒeƒNƒXƒ`ƒƒ
+	"data\\TEXTURE\\control001.png",	// ƒŒƒbƒXƒ“03F¶‰E‰Á‘¬	‘€ì•û–@‚ÌƒeƒNƒXƒ`ƒƒ
+	"data\\TEXTURE\\control002.png",	// ƒŒƒbƒXƒ“04FUŒ‚		‘€ì•û–@‚ÌƒeƒNƒXƒ`ƒƒ
 	NULL,	// ƒŒƒbƒXƒ“05FƒeƒNƒXƒ`ƒƒ‚È‚µ
 	NULL,	// ƒŒƒbƒXƒ“06FƒeƒNƒXƒ`ƒƒ‚È‚µ
 };
