@@ -18,6 +18,17 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
+// 便利マクロ
+#define SCREEN_WIDTH	(1280)	// ウインドウの横幅
+#define SCREEN_HEIGHT	(720)	// ウインドウの縦幅
+#define MAX_STRING		(128)	// 文字列の最大文字数
+#define MAX_FILENAME	(128)	// ファイル名の最大文字数
+#define NONE_IDX		(-1)	// インデックス非使用
+#define NONE_STRING		("\0")	// 文字列非使用
+
+#define HALF_PI (D3DX_PI * 0.5f)	// 二分の一の円周率 (π/２)
+#define QRTR_PI (D3DX_PI * 0.25f)	// 四分の一の円周率 (π/４)
+
 // D3DXVECTOR2関係
 #define VEC2_ZERO	(D3DXVECTOR2(0.0f, 0.0f))	// 0クリア
 #define VEC2_ONE	(D3DXVECTOR2(1.0f, 1.0f))	// 1クリア
@@ -54,15 +65,6 @@
 // ポインタ使用判定
 #define USED(p)		((p) != NULL)	// 使用中
 #define UNUSED(p)	((p) == NULL)	// 未使用
-
-// そのほか便利マクロ
-#define MAX_STRING		(128)	// 文字列の最大文字数
-#define MAX_FILENAME	(128)	// ファイル名の最大文字数
-#define NONE_IDX		(-1)	// インデックス非使用
-#define NONE_STRING		("\0")	// 文字列非使用
-
-#define HALF_PI (D3DX_PI * 0.5f)	// 二分の一の円周率 (π/２)
-#define QRTR_PI (D3DX_PI * 0.25f)	// 四分の一の円周率 (π/４)
 
 //************************************************************
 //	構造体定義
