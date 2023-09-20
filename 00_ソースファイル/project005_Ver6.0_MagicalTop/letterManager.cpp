@@ -487,9 +487,18 @@ void CLetterManager::UpdateWait(void)
 	// 変数を宣言
 	D3DXCOLOR colControl = m_pControl->GetColor();	// 操作方法の色
 
-	if (CManager::GetKeyboard()->GetTrigger(DIK_0))
-	{ // TODO：操作
+	// ポインタを宣言
+	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
+	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
+	if (pKeyboard->GetTrigger(DIK_RETURN)
+	||  pKeyboard->GetTrigger(DIK_SPACE)
+	||  pPad->GetTrigger(CInputPad::KEY_A)
+	||  pPad->GetTrigger(CInputPad::KEY_B)
+	||  pPad->GetTrigger(CInputPad::KEY_X)
+	||  pPad->GetTrigger(CInputPad::KEY_Y)
+	||  pPad->GetTrigger(CInputPad::KEY_START))
+	{
 		// 操作方法の点滅向きを初期化
 		m_fSinRot = -HALF_PI;
 
