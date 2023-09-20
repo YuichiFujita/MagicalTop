@@ -140,6 +140,9 @@ void CLevelupManager::Update(void)
 		if (CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_WAIT)
 		{ // 次の季節へ移行待ちの場合
 
+			// ショップの品ぞろえを全変更
+			m_pShopManager->AllRandomShop();
+
 			// ショップを表示
 			m_pShopManager->SetEnableDraw(true);
 

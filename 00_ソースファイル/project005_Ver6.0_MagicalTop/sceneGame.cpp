@@ -72,9 +72,6 @@ CSceneGame::~CSceneGame()
 //============================================================
 HRESULT CSceneGame::Init(void)
 {
-	//--------------------------------------------------------
-	//	ゲームの初期化
-	//--------------------------------------------------------
 	// ウェーブマネージャーの生成
 	m_pWaveManager = CWaveManager::Create();
 	if (UNUSED(m_pWaveManager))
@@ -102,6 +99,21 @@ HRESULT CSceneGame::Init(void)
 		return E_FAIL;
 	}
 
+	// スコアオブジェクトの生成
+	m_pScore = CScore::Create
+	( // 引数
+		SCO_POS,	// 位置
+		SCO_SIZE,	// 大きさ
+		SCO_SPACE	// 空白
+	);
+	if (UNUSED(m_pScore))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// ポーズの生成
 	m_pPause = CPause::Create();
 	if (UNUSED(m_pPause))
@@ -113,11 +125,8 @@ HRESULT CSceneGame::Init(void)
 	}
 
 	// シーンの初期化
-	CScene::Init();
+	CScene::Init();		// ステージ・地面・ターゲット・プレイヤーの生成
 
-	//--------------------------------------------------------
-	//	オブジェクト生成
-	//--------------------------------------------------------
 	// 海オブジェクトの生成
 	CSea::Create();
 
@@ -134,21 +143,6 @@ HRESULT CSceneGame::Init(void)
 
 	// 空オブジェクトの生成
 	CSky::Create(CSky::TEXTURE_NORMAL, VEC3_ZERO, VEC3_ZERO, XCOL_WHITE, POSGRID2(32, 6), 18000.0f, D3DCULL_CW, false);
-
-	// スコアオブジェクトの生成
-	m_pScore = CScore::Create
-	( // 引数
-		SCO_POS,	// 位置
-		SCO_SIZE,	// 大きさ
-		SCO_SPACE	// 空白
-	);
-	if (UNUSED(m_pScore))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
 
 	//--------------------------------------------------------
 	//	初期設定

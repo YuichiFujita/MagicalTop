@@ -63,6 +63,7 @@ public:
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
+	void AllRandomShop(void);	// ショップ全変更
 	void SetEnableDraw(const bool bDraw);	// 描画状況設定
 
 	// 静的メンバ関数
@@ -70,6 +71,15 @@ public:
 	static HRESULT Release(CShopManager *&prShopManager);	// 破棄
 
 private:
+	// メンバ関数
+	int RandomShop	// ショップ単変更
+	( // 引数
+		const int nShop,		// 変更するショップインデックス
+		int *pOmit = NULL,		// ランダムを省く購入品の先頭アドレス
+		const int nNumOmit = 0	// ランダムを省く購入品数
+	);
+	void UpdateSelect(void);	// 購入品選択
+
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 

@@ -61,6 +61,8 @@ public:
 	void SetColor(const D3DXCOLOR& rCol);			// 色設定
 	void SetPattern(const int nPattern);			// パターンの設定
 	void SetMaxPattern(const int nMaxPtrn);			// パターンの総数の設定
+	void SetWidthPattern(const int nWidthPtrn);		// テクスチャの横分割数の設定
+	void SetHeightPattern(const int nHeightPtrn);	// テクスチャの縦分割数の設定
 	void SetCounter(const int nCntChange);			// カウンターの設定
 	void SetEnableStop(const bool bStop);			// 停止状況の設定
 	void SetEnablePlayBack(const bool bPlayBack);	// 逆再生状況の設定

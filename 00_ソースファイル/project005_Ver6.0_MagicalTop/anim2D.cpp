@@ -279,6 +279,9 @@ void CAnim2D::SetColor(const D3DXCOLOR& rCol)
 {
 	// 色の設定
 	CObject2D::SetColor(rCol);
+
+	// アニメーションのテクスチャ座標の設定
+	CObject2D::SetAnimTex(m_nPattern, m_nWidthPtrn, m_nHeightPtrn);
 }
 
 //============================================================
@@ -300,6 +303,33 @@ void CAnim2D::SetMaxPattern(const int nMaxPtrn)
 {
 	// 引数のパターンの総数を代入
 	m_nMaxPtrn = nMaxPtrn;
+
+	// アニメーションのテクスチャ座標の設定
+	CObject2D::SetAnimTex(m_nPattern, m_nWidthPtrn, m_nHeightPtrn);
+}
+
+//============================================================
+//	テクスチャの横分割数の設定処理
+//============================================================
+void CAnim2D::SetWidthPattern(const int nWidthPtrn)
+{
+	// 引数のテクスチャ横分割数を設定
+	m_nWidthPtrn = nWidthPtrn;
+
+	// アニメーションのテクスチャ座標の設定
+	CObject2D::SetAnimTex(m_nPattern, m_nWidthPtrn, m_nHeightPtrn);
+}
+
+//============================================================
+//	テクスチャの縦分割数の設定処理
+//============================================================
+void CAnim2D::SetHeightPattern(const int nHeightPtrn)
+{
+	// 引数のテクスチャ縦分割数を設定
+	m_nHeightPtrn = nHeightPtrn;
+
+	// アニメーションのテクスチャ座標の設定
+	CObject2D::SetAnimTex(m_nPattern, m_nWidthPtrn, m_nHeightPtrn);
 }
 
 //============================================================
