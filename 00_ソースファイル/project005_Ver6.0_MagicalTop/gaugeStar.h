@@ -51,7 +51,7 @@ public:
 	}STATE;
 
 	// コンストラクタ
-	CGaugeStar(const int nHealNumGauge, const int nHealWait, const int nMaxNumGauge, const float fMaxRadius);
+	CGaugeStar(const int nHealNumGauge, const int nHealWait, const float fMaxRadius);
 
 	// デストラクタ
 	~CGaugeStar();
@@ -86,7 +86,9 @@ public:
 	);
 
 	// メンバ関数
-	bool UseGauge(void);	// ゲージ使用
+	bool UseGauge(void);		// ゲージ使用
+	void HealNumGauge(void);	// ゲージ全回復
+	void SetMaxNumGauge(const int nMax);	// 最大ゲージ量
 	void SetStar(const int nNumGauge, const float fRadius);	// 星情報設定
 	void SetGapPosition(const D3DXVECTOR3& rGap);	// 表示位置の加算量設定
 	void SetDistance(const float fDistance);		// 中心からの距離設定
@@ -105,12 +107,12 @@ private:
 	CObjectBillboard *m_apStarBG[MAX_STAR];		// 星の背景情報
 	Star m_aStar[MAX_STAR];		// 星の情報
 	STATE m_state;				// 状態
+	int m_nMaxNumGauge;			// 最大ゲージ量
 	int m_nCounterState;		// 状態管理カウンター
 	int m_nCurrentStar;			// 現在消費中の星
 	bool m_bOverheat;			// オーバーヒート状況
 	const int m_nHealNumGauge;	// ゲージ回復量定数
 	const int m_nHealWait;		// 回復待機カウント定数
-	const int m_nMaxNumGauge;	// 最大ゲージ量定数
 	const float m_fMaxRadius;	// 最大半径定数
 
 	CObject *m_pParentObject;	// 親オブジェクト

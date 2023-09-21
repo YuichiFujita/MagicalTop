@@ -42,8 +42,8 @@ const char *CGaugeStar::mc_apTextureFile[] =	// テクスチャ定数
 //============================================================
 //	コンストラクタ
 //============================================================
-CGaugeStar::CGaugeStar(const int nHealNumGauge, const int nHealWait, const int nMaxNumGauge, const float fMaxRadius) : CObject(CObject::LABEL_GAUGE, GAUGE_PRIO),
-m_nHealNumGauge(nHealNumGauge), m_nHealWait(nHealWait), m_nMaxNumGauge(nMaxNumGauge), m_fMaxRadius(fMaxRadius)
+CGaugeStar::CGaugeStar(const int nHealNumGauge, const int nHealWait, const float fMaxRadius) : CObject(CObject::LABEL_GAUGE, GAUGE_PRIO),
+m_nHealNumGauge(nHealNumGauge), m_nHealWait(nHealWait), m_fMaxRadius(fMaxRadius)
 {
 	// メンバ変数をクリア
 	memset(&m_apStarFrame[0], 0, sizeof(m_apStarFrame));	// 星の枠情報
@@ -51,6 +51,7 @@ m_nHealNumGauge(nHealNumGauge), m_nHealWait(nHealWait), m_nMaxNumGauge(nMaxNumGa
 	memset(&m_aStar[0], 0, sizeof(m_aStar));				// 星の情報
 
 	m_state			= STATE_NORMAL;	// 状態
+	m_nMaxNumGauge	= 0;			// 最大ゲージ量
 	m_nCounterState	= 0;			// 状態管理カウンター
 	m_nCurrentStar	= 0;			// 現在消費中の星
 	m_bOverheat		= false;		// オーバーヒート状況
@@ -85,6 +86,7 @@ HRESULT CGaugeStar::Init(void)
 	memset(&m_aStar[0], 0, sizeof(m_aStar));				// 星の情報
 
 	m_state			= STATE_NORMAL;	// 状態
+	m_nMaxNumGauge	= 0;			// 最大ゲージ量
 	m_nCounterState = 0;			// 状態管理カウンター
 	m_nCurrentStar	= 0;			// 現在消費中の星
 	m_bOverheat		= false;		// オーバーヒート状況
@@ -476,7 +478,7 @@ CGaugeStar *CGaugeStar::Create
 	{ // 使用されていない場合
 
 		// メモリ確保
-		pGaugeStar = new CGaugeStar(nHealNumGauge, nHealWait, nMaxNumGauge, fMaxRadius);	// 星ゲージ
+		pGaugeStar = new CGaugeStar(nHealNumGauge, nHealWait, fMaxRadius);	// 星ゲージ
 	}
 	else { assert(false); return NULL; }	// 使用中
 
@@ -493,6 +495,9 @@ CGaugeStar *CGaugeStar::Create
 
 		// 親オブジェクトを設定
 		pGaugeStar->SetParentObject(pObject);
+
+		// 最大ゲージ量を設定
+		pGaugeStar->SetMaxNumGauge(nMaxNumGauge);
 
 		// 表示位置の加算量を設定
 		pGaugeStar->SetGapPosition(rGap);
@@ -545,6 +550,56 @@ bool CGaugeStar::UseGauge(void)
 		// 使用していない状態を返す
 		return false;
 	}
+}
+
+//============================================================
+//	ゲージの全回復処理
+//============================================================
+void CGaugeStar::HealNumGauge(void)
+{
+	// 目標加算向きを設定
+	m_fDestAddRot = ((D3DX_PI * 2) / MAX_STAR) * 0;
+	useful::NormalizeRot(m_fDestAddRot);	// 向きを補正
+
+	// 消費星を先頭に設定
+	m_nCurrentStar = 0;
+
+	// 状態管理カウンターを初期化
+	m_nCounterState = 0;
+
+	for (int nCntStar = 0; nCntStar < MAX_STAR; nCntStar++)
+	{ // 星の最大数分繰り返す
+
+		// ゲージを最大値に補正
+		m_aStar[nCntStar].nNumGauge = m_nMaxNumGauge;
+
+		// 現在のゲージ量に応じた星の大きさに変更
+		m_aStar[nCntStar].fRadius = (m_fMaxRadius / (float)m_nMaxNumGauge) * m_aStar[nCntStar].nNumGauge;
+
+		// 星の大きさを設定
+		m_aStar[nCntStar].pBillboard->SetScaling(D3DXVECTOR3(m_aStar[nCntStar].fRadius, m_aStar[nCntStar].fRadius, 0.0f));
+
+		// 色を設定
+		m_aStar[nCntStar].pBillboard->SetColor(XCOL_WHITE);
+	}
+
+	// 状態を設定
+	m_state = STATE_NORMAL;	// 通常状態
+
+	// オーバーヒートしていない状態にする
+	m_bOverheat = false;
+}
+
+//============================================================
+//	最大ゲージ量の設定処理
+//============================================================
+void CGaugeStar::SetMaxNumGauge(const int nMax)
+{
+	// 引数の最大ゲージ量を設定
+	m_nMaxNumGauge = nMax;
+
+	// ゲージの全回復
+	HealNumGauge();
 }
 
 //============================================================

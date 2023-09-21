@@ -129,6 +129,20 @@ HRESULT CShopManager::Init(void)
 		return E_FAIL;
 	}
 
+
+	// TODO
+	m_pOmitShop->SetEnableOmit(CShop::BUY_HEAL, true);
+	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_LIFE, true);
+	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MANA, true);
+	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DASH, true);
+	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DEFENSE, true);
+	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_SPEED, true);
+	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_RAPID, true);
+	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_NUM, true);
+	m_pOmitShop->SetEnableOmit(CShop::BUY_EXP_UP, true);
+	m_pOmitShop->SetEnableOmit(CShop::BUY_LEVEL_REBATE, true);
+
+
 	//--------------------------------------------------------
 	//	背景の生成・設定
 	//--------------------------------------------------------
@@ -302,7 +316,7 @@ HRESULT CShopManager::Init(void)
 		// ショップ情報の生成
 		m_apShop[nCntShop] = CShop::Create
 		( // 引数
-			CShop::BUY_PLAYER_HEAL,					// 購入品
+			CShop::BUY_HEAL,						// 購入品
 			POS_SHOP + (float)nCntShop * SPACE_SHOP	// 位置
 		);
 		if (UNUSED(m_apShop[nCntShop]))
@@ -364,6 +378,12 @@ void CShopManager::Uninit(void)
 //============================================================
 void CShopManager::Update(void)
 {
+	// 購入品選択の更新
+	UpdateSelect();
+
+	// 購入の更新
+	UpdateBuy();
+
 	// 数値に体力を設定
 	m_pLife->GetMultiValue()->SetNum(CScene::GetPlayer()->GetLife());
 
@@ -372,12 +392,6 @@ void CShopManager::Update(void)
 
 	// 数値にレベルを設定
 	m_pLv->GetMultiValue()->SetNum(CScene::GetPlayer()->GetLevel());
-
-	// 購入品選択の更新
-	UpdateSelect();
-
-	// 購入の更新
-	UpdateBuy();
 
 	// オブジェクト2D情報の更新
 	m_pBg->Update();			// 背景情報
@@ -395,14 +409,14 @@ void CShopManager::Update(void)
 //============================================================
 void CShopManager::SetEnableOpen(const bool bOpen)
 {
-	// ショップの品ぞろえを全変更
-	AllRandomShop();
-
 	// ショップを表示
 	SetEnableDraw(bOpen);
 
 	if (bOpen)
 	{ // 開店する場合
+
+		// ショップの品ぞろえを全変更
+		AllRandomShop();
 
 		// 数値に体力を設定
 		m_pLife->GetMultiValue()->SetNum(CScene::GetPlayer()->GetLife());
@@ -527,14 +541,14 @@ void CShopManager::UpdateBuy(void)
 
 				switch (nBuy)
 				{ // 購入品ごとの処理
-				case CShop::BUY_PLAYER_HEAL:	// プレイヤー回復
+				case CShop::BUY_HEAL:	// プレイヤー回復
 
 					// プレイヤーの体力を回復
 					pPlayer->AddLife(50);
 
 					break;
 
-				case CShop::BUY_PLAYER_LVUP_LIFE:	// プレイヤー体力レベルアップ
+				case CShop::BUY_LVUP_LIFE:	// プレイヤー体力レベルアップ
 
 					// プレイヤーの体力をレベルアップ
 					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_LIFE);
@@ -543,12 +557,40 @@ void CShopManager::UpdateBuy(void)
 					{ // プレイヤーの体力が最大レベルの場合
 
 						// プレイヤーの体力レベルアップを省くようにする
-						m_pOmitShop->SetEnableOmit(CShop::BUY_PLAYER_LVUP_LIFE, true);
+						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_LIFE, true);
 					}
 
 					break;
 
-				case CShop::BUY_PLAYER_LVUP_DEFENSE:	// プレイヤー防御力レベルアップ
+				case CShop::BUY_LVUP_MANA:	// プレイヤーマナレベルアップ
+
+					// プレイヤーのマナをレベルアップ
+					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_MANA);
+
+					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_MANA) >= CPlayer::LEVEL_MAX - 1)
+					{ // プレイヤーのマナが最大レベルの場合
+
+						// プレイヤーのマナレベルアップを省くようにする
+						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MANA, true);
+					}
+
+					break;
+
+				case CShop::BUY_LVUP_DASH:	// プレイヤーダッシュレベルアップ
+
+					// プレイヤーのダッシュをレベルアップ
+					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_DASH);
+
+					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_DASH) >= CPlayer::LEVEL_MAX - 1)
+					{ // プレイヤーのダッシュが最大レベルの場合
+
+						// プレイヤーのダッシュレベルアップを省くようにする
+						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DASH, true);
+					}
+
+					break;
+
+				case CShop::BUY_LVUP_DEFENSE:	// プレイヤー防御力レベルアップ
 
 					// プレイヤーの防御力をレベルアップ
 					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_DEFENSE);
@@ -557,7 +599,21 @@ void CShopManager::UpdateBuy(void)
 					{ // プレイヤーの防御力が最大レベルの場合
 
 						// プレイヤーの防御力レベルアップを省くようにする
-						m_pOmitShop->SetEnableOmit(CShop::BUY_PLAYER_LVUP_DEFENSE, true);
+						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DEFENSE, true);
+					}
+
+					break;
+
+				case CShop::BUY_LVUP_SPEED:	// プレイヤー素早さレベルアップ
+
+					// プレイヤーの素早さをレベルアップ
+					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_SPEED);
+
+					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_SPEED) >= CPlayer::LEVEL_MAX - 1)
+					{ // プレイヤーの素早さが最大レベルの場合
+
+						// プレイヤーの素早さレベルアップを省くようにする
+						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_SPEED, true);
 					}
 
 					break;

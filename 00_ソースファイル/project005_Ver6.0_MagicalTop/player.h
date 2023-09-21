@@ -113,7 +113,10 @@ public:
 	typedef enum
 	{
 		LEVELINFO_LIFE = 0,	// 体力
+		LEVELINFO_MANA,		// マナ
+		LEVELINFO_DASH,		// ダッシュ
 		LEVELINFO_DEFENSE,	// 防御力
+		LEVELINFO_SPEED,	// 素早さ
 		LEVELINFO_MAX		// この列挙型の総数
 	}LEVELINFO;
 
@@ -123,18 +126,32 @@ public:
 	// デストラクタ
 	~CPlayer();
 
+	// 素早さ構造体
+	typedef struct
+	{
+		float fLeftside;	// 左側への加速量
+		float fOutside;		// 内側への加速量
+		float fInside;		// 外側への加速量
+	}Speed;
+
 	// ステータス構造体
 	typedef struct
 	{
 		int nLife;		// 体力
+		int nMana;		// マナ
+		int nDash;		// ダッシュ
 		int nDefense;	// 防御力
+		Speed speed;	// 素早さ
 	}StatusInfo;
 
 	// レベル構造体
 	typedef struct
 	{
 		int nLife;		// 体力
+		int nMana;		// マナ
+		int nDash;		// ダッシュ
 		int nDefense;	// 防御力
+		int nSpeed;		// 素早さ
 	}LevelInfo;
 
 	// オーバーライド関数

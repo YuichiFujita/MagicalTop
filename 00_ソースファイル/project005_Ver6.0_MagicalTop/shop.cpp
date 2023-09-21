@@ -40,7 +40,10 @@
 const char *CShop::mc_apTextureFile[] =	// テクスチャ定数
 {
 	"data\\TEXTURE\\shop003.png",	// 必要レベルテクスチャ
-	"data\\TEXTURE\\shop004.png",	// アイコンテクスチャ
+
+	//"data\\TEXTURE\\shop004.png",	// アイコンテクスチャ
+	"data\\TEXTURE\\debug000.png",	// アイコンテクスチャ	// TODO
+
 	"data\\TEXTURE\\shop005.png",	// 説明テクスチャ
 	"data\\TEXTURE\\shop006.png",	// 売り切れアイコンテクスチャ
 	"data\\TEXTURE\\shop007.png",	// 売り切れ説明テクスチャ
@@ -48,9 +51,17 @@ const char *CShop::mc_apTextureFile[] =	// テクスチャ定数
 
 const int CShop::mc_aNeedLevel[] =	// 購入必要レベル定数
 {
-	1,	// プレイヤー回復
-	1,	// ターゲット回復
-	2,	// 魔法発射数増加
+	0,	// 回復
+	0,	// 体力レベルアップ
+	0,	// マナレベルアップ
+	0,	// ダッシュレベルアップ
+	0,	// 防御力レベルアップ
+	0,	// 素早さレベルアップ
+	0,	// 魔法弾速レベルアップ
+	0,	// 魔法連射速度レベルアップ
+	0,	// 魔法発射数レベルアップ
+	0,	// 獲得経験値増加
+	0,	// レベルアップ割引
 };
 
 //************************************************************
@@ -62,12 +73,12 @@ const int CShop::mc_aNeedLevel[] =	// 購入必要レベル定数
 CShop::CShop() : CObject(CObject::LABEL_NONE, DEFAULT_PRIO)
 {
 	// メンバ変数をクリア
-	m_pIcon = NULL;				// 購入品アイコン
-	m_pExplain = NULL;			// 購入品説明
-	m_pLv = NULL;				// 必要レベル
-	m_pos = VEC3_ZERO;			// 位置
-	m_col = XCOL_WHITE;			// 色
-	m_buy = BUY_PLAYER_HEAL;	// 購入品
+	m_pIcon = NULL;		// 購入品アイコン
+	m_pExplain = NULL;	// 購入品説明
+	m_pLv = NULL;		// 必要レベル
+	m_pos = VEC3_ZERO;	// 位置
+	m_col = XCOL_WHITE;	// 色
+	m_buy = BUY_HEAL;	// 購入品
 }
 
 //============================================================
@@ -87,11 +98,11 @@ HRESULT CShop::Init(void)
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャ
 
 	// メンバ変数を初期化
-	m_pIcon = NULL;				// 購入品アイコン
-	m_pLv = NULL;				// 必要レベル
-	m_pos = VEC3_ZERO;			// 位置
-	m_col = XCOL_WHITE;			// 色
-	m_buy = BUY_PLAYER_HEAL;	// 購入品
+	m_pIcon = NULL;		// 購入品アイコン
+	m_pLv = NULL;		// 必要レベル
+	m_pos = VEC3_ZERO;	// 位置
+	m_col = XCOL_WHITE;	// 色
+	m_buy = BUY_HEAL;	// 購入品
 
 	//--------------------------------------------------------
 	//	購入品アイコンの生成・設定

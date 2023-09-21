@@ -43,10 +43,18 @@ public:
 	// 購入列挙
 	enum BUY
 	{
-		BUY_PLAYER_HEAL = 0,		// プレイヤー回復
-		BUY_PLAYER_LVUP_LIFE,		// プレイヤー体力レベルアップ
-		BUY_PLAYER_LVUP_DEFENSE,	// プレイヤー防御力レベルアップ
-		BUY_MAX						// この列挙型の総数
+		BUY_HEAL = 0,			// 回復
+		BUY_LVUP_LIFE,			// 体力レベルアップ
+		BUY_LVUP_MANA,			// マナレベルアップ
+		BUY_LVUP_DASH,			// ダッシュレベルアップ
+		BUY_LVUP_DEFENSE,		// 防御力レベルアップ
+		BUY_LVUP_SPEED,			// 素早さレベルアップ
+		BUY_LVUP_MAGIC_SPEED,	// 魔法弾速レベルアップ
+		BUY_LVUP_MAGIC_RAPID,	// 魔法連射速度レベルアップ
+		BUY_LVUP_MAGIC_NUM,		// 魔法発射数レベルアップ
+		BUY_EXP_UP,				// 獲得経験値増加
+		BUY_LEVEL_REBATE,		// レベルアップ割引
+		BUY_MAX					// この列挙型の総数
 	};
 
 	// コンストラクタ

@@ -58,12 +58,14 @@ public:
 	Shot ShotMagic(void);	// 魔法発射
 	void SetEnableHealMana(const bool bHeal);	// マナ回復状況設定
 	void SetEnableManaDraw(const bool bDraw);	// マナ描画状況設定
-	void SetMana(const int nMana);	// マナ設定
-	int GetMana(void) const;		// マナ残量取得
-	int GetMaxMana(void) const;		// 最大マナ取得
+	void AddMana(const int nAdd);		// マナ加算
+	void SetMana(const int nMana);		// マナ設定
+	void SetMaxMana(const int nMana);	// 最大マナ設定
+	int GetMana(void) const;			// マナ残量取得
+	int GetMaxMana(void) const;			// 最大マナ取得
 
 	// 静的メンバ関数
-	static CMagicManager *Create(CObject *pPlayer);			// 生成
+	static CMagicManager *Create(CObject *pPlayer, const int nMaxMana);	// 生成
 	static HRESULT Release(CMagicManager *&prMagicManager);	// 破棄
 
 private:

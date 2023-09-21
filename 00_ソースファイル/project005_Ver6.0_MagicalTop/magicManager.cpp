@@ -25,7 +25,6 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define MAX_MANA	(100)	// 最大マナ
 #define MANA_FRAME	(10)	// マナ変動フレーム
 
 #define GAUGE_PLUS_Y	(120.0f)	// ゲージY位置加算量
@@ -82,7 +81,7 @@ HRESULT CMagicManager::Init(void)
 	( // 引数
 		CObject::LABEL_GAUGE,			// オブジェクトラベル
 		NULL,							// ゲージ表示オブジェクト
-		MAX_MANA,						// 最大マナ
+		0,								// 最大マナ
 		MANA_FRAME,						// マナ変動フレーム
 		GAUGE_PLUS_Y,					// 表示Y位置の加算量
 		GAUGE_GAUGESIZE,				// ゲージ大きさ
@@ -186,7 +185,7 @@ void CMagicManager::Update(void)
 			if (CScene::GetStage()->GetAreaPlayer() == CStage::AREA_SAFE)
 			{ // セーフエリアにいる場合
 
-				if (m_pMana->GetNum() < MAX_MANA)
+				if (m_pMana->GetNum() < m_pMana->GetMaxNum())
 				{ // マナが減っている場合
 
 					if (m_bHeal)
@@ -409,12 +408,30 @@ void CMagicManager::SetEnableManaDraw(const bool bDraw)
 }
 
 //============================================================
+//	マナの加算処理
+//============================================================
+void CMagicManager::AddMana(const int nAdd)
+{
+	// マナを加算
+	m_pMana->AddNum(nAdd);
+}
+
+//============================================================
 //	マナの設定処理
 //============================================================
 void CMagicManager::SetMana(const int nMana)
 {
 	// マナを設定
 	m_pMana->SetNum(nMana);
+}
+
+//============================================================
+//	最大マナの設定処理
+//============================================================
+void CMagicManager::SetMaxMana(const int nMana)
+{
+	// 引数の最大マナを設定
+	m_pMana->SetMaxNum(nMana);
 }
 
 //============================================================
@@ -438,7 +455,7 @@ int CMagicManager::GetMaxMana(void) const
 //============================================================
 //	生成処理
 //============================================================
-CMagicManager *CMagicManager::Create(CObject *pPlayer)
+CMagicManager *CMagicManager::Create(CObject *pPlayer, const int nMaxMana)
 {
 	// ポインタを宣言
 	CMagicManager *pMagicManager = NULL;	// 魔法マネージャー生成用
@@ -465,6 +482,9 @@ CMagicManager *CMagicManager::Create(CObject *pPlayer)
 			// 失敗を返す
 			return NULL;
 		}
+
+		// マナの最大値を設定
+		pMagicManager->m_pMana->SetMaxNum(nMaxMana);
 
 		// マナ表示オブジェクトを設定
 		pMagicManager->m_pMana->SetGaugeObject(pPlayer);

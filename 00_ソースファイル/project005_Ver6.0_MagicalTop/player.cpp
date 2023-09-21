@@ -49,7 +49,6 @@
 #define GAUGE_BACKCOL	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	// 裏ゲージ色
 
 #define STAR_ADDPOS		(D3DXVECTOR3(0.0f, 50.0f, 0.0f))	// 表示位置の加算量
-#define STAR_MAX_GAUGE	(60)	// 最大ゲージ量
 #define STAR_RADIUS		(40.0f)	// 半径
 #define STAR_HEAL		(4)		// ゲージ回復量
 #define STAR_WAIT_HEAL	(120)	// 回復待機カウント
@@ -85,10 +84,7 @@
 #define OUTSIDE_SUBROT		(0.5f)	// 内側移動時の向き変動量
 
 #define MOVE_INSIDE			(0.55f)	// 内側への移動量
-#define MOVE_OUTSIDE		(2.55f)	// 外側への移動量
-#define MOVE_OUTSIDE_ACCELE	(1.0f)	// 外側移動の加速量
 #define MOVE_LEFT			(0.55f)	// 左側への移動量
-#define MOVE_LEFT_ACCELE	(1.2f)	// 左移動の加速量
 #define MOVE_LEFT_DECELE	(0.4f)	// 左移動の減速量
 
 //************************************************************
@@ -205,7 +201,7 @@ HRESULT CPlayer::Init(void)
 	SetModelInfo();
 
 	// 魔法マネージャーの生成
-	m_pMagic = CMagicManager::Create(this);
+	m_pMagic = CMagicManager::Create(this, m_aStatusInfo[m_level.nMana].nMana);
 	if (UNUSED(m_pMagic))
 	{ // 非使用中の場合
 
@@ -250,14 +246,14 @@ HRESULT CPlayer::Init(void)
 	// ダッシュの生成
 	m_pDash = CGaugeStar::Create
 	( // 引数
-		STAR_MAX_GAUGE,		// 最大ゲージ量
-		STAR_RADIUS,		// 半径
-		STAR_HEAL,			// ゲージ回復量
-		STAR_WAIT_HEAL,		// 回復待機カウント
-		this,				// 親オブジェクト
-		STAR_ADDPOS,		// 表示位置の加算量
-		STAR_DIS_CENTER,	// 中心からの距離
-		STAR_FLICKER		// 揺らめき量
+		m_aStatusInfo[m_level.nDash].nDash,	// 最大ゲージ量
+		STAR_RADIUS,						// 半径
+		STAR_HEAL,							// ゲージ回復量
+		STAR_WAIT_HEAL,						// 回復待機カウント
+		this,								// 親オブジェクト
+		STAR_ADDPOS,						// 表示位置の加算量
+		STAR_DIS_CENTER,					// 中心からの距離
+		STAR_FLICKER						// 揺らめき量
 	);
 	if (UNUSED(m_pDash))
 	{ // 非使用中の場合
@@ -356,12 +352,10 @@ void CPlayer::Update(void)
 
 	// デバッグ表示
 	CManager::GetDebugProc()->Print("体力レベル：%d\n", m_level.nLife);
+	CManager::GetDebugProc()->Print("マナレベル：%d\n", m_level.nMana);
+	CManager::GetDebugProc()->Print("ダッシュレベル：%d\n", m_level.nDash);
 	CManager::GetDebugProc()->Print("防御力レベル：%d\n", m_level.nDefense);
-
-	if (CManager::GetKeyboard()->GetPress(DIK_0))
-	{ // TODO：デバッグ操作
-		m_pExp->AddExp(1);
-	}
+	CManager::GetDebugProc()->Print("素早さレベル：%d\n", m_level.nSpeed);
 }
 
 //============================================================
@@ -517,6 +511,7 @@ void CPlayer::AddLevelStatus(const LEVELINFO level)
 {
 	// 変数を宣言
 	int nLife = 0;	// 体力の保存用
+	int nMana = 0;	// マナの保存用
 
 	// 引数のレベルを加算
 	switch (level)
@@ -540,6 +535,38 @@ void CPlayer::AddLevelStatus(const LEVELINFO level)
 
 		break;
 
+	case LEVELINFO_MANA:		// マナ
+
+		// マナのレベルを加算
+		m_level.nMana++;
+
+		// 現在のマナを取得
+		nMana = m_pMagic->GetMana();
+
+		// 最大マナを更新
+		m_pMagic->SetMaxMana(m_aStatusInfo[m_level.nMana].nMana);
+
+		// マナの増加分を先ほどまでのマナに加算して設定
+		m_pMagic->SetMana(nMana + (m_aStatusInfo[m_level.nMana].nMana - m_aStatusInfo[m_level.nMana - 1].nMana));
+
+		// マナオーバー
+		assert(m_level.nMana < LEVEL_MAX);
+
+		break;
+
+	case LEVELINFO_DASH:	// ダッシュ
+
+		// ダッシュのレベルを加算
+		m_level.nDash++;
+
+		// 最大ダッシュを更新
+		m_pDash->SetMaxNumGauge(m_aStatusInfo[m_level.nDash].nDash);
+
+		// ダッシュオーバー
+		assert(m_level.nDash < LEVEL_MAX);
+
+		break;
+
 	case LEVELINFO_DEFENSE:	// 防御力
 
 		// 防御力のレベルを加算
@@ -547,6 +574,16 @@ void CPlayer::AddLevelStatus(const LEVELINFO level)
 
 		// 防御力オーバー
 		assert(m_level.nDefense < LEVEL_MAX);
+
+		break;
+
+	case LEVELINFO_SPEED:	// 素早さ
+
+		// 素早さのレベルを加算
+		m_level.nSpeed++;
+
+		// 素早さオーバー
+		assert(m_level.nSpeed < LEVEL_MAX);
 
 		break;
 
@@ -603,6 +640,9 @@ void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 
 	// ターゲットとの距離を設定
 	UpdateDisTarget();
+
+	// ダッシュゲージを全回復させる
+	m_pDash->HealNumGauge();
 
 	// 軌跡の初期化を行う状態にする
 	m_pOrbit->SetEnableInit(false);
@@ -750,19 +790,29 @@ int CPlayer::GetLevelStatus(const LEVELINFO level) const
 		// 体力のレベルを返す
 		return m_level.nLife;
 
-		break;
+	case LEVELINFO_MANA:	// マナ
+
+		// マナのレベルを返す
+		return m_level.nMana;
+
+	case LEVELINFO_DASH:	// ダッシュ
+
+		// ダッシュのレベルを返す
+		return m_level.nDash;
 
 	case LEVELINFO_DEFENSE:	// 防御力
 
 		// 防御力のレベルを返す
 		return m_level.nDefense;
 
-		break;
+	case LEVELINFO_SPEED:	// 素早さ
+
+		// 素早さのレベルを返す
+		return m_level.nSpeed;
 
 	default:	// 例外処理
 		assert(false);
 		return NONE_IDX;
-		break;
 	}
 }
 
@@ -960,7 +1010,7 @@ CPlayer::MOTION CPlayer::ControlTargAccel(const D3DXVECTOR3& rVecTarg, bool *pMo
 	if (pKeyboard->GetPress(DIK_W) || pPad->GetPressLStickY() > 0.0f)
 	{
 		// 外側への移動量を追加
-		m_move -= rVecTarg * (MOVE_OUTSIDE + (fDisTargRate * PLUS_OUTSIDE_MOVE));
+		m_move -= rVecTarg * (m_aStatusInfo[m_level.nSpeed].speed.fOutside + (fDisTargRate * PLUS_OUTSIDE_MOVE));
 
 		// 外側を向かせる
 		m_destRot.y += INSIDE_ADDROT;
@@ -975,7 +1025,7 @@ CPlayer::MOTION CPlayer::ControlTargAccel(const D3DXVECTOR3& rVecTarg, bool *pMo
 	else if (pKeyboard->GetPress(DIK_S) || pPad->GetPressLStickY() < 0.0f)
 	{
 		// 内側への移動量を追加
-		m_move += rVecTarg * MOVE_OUTSIDE_ACCELE;
+		m_move += rVecTarg * m_aStatusInfo[m_level.nSpeed].speed.fInside;
 
 		// 内側を向かせる
 		m_destRot.y -= OUTSIDE_SUBROT;
@@ -1019,7 +1069,7 @@ CPlayer::MOTION CPlayer::ControlSideAccel(const D3DXVECTOR3& rVecSide, bool *pMo
 		{ // ゲージが使用できた場合
 
 			// 左移動量を加速
-			m_move += rVecSide * MOVE_LEFT_ACCELE;
+			m_move += rVecSide * m_aStatusInfo[m_level.nSpeed].speed.fLeftside;
 
 			// 現在のモーションを設定
 			currentMotion = MOTION_ACCELE;	// 加速モーション
@@ -1579,11 +1629,41 @@ void CPlayer::LoadSetup(void)
 								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
 								fscanf(pFile, "%d", &m_aStatusInfo[nLevel].nLife);		// 体力を読み込む
 							}
+							else if (strcmp(&aString[0], "MANA") == 0)
+							{ // 読み込んだ文字列が MANA の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nLevel].nMana);		// マナを読み込む
+							}
+							else if (strcmp(&aString[0], "DASH") == 0)
+							{ // 読み込んだ文字列が DASH の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nLevel].nDash);		// ダッシュを読み込む
+							}
 							else if (strcmp(&aString[0], "DEFENSE") == 0)
 							{ // 読み込んだ文字列が DEFENSE の場合
 
 								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
 								fscanf(pFile, "%d", &m_aStatusInfo[nLevel].nDefense);	// 防御力を読み込む
+							}
+							else if (strcmp(&aString[0], "LEFTSIDE") == 0)
+							{ // 読み込んだ文字列が LEFTSIDE の場合
+
+								fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nLevel].speed.fLeftside);	// 左側への加速量を読み込む
+							}
+							else if (strcmp(&aString[0], "INSIDE") == 0)
+							{ // 読み込んだ文字列が INSIDE の場合
+
+								fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nLevel].speed.fInside);		// 内側への加速量を読み込む
+							}
+							else if (strcmp(&aString[0], "OUTSIDE") == 0)
+							{ // 読み込んだ文字列が OUTSIDE の場合
+
+								fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nLevel].speed.fOutside);		// 外側への加速量を読み込む
 							}
 						} while (strcmp(&aString[0], "END_LEVELSET") != 0);	// 読み込んだ文字列が END_LEVELSET ではない場合ループ
 					}
