@@ -40,10 +40,7 @@
 const char *CShop::mc_apTextureFile[] =	// テクスチャ定数
 {
 	"data\\TEXTURE\\shop003.png",	// 必要レベルテクスチャ
-
-	//"data\\TEXTURE\\shop004.png",	// アイコンテクスチャ
-	"data\\TEXTURE\\debug000.png",	// アイコンテクスチャ	// TODO
-
+	"data\\TEXTURE\\shop004.png",	// アイコンテクスチャ
 	"data\\TEXTURE\\shop005.png",	// 説明テクスチャ
 	"data\\TEXTURE\\shop006.png",	// 売り切れアイコンテクスチャ
 	"data\\TEXTURE\\shop007.png",	// 売り切れ説明テクスチャ
@@ -57,11 +54,10 @@ const int CShop::mc_aNeedLevel[] =	// 購入必要レベル定数
 	0,	// ダッシュレベルアップ
 	0,	// 防御力レベルアップ
 	0,	// 素早さレベルアップ
+	0,	// 魔法発射数レベルアップ
 	0,	// 魔法弾速レベルアップ
 	0,	// 魔法連射速度レベルアップ
-	0,	// 魔法発射数レベルアップ
 	0,	// 獲得経験値増加
-	0,	// レベルアップ割引
 };
 
 //************************************************************

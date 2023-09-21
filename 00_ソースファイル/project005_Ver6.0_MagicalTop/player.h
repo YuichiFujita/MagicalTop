@@ -117,6 +117,7 @@ public:
 		LEVELINFO_DASH,		// ダッシュ
 		LEVELINFO_DEFENSE,	// 防御力
 		LEVELINFO_SPEED,	// 素早さ
+		LEVELINFO_EXP_UP,	// 経験値ボーナス
 		LEVELINFO_MAX		// この列挙型の総数
 	}LEVELINFO;
 
@@ -142,6 +143,7 @@ public:
 		int nDash;		// ダッシュ
 		int nDefense;	// 防御力
 		Speed speed;	// 素早さ
+		float fMulExp;	// 経験値ボーナス
 	}StatusInfo;
 
 	// レベル構造体
@@ -152,6 +154,7 @@ public:
 		int nDash;		// ダッシュ
 		int nDefense;	// 防御力
 		int nSpeed;		// 素早さ
+		int nMulExp;	// 経験値ボーナス
 	}LevelInfo;
 
 	// オーバーライド関数
@@ -168,6 +171,7 @@ public:
 		const D3DXVECTOR3& rPos,	// 位置
 		const D3DXVECTOR3& rRot		// 向き
 	);
+	static StatusInfo GetStatusInfo(const LEVEL level);	// ステータス情報取得
 
 	// 純粋仮想関数
 	virtual void HitBlowAway	// 吹っ飛びヒット

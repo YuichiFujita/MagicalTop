@@ -100,12 +100,8 @@ public:
 		float	fKnockBackSide;		// ノックバック横移動量
 		float	fKnockBackRevision;	// ノックバック減衰係数
 		float	fForwardMove;		// 前進の移動量
-		float	fBackwardMove;		// 後退の移動量
 		float	fLookRevision;		// プレイヤー方向を向く補正係数
-		float	fFindRadius;		// 検知範囲
 		float	fAttackRadius;		// 攻撃範囲
-		float	fBackwardRadius;	// 後退範囲
-		bool	bBackward;			// 後退の ON/OFF
 	}StatusInfo;
 
 	// オーバーライド関数

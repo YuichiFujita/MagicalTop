@@ -128,6 +128,7 @@ CPlayer::StatusInfo CPlayer::m_aStatusInfo[LEVEL_MAX] = {};	// ステータス情報
 CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 {
 	// メンバ変数をクリア
+	memset(&m_level, 0, sizeof(m_level));	// レベル
 	m_pMagic		= NULL;			// 魔法マネージャーの情報
 	m_pExp			= NULL;			// 経験値マネージャーの情報
 	m_pLife			= NULL;			// 体力の情報
@@ -144,7 +145,6 @@ CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 	m_fVortexRot	= 0.0f;			// 渦巻き方向
 	m_fVortexDis	= 0.0f;			// 渦巻との距離
 	m_bJump			= false;		// ジャンプ状況
-	memset(&m_level, 0, sizeof(m_level));	// レベル
 }
 
 //============================================================
@@ -164,26 +164,30 @@ HRESULT CPlayer::Init(void)
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 
 	// メンバ変数を初期化
-	m_pMagic		= NULL;				// 魔法マネージャーの情報
-	m_pExp			= NULL;				// 経験値マネージャーの情報
-	m_pLife			= NULL;				// 体力の情報
-	m_pDash			= NULL;				// ダッシュの情報
-	m_pShadow		= NULL;				// 影の情報
-	m_pOrbit		= NULL;				// 軌跡の情報
-	m_oldPos		= VEC3_ZERO;		// 過去位置
-	m_move			= VEC3_ZERO;		// 移動量
-	m_destRot		= VEC3_ZERO;		// 目標向き
-	m_state			= STATE_NONE;		// 状態
-	m_nCounterState	= 0;				// 状態管理カウンター
-	m_nNumModel		= 0;				// パーツの総数
-	m_fDisTarget	= 0.0f;				// ターゲットとの距離
-	m_fVortexRot	= 0.0f;				// 渦巻き方向
-	m_fVortexDis	= 0.0f;				// 渦巻との距離
-	m_bJump			= true;				// ジャンプ状況
+	m_pMagic		= NULL;			// 魔法マネージャーの情報
+	m_pExp			= NULL;			// 経験値マネージャーの情報
+	m_pLife			= NULL;			// 体力の情報
+	m_pDash			= NULL;			// ダッシュの情報
+	m_pShadow		= NULL;			// 影の情報
+	m_pOrbit		= NULL;			// 軌跡の情報
+	m_oldPos		= VEC3_ZERO;	// 過去位置
+	m_move			= VEC3_ZERO;	// 移動量
+	m_destRot		= VEC3_ZERO;	// 目標向き
+	m_state			= STATE_NONE;	// 状態
+	m_nCounterState	= 0;			// 状態管理カウンター
+	m_nNumModel		= 0;			// パーツの総数
+	m_fDisTarget	= 0.0f;			// ターゲットとの距離
+	m_fVortexRot	= 0.0f;			// 渦巻き方向
+	m_fVortexDis	= 0.0f;			// 渦巻との距離
+	m_bJump			= true;			// ジャンプ状況
 
 	// レベル情報を初期化
-	m_level.nLife = LEVEL_00;		// 体力
-	m_level.nDefense = LEVEL_00;	// 防御力
+	m_level.nLife		= LEVEL_00;	// 体力
+	m_level.nDefense	= LEVEL_00;	// 防御力
+	m_level.nDash		= LEVEL_00;	// ダッシュ
+	m_level.nDefense	= LEVEL_00;	// 防御力
+	m_level.nSpeed		= LEVEL_00;	// 素早さ
+	m_level.nMulExp		= LEVEL_00;	// 経験値ボーナス
 
 	// オブジェクトキャラクターの初期化
 	if (FAILED(CObjectChara::Init()))
@@ -505,6 +509,15 @@ CPlayer *CPlayer::Create
 }
 
 //============================================================
+//	ステータス情報取得処理
+//============================================================
+CPlayer::StatusInfo CPlayer::GetStatusInfo(const LEVEL level)
+{
+	// 引数のレベルのステータス情報を返す
+	return m_aStatusInfo[level];
+}
+
+//============================================================
 //	ステータスレベルの加算処理
 //============================================================
 void CPlayer::AddLevelStatus(const LEVELINFO level)
@@ -584,6 +597,16 @@ void CPlayer::AddLevelStatus(const LEVELINFO level)
 
 		// 素早さオーバー
 		assert(m_level.nSpeed < LEVEL_MAX);
+
+		break;
+
+	case LEVELINFO_EXP_UP:	// 経験値ボーナス
+
+		// 経験値ボーナスのレベルを加算
+		m_level.nMulExp++;
+
+		// 経験値ボーナスオーバー
+		assert(m_level.nMulExp < LEVEL_MAX);
 
 		break;
 
@@ -809,6 +832,11 @@ int CPlayer::GetLevelStatus(const LEVELINFO level) const
 
 		// 素早さのレベルを返す
 		return m_level.nSpeed;
+
+	case LEVELINFO_EXP_UP:	// 経験値ボーナス
+
+		// 経験値ボーナスのレベルを返す
+		return m_level.nMulExp;
 
 	default:	// 例外処理
 		assert(false);
@@ -1664,6 +1692,12 @@ void CPlayer::LoadSetup(void)
 
 								fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nLevel].speed.fOutside);		// 外側への加速量を読み込む
+							}
+							else if (strcmp(&aString[0], "EXPBONUS") == 0)
+							{ // 読み込んだ文字列が EXPBONUS の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_aStatusInfo[nLevel].fMulExp);	// 経験値ボーナスを読み込む
 							}
 						} while (strcmp(&aString[0], "END_LEVELSET") != 0);	// 読み込んだ文字列が END_LEVELSET ではない場合ループ
 					}

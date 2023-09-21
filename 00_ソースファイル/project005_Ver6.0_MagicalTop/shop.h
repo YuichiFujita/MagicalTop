@@ -49,11 +49,10 @@ public:
 		BUY_LVUP_DASH,			// ダッシュレベルアップ
 		BUY_LVUP_DEFENSE,		// 防御力レベルアップ
 		BUY_LVUP_SPEED,			// 素早さレベルアップ
+		BUY_LVUP_MAGIC_NUM,		// 魔法発射数レベルアップ
 		BUY_LVUP_MAGIC_SPEED,	// 魔法弾速レベルアップ
 		BUY_LVUP_MAGIC_RAPID,	// 魔法連射速度レベルアップ
-		BUY_LVUP_MAGIC_NUM,		// 魔法発射数レベルアップ
 		BUY_EXP_UP,				// 獲得経験値増加
-		BUY_LEVEL_REBATE,		// レベルアップ割引
 		BUY_MAX					// この列挙型の総数
 	};
 

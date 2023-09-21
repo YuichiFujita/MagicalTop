@@ -132,17 +132,16 @@ HRESULT CShopManager::Init(void)
 
 
 	// TODO
-	//m_pOmitShop->SetEnableOmit(CShop::BUY_HEAL, true);
+	m_pOmitShop->SetEnableOmit(CShop::BUY_HEAL, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_LIFE, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MANA, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DASH, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DEFENSE, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_SPEED, true);
+	//m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_NUM, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_SPEED, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_RAPID, true);
-	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_NUM, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_EXP_UP, true);
-	m_pOmitShop->SetEnableOmit(CShop::BUY_LEVEL_REBATE, true);
 
 
 	//--------------------------------------------------------
@@ -628,6 +627,62 @@ void CShopManager::UpdateBuy(void)
 
 						// プレイヤーの素早さレベルアップを省くようにする
 						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_SPEED, true);
+					}
+
+					break;
+
+				case CShop::BUY_LVUP_MAGIC_NUM:		// 魔法発射数レベルアップ
+
+					// 魔法の発射数をレベルアップ
+					CMagic::AddLevelStatus(CMagic::LEVELINFO_NUM);
+
+					if (CMagic::GetLevelStatus(CMagic::LEVELINFO_NUM) >= CMagic::LEVEL_MAX - 1)
+					{ // 魔法の発射数が最大レベルの場合
+
+						// 魔法の発射数レベルアップを省くようにする
+						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_NUM, true);
+					}
+
+					break;
+
+				case CShop::BUY_LVUP_MAGIC_SPEED:	// 魔法弾速レベルアップ
+
+					// 魔法の弾速をレベルアップ
+					CMagic::AddLevelStatus(CMagic::LEVELINFO_SPEED);
+
+					if (CMagic::GetLevelStatus(CMagic::LEVELINFO_SPEED) >= CMagic::LEVEL_MAX - 1)
+					{ // 魔法の弾速が最大レベルの場合
+
+						// 魔法の弾速レベルアップを省くようにする
+						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_SPEED, true);
+					}
+
+					break;
+
+				case CShop::BUY_LVUP_MAGIC_RAPID:	// 魔法連射速度レベルアップ
+
+					// 魔法の連射速度をレベルアップ
+					CMagic::AddLevelStatus(CMagic::LEVELINFO_RAPID);
+
+					if (CMagic::GetLevelStatus(CMagic::LEVELINFO_RAPID) >= CMagic::LEVEL_MAX - 1)
+					{ // 魔法の連射速度が最大レベルの場合
+
+						// 魔法の連射速度レベルアップを省くようにする
+						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_RAPID, true);
+					}
+
+					break;
+
+				case CShop::BUY_EXP_UP:	// 獲得経験値増加
+
+					// 獲得経験値を増加させる
+					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_EXP_UP);
+
+					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_EXP_UP) >= CPlayer::LEVEL_MAX - 1)
+					{ // 経験値増加が最大レベルの場合
+
+						// 経験値増加を省くようにする
+						m_pOmitShop->SetEnableOmit(CShop::BUY_EXP_UP, true);
 					}
 
 					break;

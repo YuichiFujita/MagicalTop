@@ -369,7 +369,7 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 			);
 
 			// カウンターを設定
-			m_nCounterMagic = status.nCoolTime;
+			m_nCounterMagic = status.aLevel[CMagic::GetLevelStatus(CMagic::LEVELINFO_RAPID)].nCoolTime;
 
 			// マナを消費
 			m_pMana->AddNum(-1);

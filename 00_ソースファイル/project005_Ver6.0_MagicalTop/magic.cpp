@@ -45,6 +45,7 @@
 //	静的メンバ変数宣言
 //************************************************************
 CMagic::StatusInfo CMagic::m_statusInfo = {};	// ステータス情報
+CMagic::LevelInfo CMagic::m_level = {};			// レベル情報
 
 //************************************************************
 //	子クラス [CMagic] のメンバ関数
@@ -310,7 +311,7 @@ CMagic *CMagic::Create
 		pMagic->SetRotation(rRot);
 
 		// 移動量を設定
-		pMagic->SetMove(rVec, pMagic->GetStatusInfo().fMove);
+		pMagic->SetMove(rVec, pMagic->GetStatusInfo().aLevel[pMagic->m_level.nMove].fMove);
 
 		// 確保したアドレスを返す
 		return pMagic;
@@ -325,6 +326,79 @@ CMagic::StatusInfo CMagic::GetStatusInfo(void)
 {
 	// ステータス情報を返す
 	return m_statusInfo;
+}
+
+//============================================================
+//	ステータスレベルの加算処理
+//============================================================
+void CMagic::AddLevelStatus(const LEVELINFO level)
+{
+	// 引数のレベルを加算
+	switch (level)
+	{ // レベル情報ごとの処理
+	case LEVELINFO_NUM:		// 発射数
+
+		// 発射数のレベルを加算
+		m_level.nNumBunnle++;
+
+		// 発射数オーバー
+		assert(m_level.nNumBunnle < LEVEL_MAX);
+
+		break;
+
+	case LEVELINFO_SPEED:	// 弾速
+
+		// 弾速のレベルを加算
+		m_level.nMove++;
+
+		// 弾速オーバー
+		assert(m_level.nMove < LEVEL_MAX);
+
+		break;
+
+	case LEVELINFO_RAPID:	// 連射速度
+
+		// 連射速度のレベルを加算
+		m_level.nCoolTime++;
+
+		// 連射速度オーバー
+		assert(m_level.nCoolTime < LEVEL_MAX);
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
+}
+
+//============================================================
+//	ステータスレベル取得処理
+//============================================================
+int CMagic::GetLevelStatus(const LEVELINFO level)
+{
+	// 引数のレベルを返す
+	switch (level)
+	{ // レベル情報ごとの処理
+	case LEVELINFO_NUM:		// 発射数
+
+		// 発射数のレベルを返す
+		return m_level.nNumBunnle;
+
+	case LEVELINFO_SPEED:	// 弾速
+
+		// 弾速のレベルを返す
+		return m_level.nMove;
+
+	case LEVELINFO_RAPID:	// 連射速度
+
+		// 連射速度のレベルを返す
+		return m_level.nCoolTime;
+
+	default:	// 例外処理
+		assert(false);
+		return NONE_IDX;
+	}
 }
 
 //============================================================
@@ -467,8 +541,8 @@ bool CMagic::CollisionEnemy(void)
 void CMagic::LoadSetup(void)
 {
 	// 変数を宣言
-	int nType	= 0;	// 種類の代入用
-	int nEnd	= 0;	// テキスト読み込み終了の確認用
+	int nLevel = 0;	// レベルの代入用
+	int nEnd = 0;	// テキスト読み込み終了の確認用
 
 	// 変数配列を宣言
 	char aString[MAX_STRING];	// テキストの文字列の代入用
@@ -478,6 +552,7 @@ void CMagic::LoadSetup(void)
 
 	// 静的メンバ変数の情報をクリア
 	memset(&m_statusInfo, 0, sizeof(m_statusInfo));	// ステータス情報
+	memset(&m_level, 0, sizeof(m_level));			// レベル情報
 
 	// ファイルを読み込み形式で開く
 	pFile = fopen(MAGIC_SETUP_TXT, "r");
@@ -501,6 +576,7 @@ void CMagic::LoadSetup(void)
 					// ファイルから文字列を読み込む
 					fscanf(pFile, "%s", &aString[0]);
 
+					// 基本情報
 					if (strcmp(&aString[0], "MAGICSET") == 0)
 					{ // 読み込んだ文字列が MAGICSET の場合
 
@@ -510,29 +586,11 @@ void CMagic::LoadSetup(void)
 							// ファイルから文字列を読み込む
 							fscanf(pFile, "%s", &aString[0]);
 
-							if (strcmp(&aString[0], "TYPE") == 0)
-							{ // 読み込んだ文字列が TYPE の場合
-
-								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
-								fscanf(pFile, "%d", &nType);		// 種類を読み込む
-							}
-							else if (strcmp(&aString[0], "LIFE") == 0)
+							if (strcmp(&aString[0], "LIFE") == 0)
 							{ // 読み込んだ文字列が LIFE の場合
 
 								fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
 								fscanf(pFile, "%d", &m_statusInfo.nLife);	// 寿命を読み込む
-							}
-							else if (strcmp(&aString[0], "COOLTIME") == 0)
-							{ // 読み込んだ文字列が COOLTIME の場合
-
-								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_statusInfo.nCoolTime);	// クールタイムを読み込む
-							}
-							else if (strcmp(&aString[0], "MOVE") == 0)
-							{ // 読み込んだ文字列が MOVE の場合
-
-								fscanf(pFile, "%s", &aString[0]);				// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_statusInfo.fMove);		// 移動量を読み込む
 							}
 							else if (strcmp(&aString[0], "BUBBLE_RADIUS") == 0)
 							{ // 読み込んだ文字列が BUBBLE_RADIUS の場合
@@ -555,6 +613,43 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%f", &m_statusInfo.shotPos.z);	// 発射位置Zを読み込む
 							}
 						} while (strcmp(&aString[0], "END_MAGICSET") != 0);	// 読み込んだ文字列が END_MAGICSET ではない場合ループ
+					}
+
+					// レベル情報
+					else if (strcmp(&aString[0], "LEVELSET") == 0)
+					{ // 読み込んだ文字列が LEVELSET の場合
+
+						do
+						{ // 読み込んだ文字列が END_LEVELSET ではない場合ループ
+
+							// ファイルから文字列を読み込む
+							fscanf(pFile, "%s", &aString[0]);
+
+							if (strcmp(&aString[0], "LEVEL") == 0)
+							{ // 読み込んだ文字列が LEVEL の場合
+
+								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
+								fscanf(pFile, "%d", &nLevel);		// レベルを読み込む
+							}
+							else if (strcmp(&aString[0], "NUMBUBBLE") == 0)
+							{ // 読み込んだ文字列が NUMBUBBLE の場合
+
+								fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_statusInfo.aLevel[nLevel].nCoolTime);	// バブル数を読み込む
+							}
+							else if (strcmp(&aString[0], "MOVE") == 0)
+							{ // 読み込んだ文字列が MOVE の場合
+
+								fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_statusInfo.aLevel[nLevel].fMove);		// 移動量を読み込む
+							}
+							else if (strcmp(&aString[0], "COOLTIME") == 0)
+							{ // 読み込んだ文字列が COOLTIME の場合
+
+								fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_statusInfo.aLevel[nLevel].nCoolTime);	// クールタイムを読み込む
+							}
+						} while (strcmp(&aString[0], "END_LEVELSET") != 0);	// 読み込んだ文字列が END_LEVELSET ではない場合ループ
 					}
 				} while (strcmp(&aString[0], "END_STATUSSET") != 0);		// 読み込んだ文字列が END_STATUSSET ではない場合ループ
 			}

@@ -802,6 +802,7 @@ bool CEnemy::Death(void)
 {
 	// 変数を宣言
 	D3DXVECTOR3 posEnemy = GetPosition();	// 敵位置
+	float fBonus = CScene::GetPlayer()->GetStatusInfo((CPlayer::LEVEL)CScene::GetPlayer()->GetLevelStatus(CPlayer::LEVELINFO_EXP_UP)).fMulExp;	// 経験値ボーナス量
 
 	// 上に位置を動かす
 	posEnemy.y += ENE_DEATH_ADD_POSY;
@@ -820,7 +821,7 @@ bool CEnemy::Death(void)
 		}
 
 		// 経験値のランダム生成
-		CExpOrb::RandomSpawn(m_status.nExp, posEnemy);
+		CExpOrb::RandomSpawn((int)(m_status.nExp * fBonus), posEnemy);
 
 		// 敵オブジェクトの終了
 		Uninit();
@@ -2017,44 +2018,17 @@ void CEnemy::LoadSetup(void)
 								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].fForwardMove);	// 前進の移動量を読み込む
 							}
-							else if (strcmp(&aString[0], "BACKWARD_MOVE") == 0)
-							{ // 読み込んだ文字列が BACKWARD_MOVE の場合
-
-								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fBackwardMove);	// 後退の移動量を読み込む
-							}
 							else if (strcmp(&aString[0], "LOOK_REV") == 0)
 							{ // 読み込んだ文字列が LOOK_REV の場合
 
 								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].fLookRevision);	// 振り向き補正係数を読み込む
 							}
-							else if (strcmp(&aString[0], "FIND_RADIUS") == 0)
-							{ // 読み込んだ文字列が FIND_RADIUS の場合
-
-								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fFindRadius);		// 検知範囲を読み込む
-							}
 							else if (strcmp(&aString[0], "ATTACK_RADIUS") == 0)
 							{ // 読み込んだ文字列が ATTACK_RADIUS の場合
 
 								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
 								fscanf(pFile, "%f", &m_aStatusInfo[nType].fAttackRadius);	// 攻撃範囲を読み込む
-							}
-							else if (strcmp(&aString[0], "BACKWARD_RADIUS") == 0)
-							{ // 読み込んだ文字列が BACKWARD_RADIUS の場合
-
-								fscanf(pFile, "%s", &aString[0]);							// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_aStatusInfo[nType].fBackwardRadius);	// 後退範囲を読み込む
-							}
-							else if (strcmp(&aString[0], "BACWARD_ENABLE") == 0)
-							{ // 読み込んだ文字列が BACWARD_ENABLE の場合
-
-								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
-								fscanf(pFile, "%d", &nBackward);	// 後退のON/OFFを読み込む
-
-								// 読み込んだ値をbool型に変換
-								m_aStatusInfo[nType].bBackward = (nBackward == 0) ? true : false;
 							}
 						} while (strcmp(&aString[0], "END_ENEMYSET") != 0);	// 読み込んだ文字列が END_ENEMYSET ではない場合ループ
 					}
