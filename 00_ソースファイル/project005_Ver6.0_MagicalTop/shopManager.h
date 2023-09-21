@@ -71,6 +71,7 @@ private:
 	// メンバ関数
 	void UpdateSelect(void);	// 購入品選択
 	void UpdateBuy(void);		// 購入
+	void CheckHealOmit(void);	// 回復省き確認
 	void SetEnableDraw(const bool bDraw);	// 描画状況設定
 
 	int RandomShop	// ショップ単変更

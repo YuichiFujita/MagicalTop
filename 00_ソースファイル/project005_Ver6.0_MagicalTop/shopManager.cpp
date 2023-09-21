@@ -22,7 +22,8 @@
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define SHOP_PRIO	(6)	// ショップ表示の優先順位
+#define SHOP_PRIO	(6)		// ショップ表示の優先順位
+#define HEAL_PLAYER	(50)	// プレイヤーの体力回復量
 
 #define POS_BG	(D3DXVECTOR3(SCREEN_CENT.x, 330.0f, 0.0f))	// 背景の位置
 #define SIZE_BG	(D3DXVECTOR3(1088.0f, 562.0f, 0.0f))		// 背景の大きさ
@@ -131,11 +132,12 @@ HRESULT CShopManager::Init(void)
 
 
 	// TODO
-	m_pOmitShop->SetEnableOmit(CShop::BUY_HEAL, true);
+	//m_pOmitShop->SetEnableOmit(CShop::BUY_HEAL, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_LIFE, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MANA, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DASH, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DEFENSE, true);
+	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_SPEED, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_SPEED, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_RAPID, true);
 	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_NUM, true);
@@ -488,6 +490,18 @@ HRESULT CShopManager::Release(CShopManager *&prShopManager)
 }
 
 //============================================================
+//	回復省きの確認処理
+//============================================================
+void CShopManager::CheckHealOmit(void)
+{
+	// ポインタを宣言
+	CPlayer *pPlayer = CScene::GetPlayer();	// プレイヤー
+
+	// プレイヤー回復の省き状態を設定
+	m_pOmitShop->SetEnableOmit(CShop::BUY_HEAL, (pPlayer->GetLife() >= pPlayer->GetMaxLife()));	// プレイヤーの体力が最大体力以上で省く
+}
+
+//============================================================
 //	購入品選択の更新処理
 //============================================================
 void CShopManager::UpdateSelect(void)
@@ -544,7 +558,7 @@ void CShopManager::UpdateBuy(void)
 				case CShop::BUY_HEAL:	// プレイヤー回復
 
 					// プレイヤーの体力を回復
-					pPlayer->AddLife(50);
+					pPlayer->AddLife(HEAL_PLAYER);
 
 					break;
 
@@ -808,6 +822,9 @@ void CShopManager::AllRandomShop(void)
 
 	// ポインタを宣言
 	int *pShuffle = NULL;	// シャッフルを省くデータの保持用
+
+	// 回復省きの確認
+	CheckHealOmit();
 
 	//--------------------------------------------------------
 	//	ショップ数分変更する
