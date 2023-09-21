@@ -43,6 +43,12 @@
 #define VALUEUI_SIZE_TITLE	(D3DXVECTOR3(252.0f, 80.0f, 0.0f))	// 数字UIのタイトルの大きさ
 #define VALUEUI_SIZE_VALUE	(D3DXVECTOR3(80.0f, 80.0f, 0.0f))	// 数字UIの数字の大きさ
 
+#define POS_MAXLIFE				(D3DXVECTOR3(565.0f, 166.0f, 0.0f))	// 最大体力のタイトルと数字の位置
+#define SPACE_MAXLIFE			(D3DXVECTOR3(45.0f, 0.0f, 0.0f))	// 最大体力のタイトルと数字の行間
+#define MAX_LIFE_SPACE_VALUE	(D3DXVECTOR3(45.0f, 0.0f, 0.0f))	// 最大体力の数字の行間
+#define MAX_LIFE_SIZE_TITLE		(D3DXVECTOR3(33.0f, 55.0f, 0.0f))	// 最大体力のタイトルの大きさ
+#define MAX_LIFE_SIZE_VALUE		(D3DXVECTOR3(55.0f, 55.0f, 0.0f))	// 最大体力の数字の大きさ
+
 #define POS_SHOP	(D3DXVECTOR3(285.0f, 270.0f, 0.0f))	// ショップの位置
 #define SPACE_SHOP	(D3DXVECTOR3(350.0f, 0.0f, 0.0f))	// ショップの空白
 #define CHOICE_COL	(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	// 選択中カラー
@@ -56,7 +62,8 @@ const char *CShopManager::mc_apTextureFile[] =	// テクスチャ定数
 	"data\\TEXTURE\\icon000.png",	// プレイヤーアイコンテクスチャ
 	"data\\TEXTURE\\icon001.png",	// 経験値アイコンテクスチャ
 	"data\\TEXTURE\\shop000.png",	// 体力テクスチャ
-	"data\\TEXTURE\\shop001.png",	// レベルテクスチャ
+	"data\\TEXTURE\\shop001.png",	// 最大体力区切りテクスチャ
+	"data\\TEXTURE\\shop002.png",	// レベルテクスチャ
 };
 
 //************************************************************
@@ -73,6 +80,7 @@ CShopManager::CShopManager()
 	m_pIconPlayer	= NULL;	// プレイヤーアイコン情報
 	m_pIconExp		= NULL;	// 経験値アイコン情報
 	m_pLife			= NULL;	// プレイヤー体力情報
+	m_pMaxLife		= NULL;	// プレイヤー最大体力情報
 	m_pLv			= NULL;	// プレイヤーレベル情報
 	m_nSelect		= 0;	// 現在の選択番号
 	m_nOldSelect	= 0;	// 過去の選択番号
@@ -100,6 +108,7 @@ HRESULT CShopManager::Init(void)
 	m_pIconPlayer	= NULL;	// プレイヤーアイコン情報
 	m_pIconExp		= NULL;	// 経験値アイコン情報
 	m_pLife			= NULL;	// プレイヤー体力情報
+	m_pMaxLife		= NULL;	// プレイヤー最大体力情報
 	m_pLv			= NULL;	// プレイヤーレベル情報
 	m_nSelect		= 0;	// 現在の選択番号
 	m_nOldSelect	= 0;	// 過去の選択番号
@@ -211,6 +220,35 @@ HRESULT CShopManager::Init(void)
 	m_pLife->SetEnableDraw(false);
 
 	//--------------------------------------------------------
+	//	プレイヤー最大体力の生成・設定
+	//--------------------------------------------------------
+	// プレイヤーの最大体力情報の生成
+	m_pMaxLife = CValueUI::Create
+	( // 引数
+		mc_apTextureFile[TEXTURE_SLASH],	// タイトルテクスチャパス
+		CValue::TEXTURE_ANGULAR,			// 数字テクスチャ
+		DIGIT_LIFE,				// 桁数
+		POS_MAXLIFE,			// 位置
+		SPACE_MAXLIFE,			// 行間
+		MAX_LIFE_SPACE_VALUE,	// 数字行間
+		MAX_LIFE_SIZE_TITLE,	// タイトル大きさ
+		MAX_LIFE_SIZE_VALUE		// 数字大きさ
+	);
+	if (UNUSED(m_pMaxLife))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 優先順位を設定
+	m_pMaxLife->SetPriority(SHOP_PRIO);
+
+	// 描画をしない状態にする
+	m_pMaxLife->SetEnableDraw(false);
+
+	//--------------------------------------------------------
 	//	プレイヤーレベルの生成・設定
 	//--------------------------------------------------------
 	// プレイヤーのレベル情報の生成
@@ -281,8 +319,9 @@ void CShopManager::Uninit(void)
 	m_pIconExp->Uninit();		// 経験値アイコン情報
 
 	// 数字UI情報を破棄
-	m_pLife->Uninit();	// プレイヤー体力情報
-	m_pLv->Uninit();	// プレイヤーレベル情報
+	m_pLife->Uninit();		// プレイヤー体力情報
+	m_pMaxLife->Uninit();	// プレイヤー最大体力情報
+	m_pLv->Uninit();		// プレイヤーレベル情報
 
 	for (int nCntShop = 0; nCntShop < SELECT_MAX; nCntShop++)
 	{ // ショップの品目数分繰り返す
@@ -304,6 +343,9 @@ void CShopManager::Update(void)
 	// 数値に体力を設定
 	m_pLife->GetMultiValue()->SetNum(CScene::GetPlayer()->GetLife());
 
+	// 数値に最大体力を設定
+	m_pMaxLife->GetMultiValue()->SetNum(CScene::GetPlayer()->GetMaxLife());
+
 	// 数値にレベルを設定
 	m_pLv->GetMultiValue()->SetNum(CScene::GetPlayer()->GetLevel());
 
@@ -316,127 +358,33 @@ void CShopManager::Update(void)
 	m_pIconExp->Update();		// 経験値アイコン情報
 
 	// 数字UI情報の更新
-	m_pLife->Update();	// プレイヤー体力情報
-	m_pLv->Update();	// プレイヤーレベル情報
+	m_pLife->Update();		// プレイヤー体力情報
+	m_pMaxLife->Update();	// プレイヤー最大体力情報
+	m_pLv->Update();		// プレイヤーレベル情報
 }
 
 //============================================================
-//	ショップ全変更処理
+//	開店状況の設定処理
 //============================================================
-void CShopManager::AllRandomShop(void)
+void CShopManager::SetEnableOpen(const bool bOpen)
 {
-	// 変数を宣言
-	int nNumOmit = 0;	// シャッフルを省く数
+	// ショップの品ぞろえを全変更
+	AllRandomShop();
 
-	// 変数配列を宣言
-	int aRandomHit[SELECT_MAX] = {};	// ランダムに当たった購入品
-	bool aOmitBuy[CShop::BUY_MAX] = {};	// 省くかの情報
+	// ショップを表示
+	SetEnableDraw(bOpen);
 
-	// ポインタを宣言
-	int *pShuffle = NULL;	// シャッフルを省くデータの保持用
+	if (bOpen)
+	{ // 開店する場合
 
-	//--------------------------------------------------------
-	//	省く購入品を設定
-	//--------------------------------------------------------
+		// 数値に体力を設定
+		m_pLife->GetMultiValue()->SetNum(CScene::GetPlayer()->GetLife());
 
-	// TODO：ここに省く購入品を設定する処理
+		// 数値に最大体力を設定
+		m_pMaxLife->GetMultiValue()->SetNum(CScene::GetPlayer()->GetMaxLife());
 
-#if 0
-	aOmitBuy[0] = true;
-	nNumOmit++;
-#endif
-
-	//--------------------------------------------------------
-	//	ショップ数分変更する
-	//--------------------------------------------------------
-	for (int nCntShop = 0; nCntShop < SELECT_MAX; nCntShop++)
-	{ // ショップの品目数分繰り返す
-
-		// 変数を宣言
-		int nOmitID = 0;	// 現在のシャッフルを省く配列の要素
-
-		//----------------------------------------------------
-		//	シャッフルから省く値の数分メモリ確保
-		//----------------------------------------------------
-		if (nNumOmit + nCntShop > 0)
-		{ // 確保する場合
-
-			if (UNUSED(pShuffle))
-			{ // シャッフルデータが使われていない場合
-
-				// シャッフルを省く数分のメモリ生成
-				pShuffle = new int[nNumOmit + nCntShop];
-
-				// 例外処理
-				assert(USED(pShuffle));	// 生成失敗
-			}
-			else { assert(false); }	// 使用中
-
-			for (int nCntShopMenu = 0; nCntShopMenu < CShop::BUY_MAX; nCntShopMenu++)
-			{ // 購入品の最大数分繰り返す
-
-				if (aOmitBuy[nCntShopMenu])
-				{ // 省く場合
-
-					// 現在のインデックスを省くデータに代入
-					pShuffle[nOmitID] = nCntShopMenu;
-
-					// 省くデータを入れるインデックスを加算
-					nOmitID++;
-				}
-			}
-		}
-
-		//----------------------------------------------------
-		//	ショップ内容の変更・購入品を出さないように設定
-		//----------------------------------------------------
-		// ショップの単変更
-		aRandomHit[nCntShop] = RandomShop(nCntShop, pShuffle, nNumOmit + nCntShop);
-		if (aRandomHit[nCntShop] > NONE_IDX)
-		{ // 売り切れではなかった場合
-
-			// 切り替わった購入品を次から省くように設定
-			aOmitBuy[aRandomHit[nCntShop]] = true;
-		}
-
-		//----------------------------------------------------
-		//	シャッフルから省く値のメモリ開放
-		//----------------------------------------------------
-		if (nNumOmit + nCntShop > 0)
-		{ // 確保している場合
-
-			if (USED(pShuffle))
-			{ // シャッフルデータが使われている場合
-
-				// シャッフルを省く数分のメモリ開放
-				delete[] pShuffle;
-				pShuffle = NULL;
-
-				// 例外処理
-				assert(UNUSED(pShuffle));	// 開放失敗
-			}
-			else { assert(false); }	// 非使用中
-		}
-	}
-}
-
-//============================================================
-//	描画状況の設定処理
-//============================================================
-void CShopManager::SetEnableDraw(const bool bDraw)
-{
-	// 引数の描画状況を設定
-	m_pBg->SetEnableDraw(bDraw);			// 背景情報
-	m_pIconPlayer->SetEnableDraw(bDraw);	// プレイヤーアイコン情報
-	m_pIconExp->SetEnableDraw(bDraw);		// 経験値アイコン情報
-	m_pLife->SetEnableDraw(bDraw);			// プレイヤー体力情報
-	m_pLv->SetEnableDraw(bDraw);			// プレイヤーレベル情報
-
-	for (int nCntShop = 0; nCntShop < SELECT_MAX; nCntShop++)
-	{ // ショップの品目数分繰り返す
-
-		// 引数の描画状況を設定
-		m_apShop[nCntShop]->SetEnableDraw(bDraw);	// ショップ情報
+		// 数値にレベルを設定
+		m_pLv->GetMultiValue()->SetNum(CScene::GetPlayer()->GetLevel());
 	}
 }
 
@@ -496,6 +444,56 @@ HRESULT CShopManager::Release(CShopManager *&prShopManager)
 		return S_OK;
 	}
 	else { assert(false); return E_FAIL; }	// 非使用中
+}
+
+//============================================================
+//	購入品選択の更新処理
+//============================================================
+void CShopManager::UpdateSelect(void)
+{
+	// ポインタを宣言
+	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
+	CInputPad		*pPad		= CManager::GetPad();		// パッド
+
+	// 過去の選択番号を更新
+	m_nOldSelect = m_nSelect;
+
+	// 選択操作
+	if (pKeyboard->GetTrigger(DIK_LEFT) || pPad->GetTrigger(CInputPad::KEY_LEFT))
+	{
+		// 選択中番号を減算
+		m_nSelect = (m_nSelect + (SELECT_MAX - 1)) % SELECT_MAX;
+	}
+	else if (pKeyboard->GetTrigger(DIK_RIGHT) || pPad->GetTrigger(CInputPad::KEY_RIGHT))
+	{
+		// 選択中番号を加算
+		m_nSelect = (m_nSelect + 1) % SELECT_MAX;
+	}
+
+	// 選択中のカラーを設定
+	m_apShop[m_nOldSelect]->SetColor(DEFAULT_COL);	// 過去の選択を暗くする
+	m_apShop[m_nSelect]->SetColor(CHOICE_COL);		// 現在の選択を明るくする
+}
+
+//============================================================
+//	描画状況の設定処理
+//============================================================
+void CShopManager::SetEnableDraw(const bool bDraw)
+{
+	// 引数の描画状況を設定
+	m_pBg->SetEnableDraw(bDraw);			// 背景情報
+	m_pIconPlayer->SetEnableDraw(bDraw);	// プレイヤーアイコン情報
+	m_pIconExp->SetEnableDraw(bDraw);		// 経験値アイコン情報
+	m_pLife->SetEnableDraw(bDraw);			// プレイヤー体力情報
+	m_pMaxLife->SetEnableDraw(bDraw);		// プレイヤー最大体力情報
+	m_pLv->SetEnableDraw(bDraw);			// プレイヤーレベル情報
+
+	for (int nCntShop = 0; nCntShop < SELECT_MAX; nCntShop++)
+	{ // ショップの品目数分繰り返す
+
+		// 引数の描画状況を設定
+		m_apShop[nCntShop]->SetEnableDraw(bDraw);	// ショップ情報
+	}
 }
 
 //============================================================
@@ -643,30 +641,101 @@ int CShopManager::RandomShop
 }
 
 //============================================================
-//	購入品選択の更新処理
+//	ショップ全変更処理
 //============================================================
-void CShopManager::UpdateSelect(void)
+void CShopManager::AllRandomShop(void)
 {
+	// 変数を宣言
+	int nNumOmit = 0;	// シャッフルを省く数
+
+	// 変数配列を宣言
+	int aRandomHit[SELECT_MAX] = {};	// ランダムに当たった購入品
+	bool aOmitBuy[CShop::BUY_MAX] = {};	// 省くかの情報
+
 	// ポインタを宣言
-	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
-	CInputPad		*pPad		= CManager::GetPad();		// パッド
+	int *pShuffle = NULL;	// シャッフルを省くデータの保持用
 
-	// 過去の選択番号を更新
-	m_nOldSelect = m_nSelect;
+	//--------------------------------------------------------
+	//	省く購入品を設定
+	//--------------------------------------------------------
 
-	// 選択操作
-	if (pKeyboard->GetTrigger(DIK_LEFT) || pPad->GetTrigger(CInputPad::KEY_LEFT))
-	{
-		// 選択中番号を減算
-		m_nSelect = (m_nSelect + (SELECT_MAX - 1)) % SELECT_MAX;
+	// TODO：ここに省く購入品を設定する処理
+
+#if 0
+	aOmitBuy[0] = true;
+	nNumOmit++;
+#endif
+
+	//--------------------------------------------------------
+	//	ショップ数分変更する
+	//--------------------------------------------------------
+	for (int nCntShop = 0; nCntShop < SELECT_MAX; nCntShop++)
+	{ // ショップの品目数分繰り返す
+
+		// 変数を宣言
+		int nOmitID = 0;	// 現在のシャッフルを省く配列の要素
+
+		//----------------------------------------------------
+		//	シャッフルから省く値の数分メモリ確保
+		//----------------------------------------------------
+		if (nNumOmit + nCntShop > 0)
+		{ // 確保する場合
+
+			if (UNUSED(pShuffle))
+			{ // シャッフルデータが使われていない場合
+
+				// シャッフルを省く数分のメモリ生成
+				pShuffle = new int[nNumOmit + nCntShop];
+
+				// 例外処理
+				assert(USED(pShuffle));	// 生成失敗
+			}
+			else { assert(false); }	// 使用中
+
+			for (int nCntShopMenu = 0; nCntShopMenu < CShop::BUY_MAX; nCntShopMenu++)
+			{ // 購入品の最大数分繰り返す
+
+				if (aOmitBuy[nCntShopMenu])
+				{ // 省く場合
+
+					// 現在のインデックスを省くデータに代入
+					pShuffle[nOmitID] = nCntShopMenu;
+
+					// 省くデータを入れるインデックスを加算
+					nOmitID++;
+				}
+			}
+		}
+
+		//----------------------------------------------------
+		//	ショップ内容の変更・購入品を出さないように設定
+		//----------------------------------------------------
+		// ショップの単変更
+		aRandomHit[nCntShop] = RandomShop(nCntShop, pShuffle, nNumOmit + nCntShop);
+		if (aRandomHit[nCntShop] > NONE_IDX)
+		{ // 売り切れではなかった場合
+
+			// 切り替わった購入品を次から省くように設定
+			aOmitBuy[aRandomHit[nCntShop]] = true;
+		}
+
+		//----------------------------------------------------
+		//	シャッフルから省く値のメモリ開放
+		//----------------------------------------------------
+		if (nNumOmit + nCntShop > 0)
+		{ // 確保している場合
+
+			if (USED(pShuffle))
+			{ // シャッフルデータが使われている場合
+
+				// シャッフルを省く数分のメモリ開放
+				delete[] pShuffle;
+				pShuffle = NULL;
+
+				// 例外処理
+				assert(UNUSED(pShuffle));	// 開放失敗
+			}
+			else { assert(false); }	// 非使用中
+		}
 	}
-	else if (pKeyboard->GetTrigger(DIK_RIGHT) || pPad->GetTrigger(CInputPad::KEY_RIGHT))
-	{
-		// 選択中番号を加算
-		m_nSelect = (m_nSelect + 1) % SELECT_MAX;
-	}
-
-	// 選択中のカラーを設定
-	m_apShop[m_nOldSelect]->SetColor(DEFAULT_COL);	// 過去の選択を暗くする
-	m_apShop[m_nSelect]->SetColor(CHOICE_COL);		// 現在の選択を明るくする
 }

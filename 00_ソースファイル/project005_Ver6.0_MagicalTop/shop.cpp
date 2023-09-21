@@ -22,29 +22,28 @@
 #define PTRN_HEIGHT	(1)			// テクスチャの縦分割数
 
 #define ICON_SIZE	(D3DXVECTOR3(120.0f, 120.0f, 0.0f))	// アイコンの大きさ
+#define DEFAULT_COL	(D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f))	// 非選択時の色
 
 #define EXPLAIN_SIZE	(D3DXVECTOR3(320.0f, 270.0f, 0.0f))	// 説明の大きさ
 #define ADD_POS_EXPLAIN	(D3DXVECTOR3(0.0f, 210.0f, 0.0f))	// 説明の表示位置の相対座標への加算量
 
-#define DEFAULT_COL	(D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f))	// 非選択時の色
-
+#define LV_VALUE_DIGIT	(2)	// レベルの数字の桁数
 #define LV_SPACE		(D3DXVECTOR3(114.0f, -3.0f, 0.0f))	// レベルの行間
 #define LV_TITLE_SIZE	(D3DXVECTOR3(180.0f, 50.0f, 0.0f))	// レベルのタイトル大きさ
 #define LV_VALUE_SIZE	(D3DXVECTOR3(50.0f, 50.0f, 0.0f))	// レベルの数字大きさ
 #define LV_VALUE_SPACE	(D3DXVECTOR3(38.0f, 0.0f, 0.0f))	// レベルの数字の行間
 #define ADD_POS_LEVEL	(D3DXVECTOR3(-40.0f, 125.0f, 0.0f))	// レベルの表示位置の相対座標への加算量
-#define LV_VALUE_DIGIT	(2)	// レベルの数字の桁数
 
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
 const char *CShop::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\shop002.png",	// 必要レベルテクスチャ
-	"data\\TEXTURE\\shop003.png",	// アイコンテクスチャ
-	"data\\TEXTURE\\shop004.png",	// 説明テクスチャ
-	"data\\TEXTURE\\shop005.png",	// 売り切れアイコンテクスチャ
-	"data\\TEXTURE\\shop006.png",	// 売り切れ説明テクスチャ
+	"data\\TEXTURE\\shop003.png",	// 必要レベルテクスチャ
+	"data\\TEXTURE\\shop004.png",	// アイコンテクスチャ
+	"data\\TEXTURE\\shop005.png",	// 説明テクスチャ
+	"data\\TEXTURE\\shop006.png",	// 売り切れアイコンテクスチャ
+	"data\\TEXTURE\\shop007.png",	// 売り切れ説明テクスチャ
 };
 
 const int CShop::mc_aNeedLevel[] =	// 購入必要レベル定数

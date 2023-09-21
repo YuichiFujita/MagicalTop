@@ -159,8 +159,9 @@ public:
 	void SetEnableHealMana(const bool bHeal);	// マナ回復状況設定
 	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
 	float GetDistanceTarget(void) const;		// ターゲットとの距離取得
-	int GetLife(void) const;					// 体力取得
 	int GetLevel(void) const;					// レベル取得
+	int GetLife(void) const;					// 体力取得
+	int GetMaxLife(void) const;					// 最大体力取得
 	int GetMana(void) const;					// マナ取得
 	int GetMaxMana(void) const;					// 最大マナ取得
 	int GetState(void) const;					// 状態取得

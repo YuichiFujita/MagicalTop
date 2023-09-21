@@ -35,6 +35,7 @@ public:
 		TEXTURE_PLAYER = 0,	// プレイヤーアイコンテクスチャ
 		TEXTURE_EXP,		// 経験値アイコンテクスチャ
 		TEXTURE_LIFE,		// 体力テクスチャ
+		TEXTURE_SLASH,		// 最大体力区切りテクスチャ
 		TEXTURE_LV,			// レベルテクスチャ
 		TEXTURE_MAX,		// この列挙型の総数
 	};
@@ -58,8 +59,7 @@ public:
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
-	void AllRandomShop(void);	// ショップ全変更
-	void SetEnableDraw(const bool bDraw);	// 描画状況設定
+	void SetEnableOpen(const bool bOpen);	// 開店状況設定
 
 	// 静的メンバ関数
 	static CShopManager *Create(void);	// 生成
@@ -67,13 +67,16 @@ public:
 
 private:
 	// メンバ関数
+	void UpdateSelect(void);	// 購入品選択
+	void SetEnableDraw(const bool bDraw);	// 描画状況設定
+
 	int RandomShop	// ショップ単変更
 	( // 引数
 		const int nShop,		// 変更するショップインデックス
 		int *pOmit = NULL,		// ランダムを省く購入品の先頭アドレス
 		const int nNumOmit = 0	// ランダムを省く購入品数
 	);
-	void UpdateSelect(void);	// 購入品選択
+	void AllRandomShop(void);	// ショップ全変更
 
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];	// テクスチャ定数
@@ -83,6 +86,7 @@ private:
 	CObject2D *m_pIconPlayer;		// プレイヤーアイコン情報
 	CObject2D *m_pIconExp;			// 経験値アイコン情報
 	CValueUI *m_pLife;				// プレイヤー体力情報
+	CValueUI *m_pMaxLife;			// プレイヤー最大体力情報
 	CValueUI *m_pLv;				// プレイヤーレベル情報
 	CShop *m_apShop[SELECT_MAX];	// ショップ情報
 	int m_nSelect;					// 現在の選択番号

@@ -77,8 +77,8 @@ HRESULT CLevelupManager::Init(void)
 		return E_FAIL;
 	}
 
-	// 描画をしない状態にする
-	m_pShopManager->SetEnableDraw(false);
+	// ショップを閉店する
+	m_pShopManager->SetEnableOpen(false);
 
 	// 操作情報の生成
 	m_pControl = CObject2D::Create
@@ -140,11 +140,8 @@ void CLevelupManager::Update(void)
 		if (CSceneGame::GetWaveManager()->GetState() == CWaveManager::STATE_WAIT)
 		{ // 次の季節へ移行待ちの場合
 
-			// ショップの品ぞろえを全変更
-			m_pShopManager->AllRandomShop();
-
-			// ショップを表示
-			m_pShopManager->SetEnableDraw(true);
+			// ショップを開店する
+			m_pShopManager->SetEnableOpen(true);
 
 			// 操作情報を表示
 			m_pControl->SetEnableDraw(true);
@@ -160,8 +157,8 @@ void CLevelupManager::Update(void)
 		if (pKeyboard->GetTrigger(DIK_1) || pPad->GetTrigger(CInputPad::KEY_X))
 		{ // 強化終了の操作が行われた場合
 
-			// ショップを非表示
-			m_pShopManager->SetEnableDraw(false);
+			// ショップを閉店する
+			m_pShopManager->SetEnableOpen(false);
 
 			// 操作情報を非表示
 			m_pControl->SetEnableDraw(false);
