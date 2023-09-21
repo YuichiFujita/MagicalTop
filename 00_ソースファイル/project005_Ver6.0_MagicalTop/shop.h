@@ -43,10 +43,10 @@ public:
 	// 購入列挙
 	enum BUY
 	{
-		BUY_PLAYLIFE = 0,	// プレイヤー回復
-		BUY_TARGLIFE,		// ターゲット回復
-		BUY_MAGIC_UP,		// 魔法発射数増加
-		BUY_MAX				// この列挙型の総数
+		BUY_PLAYER_HEAL = 0,		// プレイヤー回復
+		BUY_PLAYER_LVUP_LIFE,		// プレイヤー体力レベルアップ
+		BUY_PLAYER_LVUP_DEFENSE,	// プレイヤー防御力レベルアップ
+		BUY_MAX						// この列挙型の総数
 	};
 
 	// コンストラクタ
@@ -69,6 +69,7 @@ public:
 		const BUY buy,			// 購入品
 		const D3DXVECTOR3& rPos	// 位置
 	);
+	static int GetNeedLevel(const BUY buy);	// 購入必要レベル取得
 
 	// メンバ関数
 	void SetBuy(const BUY buy);	// 設定

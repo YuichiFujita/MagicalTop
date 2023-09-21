@@ -1868,80 +1868,8 @@ void CEnemy::LoadSetup(void)
 			// ファイルから文字列を読み込む
 			nEnd = fscanf(pFile, "%s", &aString[0]);	// テキストを読み込みきったら EOF を返す
 
-			// キャラクターの設定
-			if (strcmp(&aString[0], "CHARACTERSET") == 0)
-			{ // 読み込んだ文字列が CHARACTERSET の場合
-
-				do
-				{ // 読み込んだ文字列が END_CHARACTERSET ではない場合ループ
-
-					// ファイルから文字列を読み込む
-					fscanf(pFile, "%s", &aString[0]);
-
-					if (strcmp(&aString[0], "ENEMYSET") == 0)
-					{ // 読み込んだ文字列が ENEMYSET の場合
-
-						do
-						{ // 読み込んだ文字列が END_ENEMYSET ではない場合ループ
-
-							// ファイルから文字列を読み込む
-							fscanf(pFile, "%s", &aString[0]);
-
-							if (strcmp(&aString[0], "TYPE") == 0)
-							{ // 読み込んだ文字列が TYPE の場合
-
-								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
-								fscanf(pFile, "%d", &nType);		// 種類を読み込む
-							}
-							else if (strcmp(&aString[0], "PARTSSET") == 0)
-							{ // 読み込んだ文字列が PARTSSET の場合
-
-								do
-								{ // 読み込んだ文字列が END_PARTSSET ではない場合ループ
-
-									// ファイルから文字列を読み込む
-									fscanf(pFile, "%s", &aString[0]);
-
-									if (strcmp(&aString[0], "INDEX") == 0)
-									{ // 読み込んだ文字列が INDEX の場合
-
-										fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
-										fscanf(pFile, "%d", &nID);			// モデルのインデックスを読み込む
-
-										// パーツ数を加算
-										m_aPartsInfo[nType].nNumParts++;
-									}
-									else if (strcmp(&aString[0], "PARENT") == 0)
-									{ // 読み込んだ文字列が PARENT の場合
-
-										fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
-										fscanf(pFile, "%d", &m_aPartsInfo[nType].aInfo[nID].nParentID);	// モデルの親のインデックスを読み込む
-									}
-									else if (strcmp(&aString[0], "POS") == 0)
-									{ // 読み込んだ文字列が POS の場合
-
-										fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
-										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].pos.x);		// X座標を読み込む
-										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].pos.y);		// Y座標を読み込む
-										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].pos.z);		// Z座標を読み込む
-									}
-									else if (strcmp(&aString[0], "ROT") == 0)
-									{ // 読み込んだ文字列が ROT の場合
-
-										fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
-										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].rot.x);		// X向きを読み込む
-										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].rot.y);		// Y向きを読み込む
-										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].rot.z);		// Z向きを読み込む
-									}
-								} while (strcmp(&aString[0], "END_PARTSSET") != 0);	// 読み込んだ文字列が END_PARTSSET ではない場合ループ
-							}
-						} while (strcmp(&aString[0], "END_ENEMYSET") != 0);	// 読み込んだ文字列が END_ENEMYSET ではない場合ループ
-					}
-				} while (strcmp(&aString[0], "END_CHARACTERSET") != 0);		// 読み込んだ文字列が END_CHARACTERSET ではない場合ループ
-			}
-
 			// ステータスの設定
-			else if (strcmp(&aString[0], "STATUSSET") == 0)
+			if (strcmp(&aString[0], "STATUSSET") == 0)
 			{ // 読み込んだ文字列が STATUSSET の場合
 
 				do
@@ -2131,6 +2059,78 @@ void CEnemy::LoadSetup(void)
 						} while (strcmp(&aString[0], "END_ENEMYSET") != 0);	// 読み込んだ文字列が END_ENEMYSET ではない場合ループ
 					}
 				} while (strcmp(&aString[0], "END_STATUSSET") != 0);		// 読み込んだ文字列が END_STATUSSET ではない場合ループ
+			}
+
+			// キャラクターの設定
+			else if (strcmp(&aString[0], "CHARACTERSET") == 0)
+			{ // 読み込んだ文字列が CHARACTERSET の場合
+
+				do
+				{ // 読み込んだ文字列が END_CHARACTERSET ではない場合ループ
+
+					// ファイルから文字列を読み込む
+					fscanf(pFile, "%s", &aString[0]);
+
+					if (strcmp(&aString[0], "ENEMYSET") == 0)
+					{ // 読み込んだ文字列が ENEMYSET の場合
+
+						do
+						{ // 読み込んだ文字列が END_ENEMYSET ではない場合ループ
+
+							// ファイルから文字列を読み込む
+							fscanf(pFile, "%s", &aString[0]);
+
+							if (strcmp(&aString[0], "TYPE") == 0)
+							{ // 読み込んだ文字列が TYPE の場合
+
+								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
+								fscanf(pFile, "%d", &nType);		// 種類を読み込む
+							}
+							else if (strcmp(&aString[0], "PARTSSET") == 0)
+							{ // 読み込んだ文字列が PARTSSET の場合
+
+								do
+								{ // 読み込んだ文字列が END_PARTSSET ではない場合ループ
+
+									// ファイルから文字列を読み込む
+									fscanf(pFile, "%s", &aString[0]);
+
+									if (strcmp(&aString[0], "INDEX") == 0)
+									{ // 読み込んだ文字列が INDEX の場合
+
+										fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
+										fscanf(pFile, "%d", &nID);			// モデルのインデックスを読み込む
+
+										// パーツ数を加算
+										m_aPartsInfo[nType].nNumParts++;
+									}
+									else if (strcmp(&aString[0], "PARENT") == 0)
+									{ // 読み込んだ文字列が PARENT の場合
+
+										fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
+										fscanf(pFile, "%d", &m_aPartsInfo[nType].aInfo[nID].nParentID);	// モデルの親のインデックスを読み込む
+									}
+									else if (strcmp(&aString[0], "POS") == 0)
+									{ // 読み込んだ文字列が POS の場合
+
+										fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
+										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].pos.x);		// X座標を読み込む
+										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].pos.y);		// Y座標を読み込む
+										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].pos.z);		// Z座標を読み込む
+									}
+									else if (strcmp(&aString[0], "ROT") == 0)
+									{ // 読み込んだ文字列が ROT の場合
+
+										fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
+										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].rot.x);		// X向きを読み込む
+										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].rot.y);		// Y向きを読み込む
+										fscanf(pFile, "%f", &m_aPartsInfo[nType].aInfo[nID].rot.z);		// Z向きを読み込む
+									}
+								} while (strcmp(&aString[0], "END_PARTSSET") != 0);	// 読み込んだ文字列が END_PARTSSET ではない場合ループ
+							}
+						} while (strcmp(&aString[0], "END_ENEMYSET") != 0);	// 読み込んだ文字列が END_ENEMYSET ではない場合ループ
+					}
+				} while (strcmp(&aString[0], "END_CHARACTERSET") != 0);		// 読み込んだ文字列が END_CHARACTERSET ではない場合ループ
 			}
 
 			// モーションの設定

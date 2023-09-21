@@ -22,7 +22,6 @@
 //	マクロ定義
 //************************************************************
 #define PLAY_SPAWN_POS	(D3DXVECTOR3(0.0f, 0.0f, -1000.0f))	// プレイヤー生成位置
-#define PLAY_MAGIC_POS_PLUS_Y	(40.0f)	// プレイヤーの魔法発射時の高さ加算量
 
 //************************************************************
 //	前方宣言
@@ -86,14 +85,6 @@ public:
 		MOTION_MAX				// この列挙型の総数
 	}MOTION;
 
-	// 回転列挙
-	typedef enum
-	{
-		ROTATION_LEFT = 0,	// 左回転
-		ROTATION_RIGHT,		// 右回転
-		ROTATION_MAX		// この列挙型の総数
-	}ROTATION;
-
 	// 状態列挙
 	typedef enum
 	{
@@ -109,11 +100,42 @@ public:
 		STATE_MAX			// この列挙型の総数
 	}STATE;
 
+	// レベル列挙
+	typedef enum
+	{
+		LEVEL_00 = 0,	// レベル00
+		LEVEL_01,		// レベル01
+		LEVEL_02,		// レベル02
+		LEVEL_MAX		// この列挙型の総数
+	}LEVEL;
+
+	// レベル情報列挙
+	typedef enum
+	{
+		LEVELINFO_LIFE = 0,	// 体力
+		LEVELINFO_DEFENSE,	// 防御力
+		LEVELINFO_MAX		// この列挙型の総数
+	}LEVELINFO;
+
 	// コンストラクタ
 	CPlayer();
 
 	// デストラクタ
 	~CPlayer();
+
+	// ステータス構造体
+	typedef struct
+	{
+		int nLife;		// 体力
+		int nDefense;	// 防御力
+	}StatusInfo;
+
+	// レベル構造体
+	typedef struct
+	{
+		int nLife;		// 体力
+		int nDefense;	// 防御力
+	}LevelInfo;
 
 	// オーバーライド関数
 	HRESULT Init(void);	// 初期化
@@ -146,26 +168,30 @@ public:
 	virtual void SetDisp(const bool bDisp) = 0;	// 表示設定
 
 	// メンバ関数
-	void AddExp(const int nAdd);				// 経験値加算
-	void SetRespawn(D3DXVECTOR3& rPos);			// 再出現設定
-	void SetMana(const int nMana);				// マナ設定
-	void SetState(const int nState);			// 状態設定
-	void SetEnableUpdate(const bool bUpdate);	// 更新状況設定
-	void SetEnableDraw(const bool bDraw);		// 描画状況設定
-	void SetEnableDrawMana(const bool bDraw);	// マナの描画状況設定
-	void SetEnableDrawExp(const bool bDraw);	// 経験値の描画状況設定
-	void SetEnableDrawLife(const bool bDraw);	// 体力の描画状況設定
-	void SetEnableDrawDash(const bool bDraw);	// ダッシュの描画状況設定
-	void SetEnableHealMana(const bool bHeal);	// マナ回復状況設定
-	D3DXMATRIX GetMtxWorld(void) const;			// マトリックス取得
-	float GetDistanceTarget(void) const;		// ターゲットとの距離取得
-	int GetLevel(void) const;					// レベル取得
-	int GetLife(void) const;					// 体力取得
-	int GetMaxLife(void) const;					// 最大体力取得
-	int GetMana(void) const;					// マナ取得
-	int GetMaxMana(void) const;					// 最大マナ取得
-	int GetState(void) const;					// 状態取得
-	float GetRadius(void) const;				// 半径取得
+	void AddLevelStatus(const LEVELINFO level);			// ステータスレベル加算
+	void AddLevel(const int nAdd);						// レベル加算
+	void AddExp(const int nAdd);						// 経験値加算
+	void AddLife(const int nAdd);						// 体力加算
+	void SetRespawn(D3DXVECTOR3& rPos);					// 再出現設定
+	void SetMana(const int nMana);						// マナ設定
+	void SetState(const int nState);					// 状態設定
+	void SetEnableUpdate(const bool bUpdate);			// 更新状況設定
+	void SetEnableDraw(const bool bDraw);				// 描画状況設定
+	void SetEnableDrawMana(const bool bDraw);			// マナの描画状況設定
+	void SetEnableDrawExp(const bool bDraw);			// 経験値の描画状況設定
+	void SetEnableDrawLife(const bool bDraw);			// 体力の描画状況設定
+	void SetEnableDrawDash(const bool bDraw);			// ダッシュの描画状況設定
+	void SetEnableHealMana(const bool bHeal);			// マナ回復状況設定
+	D3DXMATRIX GetMtxWorld(void) const;					// マトリックス取得
+	float GetDistanceTarget(void) const;				// ターゲットとの距離取得
+	int GetLevelStatus(const LEVELINFO level) const;	// ステータスレベル取得
+	int GetLevel(void) const;		// レベル取得
+	int GetLife(void) const;		// 体力取得
+	int GetMaxLife(void) const;		// 最大体力取得
+	int GetMana(void) const;		// マナ取得
+	int GetMaxMana(void) const;		// 最大マナ取得
+	int GetState(void) const;		// 状態取得
+	float GetRadius(void) const;	// 半径取得
 
 protected:
 	// 純粋仮想関数
@@ -201,8 +227,9 @@ private:
 	void LoadSetup(void);	// セットアップ
 
 	// 静的メンバ変数
-	static const char *mc_apTextureFile[];	// テクスチャ定数
-	static const char *mc_apModelFile[];	// モデル定数
+	static const char *mc_apTextureFile[];		// テクスチャ定数
+	static const char *mc_apModelFile[];		// モデル定数
+	static StatusInfo m_aStatusInfo[LEVEL_MAX];	// ステータス情報
 
 	// メンバ変数
 	CMagicManager	*m_pMagic;		// 魔法マネージャーの情報
@@ -215,7 +242,7 @@ private:
 	D3DXVECTOR3	m_oldPos;	// 過去位置
 	D3DXVECTOR3	m_move;		// 移動量
 	D3DXVECTOR3	m_destRot;	// 目標向き
-	ROTATION m_rotation;	// 回転方向
+	LevelInfo m_level;		// レベル
 	STATE m_state;			// 状態
 	int   m_nCounterState;	// 状態管理カウンター
 	int   m_nNumModel;		// パーツの総数

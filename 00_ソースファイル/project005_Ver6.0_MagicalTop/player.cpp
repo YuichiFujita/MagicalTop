@@ -61,17 +61,11 @@
 #define VORTEX_ADDPOSY	(6.5f)		// 渦巻きこまれ時の高さ座標加算量
 #define VORTEX_HITDMG	(50)		// 渦巻きこまれ時のダメージ量
 
-#define MAX_MOVEX		(5.0f)		// 自動歩行時の速度割合用
-#define PULSROT_MOVEZ	(20)		// 前後移動時のプレイヤー向きの変更量
-#define PLUS_MOVEX		(0.5f)		// 左右回転の移動量の加算量
-#define PLAY_MOVEZ		(2.0f)		// 前後の移動量
 #define PLAY_AWAY_REV	(0.08f)		// 空中のプレイヤー移動量の減衰係数
 #define PLAY_LAND_REV	(0.2f)		// 地上のプレイヤー移動量の減衰係数
 #define PLAY_REV_ROTA	(0.15f)		// プレイヤー向き変更の減衰係数
-#define PLAY_JUMP		(20.0f)		// プレイヤージャンプ量
 #define PLAY_GRAVITY	(1.0f)		// プレイヤー重力
 #define PLAY_RADIUS		(20.0f)		// プレイヤー半径
-#define PLAY_LIFE		(150)		// プレイヤー体力
 #define ENE_HIT_DMG		(30)		// 敵ヒット時のダメージ量
 
 #define FADE_LEVEL		(0.01f)		// フェードのα値の加減量
@@ -127,6 +121,8 @@ const char *CPlayer::mc_apModelFile[] =	// モデル定数
 	"data\\MODEL\\PLAYER\\17_rod.x",	// 杖
 };
 
+CPlayer::StatusInfo CPlayer::m_aStatusInfo[LEVEL_MAX] = {};	// ステータス情報
+
 //************************************************************
 //	子クラス [CPlayer] のメンバ関数
 //************************************************************
@@ -136,23 +132,23 @@ const char *CPlayer::mc_apModelFile[] =	// モデル定数
 CPlayer::CPlayer() : CObjectChara(CObject::LABEL_PLAYER)
 {
 	// メンバ変数をクリア
-	m_pMagic		= NULL;				// 魔法マネージャーの情報
-	m_pExp			= NULL;				// 経験値マネージャーの情報
-	m_pLife			= NULL;				// 体力の情報
-	m_pDash			= NULL;				// ダッシュの情報
-	m_pShadow		= NULL;				// 影の情報
-	m_pOrbit		= NULL;				// 軌跡の情報
-	m_oldPos		= VEC3_ZERO;		// 過去位置
-	m_move			= VEC3_ZERO;		// 移動量
-	m_destRot		= VEC3_ZERO;		// 目標向き
-	m_rotation		= ROTATION_LEFT;	// 回転方向
-	m_state			= STATE_NONE;		// 状態
-	m_nCounterState	= 0;				// 状態管理カウンター
-	m_nNumModel		= 0;				// パーツの総数
-	m_fDisTarget	= 0.0f;				// ターゲットとの距離
-	m_fVortexRot	= 0.0f;				// 渦巻き方向
-	m_fVortexDis	= 0.0f;				// 渦巻との距離
-	m_bJump			= false;			// ジャンプ状況
+	m_pMagic		= NULL;			// 魔法マネージャーの情報
+	m_pExp			= NULL;			// 経験値マネージャーの情報
+	m_pLife			= NULL;			// 体力の情報
+	m_pDash			= NULL;			// ダッシュの情報
+	m_pShadow		= NULL;			// 影の情報
+	m_pOrbit		= NULL;			// 軌跡の情報
+	m_oldPos		= VEC3_ZERO;	// 過去位置
+	m_move			= VEC3_ZERO;	// 移動量
+	m_destRot		= VEC3_ZERO;	// 目標向き
+	m_state			= STATE_NONE;	// 状態
+	m_nCounterState	= 0;			// 状態管理カウンター
+	m_nNumModel		= 0;			// パーツの総数
+	m_fDisTarget	= 0.0f;			// ターゲットとの距離
+	m_fVortexRot	= 0.0f;			// 渦巻き方向
+	m_fVortexDis	= 0.0f;			// 渦巻との距離
+	m_bJump			= false;		// ジャンプ状況
+	memset(&m_level, 0, sizeof(m_level));	// レベル
 }
 
 //============================================================
@@ -181,7 +177,6 @@ HRESULT CPlayer::Init(void)
 	m_oldPos		= VEC3_ZERO;		// 過去位置
 	m_move			= VEC3_ZERO;		// 移動量
 	m_destRot		= VEC3_ZERO;		// 目標向き
-	m_rotation		= ROTATION_LEFT;	// 回転方向
 	m_state			= STATE_NONE;		// 状態
 	m_nCounterState	= 0;				// 状態管理カウンター
 	m_nNumModel		= 0;				// パーツの総数
@@ -189,6 +184,25 @@ HRESULT CPlayer::Init(void)
 	m_fVortexRot	= 0.0f;				// 渦巻き方向
 	m_fVortexDis	= 0.0f;				// 渦巻との距離
 	m_bJump			= true;				// ジャンプ状況
+
+	// レベル情報を初期化
+	m_level.nLife = LEVEL_00;		// 体力
+	m_level.nDefense = LEVEL_00;	// 防御力
+
+	// オブジェクトキャラクターの初期化
+	if (FAILED(CObjectChara::Init()))
+	{ // 初期化に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// セットアップの読み込み
+	LoadSetup();
+
+	// モデル情報の設定
+	SetModelInfo();
 
 	// 魔法マネージャーの生成
 	m_pMagic = CMagicManager::Create(this);
@@ -213,17 +227,17 @@ HRESULT CPlayer::Init(void)
 	// 体力の生成
 	m_pLife = CObjectGauge3D::Create
 	( // 引数
-		CObject::LABEL_GAUGE,			// オブジェクトラベル
-		this,							// ゲージ表示オブジェクト
-		PLAY_LIFE,						// 最大表示値
-		(int)(NORMAL_CNT * 0.25f),		// 表示値変動フレーム
-		GAUGE_PLUS_Y,					// 表示Y位置の加算量
-		GAUGE_GAUGESIZE,				// ゲージ大きさ
-		GAUGE_FRONTCOL,					// 表ゲージ色
-		GAUGE_BACKCOL,					// 裏ゲージ色
-		true,							// 枠描画状況
-		CObjectGauge3D::TYPE_PLAYER,	// 枠種類
-		GAUGE_GAUGESIZE					// 枠大きさ
+		CObject::LABEL_GAUGE,				// オブジェクトラベル
+		this,								// ゲージ表示オブジェクト
+		m_aStatusInfo[m_level.nLife].nLife,	// 最大表示値
+		(int)(NORMAL_CNT * 0.25f),			// 表示値変動フレーム
+		GAUGE_PLUS_Y,						// 表示Y位置の加算量
+		GAUGE_GAUGESIZE,					// ゲージ大きさ
+		GAUGE_FRONTCOL,						// 表ゲージ色
+		GAUGE_BACKCOL,						// 裏ゲージ色
+		true,								// 枠描画状況
+		CObjectGauge3D::TYPE_PLAYER,		// 枠種類
+		GAUGE_GAUGESIZE						// 枠大きさ
 	);
 	if (UNUSED(m_pLife))
 	{ // 非使用中の場合
@@ -262,21 +276,6 @@ HRESULT CPlayer::Init(void)
 		assert(false);
 		return E_FAIL;
 	}
-
-	// オブジェクトキャラクターの初期化
-	if (FAILED(CObjectChara::Init()))
-	{ // 初期化に失敗した場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
-	// セットアップの読み込み
-	LoadSetup();
-
-	// モデル情報の設定
-	SetModelInfo();
 
 	// 軌跡の生成
 	m_pOrbit = CObjectOrbit::Create(GetMultiModel(MODEL_ROD)->GetPtrMtxWorld(), PLAY_ORBIT_COL, CObjectOrbit::OFFSET_ROD);
@@ -354,6 +353,15 @@ void CPlayer::Update(void)
 
 	// 軌跡の更新
 	m_pOrbit->Update();
+
+	// デバッグ表示
+	CManager::GetDebugProc()->Print("体力レベル：%d\n", m_level.nLife);
+	CManager::GetDebugProc()->Print("防御力レベル：%d\n", m_level.nDefense);
+
+	if (CManager::GetKeyboard()->GetPress(DIK_0))
+	{ // TODO：デバッグ操作
+		m_pExp->AddExp(1);
+	}
 }
 
 //============================================================
@@ -372,6 +380,7 @@ void CPlayer::Hit(const int nDmg)
 {
 	// 変数を宣言
 	D3DXVECTOR3 pos = GetPosition();	// プレイヤー位置
+	int nRevDamage = 0;	// 補正後のダメージ量
 
 	if (IsDeath() != true)
 	{ // 死亡フラグが立っていない場合
@@ -379,8 +388,12 @@ void CPlayer::Hit(const int nDmg)
 		if (m_state == STATE_NORMAL)
 		{ // 通常状態の場合
 
+			// ダメージ量を補正
+			nRevDamage = nDmg - (int)(m_aStatusInfo[m_level.nDefense].nDefense * 0.25f);
+			useful::LimitNum(nRevDamage, 0, m_aStatusInfo[m_level.nLife].nLife);	// ダメージ量制限
+
 			// 体力からダメージ分減算
-			m_pLife->AddNum(-nDmg);
+			m_pLife->AddNum(-nRevDamage);
 
 			if (m_pLife->GetNum() > 0)
 			{ // 生きている場合
@@ -498,12 +511,76 @@ CPlayer *CPlayer::Create
 }
 
 //============================================================
+//	ステータスレベルの加算処理
+//============================================================
+void CPlayer::AddLevelStatus(const LEVELINFO level)
+{
+	// 変数を宣言
+	int nLife = 0;	// 体力の保存用
+
+	// 引数のレベルを加算
+	switch (level)
+	{ // レベル情報ごとの処理
+	case LEVELINFO_LIFE:	// 体力
+
+		// 体力のレベルを加算
+		m_level.nLife++;
+
+		// 現在の体力を取得
+		nLife = m_pLife->GetNum();
+
+		// 最大体力を更新
+		m_pLife->SetMaxNum(m_aStatusInfo[m_level.nLife].nLife);
+
+		// 体力の増加分を先ほどまでの体力に加算して設定
+		m_pLife->SetNum(nLife + (m_aStatusInfo[m_level.nLife].nLife - m_aStatusInfo[m_level.nLife - 1].nLife));
+
+		// 体力オーバー
+		assert(m_level.nLife < LEVEL_MAX);
+
+		break;
+
+	case LEVELINFO_DEFENSE:	// 防御力
+
+		// 防御力のレベルを加算
+		m_level.nDefense++;
+
+		// 防御力オーバー
+		assert(m_level.nDefense < LEVEL_MAX);
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		break;
+	}
+}
+
+//============================================================
+//	レベルの加算処理
+//============================================================
+void CPlayer::AddLevel(const int nAdd)
+{
+	// レベルを加算
+	m_pExp->AddLevel(nAdd);
+}
+
+//============================================================
 //	経験値の加算処理
 //============================================================
 void CPlayer::AddExp(const int nAdd)
 {
 	// 経験値を加算
 	m_pExp->AddExp(nAdd);
+}
+
+//============================================================
+//	体力の加算処理
+//============================================================
+void CPlayer::AddLife(const int nAdd)
+{
+	// 体力を加算
+	m_pLife->AddNum(nAdd);
 }
 
 //============================================================
@@ -658,6 +735,35 @@ float CPlayer::GetDistanceTarget(void) const
 {
 	// ターゲットとの距離を返す
 	return m_fDisTarget;
+}
+
+//============================================================
+//	ステータスレベル取得処理
+//============================================================
+int CPlayer::GetLevelStatus(const LEVELINFO level) const
+{
+	// 引数のレベルを返す
+	switch (level)
+	{ // レベル情報ごとの処理
+	case LEVELINFO_LIFE:	// 体力
+
+		// 体力のレベルを返す
+		return m_level.nLife;
+
+		break;
+
+	case LEVELINFO_DEFENSE:	// 防御力
+
+		// 防御力のレベルを返す
+		return m_level.nDefense;
+
+		break;
+
+	default:	// 例外処理
+		assert(false);
+		return NONE_IDX;
+		break;
+	}
 }
 
 //============================================================
@@ -1410,6 +1516,7 @@ void CPlayer::LoadSetup(void)
 	CMotion::MotionInfo info;		// ポーズの代入用
 	D3DXVECTOR3 pos = VEC3_ZERO;	// 位置の代入用
 	D3DXVECTOR3 rot = VEC3_ZERO;	// 向きの代入用
+	int nLevel		= 0;	// レベルの代入用
 	int nID			= 0;	// インデックスの代入用
 	int nParentID	= 0;	// 親インデックスの代入用
 	int nNowPose	= 0;	// 現在のポーズ番号
@@ -1426,6 +1533,9 @@ void CPlayer::LoadSetup(void)
 	// ポーズ代入用の変数を初期化
 	memset(&info, 0, sizeof(info));
 
+	// 静的メンバ変数の情報をクリア
+	memset(&m_aStatusInfo[0], 0, sizeof(m_aStatusInfo));	// ステータス情報
+
 	// ファイルを読み込み形式で開く
 	pFile = fopen(PLAYER_SETUP_TXT, "r");
 
@@ -1438,8 +1548,50 @@ void CPlayer::LoadSetup(void)
 			// ファイルから文字列を読み込む
 			nEnd = fscanf(pFile, "%s", &aString[0]);	// テキストを読み込みきったら EOF を返す
 
+			// ステータスの設定
+			if (strcmp(&aString[0], "STATUSSET") == 0)
+			{ // 読み込んだ文字列が STATUSSET の場合
+
+				do
+				{ // 読み込んだ文字列が END_STATUSSET ではない場合ループ
+
+					// ファイルから文字列を読み込む
+					fscanf(pFile, "%s", &aString[0]);
+
+					if (strcmp(&aString[0], "LEVELSET") == 0)
+					{ // 読み込んだ文字列が LEVELSET の場合
+
+						do
+						{ // 読み込んだ文字列が END_LEVELSET ではない場合ループ
+
+							// ファイルから文字列を読み込む
+							fscanf(pFile, "%s", &aString[0]);
+
+							if (strcmp(&aString[0], "LEVEL") == 0)
+							{ // 読み込んだ文字列が LEVEL の場合
+
+								fscanf(pFile, "%s", &aString[0]);	// = を読み込む (不要)
+								fscanf(pFile, "%d", &nLevel);		// レベルを読み込む
+							}
+							else if (strcmp(&aString[0], "LIFE") == 0)
+							{ // 読み込んだ文字列が LIFE の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nLevel].nLife);		// 体力を読み込む
+							}
+							else if (strcmp(&aString[0], "DEFENSE") == 0)
+							{ // 読み込んだ文字列が DEFENSE の場合
+
+								fscanf(pFile, "%s", &aString[0]);						// = を読み込む (不要)
+								fscanf(pFile, "%d", &m_aStatusInfo[nLevel].nDefense);	// 防御力を読み込む
+							}
+						} while (strcmp(&aString[0], "END_LEVELSET") != 0);	// 読み込んだ文字列が END_LEVELSET ではない場合ループ
+					}
+				} while (strcmp(&aString[0], "END_STATUSSET") != 0);		// 読み込んだ文字列が END_STATUSSET ではない場合ループ
+			}
+
 			// キャラクターの設定
-			if (strcmp(&aString[0], "CHARACTERSET") == 0)
+			else if (strcmp(&aString[0], "CHARACTERSET") == 0)
 			{ // 読み込んだ文字列が CHARACTERSET の場合
 
 				do

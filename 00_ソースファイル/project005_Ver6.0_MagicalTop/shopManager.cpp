@@ -12,9 +12,9 @@
 #include "input.h"
 #include "texture.h"
 #include "sceneGame.h"
+#include "omitShop.h"
 #include "object2D.h"
 #include "valueUI.h"
-#include "shop.h"
 #include "multiValue.h"
 #include "player.h"
 #include "stage.h"
@@ -77,6 +77,7 @@ CShopManager::CShopManager()
 {
 	// メンバ変数をクリア
 	memset(&m_apShop[0], 0, sizeof(m_apShop));	// ショップ情報
+	m_pOmitShop		= NULL;	// ショップ省き情報
 	m_pBg			= NULL;	// 背景情報
 	m_pIconPlayer	= NULL;	// プレイヤーアイコン情報
 	m_pIconExp		= NULL;	// 経験値アイコン情報
@@ -105,6 +106,7 @@ HRESULT CShopManager::Init(void)
 
 	// メンバ変数を初期化
 	memset(&m_apShop[0], 0, sizeof(m_apShop));	// ショップ情報
+	m_pOmitShop		= NULL;	// ショップ省き情報
 	m_pBg			= NULL;	// 背景情報
 	m_pIconPlayer	= NULL;	// プレイヤーアイコン情報
 	m_pIconExp		= NULL;	// 経験値アイコン情報
@@ -113,6 +115,19 @@ HRESULT CShopManager::Init(void)
 	m_pLv			= NULL;	// プレイヤーレベル情報
 	m_nSelect		= 0;	// 現在の選択番号
 	m_nOldSelect	= 0;	// 過去の選択番号
+
+	//--------------------------------------------------------
+	//	ショップ省き情報の生成
+	//--------------------------------------------------------
+	// ショップ省き情報の生成
+	m_pOmitShop = COmitShop::Create();
+	if (UNUSED(m_pOmitShop))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
 
 	//--------------------------------------------------------
 	//	背景の生成・設定
@@ -287,7 +302,7 @@ HRESULT CShopManager::Init(void)
 		// ショップ情報の生成
 		m_apShop[nCntShop] = CShop::Create
 		( // 引数
-			CShop::BUY_PLAYLIFE,					// 購入品
+			CShop::BUY_PLAYER_HEAL,					// 購入品
 			POS_SHOP + (float)nCntShop * SPACE_SHOP	// 位置
 		);
 		if (UNUSED(m_apShop[nCntShop]))
@@ -314,6 +329,14 @@ HRESULT CShopManager::Init(void)
 //============================================================
 void CShopManager::Uninit(void)
 {
+	// ショップ省き情報を破棄
+	if (FAILED(COmitShop::Release(m_pOmitShop)))
+	{ // 破棄に失敗した場合
+
+		// 例外処理
+		assert(false);
+	}
+
 	// オブジェクト2D情報を破棄
 	m_pBg->Uninit();			// 背景情報
 	m_pIconPlayer->Uninit();	// プレイヤーアイコン情報
@@ -352,6 +375,9 @@ void CShopManager::Update(void)
 
 	// 購入品選択の更新
 	UpdateSelect();
+
+	// 購入の更新
+	UpdateBuy();
 
 	// オブジェクト2D情報の更新
 	m_pBg->Update();			// 背景情報
@@ -474,6 +500,81 @@ void CShopManager::UpdateSelect(void)
 	// 選択中のカラーを設定
 	m_apShop[m_nOldSelect]->SetColor(DEFAULT_COL);	// 過去の選択を暗くする
 	m_apShop[m_nSelect]->SetColor(CHOICE_COL);		// 現在の選択を明るくする
+}
+
+//============================================================
+//	購入の更新処理
+//============================================================
+void CShopManager::UpdateBuy(void)
+{
+	// ポインタを宣言
+	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
+	CInputPad		*pPad		= CManager::GetPad();		// パッド
+	CPlayer			*pPlayer	= CScene::GetPlayer();		// プレイヤー
+
+	// 購入操作
+	if (pKeyboard->GetTrigger(DIK_RETURN) || pPad->GetTrigger(CInputPad::KEY_A))
+	{ // 購入操作が行われた場合
+
+		// 変数を宣言
+		int nBuy = m_apShop[m_nSelect]->GetBuy();	// 購入品情報
+
+		if (nBuy != NONE_IDX)
+		{ // 売り切れではない場合
+
+			if (pPlayer->GetLevel() >= CShop::GetNeedLevel((CShop::BUY)nBuy))
+			{ // レベルが必要数分ある場合
+
+				switch (nBuy)
+				{ // 購入品ごとの処理
+				case CShop::BUY_PLAYER_HEAL:	// プレイヤー回復
+
+					// プレイヤーの体力を回復
+					pPlayer->AddLife(50);
+
+					break;
+
+				case CShop::BUY_PLAYER_LVUP_LIFE:	// プレイヤー体力レベルアップ
+
+					// プレイヤーの体力をレベルアップ
+					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_LIFE);
+
+					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_LIFE) >= CPlayer::LEVEL_MAX - 1)
+					{ // プレイヤーの体力が最大レベルの場合
+
+						// プレイヤーの体力レベルアップを省くようにする
+						m_pOmitShop->SetEnableOmit(CShop::BUY_PLAYER_LVUP_LIFE, true);
+					}
+
+					break;
+
+				case CShop::BUY_PLAYER_LVUP_DEFENSE:	// プレイヤー防御力レベルアップ
+
+					// プレイヤーの防御力をレベルアップ
+					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_DEFENSE);
+
+					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_DEFENSE) >= CPlayer::LEVEL_MAX - 1)
+					{ // プレイヤーの防御力が最大レベルの場合
+
+						// プレイヤーの防御力レベルアップを省くようにする
+						m_pOmitShop->SetEnableOmit(CShop::BUY_PLAYER_LVUP_DEFENSE, true);
+					}
+
+					break;
+
+				default:	// 例外処理
+					assert(false);
+					break;
+				}
+
+				// 購入に使用したレベルを減算
+				pPlayer->AddLevel(-CShop::GetNeedLevel((CShop::BUY)nBuy));
+
+				// ショップをすべて変更する
+				AllRandomShop();
+			}
+		}
+	}
 }
 
 //============================================================
@@ -646,26 +747,11 @@ int CShopManager::RandomShop
 //============================================================
 void CShopManager::AllRandomShop(void)
 {
-	// 変数を宣言
-	int nNumOmit = 0;	// シャッフルを省く数
-
 	// 変数配列を宣言
-	int aRandomHit[SELECT_MAX] = {};	// ランダムに当たった購入品
-	bool aOmitBuy[CShop::BUY_MAX] = {};	// 省くかの情報
+	CShop::BUY aRandomHit[SELECT_MAX] = {};	// ランダムに当たった購入品
 
 	// ポインタを宣言
 	int *pShuffle = NULL;	// シャッフルを省くデータの保持用
-
-	//--------------------------------------------------------
-	//	省く購入品を設定
-	//--------------------------------------------------------
-
-	// TODO：ここに省く購入品を設定する処理
-
-#if 0
-	aOmitBuy[0] = true;
-	nNumOmit++;
-#endif
 
 	//--------------------------------------------------------
 	//	ショップ数分変更する
@@ -674,37 +760,21 @@ void CShopManager::AllRandomShop(void)
 	{ // ショップの品目数分繰り返す
 
 		// 変数を宣言
-		int nOmitID = 0;	// 現在のシャッフルを省く配列の要素
+		int nNumOmit = m_pOmitShop->GetNumOmit();	// シャッフルを省く数
 
 		//----------------------------------------------------
 		//	シャッフルから省く値の数分メモリ確保
 		//----------------------------------------------------
-		if (nNumOmit + nCntShop > 0)
-		{ // 確保する場合
+		if (nNumOmit > 0)
+		{ // 省く購入品がある場合
 
-			if (UNUSED(pShuffle))
-			{ // シャッフルデータが使われていない場合
-
-				// シャッフルを省く数分のメモリ生成
-				pShuffle = new int[nNumOmit + nCntShop];
+			// 省く購入品情報を生成
+			pShuffle = m_pOmitShop->CreateOmit();
+			if (UNUSED(m_pOmitShop))
+			{ // 非使用中の場合
 
 				// 例外処理
-				assert(USED(pShuffle));	// 生成失敗
-			}
-			else { assert(false); }	// 使用中
-
-			for (int nCntShopMenu = 0; nCntShopMenu < CShop::BUY_MAX; nCntShopMenu++)
-			{ // 購入品の最大数分繰り返す
-
-				if (aOmitBuy[nCntShopMenu])
-				{ // 省く場合
-
-					// 現在のインデックスを省くデータに代入
-					pShuffle[nOmitID] = nCntShopMenu;
-
-					// 省くデータを入れるインデックスを加算
-					nOmitID++;
-				}
+				assert(false);
 			}
 		}
 
@@ -712,31 +782,41 @@ void CShopManager::AllRandomShop(void)
 		//	ショップ内容の変更・購入品を出さないように設定
 		//----------------------------------------------------
 		// ショップの単変更
-		aRandomHit[nCntShop] = RandomShop(nCntShop, pShuffle, nNumOmit + nCntShop);
+		aRandomHit[nCntShop] = (CShop::BUY)RandomShop(nCntShop, pShuffle, nNumOmit);
 		if (aRandomHit[nCntShop] > NONE_IDX)
 		{ // 売り切れではなかった場合
 
 			// 切り替わった購入品を次から省くように設定
-			aOmitBuy[aRandomHit[nCntShop]] = true;
+			m_pOmitShop->SetEnableOmit(aRandomHit[nCntShop], true);
 		}
 
 		//----------------------------------------------------
 		//	シャッフルから省く値のメモリ開放
 		//----------------------------------------------------
-		if (nNumOmit + nCntShop > 0)
+		if (nNumOmit > 0)
 		{ // 確保している場合
 
-			if (USED(pShuffle))
-			{ // シャッフルデータが使われている場合
-
-				// シャッフルを省く数分のメモリ開放
-				delete[] pShuffle;
-				pShuffle = NULL;
+			// 省く購入品情報を破棄
+			if (FAILED(m_pOmitShop->ReleaseOmit()))
+			{ // 破棄に失敗した場合
 
 				// 例外処理
-				assert(UNUSED(pShuffle));	// 開放失敗
+				assert(false);
 			}
-			else { assert(false); }	// 非使用中
+		}
+	}
+
+	//--------------------------------------------------------
+	//	一時的に省いた購入品を元に戻す
+	//--------------------------------------------------------
+	for (int nCntShop = 0; nCntShop < SELECT_MAX; nCntShop++)
+	{ // ショップの品目数分繰り返す
+
+		if (aRandomHit[nCntShop] > NONE_IDX)
+		{ // 売り切れではなかった場合
+
+			// 購入品を省かないように設定
+			m_pOmitShop->SetEnableOmit(aRandomHit[nCntShop], false);
 		}
 	}
 }

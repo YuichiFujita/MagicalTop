@@ -38,6 +38,7 @@ public:
 	HRESULT Init(void);	// 初期化
 	void Uninit(void);	// 終了
 	void Update(void);	// 更新
+	void AddLevel(const int nAdd);	// レベル加算
 	void AddExp(const int nAdd);	// 経験値加算
 	int  GetLevel(void) const;		// レベル取得
 	void SetEnableExpDraw(const bool bDraw);	// 経験値描画状況の設定

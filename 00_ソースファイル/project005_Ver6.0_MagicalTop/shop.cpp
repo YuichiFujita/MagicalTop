@@ -62,12 +62,12 @@ const int CShop::mc_aNeedLevel[] =	// 購入必要レベル定数
 CShop::CShop() : CObject(CObject::LABEL_NONE, DEFAULT_PRIO)
 {
 	// メンバ変数をクリア
-	m_pIcon = NULL;			// 購入品アイコン
-	m_pExplain = NULL;		// 購入品説明
-	m_pLv = NULL;			// 必要レベル
-	m_pos = VEC3_ZERO;		// 位置
-	m_col = XCOL_WHITE;		// 色
-	m_buy = BUY_PLAYLIFE;	// 購入品
+	m_pIcon = NULL;				// 購入品アイコン
+	m_pExplain = NULL;			// 購入品説明
+	m_pLv = NULL;				// 必要レベル
+	m_pos = VEC3_ZERO;			// 位置
+	m_col = XCOL_WHITE;			// 色
+	m_buy = BUY_PLAYER_HEAL;	// 購入品
 }
 
 //============================================================
@@ -87,11 +87,11 @@ HRESULT CShop::Init(void)
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャ
 
 	// メンバ変数を初期化
-	m_pIcon = NULL;			// 購入品アイコン
-	m_pLv = NULL;			// 必要レベル
-	m_pos = VEC3_ZERO;		// 位置
-	m_col = XCOL_WHITE;		// 色
-	m_buy = BUY_PLAYLIFE;	// 購入品
+	m_pIcon = NULL;				// 購入品アイコン
+	m_pLv = NULL;				// 必要レベル
+	m_pos = VEC3_ZERO;			// 位置
+	m_col = XCOL_WHITE;			// 色
+	m_buy = BUY_PLAYER_HEAL;	// 購入品
 
 	//--------------------------------------------------------
 	//	購入品アイコンの生成・設定
@@ -276,6 +276,15 @@ CShop *CShop::Create
 		return pShop;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	購入必要レベル取得処理
+//============================================================
+int CShop::GetNeedLevel(const BUY buy)
+{
+	// 引数の購入品の購入必要レベルを返す
+	return mc_aNeedLevel[buy];
 }
 
 //============================================================

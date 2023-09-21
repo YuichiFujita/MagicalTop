@@ -14,10 +14,12 @@
 //	インクルードファイル
 //************************************************************
 #include "main.h"
+#include "shop.h"
 
 //************************************************************
 //	前方宣言
 //************************************************************
+class COmitShop;	// ショップ省き情報クラス
 class CObject2D;	// オブジェクト2Dクラス
 class CValueUI;		// 数字UIクラス
 class CShop;		// ショップクラス
@@ -68,6 +70,7 @@ public:
 private:
 	// メンバ関数
 	void UpdateSelect(void);	// 購入品選択
+	void UpdateBuy(void);		// 購入
 	void SetEnableDraw(const bool bDraw);	// 描画状況設定
 
 	int RandomShop	// ショップ単変更
@@ -82,6 +85,7 @@ private:
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 
 	// メンバ変数
+	COmitShop *m_pOmitShop;			// ショップ省き情報
 	CObject2D *m_pBg;				// 背景情報
 	CObject2D *m_pIconPlayer;		// プレイヤーアイコン情報
 	CObject2D *m_pIconExp;			// 経験値アイコン情報
