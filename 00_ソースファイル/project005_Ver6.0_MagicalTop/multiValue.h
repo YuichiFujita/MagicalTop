@@ -15,6 +15,7 @@
 //************************************************************
 #include "main.h"
 #include "object.h"
+#include "value.h"
 
 //************************************************************
 //	マクロ定義
@@ -50,11 +51,12 @@ public:
 	// 静的メンバ関数
 	static CMultiValue *Create	// 生成
 	( // 引数
-		const int nNum,				// 数字
-		const int nDigit,			// 桁数
-		const D3DXVECTOR3& rPos,	// 位置
-		const D3DXVECTOR3& rSize,	// 大きさ
-		const D3DXVECTOR3& rSpace,	// 行間
+		const CValue::TEXTURE texture,	// テクスチャ
+		const int nNum,					// 数字
+		const int nDigit,				// 桁数
+		const D3DXVECTOR3& rPos,		// 位置
+		const D3DXVECTOR3& rSize,		// 大きさ
+		const D3DXVECTOR3& rSpace,		// 行間
 		const D3DXVECTOR3& rRot = VEC3_ZERO,	// 向き
 		const D3DXCOLOR& rCol = XCOL_WHITE		// 色
 	);
@@ -70,16 +72,18 @@ public:
 	int GetMin(void) const;				// 最小値取得
 	int GetMax(void) const;				// 最大値取得
 
-	void SetPosition(const D3DXVECTOR3& rPos);	// 位置設定
-	void SetRotation(const D3DXVECTOR3& rRot);	// 向き設定
-	void SetScaling(const D3DXVECTOR3& rSize);	// 大きさ設定
-	void SetColor(const D3DXCOLOR& rCol);		// 色設定
-	void SetSpace(const D3DXVECTOR3& rSpace);	// 行間設定
-	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
-	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
-	D3DXVECTOR3 GetScaling(void) const;			// 大きさ取得
-	D3DXCOLOR GetColor(void) const;				// 色取得
-	D3DXVECTOR3 GetSpace(void) const;			// 行間取得
+	void SetPosition(const D3DXVECTOR3& rPos);		// 位置設定
+	void SetRotation(const D3DXVECTOR3& rRot);		// 向き設定
+	void SetScaling(const D3DXVECTOR3& rSize);		// 大きさ設定
+	void SetColor(const D3DXCOLOR& rCol);			// 色設定
+	void SetSpace(const D3DXVECTOR3& rSpace);		// 行間設定
+	void SetTexture(const CValue::TEXTURE texture);	// テクスチャ設定
+
+	D3DXVECTOR3 GetPosition(void) const;	// 位置取得
+	D3DXVECTOR3 GetRotation(void) const;	// 向き取得
+	D3DXVECTOR3 GetScaling(void) const;		// 大きさ取得
+	D3DXCOLOR GetColor(void) const;			// 色取得
+	D3DXVECTOR3 GetSpace(void) const;		// 行間取得
 
 private:
 	// メンバ関数

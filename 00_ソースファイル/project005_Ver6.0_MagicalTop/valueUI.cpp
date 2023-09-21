@@ -67,7 +67,7 @@ HRESULT CValueUI::Init(void)
 	m_pTitle->SetPriority(VALUE_UI_PRIO);
 
 	// 数字情報の生成
-	m_pValue = CMultiValue::Create(0, 1, VEC3_ZERO, VEC3_ONE, VEC3_ZERO);
+	m_pValue = CMultiValue::Create(CValue::TEXTURE_NORMAL, 0, 1, VEC3_ZERO, VEC3_ONE, VEC3_ZERO);
 	if (UNUSED(m_pValue))
 	{ // 非使用中の場合
 
@@ -142,11 +142,14 @@ void CValueUI::SetPriority(const int nPriority)
 //============================================================
 CValueUI *CValueUI::Create
 (
+	const char *pPassTex,			// タイトルテクスチャパス
+	const CValue::TEXTURE texture,	// 数字テクスチャ
+	const int nDigit,				// 桁数
 	const D3DXVECTOR3& rPos,		// 位置
 	const D3DXVECTOR3& rSpace,		// 行間
+	const D3DXVECTOR3& rSpaceValue,	// 数字行間
 	const D3DXVECTOR3& rSizeTitle,	// タイトル大きさ
 	const D3DXVECTOR3& rSizeValue,	// 数字大きさ
-	const int nTextureID,			// テクスチャインデックス
 	const D3DXVECTOR3& rRotTitle,	// タイトル向き
 	const D3DXVECTOR3& rRotValue,	// 数字向き
 	const D3DXCOLOR& rColTitle,		// タイトル色
@@ -179,8 +182,14 @@ CValueUI *CValueUI::Create
 			return NULL;
 		}
 
-		// タイトルテクスチャを割当
-		pValueUI->BindTextureTitle(nTextureID);
+		// 数字の桁数を設定
+		pValueUI->GetMultiValue()->SetDigit(nDigit);
+
+		// タイトルテクスチャを設定
+		pValueUI->SetTextureTitle(pPassTex);
+
+		// 数字テクスチャを設定
+		pValueUI->GetMultiValue()->SetTexture(texture);
 
 		// タイトル向きを設定
 		pValueUI->SetRotationTitle(rRotTitle);
@@ -199,6 +208,9 @@ CValueUI *CValueUI::Create
 
 		// 数字色を設定
 		pValueUI->GetMultiValue()->SetColor(rColValue);
+
+		// 数字の行間を設定
+		pValueUI->GetMultiValue()->SetSpace(rSpaceValue);
 
 		// 行間を設定
 		pValueUI->SetSpace(rSpace);
@@ -264,12 +276,15 @@ void CValueUI::SetColorTitle(const D3DXCOLOR& rCol)
 }
 
 //============================================================
-//	タイトルテクスチャの割当処理
+//	タイトルテクスチャの設定処理
 //============================================================
-void CValueUI::BindTextureTitle(const int nTextureID)
+void CValueUI::SetTextureTitle(const char *pPassTex)
 {
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
 	// 引数のテクスチャを割当
-	m_pTitle->BindTexture(nTextureID);
+	m_pTitle->BindTexture(pTexture->Regist(pPassTex));
 }
 
 //============================================================

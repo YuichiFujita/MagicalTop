@@ -27,6 +27,7 @@ const char *CValue::mc_apTextureFile[] =	// テクスチャ定数
 	"data\\TEXTURE\\number000.png",	// 通常テクスチャ
 	"data\\TEXTURE\\number001.png",	// 魔法っぽいテクスチャ (白)
 	"data\\TEXTURE\\number002.png",	// 魔法っぽいテクスチャ (緑)
+	"data\\TEXTURE\\number003.png",	// かくかくしたテクスチャ
 };
 
 //************************************************************
@@ -105,11 +106,7 @@ void CValue::Draw(void)
 //============================================================
 CValue *CValue::Create(const TEXTURE texture)
 {
-	// 変数を宣言
-	int nTextureID;	// テクスチャインデックス
-
 	// ポインタを宣言
-	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 	CValue *pValue = NULL;		// 数字生成用
 
 	if (UNUSED(pValue))
@@ -135,11 +132,8 @@ CValue *CValue::Create(const TEXTURE texture)
 			return NULL;
 		}
 
-		// テクスチャを登録
-		nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
-
-		// テクスチャを割当
-		pValue->BindTexture(nTextureID);
+		// テクスチャを設定
+		pValue->SetTexture(texture);
 
 		// 確保したアドレスを返す
 		return pValue;
@@ -152,11 +146,7 @@ CValue *CValue::Create(const TEXTURE texture)
 //============================================================
 CValue *CValue::Create(const TEXTURE texture, const D3DXVECTOR3& rPos, const D3DXVECTOR3& rSize, const D3DXVECTOR3& rRot, const D3DXCOLOR& rCol)
 {
-	// 変数を宣言
-	int nTextureID;	// テクスチャインデックス
-
 	// ポインタを宣言
-	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
 	CValue *pValue = NULL;		// 数字生成用
 
 	if (UNUSED(pValue))
@@ -182,11 +172,8 @@ CValue *CValue::Create(const TEXTURE texture, const D3DXVECTOR3& rPos, const D3D
 			return NULL;
 		}
 
-		// テクスチャを登録
-		nTextureID = pTexture->Regist(mc_apTextureFile[texture]);
-
-		// テクスチャを割当
-		pValue->BindTexture(nTextureID);
+		// テクスチャを設定
+		pValue->SetTexture(texture);
 
 		// 位置を設定
 		pValue->SetPosition(rPos);
@@ -204,6 +191,18 @@ CValue *CValue::Create(const TEXTURE texture, const D3DXVECTOR3& rPos, const D3D
 		return pValue;
 	}
 	else { assert(false); return NULL; }	// 確保失敗
+}
+
+//============================================================
+//	テクスチャの設定処理
+//============================================================
+void CValue::SetTexture(const TEXTURE texture)
+{
+	// ポインタを宣言
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+
+	// テクスチャを登録・割当
+	BindTexture(pTexture->Regist(mc_apTextureFile[texture]));
 }
 
 //============================================================

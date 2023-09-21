@@ -10,7 +10,6 @@
 #include "multiValue.h"
 #include "manager.h"
 #include "renderer.h"
-#include "value.h"
 
 //************************************************************
 //	子クラス [CMultiValue] のメンバ関数
@@ -139,13 +138,14 @@ void CMultiValue::SetPriority(const int nPriority)
 //============================================================
 CMultiValue *CMultiValue::Create
 (
-	const int nNum,				// 数字
-	const int nDigit,			// 桁数
-	const D3DXVECTOR3& rPos,	// 位置
-	const D3DXVECTOR3& rSize,	// 大きさ
-	const D3DXVECTOR3& rSpace,	// 行間
-	const D3DXVECTOR3& rRot,	// 向き
-	const D3DXCOLOR& rCol		// 色
+	const CValue::TEXTURE texture,	// テクスチャ
+	const int nNum,					// 数字
+	const int nDigit,				// 桁数
+	const D3DXVECTOR3& rPos,		// 位置
+	const D3DXVECTOR3& rSize,		// 大きさ
+	const D3DXVECTOR3& rSpace,		// 行間
+	const D3DXVECTOR3& rRot,		// 向き
+	const D3DXCOLOR& rCol			// 色
 )
 {
 	// ポインタを宣言
@@ -179,6 +179,9 @@ CMultiValue *CMultiValue::Create
 
 		// 数字を設定
 		pMultiValue->SetNum(nNum);
+
+		// テクスチャを設定
+		pMultiValue->SetTexture(texture);
 
 		// 向きを設定
 		pMultiValue->SetRotation(rRot);
@@ -456,6 +459,19 @@ void CMultiValue::SetSpace(const D3DXVECTOR3& rSpace)
 {
 	// 引数の行間を設定
 	m_space = rSpace;
+}
+
+//============================================================
+//	テクスチャの設定処理
+//============================================================
+void CMultiValue::SetTexture(const CValue::TEXTURE texture)
+{
+	for (int nCntValue = 0; nCntValue < m_nDigit; nCntValue++)
+	{ // 桁数分繰り返す
+
+		// 引数のテクスチャを全ての数字に設定
+		m_apValue[nCntValue]->SetTexture(texture);
+	}
 }
 
 //============================================================

@@ -15,6 +15,7 @@
 //************************************************************
 #include "main.h"
 #include "object.h"
+#include "value.h"
 
 //************************************************************
 //	前方宣言
@@ -46,11 +47,14 @@ public:
 	// 静的メンバ関数
 	static CValueUI *Create	// 生成
 	( // 引数
+		const char *pPassTex,			// タイトルテクスチャパス
+		const CValue::TEXTURE texture,	// 数字テクスチャ
+		const int nDigit,				// 桁数
 		const D3DXVECTOR3& rPos,		// 位置
 		const D3DXVECTOR3& rSpace,		// 行間
+		const D3DXVECTOR3& rSpaceValue,	// 数字行間
 		const D3DXVECTOR3& rSizeTitle,	// タイトル大きさ
 		const D3DXVECTOR3& rSizeValue,	// 数字大きさ
-		const int nTextureID = NONE_IDX,			// テクスチャインデックス
 		const D3DXVECTOR3& rRotTitle = VEC3_ZERO,	// タイトル向き
 		const D3DXVECTOR3& rRotValue = VEC3_ZERO,	// 数字向き
 		const D3DXCOLOR& rColTitle = XCOL_WHITE,	// タイトル色
@@ -63,7 +67,7 @@ public:
 	void SetRotationTitle(const D3DXVECTOR3& rRot);	// タイトル向き設定
 	void SetScalingTitle(const D3DXVECTOR3& rSize);	// タイトル大きさ設定
 	void SetColorTitle(const D3DXCOLOR& rCol);		// タイトル色設定
-	void BindTextureTitle(const int nTextureID);	// タイトルテクスチャ割当
+	void SetTextureTitle(const char *pPassTex);		// タイトルテクスチャ設定
 
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	D3DXVECTOR3 GetSpace(void) const;			// 行間取得

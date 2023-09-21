@@ -29,6 +29,7 @@ public:
 		TEXTURE_NORMAL = 0,		// 通常テクスチャ
 		TEXTURE_MAGIC_WHITE,	// 魔法っぽいテクスチャ (白)
 		TEXTURE_MAGIC_GREEN,	// 魔法っぽいテクスチャ (緑)
+		TEXTURE_ANGULAR,		// かくかくしたテクスチャ
 		TEXTURE_MAX				// この列挙型の総数
 	}TEXTURE;
 
@@ -56,6 +57,7 @@ public:
 	);
 
 	// メイン関数
+	void SetTexture(const TEXTURE texture);	// テクスチャ設定
 	void SetNumber(const int nNum);	// 値設定
 
 private:

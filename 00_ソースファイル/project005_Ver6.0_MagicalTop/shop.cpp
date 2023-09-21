@@ -28,10 +28,10 @@
 
 #define DEFAULT_COL	(D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f))	// 非選択時の色
 
-#define LV_SPACE		(D3DXVECTOR3(110.0f, -4.0f, 0.0f))	// レベルの行間
+#define LV_SPACE		(D3DXVECTOR3(114.0f, -3.0f, 0.0f))	// レベルの行間
 #define LV_TITLE_SIZE	(D3DXVECTOR3(180.0f, 50.0f, 0.0f))	// レベルのタイトル大きさ
-#define LV_VALUE_SIZE	(D3DXVECTOR3(40.0f, 50.0f, 0.0f))	// レベルの数字大きさ
-#define LV_VALUE_SPACE	(D3DXVECTOR3(40.0f, 0.0f, 0.0f))	// レベルの数字の行間
+#define LV_VALUE_SIZE	(D3DXVECTOR3(50.0f, 50.0f, 0.0f))	// レベルの数字大きさ
+#define LV_VALUE_SPACE	(D3DXVECTOR3(38.0f, 0.0f, 0.0f))	// レベルの数字の行間
 #define ADD_POS_LEVEL	(D3DXVECTOR3(-40.0f, 125.0f, 0.0f))	// レベルの表示位置の相対座標への加算量
 #define LV_VALUE_DIGIT	(2)	// レベルの数字の桁数
 
@@ -139,17 +139,17 @@ HRESULT CShop::Init(void)
 	//--------------------------------------------------------
 	//	必要レベルの生成・設定
 	//--------------------------------------------------------
-	// 変数を宣言
-	int nTextureID = pTexture->Regist(mc_apTextureFile[TEXTURE_LV]);	// 数字UIのタイトルテクスチャ
-
 	// 必要レベルの生成
 	m_pLv = CValueUI::Create
 	( // 引数
+		mc_apTextureFile[TEXTURE_LV],	// タイトルテクスチャパス
+		CValue::TEXTURE_ANGULAR,		// 数字テクスチャ
+		LV_VALUE_DIGIT,	// 桁数
 		VEC3_ZERO,		// 位置
 		LV_SPACE,		// 行間
+		LV_VALUE_SPACE,	// 数字行間
 		LV_TITLE_SIZE,	// タイトル大きさ
 		LV_VALUE_SIZE,	// 数字大きさ
-		nTextureID,		// テクスチャインデックス
 		VEC3_ZERO,		// タイトル向き
 		VEC3_ZERO,		// 数字向き
 		DEFAULT_COL,	// タイトル色
@@ -162,12 +162,6 @@ HRESULT CShop::Init(void)
 		assert(false);
 		return E_FAIL;
 	}
-
-	// 数字の行間を設定
-	m_pLv->GetMultiValue()->SetSpace(LV_VALUE_SPACE);
-
-	// 数字の桁数を設定
-	m_pLv->GetMultiValue()->SetDigit(LV_VALUE_DIGIT);
 
 	// 成功を返す
 	return S_OK;

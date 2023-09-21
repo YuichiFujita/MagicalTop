@@ -16,11 +16,6 @@
 #include "main.h"
 
 //************************************************************
-//	マクロ定義
-//************************************************************
-#define MAX_SHOP	(3)	// ショップの品目数
-
-//************************************************************
 //	前方宣言
 //************************************************************
 class CObject2D;	// オブジェクト2Dクラス
@@ -37,7 +32,7 @@ public:
 	// テクスチャ列挙
 	enum TEXTURE
 	{
-		TEXTURE_TARGET = 0,	// ターゲットアイコンテクスチャ
+		TEXTURE_PLAYER = 0,	// プレイヤーアイコンテクスチャ
 		TEXTURE_EXP,		// 経験値アイコンテクスチャ
 		TEXTURE_LIFE,		// 体力テクスチャ
 		TEXTURE_LV,			// レベルテクスチャ
@@ -84,14 +79,14 @@ private:
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 
 	// メンバ変数
-	CObject2D *m_pBg;			// 背景情報
-	CObject2D *m_pIconTarget;	// ターゲットアイコン情報
-	CObject2D *m_pIconExp;		// 経験値アイコン情報
-	CValueUI *m_pLife;			// ターゲット体力情報
-	CValueUI *m_pLv;			// プレイヤーレベル情報
-	CShop *m_apShop[MAX_SHOP];	// ショップ情報
-	int m_nSelect;		// 現在の選択番号
-	int m_nOldSelect;	// 過去の選択番号
+	CObject2D *m_pBg;				// 背景情報
+	CObject2D *m_pIconPlayer;		// プレイヤーアイコン情報
+	CObject2D *m_pIconExp;			// 経験値アイコン情報
+	CValueUI *m_pLife;				// プレイヤー体力情報
+	CValueUI *m_pLv;				// プレイヤーレベル情報
+	CShop *m_apShop[SELECT_MAX];	// ショップ情報
+	int m_nSelect;					// 現在の選択番号
+	int m_nOldSelect;				// 過去の選択番号
 };
 
 #endif	// _SHOPMANAGER_H_

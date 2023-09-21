@@ -16,7 +16,6 @@
 #include "valueUI.h"
 #include "shop.h"
 #include "multiValue.h"
-#include "target.h"
 #include "player.h"
 #include "stage.h"
 
@@ -25,9 +24,27 @@
 //************************************************************
 #define SHOP_PRIO	(6)	// ショップ表示の優先順位
 
+#define SIZE_BG	(D3DXVECTOR3(1088.0f, 562.0f, 0.0f))	// 背景の大きさ
+#define COL_BG	(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.55f))	// 背景の色
+
+#define POS_PLAYER_ICON	(D3DXVECTOR3(160.0f, 150.0f, 0.0f))	// プレイヤーアイコンの位置
+#define POS_EXP_ICON	(D3DXVECTOR3(785.0f, 150.0f, 0.0f))	// 経験値アイコンの位置
+#define SIZE_ICON		(D3DXVECTOR3(100.0f, 100.0f, 0.0f))	// アイコンの大きさ
+
+#define DIGIT_LIFE	(3)	// 体力の桁数
+#define POS_LIFE	(D3DXVECTOR3(270.0f, 160.0f, 0.0f))	// 体力のタイトルと数字の位置
+#define SPACE_LIFE	(D3DXVECTOR3(100.0f, -2.5f, 0.0f))	// 体力のタイトルと数字の行間
+
+#define DIGIT_LEVEL	(2)	// レベルの桁数
+#define POS_LEVEL	(D3DXVECTOR3(920.0f, 160.0f, 0.0f))	// レベルのタイトルと数字の位置
+#define SPACE_LEVEL	(D3DXVECTOR3(130.0f, -2.5f, 0.0f))	// レベルのタイトルと数字の行間
+
+#define VALUEUI_SPACE_VALUE	(D3DXVECTOR3(70.0f, 0.0f, 0.0f))	// 数字UIの数字の行間
+#define VALUEUI_SIZE_TITLE	(D3DXVECTOR3(252.0f, 80.0f, 0.0f))	// 数字UIのタイトルの大きさ
+#define VALUEUI_SIZE_VALUE	(D3DXVECTOR3(80.0f, 80.0f, 0.0f))	// 数字UIの数字の大きさ
+
 #define POS_SHOP	(D3DXVECTOR3(285.0f, 270.0f, 0.0f))	// ショップの位置
 #define SPACE_SHOP	(D3DXVECTOR3(350.0f, 0.0f, 0.0f))	// ショップの空白
-
 #define CHOICE_COL	(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	// 選択中カラー
 #define DEFAULT_COL	(D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f))	// 非選択中カラー
 
@@ -36,7 +53,7 @@
 //************************************************************
 const char *CShopManager::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\icon000.png",	// ターゲットアイコンテクスチャ
+	"data\\TEXTURE\\icon000.png",	// プレイヤーアイコンテクスチャ
 	"data\\TEXTURE\\icon001.png",	// 経験値アイコンテクスチャ
 	"data\\TEXTURE\\shop000.png",	// 体力テクスチャ
 	"data\\TEXTURE\\shop001.png",	// レベルテクスチャ
@@ -53,9 +70,9 @@ CShopManager::CShopManager()
 	// メンバ変数をクリア
 	memset(&m_apShop[0], 0, sizeof(m_apShop));	// ショップ情報
 	m_pBg			= NULL;	// 背景情報
-	m_pIconTarget	= NULL;	// ターゲットアイコン情報
+	m_pIconPlayer	= NULL;	// プレイヤーアイコン情報
 	m_pIconExp		= NULL;	// 経験値アイコン情報
-	m_pLife			= NULL;	// ターゲット体力情報
+	m_pLife			= NULL;	// プレイヤー体力情報
 	m_pLv			= NULL;	// プレイヤーレベル情報
 	m_nSelect		= 0;	// 現在の選択番号
 	m_nOldSelect	= 0;	// 過去の選択番号
@@ -80,9 +97,9 @@ HRESULT CShopManager::Init(void)
 	// メンバ変数を初期化
 	memset(&m_apShop[0], 0, sizeof(m_apShop));	// ショップ情報
 	m_pBg			= NULL;	// 背景情報
-	m_pIconTarget	= NULL;	// ターゲットアイコン情報
+	m_pIconPlayer	= NULL;	// プレイヤーアイコン情報
 	m_pIconExp		= NULL;	// 経験値アイコン情報
-	m_pLife			= NULL;	// ターゲット体力情報
+	m_pLife			= NULL;	// プレイヤー体力情報
 	m_pLv			= NULL;	// プレイヤーレベル情報
 	m_nSelect		= 0;	// 現在の選択番号
 	m_nOldSelect	= 0;	// 過去の選択番号
@@ -91,12 +108,12 @@ HRESULT CShopManager::Init(void)
 	//	背景の生成・設定
 	//--------------------------------------------------------
 	// 背景情報の生成
-	m_pBg = CObject2D::Create	// TODO：定数
+	m_pBg = CObject2D::Create
 	( // 引数
-		D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f),
-		D3DXVECTOR3(SCREEN_WIDTH * 0.85f, SCREEN_HEIGHT * 0.78f, 0.0f),
-		VEC3_ZERO,
-		D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.55f)
+		SCREEN_CENT,	// 位置
+		SIZE_BG,		// 大きさ
+		VEC3_ZERO,		// 向き
+		COL_BG			// 色
 	);
 	if (UNUSED(m_pBg))
 	{ // 非使用中の場合
@@ -113,15 +130,15 @@ HRESULT CShopManager::Init(void)
 	m_pBg->SetEnableDraw(false);
 
 	//--------------------------------------------------------
-	//	ターゲットアイコンの生成・設定
+	//	プレイヤーアイコンの生成・設定
 	//--------------------------------------------------------
-	// ターゲットアイコン情報の生成
-	m_pIconTarget = CObject2D::Create	// TODO：定数
+	// プレイヤーアイコン情報の生成
+	m_pIconPlayer = CObject2D::Create
 	( // 引数
-		D3DXVECTOR3(160.0f, 150.0f, 0.0f),
-		D3DXVECTOR3(120.0f, 120.0f, 0.0f)
+		POS_PLAYER_ICON,	// 位置
+		SIZE_ICON			// 大きさ
 	);
-	if (UNUSED(m_pIconTarget))
+	if (UNUSED(m_pIconPlayer))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -130,22 +147,22 @@ HRESULT CShopManager::Init(void)
 	}
 
 	// テクスチャを割当・設定
-	m_pIconTarget->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_TARGET]));
+	m_pIconPlayer->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_PLAYER]));
 
 	// 優先順位を設定
-	m_pIconTarget->SetPriority(SHOP_PRIO);
+	m_pIconPlayer->SetPriority(SHOP_PRIO);
 
 	// 描画をしない状態にする
-	m_pIconTarget->SetEnableDraw(false);
+	m_pIconPlayer->SetEnableDraw(false);
 
 	//--------------------------------------------------------
 	//	経験値アイコンの生成・設定
 	//--------------------------------------------------------
 	// 経験値アイコン情報の生成
-	m_pIconExp = CObject2D::Create	// TODO：定数
+	m_pIconExp = CObject2D::Create
 	( // 引数
-		D3DXVECTOR3(750.0f, 145.0f, 0.0f),
-		D3DXVECTOR3(120.0f, 120.0f, 0.0f)
+		POS_EXP_ICON,	// 位置
+		SIZE_ICON		// 大きさ
 	);
 	if (UNUSED(m_pIconExp))
 	{ // 非使用中の場合
@@ -165,16 +182,19 @@ HRESULT CShopManager::Init(void)
 	m_pIconExp->SetEnableDraw(false);
 
 	//--------------------------------------------------------
-	//	ターゲット体力の生成・設定
+	//	プレイヤー体力の生成・設定
 	//--------------------------------------------------------
-	// ターゲットの体力情報の生成
+	// プレイヤーの体力情報の生成
 	m_pLife = CValueUI::Create
 	( // 引数
-		D3DXVECTOR3(280.0f, 160.0f, 0.0f),	// 
-		D3DXVECTOR3(110.0f, -10.0f, 0.0f),	// 
-		D3DXVECTOR3(280.0f, 90.0f, 0.0f),	// 
-		D3DXVECTOR3(80.0f, 90.0f, 0.0f),	// 
-		pTexture->Regist(mc_apTextureFile[TEXTURE_LIFE])
+		mc_apTextureFile[TEXTURE_LIFE],	// タイトルテクスチャパス
+		CValue::TEXTURE_ANGULAR,		// 数字テクスチャ
+		DIGIT_LIFE,				// 桁数
+		POS_LIFE,				// 位置
+		SPACE_LIFE,				// 行間
+		VALUEUI_SPACE_VALUE,	// 数字行間
+		VALUEUI_SIZE_TITLE,		// タイトル大きさ
+		VALUEUI_SIZE_VALUE		// 数字大きさ
 	);
 	if (UNUSED(m_pLife))
 	{ // 非使用中の場合
@@ -183,12 +203,6 @@ HRESULT CShopManager::Init(void)
 		assert(false);
 		return E_FAIL;
 	}
-
-	// 数字の行間を設定
-	m_pLife->GetMultiValue()->SetSpace(D3DXVECTOR3(80.0f, 0.0f, 0.0f));
-
-	// 数字の桁数を設定
-	m_pLife->GetMultiValue()->SetDigit(4);
 
 	// 優先順位を設定
 	m_pLife->SetPriority(SHOP_PRIO);
@@ -202,11 +216,14 @@ HRESULT CShopManager::Init(void)
 	// プレイヤーのレベル情報の生成
 	m_pLv = CValueUI::Create
 	( // 引数
-		D3DXVECTOR3(900.0f, 160.0f, 0.0f),	// 
-		D3DXVECTOR3(140.0f, -8.0f, 0.0f),	// 
-		D3DXVECTOR3(280.0f, 90.0f, 0.0f),	// 
-		D3DXVECTOR3(80.0f, 90.0f, 0.0f),	// 
-		pTexture->Regist(mc_apTextureFile[TEXTURE_LV])
+		mc_apTextureFile[TEXTURE_LV],	// タイトルテクスチャパス
+		CValue::TEXTURE_ANGULAR,		// 数字テクスチャ
+		DIGIT_LEVEL,			// 桁数
+		POS_LEVEL,				// 位置
+		SPACE_LEVEL,			// 行間
+		VALUEUI_SPACE_VALUE,	// 数字行間
+		VALUEUI_SIZE_TITLE,		// タイトル大きさ
+		VALUEUI_SIZE_VALUE		// 数字大きさ
 	);
 	if (UNUSED(m_pLv))
 	{ // 非使用中の場合
@@ -215,12 +232,6 @@ HRESULT CShopManager::Init(void)
 		assert(false);
 		return E_FAIL;
 	}
-
-	// 数字の行間を設定
-	m_pLv->GetMultiValue()->SetSpace(D3DXVECTOR3(80.0f, 0.0f, 0.0f));
-
-	// 数字の桁数を設定
-	m_pLv->GetMultiValue()->SetDigit(2);
 
 	// 優先順位を設定
 	m_pLv->SetPriority(SHOP_PRIO);
@@ -231,7 +242,7 @@ HRESULT CShopManager::Init(void)
 	//--------------------------------------------------------
 	//	ショップ情報の生成・設定
 	//--------------------------------------------------------
-	for (int nCntShop = 0; nCntShop < MAX_SHOP; nCntShop++)
+	for (int nCntShop = 0; nCntShop < SELECT_MAX; nCntShop++)
 	{ // ショップの品目数分繰り返す
 
 		// ショップ情報の生成
@@ -266,14 +277,14 @@ void CShopManager::Uninit(void)
 {
 	// オブジェクト2D情報を破棄
 	m_pBg->Uninit();			// 背景情報
-	m_pIconTarget->Uninit();	// ターゲットアイコン情報
+	m_pIconPlayer->Uninit();	// プレイヤーアイコン情報
 	m_pIconExp->Uninit();		// 経験値アイコン情報
 
 	// 数字UI情報を破棄
-	m_pLife->Uninit();	// ターゲット体力情報
+	m_pLife->Uninit();	// プレイヤー体力情報
 	m_pLv->Uninit();	// プレイヤーレベル情報
 
-	for (int nCntShop = 0; nCntShop < MAX_SHOP; nCntShop++)
+	for (int nCntShop = 0; nCntShop < SELECT_MAX; nCntShop++)
 	{ // ショップの品目数分繰り返す
 
 		if (USED(m_apShop[nCntShop]))
@@ -291,7 +302,7 @@ void CShopManager::Uninit(void)
 void CShopManager::Update(void)
 {
 	// 数値に体力を設定
-	m_pLife->GetMultiValue()->SetNum(CScene::GetTarget()->GetLife());
+	m_pLife->GetMultiValue()->SetNum(CScene::GetPlayer()->GetLife());
 
 	// 数値にレベルを設定
 	m_pLv->GetMultiValue()->SetNum(CScene::GetPlayer()->GetLevel());
@@ -301,11 +312,11 @@ void CShopManager::Update(void)
 
 	// オブジェクト2D情報の更新
 	m_pBg->Update();			// 背景情報
-	m_pIconTarget->Update();	// ターゲットアイコン情報
+	m_pIconPlayer->Update();	// プレイヤーアイコン情報
 	m_pIconExp->Update();		// 経験値アイコン情報
 
 	// 数字UI情報の更新
-	m_pLife->Update();	// ターゲット体力情報
+	m_pLife->Update();	// プレイヤー体力情報
 	m_pLv->Update();	// プレイヤーレベル情報
 }
 
@@ -318,11 +329,15 @@ void CShopManager::AllRandomShop(void)
 	int nNumOmit = 0;	// シャッフルを省く数
 
 	// 変数配列を宣言
-	int aRandomHit[MAX_SHOP] = {};		// ランダムに当たった購入品
+	int aRandomHit[SELECT_MAX] = {};	// ランダムに当たった購入品
 	bool aOmitBuy[CShop::BUY_MAX] = {};	// 省くかの情報
 
 	// ポインタを宣言
 	int *pShuffle = NULL;	// シャッフルを省くデータの保持用
+
+	//--------------------------------------------------------
+	//	省く購入品を設定
+	//--------------------------------------------------------
 
 	// TODO：ここに省く購入品を設定する処理
 
@@ -331,12 +346,18 @@ void CShopManager::AllRandomShop(void)
 	nNumOmit++;
 #endif
 
-	for (int nCntShop = 0; nCntShop < MAX_SHOP; nCntShop++)
+	//--------------------------------------------------------
+	//	ショップ数分変更する
+	//--------------------------------------------------------
+	for (int nCntShop = 0; nCntShop < SELECT_MAX; nCntShop++)
 	{ // ショップの品目数分繰り返す
 
 		// 変数を宣言
 		int nOmitID = 0;	// 現在のシャッフルを省く配列の要素
 
+		//----------------------------------------------------
+		//	シャッフルから省く値の数分メモリ確保
+		//----------------------------------------------------
 		if (nNumOmit + nCntShop > 0)
 		{ // 確保する場合
 
@@ -366,6 +387,9 @@ void CShopManager::AllRandomShop(void)
 			}
 		}
 
+		//----------------------------------------------------
+		//	ショップ内容の変更・購入品を出さないように設定
+		//----------------------------------------------------
 		// ショップの単変更
 		aRandomHit[nCntShop] = RandomShop(nCntShop, pShuffle, nNumOmit + nCntShop);
 		if (aRandomHit[nCntShop] > NONE_IDX)
@@ -375,6 +399,9 @@ void CShopManager::AllRandomShop(void)
 			aOmitBuy[aRandomHit[nCntShop]] = true;
 		}
 
+		//----------------------------------------------------
+		//	シャッフルから省く値のメモリ開放
+		//----------------------------------------------------
 		if (nNumOmit + nCntShop > 0)
 		{ // 確保している場合
 
@@ -400,12 +427,12 @@ void CShopManager::SetEnableDraw(const bool bDraw)
 {
 	// 引数の描画状況を設定
 	m_pBg->SetEnableDraw(bDraw);			// 背景情報
-	m_pIconTarget->SetEnableDraw(bDraw);	// ターゲットアイコン情報
+	m_pIconPlayer->SetEnableDraw(bDraw);	// プレイヤーアイコン情報
 	m_pIconExp->SetEnableDraw(bDraw);		// 経験値アイコン情報
-	m_pLife->SetEnableDraw(bDraw);			// ターゲット体力情報
+	m_pLife->SetEnableDraw(bDraw);			// プレイヤー体力情報
 	m_pLv->SetEnableDraw(bDraw);			// プレイヤーレベル情報
 
-	for (int nCntShop = 0; nCntShop < MAX_SHOP; nCntShop++)
+	for (int nCntShop = 0; nCntShop < SELECT_MAX; nCntShop++)
 	{ // ショップの品目数分繰り返す
 
 		// 引数の描画状況を設定
@@ -493,6 +520,9 @@ int CShopManager::RandomShop
 	// ポインタを宣言
 	int *pShuffle = NULL;	// データのシャッフル用
 
+	//--------------------------------------------------------
+	//	ランダムから省く値を設定・シャッフル数を設定
+	//--------------------------------------------------------
 	for (int nCntShopMenu = 0; nCntShopMenu < CShop::BUY_MAX; nCntShopMenu++)
 	{ // 購入品の最大数分繰り返す
 
@@ -534,6 +564,9 @@ int CShopManager::RandomShop
 		}
 	}
 
+	//--------------------------------------------------------
+	//	シャッフルする値がない場合 (売り切れ)
+	//--------------------------------------------------------
 	if (nNumShuffle <= 0)
 	{ // 購入できるものが存在しない場合
 
@@ -544,6 +577,9 @@ int CShopManager::RandomShop
 		return NONE_IDX;
 	}
 
+	//--------------------------------------------------------
+	//	シャッフル用配列メモリ確保
+	//--------------------------------------------------------
 	if (UNUSED(pShuffle))
 	{ // シャッフルデータが使われていない場合
 
@@ -555,6 +591,9 @@ int CShopManager::RandomShop
 	}
 	else { assert(false); }	// 使用中
 
+	//--------------------------------------------------------
+	//	シャッフル用配列に省いた値以外を順に代入
+	//--------------------------------------------------------
 	for (int nCntShopMenu = 0; nCntShopMenu < CShop::BUY_MAX; nCntShopMenu++)
 	{ // 購入品の最大数分繰り返す
 
@@ -569,6 +608,9 @@ int CShopManager::RandomShop
 		}
 	}
 
+	//--------------------------------------------------------
+	//	配列をシャッフルし購入品を設定
+	//--------------------------------------------------------
 	// 要素をシャッフルする
 	useful::Shuffle(pShuffle, nNumShuffle);
 
@@ -581,6 +623,9 @@ int CShopManager::RandomShop
 	// 購入品を変更
 	m_apShop[nShop]->SetBuy((CShop::BUY)nRandomHit);
 
+	//--------------------------------------------------------
+	//	シャッフル用配列メモリ開放
+	//--------------------------------------------------------
 	if (USED(pShuffle))
 	{ // シャッフルデータが使われている場合
 

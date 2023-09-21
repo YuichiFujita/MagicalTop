@@ -82,6 +82,7 @@ HRESULT CExpManager::Init(void)
 	// レベルの生成
 	m_pLevel = CMultiValue::Create
 	( // 引数
+		CValue::TEXTURE_NORMAL,	// テクスチャ
 		FIRST_LV,	// レベル初期値
 		LV_DIGIT,	// レベル桁数
 		LV_POS,		// 位置
