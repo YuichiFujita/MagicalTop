@@ -16,16 +16,16 @@
 //************************************************************
 #define MAX_EXP			(100)	// 最大経験値
 #define EXP_FRAME		(10)	// 経験値変動フレーム
-#define GAUGE_POS		(D3DXVECTOR3(260.0f, 440.0f, 0.0f))	// 位置
-#define GAUGE_GAUGESIZE	(D3DXVECTOR3(200.0f, 30.0f, 0.0f))	// ゲージ大きさ
-#define GAUGE_FRONTCOL	(D3DXCOLOR(0.0f, 1.0f, 0.0f, 1.0f))	// 表ゲージ色
-#define GAUGE_BACKCOL	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	// 裏ゲージ色
+#define GAUGE_POS		(D3DXVECTOR3(SCREEN_CENT.x, 680.0f, 0.0f))	// 位置
+#define GAUGE_GAUGESIZE	(D3DXVECTOR3(600.0f, 10.0f, 0.0f))			// ゲージ大きさ
+#define GAUGE_FRONTCOL	(D3DXCOLOR(0.0f, 0.8f, 0.25f, 1.0f))		// 表ゲージ色
+#define GAUGE_BACKCOL	(D3DXCOLOR(0.0f, 0.1f, 0.2f, 1.0f))			// 裏ゲージ色
 
 #define FIRST_LV	(0)	// レベル初期値
 #define LV_DIGIT	(2)	// レベル桁数
-#define LV_POS		(D3DXVECTOR3(90.0f, 440.0f, 0.0f))	// 位置
-#define LV_SIZE		(D3DXVECTOR3(50.0f, 60.0f, 0.0f))	// 数値大きさ
+#define LV_SIZE		(D3DXVECTOR3(55.0f, 65.0f, 0.0f))	// 数値大きさ
 #define LV_SPACE	(D3DXVECTOR3(55.0f, 0.0f, 0.0f))	// 行間
+#define LV_POS		(D3DXVECTOR3(SCREEN_CENT.x - (LV_SPACE.x * 0.5f), 655.0f, 0.0f))	// 位置
 
 //************************************************************
 //	親クラス [CExpManager] のメンバ関数
@@ -82,7 +82,7 @@ HRESULT CExpManager::Init(void)
 	// レベルの生成
 	m_pLevel = CMultiValue::Create
 	( // 引数
-		CValue::TEXTURE_NORMAL,	// テクスチャ
+		CValue::TEXTURE_MAGIC_GREEN,	// テクスチャ
 		FIRST_LV,	// レベル初期値
 		LV_DIGIT,	// レベル桁数
 		LV_POS,		// 位置
