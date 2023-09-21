@@ -24,8 +24,8 @@
 const char *CObjectGauge3D::mc_apTextureFile[] =	// テクスチャ定数
 {
 	NULL,	// フレーム無し
-	"data\\TEXTURE\\lifeGauge000.png",	// プレイヤーフレーム
-	"data\\TEXTURE\\lifeGauge001.png",	// ターゲットフレーム
+	"data\\TEXTURE\\lifeGauge3D000.png",	// プレイヤーフレーム
+	"data\\TEXTURE\\lifeGauge3D001.png",	// ターゲットフレーム
 };
 
 //************************************************************
@@ -340,8 +340,8 @@ CObjectGauge3D *CObjectGauge3D::Create
 )
 {
 	// ポインタを宣言
-	CObjectGauge3D *pObjectGauge3D = NULL;	// オブジェクトゲージ3D生成用
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+	CObjectGauge3D *pObjectGauge3D = NULL;			// オブジェクトゲージ3D生成用
 
 	if (UNUSED(pObjectGauge3D))
 	{ // 使用されていない場合

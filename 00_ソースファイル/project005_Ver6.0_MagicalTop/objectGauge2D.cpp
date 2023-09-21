@@ -19,6 +19,15 @@
 #define GAUGE_PRIO	(5)		// ゲージ2Dの優先順位
 
 //************************************************************
+//	静的メンバ変数宣言
+//************************************************************
+const char *CObjectGauge2D::mc_apTextureFile[] =	// テクスチャ定数
+{
+	NULL,	// フレーム無し
+	"data\\TEXTURE\\lifeGauge2D000.png",	// 経験値フレーム
+};
+
+//************************************************************
 //	子クラス [CObjectGauge2D] のメンバ関数
 //************************************************************
 //============================================================
@@ -254,11 +263,13 @@ CObjectGauge2D *CObjectGauge2D::Create
 	const D3DXCOLOR& rColFront,		// 表ゲージ色
 	const D3DXCOLOR& rColBack,		// 裏ゲージ色
 	const bool bDrawFrame,			// 枠描画状況
+	const TYPE frameType,			// 枠種類
 	const D3DXVECTOR3& rSizeFrame	// 枠大きさ
 )
 {
 	// ポインタを宣言
-	CObjectGauge2D *pObjectGauge2D = NULL;	// オブジェクトゲージ2D生成用
+	CTexture *pTexture = CManager::GetTexture();	// テクスチャへのポインタ
+	CObjectGauge2D *pObjectGauge2D = NULL;			// オブジェクトゲージ2D生成用
 
 	if (UNUSED(pObjectGauge2D))
 	{ // 使用されていない場合
@@ -282,6 +293,9 @@ CObjectGauge2D *CObjectGauge2D::Create
 			// 失敗を返す
 			return NULL;
 		}
+
+		// テクスチャを登録・割当
+		pObjectGauge2D->BindTexture(POLYGON_FRAME, pTexture->Regist(mc_apTextureFile[frameType]));
 
 		// ゲージ最大値を設定
 		pObjectGauge2D->SetMaxNum(nMax);

@@ -40,6 +40,14 @@ public:
 		POLYGON_MAX			// この列挙型の総数
 	}POLYGON;
 
+	// フレーム種類列挙
+	typedef enum
+	{
+		TYPE_NONE = 0,	// フレーム無し
+		TYPE_EXP,		// 経験値フレーム
+		TYPE_MAX		// この列挙型の総数
+	}TYPE;
+
 	// コンストラクタ
 	CObjectGauge2D();
 	CObjectGauge2D(const int nFrame, const CObject::LABEL label, const int nPriority = DEFAULT_PRIO);
@@ -64,6 +72,7 @@ public:
 		const D3DXCOLOR& rColFront = XCOL_WHITE,	// 表ゲージ色
 		const D3DXCOLOR& rColBack = XCOL_BLACK,		// 裏ゲージ色
 		const bool bDrawFrame = false,				// 枠描画状況
+		const TYPE frameType = TYPE_NONE,			// 枠種類
 		const D3DXVECTOR3& rSizeFrame = VEC3_ONE	// 枠大きさ
 	);
 
@@ -90,6 +99,9 @@ public:
 private:
 	// メンバ関数
 	void SetVtx(void);	// 頂点情報の設定
+
+	// 静的メンバ変数
+	static const char *mc_apTextureFile[];	// テクスチャ定数
 
 	// メンバ変数
 	LPDIRECT3DVERTEXBUFFER9 m_pVtxBuff;	// 頂点バッファへのポインタ

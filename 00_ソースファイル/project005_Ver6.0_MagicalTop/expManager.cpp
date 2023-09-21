@@ -18,8 +18,9 @@
 #define EXP_FRAME		(10)	// 経験値変動フレーム
 #define GAUGE_POS		(D3DXVECTOR3(SCREEN_CENT.x, 680.0f, 0.0f))	// 位置
 #define GAUGE_GAUGESIZE	(D3DXVECTOR3(600.0f, 10.0f, 0.0f))			// ゲージ大きさ
-#define GAUGE_FRONTCOL	(D3DXCOLOR(0.0f, 0.8f, 0.25f, 1.0f))		// 表ゲージ色
+#define GAUGE_FRONTCOL	(D3DXCOLOR(0.0f, 0.8f, 0.35f, 1.0f))		// 表ゲージ色
 #define GAUGE_BACKCOL	(D3DXCOLOR(0.0f, 0.1f, 0.2f, 1.0f))			// 裏ゲージ色
+#define GAUGE_FRAMESIZE	(D3DXVECTOR3(602.0f, 12.0f, 0.0f))			// ゲージ枠大きさ
 
 #define FIRST_LV	(0)	// レベル初期値
 #define LV_DIGIT	(2)	// レベル桁数
@@ -60,13 +61,16 @@ HRESULT CExpManager::Init(void)
 	// 経験値の生成
 	m_pExp = CObjectGauge2D::Create
 	( // 引数
-		CObject::LABEL_GAUGE,	// オブジェクトラベル
-		MAX_EXP,				// 最大経験値
-		EXP_FRAME,				// 経験値変動フレーム
-		GAUGE_POS,				// 位置
-		GAUGE_GAUGESIZE,		// ゲージ大きさ
-		GAUGE_FRONTCOL,			// 表ゲージ色
-		GAUGE_BACKCOL			// 裏ゲージ色
+		CObject::LABEL_GAUGE,		// オブジェクトラベル
+		MAX_EXP,					// 最大経験値
+		EXP_FRAME,					// 経験値変動フレーム
+		GAUGE_POS,					// 位置
+		GAUGE_GAUGESIZE,			// ゲージ大きさ
+		GAUGE_FRONTCOL,				// 表ゲージ色
+		GAUGE_BACKCOL,				// 裏ゲージ色
+		true,						// 枠描画状況
+		CObjectGauge2D::TYPE_EXP,	// 枠種類
+		GAUGE_FRAMESIZE				// 枠大きさ
 	);
 	if (UNUSED(m_pExp))
 	{ // 非使用中の場合
