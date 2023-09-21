@@ -59,13 +59,17 @@ public:
 	static HRESULT Release(CLevelupManager *&prLevelupManager);	// 破棄
 
 private:
+	// メンバ関数
+	void UpdateBlink(void);	// 点滅更新
+
 	// 静的メンバ変数
 	static const char *mc_apTextureFile[];	// テクスチャ定数
 
 	// メンバ変数
 	CShopManager *m_pShopManager;	// ショップマネージャーの情報
 	CObject2D *m_pControl;	// 操作情報
-	STATE m_state;	// 状態
+	STATE m_state;			// 状態
+	float m_fSinRot;		// ポリゴン点滅向き
 };
 
 #endif	// _LEVELUPMANAGER_H_

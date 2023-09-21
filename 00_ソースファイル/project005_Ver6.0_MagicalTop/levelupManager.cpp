@@ -22,15 +22,17 @@
 //************************************************************
 const char *CLevelupManager::mc_apTextureFile[] =	// テクスチャ定数
 {
-	"data\\TEXTURE\\option000.png",	// 操作テクスチャ
+	"data\\TEXTURE\\shop008.png",	// 操作テクスチャ
 };
 
 //************************************************************
 //	マクロ定義
 //************************************************************
-#define CONTROL_POS		(D3DXVECTOR3(1160.5f, 680.0f, 0.0f))	// 操作表示の位置
-#define CONTROL_SIZE	(D3DXVECTOR3(220.0f, 65.0f, 0.0f))		// 操作表示の大きさ
-#define CONTROL_PRIO	(6)	// 操作表示の優先順位
+#define CONTROL_PRIO	(6)		// 操作表示の優先順位
+#define ADD_ROT			(0.05f)	// 点滅向きの加算量
+#define POS_CONTROL		(D3DXVECTOR3(SCREEN_CENT.x, 665.0f, 0.0f))	// 操作方法表示の位置
+#define SIZE_CONTROL	(D3DXVECTOR3(SCREEN_WIDTH, 100.0f, 0.0f))	// 操作方法表示の大きさ
+#define COL_CONTROL		(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.0f))			// 操作方法表示の色
 
 //************************************************************
 //	親クラス [CLevelupManager] のメンバ関数
@@ -41,9 +43,10 @@ const char *CLevelupManager::mc_apTextureFile[] =	// テクスチャ定数
 CLevelupManager::CLevelupManager()
 {
 	// メンバ変数をクリア
-	m_pShopManager = NULL;	// ショップマネージャーの情報
-	m_pControl = NULL;		// 操作情報
-	m_state = STATE_NORMAL;	// 状態
+	m_pShopManager	= NULL;			// ショップマネージャーの情報
+	m_pControl		= NULL;			// 操作情報
+	m_state			= STATE_NORMAL;	// 状態
+	m_fSinRot		= 0.0f;			// ポリゴン点滅向き
 }
 
 //============================================================
@@ -63,9 +66,10 @@ HRESULT CLevelupManager::Init(void)
 	CTexture *pTexture = CManager::GetTexture();	// テクスチャ
 
 	// メンバ変数を初期化
-	m_pShopManager = NULL;	// ショップマネージャーの情報
-	m_pControl = NULL;		// 操作情報
-	m_state = STATE_NORMAL;	// 状態
+	m_pShopManager	= NULL;			// ショップマネージャーの情報
+	m_pControl		= NULL;			// 操作情報
+	m_state			= STATE_NORMAL;	// 状態
+	m_fSinRot		= -HALF_PI;		// ポリゴン点滅向き
 
 	// ショップマネージャーの生成
 	m_pShopManager = CShopManager::Create();
@@ -83,8 +87,10 @@ HRESULT CLevelupManager::Init(void)
 	// 操作情報の生成
 	m_pControl = CObject2D::Create
 	( // 引数
-		CONTROL_POS,	// 位置
-		CONTROL_SIZE	// 大きさ
+		POS_CONTROL,	// 位置
+		SIZE_CONTROL,	// 大きさ
+		VEC3_ZERO,		// 向き
+		COL_CONTROL		// 色
 	);
 	if (UNUSED(m_pControl))
 	{ // 非使用中の場合
@@ -154,7 +160,7 @@ void CLevelupManager::Update(void)
 
 	case STATE_SELECT:	// 強化選択状態
 
-		if (pKeyboard->GetTrigger(DIK_1) || pPad->GetTrigger(CInputPad::KEY_X))
+		if (pKeyboard->GetTrigger(DIK_SPACE) || pPad->GetTrigger(CInputPad::KEY_B))
 		{ // 強化終了の操作が行われた場合
 
 			// ショップを閉店する
@@ -163,12 +169,21 @@ void CLevelupManager::Update(void)
 			// 操作情報を非表示
 			m_pControl->SetEnableDraw(false);
 
+			// ポリゴン点滅向きを初期化
+			m_fSinRot = -HALF_PI;
+
+			// 操作情報の色を初期化
+			m_pControl->SetColor(COL_CONTROL);
+
 			// 状態を設定
 			m_state = STATE_NORMAL;	// 通常状態
 
 			// 次季節へ移行
 			CSceneGame::GetWaveManager()->NextSeason();
 		}
+
+		// 点滅の更新
+		UpdateBlink();
 
 		// ショップマネージャーの更新
 		m_pShopManager->Update();
@@ -240,4 +255,23 @@ HRESULT CLevelupManager::Release(CLevelupManager *&prLevelupManager)
 		return S_OK;
 	}
 	else { assert(false); return E_FAIL; }	// 非使用中
+}
+
+//============================================================
+//	点滅の更新処理
+//============================================================
+void CLevelupManager::UpdateBlink(void)
+{
+	// 変数を宣言
+	D3DXCOLOR colControl = m_pControl->GetColor();	// 操作表示の色
+
+	// 操作表示の点滅向きを加算
+	m_fSinRot += ADD_ROT;
+	useful::NormalizeRot(m_fSinRot);	// 向きを補正
+
+	// 操作表示のα値を変更
+	colControl.a = (1.0f / 2.0f) * (sinf(m_fSinRot) + 1.0f);
+
+	// 操作表示の色を反映
+	m_pControl->SetColor(colControl);
 }

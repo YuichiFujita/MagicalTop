@@ -24,32 +24,33 @@
 //************************************************************
 #define SHOP_PRIO	(6)	// ショップ表示の優先順位
 
-#define SIZE_BG	(D3DXVECTOR3(1088.0f, 562.0f, 0.0f))	// 背景の大きさ
-#define COL_BG	(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.55f))	// 背景の色
+#define POS_BG	(D3DXVECTOR3(SCREEN_CENT.x, 330.0f, 0.0f))	// 背景の位置
+#define SIZE_BG	(D3DXVECTOR3(1088.0f, 562.0f, 0.0f))		// 背景の大きさ
+#define COL_BG	(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.55f))		// 背景の色
 
-#define POS_PLAYER_ICON	(D3DXVECTOR3(160.0f, 150.0f, 0.0f))	// プレイヤーアイコンの位置
-#define POS_EXP_ICON	(D3DXVECTOR3(785.0f, 150.0f, 0.0f))	// 経験値アイコンの位置
+#define POS_PLAYER_ICON	(D3DXVECTOR3(160.0f, 110.0f, 0.0f))	// プレイヤーアイコンの位置
+#define POS_EXP_ICON	(D3DXVECTOR3(785.0f, 110.0f, 0.0f))	// 経験値アイコンの位置
 #define SIZE_ICON		(D3DXVECTOR3(100.0f, 100.0f, 0.0f))	// アイコンの大きさ
 
 #define DIGIT_LIFE	(3)	// 体力の桁数
-#define POS_LIFE	(D3DXVECTOR3(270.0f, 160.0f, 0.0f))	// 体力のタイトルと数字の位置
+#define POS_LIFE	(D3DXVECTOR3(270.0f, 120.0f, 0.0f))	// 体力のタイトルと数字の位置
 #define SPACE_LIFE	(D3DXVECTOR3(100.0f, -2.5f, 0.0f))	// 体力のタイトルと数字の行間
 
 #define DIGIT_LEVEL	(2)	// レベルの桁数
-#define POS_LEVEL	(D3DXVECTOR3(920.0f, 160.0f, 0.0f))	// レベルのタイトルと数字の位置
+#define POS_LEVEL	(D3DXVECTOR3(920.0f, 120.0f, 0.0f))	// レベルのタイトルと数字の位置
 #define SPACE_LEVEL	(D3DXVECTOR3(130.0f, -2.5f, 0.0f))	// レベルのタイトルと数字の行間
 
 #define VALUEUI_SPACE_VALUE	(D3DXVECTOR3(70.0f, 0.0f, 0.0f))	// 数字UIの数字の行間
 #define VALUEUI_SIZE_TITLE	(D3DXVECTOR3(252.0f, 80.0f, 0.0f))	// 数字UIのタイトルの大きさ
 #define VALUEUI_SIZE_VALUE	(D3DXVECTOR3(80.0f, 80.0f, 0.0f))	// 数字UIの数字の大きさ
 
-#define POS_MAXLIFE				(D3DXVECTOR3(565.0f, 166.0f, 0.0f))	// 最大体力のタイトルと数字の位置
+#define POS_MAXLIFE				(D3DXVECTOR3(565.0f, 126.0f, 0.0f))	// 最大体力のタイトルと数字の位置
 #define SPACE_MAXLIFE			(D3DXVECTOR3(45.0f, 0.0f, 0.0f))	// 最大体力のタイトルと数字の行間
 #define MAX_LIFE_SPACE_VALUE	(D3DXVECTOR3(45.0f, 0.0f, 0.0f))	// 最大体力の数字の行間
 #define MAX_LIFE_SIZE_TITLE		(D3DXVECTOR3(33.0f, 55.0f, 0.0f))	// 最大体力のタイトルの大きさ
 #define MAX_LIFE_SIZE_VALUE		(D3DXVECTOR3(55.0f, 55.0f, 0.0f))	// 最大体力の数字の大きさ
 
-#define POS_SHOP	(D3DXVECTOR3(285.0f, 270.0f, 0.0f))	// ショップの位置
+#define POS_SHOP	(D3DXVECTOR3(285.0f, 240.0f, 0.0f))	// ショップの位置
 #define SPACE_SHOP	(D3DXVECTOR3(350.0f, 0.0f, 0.0f))	// ショップの空白
 #define CHOICE_COL	(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f))	// 選択中カラー
 #define DEFAULT_COL	(D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f))	// 非選択中カラー
@@ -119,10 +120,10 @@ HRESULT CShopManager::Init(void)
 	// 背景情報の生成
 	m_pBg = CObject2D::Create
 	( // 引数
-		SCREEN_CENT,	// 位置
-		SIZE_BG,		// 大きさ
-		VEC3_ZERO,		// 向き
-		COL_BG			// 色
+		POS_BG,		// 位置
+		SIZE_BG,	// 大きさ
+		VEC3_ZERO,	// 向き
+		COL_BG		// 色
 	);
 	if (UNUSED(m_pBg))
 	{ // 非使用中の場合
