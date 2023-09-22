@@ -11,6 +11,7 @@
 #include "manager.h"
 #include "texture.h"
 #include "input.h"
+#include "sound.h"
 #include "camera.h"
 #include "titleManager.h"
 
@@ -134,7 +135,7 @@ HRESULT CSceneTitle::Init(void)
 	CManager::GetCamera()->SetEnableUpdate(false);			// XV‚ğ’â~
 
 	// BGM‚ÌÄ¶
-	//CManager::GetSound()->Play(CSound::LABEL_BGM_000);
+	CManager::GetSound()->Play(CSound::LABEL_BGM_TITLE_RESULT);
 
 	// ¬Œ÷‚ğ•Ô‚·
 	return S_OK;

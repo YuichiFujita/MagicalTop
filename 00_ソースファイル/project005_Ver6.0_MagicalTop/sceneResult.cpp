@@ -11,6 +11,7 @@
 #include "manager.h"
 #include "texture.h"
 #include "input.h"
+#include "sound.h"
 #include "camera.h"
 #include "resultManager.h"
 
@@ -149,7 +150,7 @@ HRESULT CSceneResult::Init(void)
 	CManager::GetCamera()->SetDestRotate();	// –Ú•WˆÊ’u‚ğİ’è
 
 	// BGM‚ÌÄ¶
-	//CManager::GetSound()->Play(CSound::LABEL_BGM_000);
+	CManager::GetSound()->Play(CSound::LABEL_BGM_TITLE_RESULT);
 
 	// ¬Œ÷‚ğ•Ô‚·
 	return S_OK;

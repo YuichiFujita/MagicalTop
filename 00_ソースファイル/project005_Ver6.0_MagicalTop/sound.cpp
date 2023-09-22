@@ -14,7 +14,10 @@
 //************************************************************
 const CSound::SOUNDINFO CSound::mc_aSoundInfo[LABEL_MAX] =	// サウンド情報
 {
-	{ "data\\BGM\\bgm000.wav", -1 },	// BGM (仮)
+	{ "data\\BGM\\bgm_title_result.wav", -1 },	// BGM (タイトル・リザルト)
+	{ "data\\BGM\\bgm_tutorial.wav", -1 },		// BGM (チュートリアル)
+	{ "data\\BGM\\bgm_game.wav", -1 },			// BGM (ゲーム)
+
 	{ "data\\SE\\shot000.wav",  0 },	// SE (仮)
 };
 

@@ -123,7 +123,7 @@ HRESULT CSceneTutorial::Init(void)
 	CManager::GetCamera()->SetDestBargaining();	// –Ú•WˆÊ’u‚ğİ’è
 
 	// BGM‚ÌÄ¶
-	//CManager::GetSound()->Play(CSound::LABEL_BGM_000);
+	CManager::GetSound()->Play(CSound::LABEL_BGM_TUTORIAL);
 
 	// ¬Œ÷‚ğ•Ô‚·
 	return S_OK;

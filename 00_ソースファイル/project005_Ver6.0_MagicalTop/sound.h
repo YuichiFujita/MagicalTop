@@ -31,9 +31,12 @@ public:
 	// サウンドラベル列挙
 	typedef enum
 	{
-		LABEL_BGM_000 = 0,	// BGM (仮)
-		LABEL_SE_SHOT,		// SE (仮)
-		LABEL_MAX,			// この列挙型の総数
+		LABEL_BGM_TITLE_RESULT = 0,	// BGM (タイトル・リザルト)
+		LABEL_BGM_TUTORIAL,			// BGM (チュートリアル)
+		LABEL_BGM_GAME,				// BGM (ゲーム)
+
+		LABEL_SE_SHOT,	// SE (仮)
+		LABEL_MAX,		// この列挙型の総数
 	}LABEL;
 
 	// サウンド情報構造体

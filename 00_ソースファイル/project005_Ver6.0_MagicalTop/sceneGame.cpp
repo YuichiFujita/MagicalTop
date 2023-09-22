@@ -174,7 +174,7 @@ HRESULT CSceneGame::Init(void)
 	m_pTimerManager->EnableStop(true);	// Œv‘ª‚ğˆê’â~
 
 	// BGM‚ÌÄ¶
-	//CManager::GetSound()->Play(CSound::LABEL_BGM_000);
+	CManager::GetSound()->Play(CSound::LABEL_BGM_GAME);
 
 	// ¬Œ÷‚ğ•Ô‚·
 	return S_OK;
