@@ -10,6 +10,7 @@
 #include "levelupManager.h"
 #include "manager.h"
 #include "input.h"
+#include "sound.h"
 #include "texture.h"
 #include "sceneGame.h"
 #include "waveManager.h"
@@ -154,6 +155,9 @@ void CLevelupManager::Update(void)
 
 			// 状態を設定
 			m_state = STATE_SELECT;	// 強化選択状態
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
 		}
 
 		break;
@@ -180,6 +184,9 @@ void CLevelupManager::Update(void)
 
 			// 次季節へ移行
 			CSceneGame::GetWaveManager()->NextSeason();
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_000);	// 決定音00
 		}
 
 		// 点滅の更新

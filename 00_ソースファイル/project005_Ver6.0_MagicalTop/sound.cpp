@@ -22,6 +22,7 @@ const CSound::SOUNDINFO CSound::mc_aSoundInfo[LABEL_MAX] =	// サウンド情報
 	{ "data\\SE\\select001.wav",  0 },		// 選択操作音01
 	{ "data\\SE\\decision000.wav",  0 },	// 決定音00
 	{ "data\\SE\\decision001.wav",  0 },	// 決定音01
+	{ "data\\SE\\decision002.wav",  0 },	// 決定音02
 	{ "data\\SE\\paper000.wav",  0 },		// 便箋めくり音
 	{ "data\\SE\\spawn000.wav",  0 },		// 生成音
 	{ "data\\SE\\playerShot000.wav",  0 },	// プレイヤー射撃音 (泡)

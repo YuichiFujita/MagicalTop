@@ -10,6 +10,7 @@
 #include "shopManager.h"
 #include "manager.h"
 #include "input.h"
+#include "sound.h"
 #include "texture.h"
 #include "sceneGame.h"
 #include "omitShop.h"
@@ -499,15 +500,25 @@ void CShopManager::UpdateSelect(void)
 	m_nOldSelect = m_nSelect;
 
 	// 選択操作
-	if (pKeyboard->GetTrigger(DIK_LEFT) || pPad->GetTrigger(CInputPad::KEY_LEFT))
+	if (pKeyboard->GetTrigger(DIK_A)
+	||  pKeyboard->GetTrigger(DIK_LEFT)
+	||  pPad->GetTrigger(CInputPad::KEY_LEFT))
 	{
 		// 選択中番号を減算
 		m_nSelect = (m_nSelect + (SELECT_MAX - 1)) % SELECT_MAX;
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_SELECT_001);	// 選択操作音01
 	}
-	else if (pKeyboard->GetTrigger(DIK_RIGHT) || pPad->GetTrigger(CInputPad::KEY_RIGHT))
+	else if (pKeyboard->GetTrigger(DIK_D)
+	||		 pKeyboard->GetTrigger(DIK_RIGHT)
+	||		 pPad->GetTrigger(CInputPad::KEY_RIGHT))
 	{
 		// 選択中番号を加算
 		m_nSelect = (m_nSelect + 1) % SELECT_MAX;
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_SELECT_001);	// 選択操作音01
 	}
 
 	// 選択中のカラーを設定
@@ -532,158 +543,163 @@ void CShopManager::UpdateBuy(void)
 		// 変数を宣言
 		int nBuy = m_apShop[m_nSelect]->GetBuy();	// 購入品情報
 
-		if (nBuy != NONE_IDX)
-		{ // 売り切れではない場合
+		if (nBuy != NONE_IDX && pPlayer->GetLevel() >= CShop::GetNeedLevel((CShop::BUY)nBuy))
+		{ // 売り切れではない且つ、レベルが必要数分ある場合
 
-			if (pPlayer->GetLevel() >= CShop::GetNeedLevel((CShop::BUY)nBuy))
-			{ // レベルが必要数分ある場合
+			switch (nBuy)
+			{ // 購入品ごとの処理
+			case CShop::BUY_HEAL:	// プレイヤー回復
 
-				switch (nBuy)
-				{ // 購入品ごとの処理
-				case CShop::BUY_HEAL:	// プレイヤー回復
+				// プレイヤーの体力を回復
+				pPlayer->AddLife(HEAL_PLAYER);
 
-					// プレイヤーの体力を回復
-					pPlayer->AddLife(HEAL_PLAYER);
+				break;
 
-					break;
+			case CShop::BUY_LVUP_LIFE:	// プレイヤー体力レベルアップ
 
-				case CShop::BUY_LVUP_LIFE:	// プレイヤー体力レベルアップ
+				// プレイヤーの体力をレベルアップ
+				pPlayer->AddLevelStatus(CPlayer::LEVELINFO_LIFE);
 
-					// プレイヤーの体力をレベルアップ
-					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_LIFE);
+				if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_LIFE) >= CPlayer::LEVEL_MAX - 1)
+				{ // プレイヤーの体力が最大レベルの場合
 
-					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_LIFE) >= CPlayer::LEVEL_MAX - 1)
-					{ // プレイヤーの体力が最大レベルの場合
-
-						// プレイヤーの体力レベルアップを省くようにする
-						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_LIFE, true);
-					}
-
-					break;
-
-				case CShop::BUY_LVUP_MANA:	// プレイヤーマナレベルアップ
-
-					// プレイヤーのマナをレベルアップ
-					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_MANA);
-
-					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_MANA) >= CPlayer::LEVEL_MAX - 1)
-					{ // プレイヤーのマナが最大レベルの場合
-
-						// プレイヤーのマナレベルアップを省くようにする
-						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MANA, true);
-					}
-
-					break;
-
-				case CShop::BUY_LVUP_DASH:	// プレイヤーダッシュレベルアップ
-
-					// プレイヤーのダッシュをレベルアップ
-					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_DASH);
-
-					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_DASH) >= CPlayer::LEVEL_MAX - 1)
-					{ // プレイヤーのダッシュが最大レベルの場合
-
-						// プレイヤーのダッシュレベルアップを省くようにする
-						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DASH, true);
-					}
-
-					break;
-
-				case CShop::BUY_LVUP_DEFENSE:	// プレイヤー防御力レベルアップ
-
-					// プレイヤーの防御力をレベルアップ
-					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_DEFENSE);
-
-					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_DEFENSE) >= CPlayer::LEVEL_MAX - 1)
-					{ // プレイヤーの防御力が最大レベルの場合
-
-						// プレイヤーの防御力レベルアップを省くようにする
-						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DEFENSE, true);
-					}
-
-					break;
-
-				case CShop::BUY_LVUP_SPEED:	// プレイヤー素早さレベルアップ
-
-					// プレイヤーの素早さをレベルアップ
-					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_SPEED);
-
-					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_SPEED) >= CPlayer::LEVEL_MAX - 1)
-					{ // プレイヤーの素早さが最大レベルの場合
-
-						// プレイヤーの素早さレベルアップを省くようにする
-						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_SPEED, true);
-					}
-
-					break;
-
-				case CShop::BUY_LVUP_MAGIC_NUM:		// 魔法発射数レベルアップ
-
-					// 魔法の発射数をレベルアップ
-					CMagic::AddLevelStatus(CMagic::LEVELINFO_NUM);
-
-					if (CMagic::GetLevelStatus(CMagic::LEVELINFO_NUM) >= CMagic::LEVEL_MAX - 1)
-					{ // 魔法の発射数が最大レベルの場合
-
-						// 魔法の発射数レベルアップを省くようにする
-						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_NUM, true);
-					}
-
-					break;
-
-				case CShop::BUY_LVUP_MAGIC_SPEED:	// 魔法弾速レベルアップ
-
-					// 魔法の弾速をレベルアップ
-					CMagic::AddLevelStatus(CMagic::LEVELINFO_SPEED);
-
-					if (CMagic::GetLevelStatus(CMagic::LEVELINFO_SPEED) >= CMagic::LEVEL_MAX - 1)
-					{ // 魔法の弾速が最大レベルの場合
-
-						// 魔法の弾速レベルアップを省くようにする
-						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_SPEED, true);
-					}
-
-					break;
-
-				case CShop::BUY_LVUP_MAGIC_RAPID:	// 魔法連射速度レベルアップ
-
-					// 魔法の連射速度をレベルアップ
-					CMagic::AddLevelStatus(CMagic::LEVELINFO_RAPID);
-
-					if (CMagic::GetLevelStatus(CMagic::LEVELINFO_RAPID) >= CMagic::LEVEL_MAX - 1)
-					{ // 魔法の連射速度が最大レベルの場合
-
-						// 魔法の連射速度レベルアップを省くようにする
-						m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_RAPID, true);
-					}
-
-					break;
-
-				case CShop::BUY_EXP_UP:	// 獲得経験値増加
-
-					// 獲得経験値を増加させる
-					pPlayer->AddLevelStatus(CPlayer::LEVELINFO_EXP_UP);
-
-					if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_EXP_UP) >= CPlayer::LEVEL_MAX - 1)
-					{ // 経験値増加が最大レベルの場合
-
-						// 経験値増加を省くようにする
-						m_pOmitShop->SetEnableOmit(CShop::BUY_EXP_UP, true);
-					}
-
-					break;
-
-				default:	// 例外処理
-					assert(false);
-					break;
+					// プレイヤーの体力レベルアップを省くようにする
+					m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_LIFE, true);
 				}
 
-				// 購入に使用したレベルを減算
-				pPlayer->AddLevel(-CShop::GetNeedLevel((CShop::BUY)nBuy));
+				break;
 
-				// ショップをすべて変更する
-				AllRandomShop();
+			case CShop::BUY_LVUP_MANA:	// プレイヤーマナレベルアップ
+
+				// プレイヤーのマナをレベルアップ
+				pPlayer->AddLevelStatus(CPlayer::LEVELINFO_MANA);
+
+				if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_MANA) >= CPlayer::LEVEL_MAX - 1)
+				{ // プレイヤーのマナが最大レベルの場合
+
+					// プレイヤーのマナレベルアップを省くようにする
+					m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MANA, true);
+				}
+
+				break;
+
+			case CShop::BUY_LVUP_DASH:	// プレイヤーダッシュレベルアップ
+
+				// プレイヤーのダッシュをレベルアップ
+				pPlayer->AddLevelStatus(CPlayer::LEVELINFO_DASH);
+
+				if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_DASH) >= CPlayer::LEVEL_MAX - 1)
+				{ // プレイヤーのダッシュが最大レベルの場合
+
+					// プレイヤーのダッシュレベルアップを省くようにする
+					m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DASH, true);
+				}
+
+				break;
+
+			case CShop::BUY_LVUP_DEFENSE:	// プレイヤー防御力レベルアップ
+
+				// プレイヤーの防御力をレベルアップ
+				pPlayer->AddLevelStatus(CPlayer::LEVELINFO_DEFENSE);
+
+				if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_DEFENSE) >= CPlayer::LEVEL_MAX - 1)
+				{ // プレイヤーの防御力が最大レベルの場合
+
+					// プレイヤーの防御力レベルアップを省くようにする
+					m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DEFENSE, true);
+				}
+
+				break;
+
+			case CShop::BUY_LVUP_SPEED:	// プレイヤー素早さレベルアップ
+
+				// プレイヤーの素早さをレベルアップ
+				pPlayer->AddLevelStatus(CPlayer::LEVELINFO_SPEED);
+
+				if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_SPEED) >= CPlayer::LEVEL_MAX - 1)
+				{ // プレイヤーの素早さが最大レベルの場合
+
+					// プレイヤーの素早さレベルアップを省くようにする
+					m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_SPEED, true);
+				}
+
+				break;
+
+			case CShop::BUY_LVUP_MAGIC_NUM:		// 魔法発射数レベルアップ
+
+				// 魔法の発射数をレベルアップ
+				CMagic::AddLevelStatus(CMagic::LEVELINFO_NUM);
+
+				if (CMagic::GetLevelStatus(CMagic::LEVELINFO_NUM) >= CMagic::LEVEL_MAX - 1)
+				{ // 魔法の発射数が最大レベルの場合
+
+					// 魔法の発射数レベルアップを省くようにする
+					m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_NUM, true);
+				}
+
+				break;
+
+			case CShop::BUY_LVUP_MAGIC_SPEED:	// 魔法弾速レベルアップ
+
+				// 魔法の弾速をレベルアップ
+				CMagic::AddLevelStatus(CMagic::LEVELINFO_SPEED);
+
+				if (CMagic::GetLevelStatus(CMagic::LEVELINFO_SPEED) >= CMagic::LEVEL_MAX - 1)
+				{ // 魔法の弾速が最大レベルの場合
+
+					// 魔法の弾速レベルアップを省くようにする
+					m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_SPEED, true);
+				}
+
+				break;
+
+			case CShop::BUY_LVUP_MAGIC_RAPID:	// 魔法連射速度レベルアップ
+
+				// 魔法の連射速度をレベルアップ
+				CMagic::AddLevelStatus(CMagic::LEVELINFO_RAPID);
+
+				if (CMagic::GetLevelStatus(CMagic::LEVELINFO_RAPID) >= CMagic::LEVEL_MAX - 1)
+				{ // 魔法の連射速度が最大レベルの場合
+
+					// 魔法の連射速度レベルアップを省くようにする
+					m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_RAPID, true);
+				}
+
+				break;
+
+			case CShop::BUY_EXP_UP:	// 獲得経験値増加
+
+				// 獲得経験値を増加させる
+				pPlayer->AddLevelStatus(CPlayer::LEVELINFO_EXP_UP);
+
+				if (pPlayer->GetLevelStatus(CPlayer::LEVELINFO_EXP_UP) >= CPlayer::LEVEL_MAX - 1)
+				{ // 経験値増加が最大レベルの場合
+
+					// 経験値増加を省くようにする
+					m_pOmitShop->SetEnableOmit(CShop::BUY_EXP_UP, true);
+				}
+
+				break;
+
+			default:	// 例外処理
+				assert(false);
+				break;
 			}
+
+			// 購入に使用したレベルを減算
+			pPlayer->AddLevel(-CShop::GetNeedLevel((CShop::BUY)nBuy));
+
+			// ショップをすべて変更する
+			AllRandomShop();
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
+		}
+		else
+		{ // 購入できない場合
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_002);	// 決定音02
 		}
 	}
 }

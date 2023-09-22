@@ -39,6 +39,7 @@ public:
 		LABEL_SE_SELECT_001,	// 選択操作音01
 		LABEL_SE_DECISION_000,	// 決定音00
 		LABEL_SE_DECISION_001,	// 決定音01
+		LABEL_SE_DECISION_002,	// 決定音02
 		LABEL_SE_PAPER,			// 便箋めくり音
 		LABEL_SE_SPAWN,			// 生成音
 		LABEL_SE_PLAYER_SHOT,	// プレイヤー射撃音 (泡)
