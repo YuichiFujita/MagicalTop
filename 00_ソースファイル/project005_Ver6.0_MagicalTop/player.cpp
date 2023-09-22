@@ -353,13 +353,6 @@ void CPlayer::Update(void)
 
 	// 軌跡の更新
 	m_pOrbit->Update();
-
-	// デバッグ表示
-	CManager::GetDebugProc()->Print("体力レベル：%d\n", m_level.nLife);
-	CManager::GetDebugProc()->Print("マナレベル：%d\n", m_level.nMana);
-	CManager::GetDebugProc()->Print("ダッシュレベル：%d\n", m_level.nDash);
-	CManager::GetDebugProc()->Print("防御力レベル：%d\n", m_level.nDefense);
-	CManager::GetDebugProc()->Print("素早さレベル：%d\n", m_level.nSpeed);
 }
 
 //============================================================

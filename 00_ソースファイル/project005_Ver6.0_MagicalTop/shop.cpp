@@ -32,7 +32,7 @@
 #define LV_TITLE_SIZE	(D3DXVECTOR3(180.0f, 50.0f, 0.0f))	// レベルのタイトル大きさ
 #define LV_VALUE_SIZE	(D3DXVECTOR3(50.0f, 50.0f, 0.0f))	// レベルの数字大きさ
 #define LV_VALUE_SPACE	(D3DXVECTOR3(38.0f, 0.0f, 0.0f))	// レベルの数字の行間
-#define ADD_POS_LEVEL	(D3DXVECTOR3(-40.0f, 125.0f, 0.0f))	// レベルの表示位置の相対座標への加算量
+#define ADD_POS_LEVEL	(D3DXVECTOR3(-40.0f, 130.0f, 0.0f))	// レベルの表示位置の相対座標への加算量
 
 //************************************************************
 //	静的メンバ変数宣言
