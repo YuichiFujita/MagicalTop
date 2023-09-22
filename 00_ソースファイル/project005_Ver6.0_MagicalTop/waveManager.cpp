@@ -9,6 +9,7 @@
 //************************************************************
 #include "waveManager.h"
 #include "manager.h"
+#include "sound.h"
 #include "texture.h"
 #include "model.h"
 #include "modelUI.h"
@@ -578,6 +579,13 @@ void CWaveManager::UpdateSeasonStart(void)
 
 		// 状態管理カウンターを加算
 		m_nCounterState++;
+
+		if (m_nCounterState == (int)(SEASON_MOVECNT * 0.5f))
+		{ // カウンターが一定値の場合
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
+		}
 	}
 	else
 	{ // カウンターが一定値より大きい場合
@@ -594,6 +602,9 @@ void CWaveManager::UpdateSeasonStart(void)
 
 		// 状態を変更
 		m_state = STATE_WAVE_START_INIT;	// ウェーブ開始初期化状態
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
 	}
 }
 
@@ -859,6 +870,13 @@ void CWaveManager::UpdateWaveEnd(void)
 
 		// 状態管理カウンターを加算
 		m_nCounterState++;
+
+		if (m_nCounterState == (int)(SEASON_MOVECNT * 0.5f))
+		{ // カウンターが一定値の場合
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
+		}
 	}
 	else
 	{ // カウンターが一定値より大きい場合

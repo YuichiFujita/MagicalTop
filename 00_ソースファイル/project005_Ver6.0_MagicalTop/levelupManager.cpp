@@ -184,9 +184,6 @@ void CLevelupManager::Update(void)
 
 			// 次季節へ移行
 			CSceneGame::GetWaveManager()->NextSeason();
-
-			// サウンドの再生
-			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_000);	// 決定音00
 		}
 
 		// 点滅の更新

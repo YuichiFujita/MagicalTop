@@ -47,6 +47,7 @@ public:
 		LABEL_SE_ENEMY_SHOT001,	// “GŽËŒ‚‰¹ (‘å–C)
 		LABEL_SE_STICK,			// –A’…’e‰¹
 		LABEL_SE_HIT,			// ’e’…’e‰¹
+		LABEL_SE_STOMP,			// A•¨“¥‚Ý‚Â‚¯‰¹
 		LABEL_MAX,				// ‚±‚Ì—ñ‹“Œ^‚Ì‘”
 	}LABEL;
 

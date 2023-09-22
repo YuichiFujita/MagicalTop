@@ -12,6 +12,7 @@
 #include "scene.h"
 #include "sceneGame.h"
 #include "renderer.h"
+#include "sound.h"
 #include "texture.h"
 
 #include "collision.h"
@@ -473,6 +474,9 @@ bool CFlower::CollisionPlayer(const D3DXVECTOR3& rPos)
 					// Ž€–Só‘Ô‚É‚·‚é
 					bDeath = true;
 				}
+
+				// ƒTƒEƒ“ƒh‚ÌÄ¶
+				CManager::GetSound()->Play(CSound::LABEL_SE_STOMP);	// A•¨“¥‚Ý‚Â‚¯‰¹
 			}
 		}
 	}
