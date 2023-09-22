@@ -12,6 +12,7 @@
 #include "tutorialManager.h"
 #include "manager.h"
 #include "camera.h"
+#include "sound.h"
 #include "collision.h"
 #include "stage.h"
 #include "enemy.h"
@@ -276,6 +277,9 @@ void CPlayerTutorial::HitVortex
 
 		// 吹っ飛びモーションに移行
 		SetMotion(MOTION_BLOW_AWAY);
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_HURRICANE);	// ハリケーン巻き込まれ音
 	}
 }
 

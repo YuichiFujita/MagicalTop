@@ -12,6 +12,7 @@
 #include "scene.h"
 #include "sceneGame.h"
 #include "renderer.h"
+#include "sound.h"
 #include "texture.h"
 #include "multiModel.h"
 #include "shadow.h"
@@ -314,6 +315,9 @@ void CEnemy::Hit(const int nDmg)
 
 			// 状態を設定
 			m_state = STATE_DEATH;	// 死亡状態
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_FLY);	// 浮遊音
 		}
 	}
 }
@@ -364,6 +368,9 @@ void CEnemy::HitKnockBack(const int nDmg, const D3DXVECTOR3& vec)
 
 			// 状態を設定
 			m_state = STATE_DEATH;	// 死亡状態
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_FLY);	// 浮遊音
 		}
 	}
 }
@@ -826,6 +833,9 @@ bool CEnemy::Death(void)
 		// 敵オブジェクトの終了
 		Uninit();
 
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_SPAWN);	// 生成音
+
 		// 死亡を返す
 		return true;
 	}
@@ -938,6 +948,27 @@ void CEnemy::Attack(const D3DXVECTOR3& rLookPos, const D3DXVECTOR3& rThisPos, co
 
 			// カウンターを初期化
 			m_nCounterAtk = 0;
+
+			switch (m_type)
+			{ // 種類ごとの処理
+			case TYPE_HUMAN:	// 歩兵
+
+				// サウンドの再生
+				CManager::GetSound()->Play(CSound::LABEL_SE_ENEMY_SHOT000);	// 敵射撃音 (銃)
+
+				break;
+
+			case TYPE_CAR:		// 戦車
+
+				// サウンドの再生
+				CManager::GetSound()->Play(CSound::LABEL_SE_ENEMY_SHOT001);	// 敵射撃音 (大砲)
+
+				break;
+
+			default:	// 例外処理
+				assert(false);
+				break;
+			}
 		}
 	}
 }
