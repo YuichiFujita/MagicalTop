@@ -10,6 +10,7 @@
 #include "magicManager.h"
 #include "manager.h"
 #include "input.h"
+#include "sound.h"
 #include "camera.h"
 #include "sceneGame.h"
 #include "object.h"
@@ -414,6 +415,9 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 				// 発射した状態にする
 				bShot.bShot = true;
 			}
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_PLAYER_SHOT);	// プレイヤー射撃音 (泡)
 		}
 	}
 

@@ -602,9 +602,6 @@ void CWaveManager::UpdateSeasonStart(void)
 
 		// 状態を変更
 		m_state = STATE_WAVE_START_INIT;	// ウェーブ開始初期化状態
-
-		// サウンドの再生
-		CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
 	}
 }
 
@@ -634,6 +631,9 @@ void CWaveManager::InitWaveStart(void)
 	// 大きさを設定
 	m_pObject2D->SetScaling(sizeWave);
 	m_pValue->SetScaling(sizeNum);
+
+	// サウンドの再生
+	CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
 }
 
 //============================================================

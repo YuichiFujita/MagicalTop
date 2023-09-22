@@ -12,6 +12,7 @@
 #include "scene.h"
 #include "sceneGame.h"
 #include "renderer.h"
+#include "sound.h"
 #include "texture.h"
 #include "collision.h"
 #include "effect3D.h"
@@ -232,6 +233,9 @@ void CMagic::Update(void)
 
 		// オブジェクトの終了
 		Uninit();
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_STICK);	// 泡着弾音
 
 		// 関数を抜ける
 		return;
