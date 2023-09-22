@@ -10,6 +10,7 @@
 #include "titleManager.h"
 #include "manager.h"
 #include "input.h"
+#include "sound.h"
 #include "camera.h"
 #include "texture.h"
 #include "model.h"
@@ -447,6 +448,9 @@ void CTitleManager::UpdateMove(void)
 
 		// カメラの更新を再開
 		CManager::GetCamera()->SetEnableUpdate(true);
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
 	}
 }
 
@@ -472,6 +476,9 @@ void CTitleManager::UpdateStart(void)
 
 			// 演出スキップ
 			SkipStaging();
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
 		}
 		else
 		{ // 遷移待機状態の場合
@@ -496,6 +503,9 @@ void CTitleManager::UpdateStart(void)
 				assert(false);
 				break;
 			}
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_000);	// 決定音00
 		}
 	}
 }
@@ -518,7 +528,7 @@ void CTitleManager::ActSelect(void)
 		m_nSelect = (m_nSelect + (SELECT_MAX - 1)) % SELECT_MAX;
 
 		// サウンドの再生
-		//PlaySound(SOUND_LABEL_SE_MOVE);	// SE (カーソル移動)
+		CManager::GetSound()->Play(CSound::LABEL_SE_SELECT_000);	// 選択操作音00
 	}
 	if (pKeyboard->GetTrigger(DIK_D)
 	||  pKeyboard->GetTrigger(DIK_RIGHT)
@@ -529,7 +539,7 @@ void CTitleManager::ActSelect(void)
 		m_nSelect = (m_nSelect + 1) % SELECT_MAX;
 
 		// サウンドの再生
-		//PlaySound(SOUND_LABEL_SE_MOVE);	// SE (カーソル移動)
+		CManager::GetSound()->Play(CSound::LABEL_SE_SELECT_000);	// 選択操作音00
 	}
 
 	// 前回の選択要素の色を黒に設定

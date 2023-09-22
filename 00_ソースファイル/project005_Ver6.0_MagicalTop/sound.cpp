@@ -18,7 +18,17 @@ const CSound::SOUNDINFO CSound::mc_aSoundInfo[LABEL_MAX] =	// サウンド情報
 	{ "data\\BGM\\bgm_tutorial.wav", -1 },		// BGM (チュートリアル)
 	{ "data\\BGM\\bgm_game.wav", -1 },			// BGM (ゲーム)
 
-	{ "data\\SE\\shot000.wav",  0 },	// SE (仮)
+	{ "data\\SE\\select000.wav",  0 },		// 選択操作音00
+	{ "data\\SE\\select001.wav",  0 },		// 選択操作音01
+	{ "data\\SE\\decision000.wav",  0 },	// 決定音00
+	{ "data\\SE\\decision001.wav",  0 },	// 決定音01
+	{ "data\\SE\\paper000.wav",  0 },		// 便箋めくり音
+	{ "data\\SE\\spawn000.wav",  0 },		// 生成音
+	{ "data\\SE\\playerShot000.wav",  0 },	// プレイヤー射撃音 (泡)
+	{ "data\\SE\\enemyShot000.wav",  0 },	// 敵射撃音 (銃)
+	{ "data\\SE\\enemyShot001.wav",  0 },	// 敵射撃音 (大砲)
+	{ "data\\SE\\stick000.wav",  0 },		// 泡着弾音
+	{ "data\\SE\\hit000.wav",  0 },			// 弾着弾音
 };
 
 //************************************************************

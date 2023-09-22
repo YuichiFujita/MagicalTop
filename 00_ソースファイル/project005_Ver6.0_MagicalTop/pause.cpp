@@ -13,6 +13,7 @@
 #include "sceneGame.h"
 #include "waveManager.h"
 #include "input.h"
+#include "sound.h"
 #include "fade.h"
 #include "texture.h"
 #include "object2D.h"
@@ -171,6 +172,9 @@ void CPause::Update(void)
 
 			// 描画状況の設定
 			SetEnableDraw(m_bPause);
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_000);	// 決定音00
 		}
 	}
 
@@ -314,7 +318,7 @@ void CPause::Select(void)
 			m_nSelect = (m_nSelect + (SELECT_MAX - 1)) % SELECT_MAX;
 
 			// サウンドの再生
-			//PlaySound(SOUND_LABEL_SE_MOVE);		// SE (カーソル移動)
+			CManager::GetSound()->Play(CSound::LABEL_SE_SELECT_000);	// 選択操作音00
 		}
 		if (pKeyboard->GetTrigger(DIK_S)
 		||  pKeyboard->GetTrigger(DIK_DOWN)
@@ -325,7 +329,7 @@ void CPause::Select(void)
 			m_nSelect = (m_nSelect + 1) % SELECT_MAX;
 
 			// サウンドの再生
-			//PlaySound(SOUND_LABEL_SE_MOVE);		// SE (カーソル移動)
+			CManager::GetSound()->Play(CSound::LABEL_SE_SELECT_000);	// 選択操作音00
 		}
 
 		if (pKeyboard->GetTrigger(DIK_RETURN)  || pKeyboard->GetTrigger(DIK_SPACE)
@@ -334,7 +338,7 @@ void CPause::Select(void)
 		{ // 決定の操作が行われた場合
 
 			// サウンドの再生
-			//PlaySound(SOUND_LABEL_SE_DEC_01);	// SE (決定01)
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_000);	// 決定音00
 
 			switch (m_nSelect)
 			{ // 選択ごとの処理

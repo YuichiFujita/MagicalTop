@@ -10,6 +10,7 @@
 #include "resultManager.h"
 #include "manager.h"
 #include "input.h"
+#include "sound.h"
 #include "camera.h"
 #include "texture.h"
 #include "model.h"
@@ -575,6 +576,9 @@ void CResultManager::UpdateResult(void)
 
 		// 状態を変更
 		m_state = STATE_SCORE_WAIT;	// スコア表示待機状態
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
 	}
 }
 
@@ -605,6 +609,9 @@ void CResultManager::UpdateScore(void)
 
 		// 状態を変更
 		m_state = STATE_TIME_WAIT;	// タイム表示待機状態
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
 	}
 }
 
@@ -637,6 +644,9 @@ void CResultManager::UpdateTime(void)
 
 		// 状態を変更
 		m_state = STATE_WAIT;	// 遷移待機状態
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
 	}
 }
 
@@ -662,12 +672,18 @@ void CResultManager::UpdateBack(void)
 
 			// 演出スキップ
 			SkipStaging();
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
 		}
 		else
 		{ // 遷移待機状態の場合
 
 			// シーンの設定
 			CManager::SetScene(CScene::MODE_TITLE);	// タイトル画面
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_000);	// 決定音00
 		}
 	}
 }

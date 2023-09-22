@@ -35,8 +35,18 @@ public:
 		LABEL_BGM_TUTORIAL,			// BGM (チュートリアル)
 		LABEL_BGM_GAME,				// BGM (ゲーム)
 
-		LABEL_SE_SHOT,	// SE (仮)
-		LABEL_MAX,		// この列挙型の総数
+		LABEL_SE_SELECT_000,	// 選択操作音00
+		LABEL_SE_SELECT_001,	// 選択操作音01
+		LABEL_SE_DECISION_000,	// 決定音00
+		LABEL_SE_DECISION_001,	// 決定音01
+		LABEL_SE_PAPER,			// 便箋めくり音
+		LABEL_SE_SPAWN,			// 生成音
+		LABEL_SE_PLAYER_SHOT,	// プレイヤー射撃音 (泡)
+		LABEL_SE_ENEMY_SHOT000,	// 敵射撃音 (銃)
+		LABEL_SE_ENEMY_SHOT001,	// 敵射撃音 (大砲)
+		LABEL_SE_STICK,			// 泡着弾音
+		LABEL_SE_HIT,			// 弾着弾音
+		LABEL_MAX,				// この列挙型の総数
 	}LABEL;
 
 	// サウンド情報構造体
