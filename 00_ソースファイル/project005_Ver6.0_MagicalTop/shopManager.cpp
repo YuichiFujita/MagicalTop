@@ -130,20 +130,6 @@ HRESULT CShopManager::Init(void)
 		return E_FAIL;
 	}
 
-
-	// TODO
-	m_pOmitShop->SetEnableOmit(CShop::BUY_HEAL, true);
-	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_LIFE, true);
-	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MANA, true);
-	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DASH, true);
-	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_DEFENSE, true);
-	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_SPEED, true);
-	//m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_NUM, true);
-	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_SPEED, true);
-	m_pOmitShop->SetEnableOmit(CShop::BUY_LVUP_MAGIC_RAPID, true);
-	m_pOmitShop->SetEnableOmit(CShop::BUY_EXP_UP, true);
-
-
 	//--------------------------------------------------------
 	//	îwåiÇÃê∂ê¨ÅEê›íË
 	//--------------------------------------------------------

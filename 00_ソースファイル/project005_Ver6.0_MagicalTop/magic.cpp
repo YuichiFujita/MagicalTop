@@ -38,7 +38,7 @@
 
 #define MOVE_NORMAL			(0.05f)	// 通常時の魔法の移動量
 #define MOVE_INHALE_INSIDE	(8.0f)	// 吸い込まれ時の魔法の内側への移動量
-#define MOVE_INHALE_LEFT	(12.0f)	// 吸い込まれ時の魔法の左側への移動量
+#define MOVE_INHALE_LEFT	(14.5f)	// 吸い込まれ時の魔法の左側への移動量
 #define MOVE_DELETE			(3.0f)	// 消失時の魔法の移動量
 
 //************************************************************
@@ -90,7 +90,7 @@ HRESULT CMagic::Init(void)
 	m_state		= STATE_NORMAL;	// 状態
 
 	// バブル情報の生成
-	m_pBubble = CBubble::Create(this, m_statusInfo.nLife + BUBBLE_INIT_LEVEL, VEC3_ALL(m_statusInfo.bubbleRadius), VEC3_ZERO, 0.0f);
+	m_pBubble = CBubble::Create(this, m_statusInfo.nLife + BUBBLE_INIT_LEVEL, VEC3_ALL(m_statusInfo.fBubbleRadius), VEC3_ZERO, 0.0f);
 	if (UNUSED(m_pBubble))
 	{ // 非使用中の場合
 
@@ -142,21 +142,9 @@ void CMagic::Update(void)
 	// 変数を宣言
 	D3DXVECTOR3 vecTarg, vecSide;	// 吸い込み方向ベクトル
 
-	// ターゲット方向のベクトルを計算
-	vecTarg = CScene::GetTarget()->GetPosition() - m_pos;
-	vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
-	D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトル正規化
-
-	// ターゲット横方向ベクトルを計算
-	vecSide = D3DXVECTOR3(vecTarg.z, 0.0f, -vecTarg.x);
-
 	switch (m_state)
 	{ // 状態ごとの処理
 	case STATE_NORMAL:	// 通常状態
-
-		// 移動量を加算
-		m_movePos += vecTarg * MOVE_NORMAL;
-		m_movePos += vecSide * MOVE_NORMAL;
 
 		// 移動量を加算
 		m_pos += m_movePos;
@@ -176,6 +164,14 @@ void CMagic::Update(void)
 
 	case STATE_DELETE:	// 消失状態
 		
+		// ターゲット方向のベクトルを計算
+		vecTarg = CScene::GetTarget()->GetPosition() - m_pos;
+		vecTarg.y = 0.0f;						// ベクトルの縦方向を無視
+		D3DXVec3Normalize(&vecTarg, &vecTarg);	// ベクトル正規化
+
+		// ターゲット横方向ベクトルを計算
+		vecSide = D3DXVECTOR3(vecTarg.z, 0.0f, -vecTarg.x);
+
 		if (CScene::GetStage()->CollisionBarrier(m_pos, m_pBubble->GetRadius()))
 		{ // バリアの判定内の場合
 
@@ -592,12 +588,6 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%s", &aString[0]);			// = を読み込む (不要)
 								fscanf(pFile, "%d", &m_statusInfo.nLife);	// 寿命を読み込む
 							}
-							else if (strcmp(&aString[0], "BUBBLE_RADIUS") == 0)
-							{ // 読み込んだ文字列が BUBBLE_RADIUS の場合
-
-								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
-								fscanf(pFile, "%f", &m_statusInfo.bubbleRadius);	// バブル半径を読み込む
-							}
 							else if (strcmp(&aString[0], "SHOT_PARTS") == 0)
 							{ // 読み込んだ文字列が SHOT_PARTS の場合
 
@@ -611,6 +601,21 @@ void CMagic::LoadSetup(void)
 								fscanf(pFile, "%f", &m_statusInfo.shotPos.x);	// 発射位置Xを読み込む
 								fscanf(pFile, "%f", &m_statusInfo.shotPos.y);	// 発射位置Yを読み込む
 								fscanf(pFile, "%f", &m_statusInfo.shotPos.z);	// 発射位置Zを読み込む
+							}
+							else if (strcmp(&aString[0], "BUBBLE_RADIUS") == 0)
+							{ // 読み込んだ文字列が BUBBLE_RADIUS の場合
+
+								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_statusInfo.fBubbleRadius);	// バブル半径を読み込む
+							}
+							else if (strcmp(&aString[0], "SHOT_ANGLE") == 0)
+							{ // 読み込んだ文字列が SHOT_ANGLE の場合
+
+								fscanf(pFile, "%s", &aString[0]);					// = を読み込む (不要)
+								fscanf(pFile, "%f", &m_statusInfo.fShotAngle);		// 射撃角度を読み込む
+
+								// 読み込んだ角度を変換
+								m_statusInfo.fShotAngle = D3DXToRadian(m_statusInfo.fShotAngle);
 							}
 						} while (strcmp(&aString[0], "END_MAGICSET") != 0);	// 読み込んだ文字列が END_MAGICSET ではない場合ループ
 					}
@@ -635,7 +640,7 @@ void CMagic::LoadSetup(void)
 							{ // 読み込んだ文字列が NUMBUBBLE の場合
 
 								fscanf(pFile, "%s", &aString[0]);								// = を読み込む (不要)
-								fscanf(pFile, "%d", &m_statusInfo.aLevel[nLevel].nCoolTime);	// バブル数を読み込む
+								fscanf(pFile, "%d", &m_statusInfo.aLevel[nLevel].nNumBunnle);	// バブル数を読み込む
 							}
 							else if (strcmp(&aString[0], "MOVE") == 0)
 							{ // 読み込んだ文字列が MOVE の場合

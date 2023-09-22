@@ -77,7 +77,8 @@ public:
 		D3DXVECTOR3 shotPos;	// 発射位置
 		int		nShotParts;		// 発射パーツ
 		int		nLife;			// 寿命
-		float	bubbleRadius;	// バブル半径
+		float	fBubbleRadius;	// バブル半径
+		float	fShotAngle;		// 射撃角度
 	}StatusInfo;
 
 	// レベル構造体

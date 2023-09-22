@@ -219,8 +219,28 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 {
 	// 変数を宣言
 	D3DXVECTOR3 rotCamera = CManager::GetCamera()->GetRotation();	// カメラ向き
+	CMagic::StatusInfo status = CMagic::GetStatusInfo();			// 魔法ステータス
+	int nNumShot = status.aLevel[CMagic::GetLevelStatus(CMagic::LEVELINFO_NUM)].nNumBunnle;	// バブル発射数
+
 	Shot bShot = { 0.0f, false, false };	// 射撃状況
 	float fVecRot = 0.0f;	// 射撃方向
+	float fAddRot = 0.0f;	// 射撃加算向き
+
+	if (nNumShot % 2 == 0)
+	{ // 発射数が偶数の場合
+
+		// 加算向きを減算
+		fAddRot -= status.fShotAngle * 0.5f;
+		useful::NormalizeRot(fAddRot);	// 向き正規化
+	}
+
+	for (int nCntMagic = 0; nCntMagic < (int)(nNumShot * 0.5f); nCntMagic++)
+	{ // 発射数の半分繰り返す
+
+		// 加算向きを加算
+		fAddRot += status.fShotAngle;
+		useful::NormalizeRot(fAddRot);	// 向き正規化
+	}
 
 	// ポインタを宣言
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
@@ -327,61 +347,73 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 	// 向きを補正
 	useful::NormalizeRot(bShot.fRot);
 
+	// 射撃方向に加算向きを加算
+	fVecRot += fAddRot;
+	useful::NormalizeRot(fVecRot);	// 向き正規化
+
 	if (bShot.bControl)
 	{ // 魔法の発射操作していた場合
 
-		if (m_pMana->GetNum() > 0 && m_nCounterMagic <= 0)
-		{ // マナがある且つ、クールタイムが終了した場合
+		if (m_nCounterMagic <= 0)
+		{ // クールタイムが終了した場合
 
 			// ポインタを宣言
 			CPlayer *pPlayer = CScene::GetPlayer();	// プレイヤー
 
 			// 変数を宣言
-			CMagic::StatusInfo status = CMagic::GetStatusInfo();	// 魔法ステータス
 			D3DXVECTOR3 magicPos, vecMove;	// 発射位置・移動方向
 			D3DXMATRIX  mtxTrans, mtxWorld;	// 計算用マトリックス
 
-			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&mtxWorld);
+			for (int nCntMagic = 0; nCntMagic < nNumShot; nCntMagic++)
+			{ // 発射数分繰り返す
 
-			// 位置を反映
-			D3DXMatrixTranslation(&mtxTrans, status.shotPos.x, status.shotPos.y, status.shotPos.z);
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
+				if (m_pMana->GetNum() > 0)
+				{ // マナがある場合
 
-			// マトリックスを掛け合わせる
-			D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &pPlayer->GetMultiModel(status.nShotParts)->GetMtxWorld());
+					// ワールドマトリックスの初期化
+					D3DXMatrixIdentity(&mtxWorld);
 
-			// マトリックスから発射位置を求める
-			magicPos = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
+					// 位置を反映
+					D3DXMatrixTranslation(&mtxTrans, status.shotPos.x, status.shotPos.y, status.shotPos.z);
+					D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &mtxTrans);
 
-			// 向きを正規化
-			useful::NormalizeRot(fVecRot);
+					// マトリックスを掛け合わせる
+					D3DXMatrixMultiply(&mtxWorld, &mtxWorld, &pPlayer->GetMultiModel(status.nShotParts)->GetMtxWorld());
 
-			// 移動方向を設定
-			vecMove = D3DXVECTOR3(sinf(fVecRot), 0.0f, cosf(fVecRot));
+					// マトリックスから発射位置を求める
+					magicPos = D3DXVECTOR3(mtxWorld._41, mtxWorld._42, mtxWorld._43);
 
-			// 魔法オブジェクトの生成
-			CMagic::Create
-			( // 引数
-				magicPos,	// 位置
-				VEC3_ZERO,	// 向き
-				vecMove		// 移動方向
-			);
+					// 移動方向を設定
+					vecMove = D3DXVECTOR3(sinf(fVecRot), 0.0f, cosf(fVecRot));
 
-			// カウンターを設定
-			m_nCounterMagic = status.aLevel[CMagic::GetLevelStatus(CMagic::LEVELINFO_RAPID)].nCoolTime;
+					// 魔法オブジェクトの生成
+					CMagic::Create
+					( // 引数
+						magicPos,	// 位置
+						VEC3_ZERO,	// 向き
+						vecMove		// 移動方向
+					);
 
-			// マナを消費
-			m_pMana->AddNum(-1);
+					// マナを消費
+					m_pMana->AddNum(-1);
 
-			// カウンターを初期化
-			m_nCounterState = 0;
+					// 向きを減算
+					fVecRot -= status.fShotAngle;
+					useful::NormalizeRot(fVecRot);	// 向き正規化
+				}
 
-			// 状態を設定
-			m_state = STATE_ATTACK;	// 攻撃状態
+				// カウンターを設定
+				m_nCounterMagic = status.aLevel[CMagic::GetLevelStatus(CMagic::LEVELINFO_RAPID)].nCoolTime;
 
-			// 発射した状態にする
-			bShot.bShot = true;
+				// カウンターを初期化
+				m_nCounterState = 0;
+
+				// 状態を設定
+				m_state = STATE_ATTACK;	// 攻撃状態
+
+				// 発射した状態にする
+				bShot.bShot = true;
+			}
 		}
 	}
 
