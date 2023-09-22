@@ -10,6 +10,7 @@
 #include "tutorialManager.h"
 #include "manager.h"
 #include "input.h"
+#include "sound.h"
 #include "camera.h"
 #include "texture.h"
 #include "letterManager.h"
@@ -526,8 +527,8 @@ void CTutorialManager::Update(void)
 //============================================================
 void CTutorialManager::AddLessonCounter(void)
 {
-	if (m_nLesson < LESSON_MAX)
-	{ // レッスンがまだある場合
+	if (m_nLesson < LESSON_MAX && m_state != STATE_NEXTWAIT)
+	{ // レッスンがまだある且つ、次レッスンの待機中ではない場合
 
 		// レッスンカウンターを加算
 		m_pCounterLesson->AddNum(1);
@@ -537,6 +538,9 @@ void CTutorialManager::AddLessonCounter(void)
 
 			// 状態を設定
 			m_state = STATE_NEXTWAIT;	// 次レッスン待機状態
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_001);	// 決定音01
 		}
 	}
 }
@@ -756,6 +760,9 @@ void CTutorialManager::UpdateFadeIn(void)
 
 		// 状態を設定
 		m_state = STATE_EXPLAIN;	// 説明表示状態
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_PAPER);	// 便箋めくり音
 	}
 
 	// 透明度を反映

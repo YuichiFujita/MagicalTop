@@ -10,6 +10,7 @@
 #include "letterManager.h"
 #include "manager.h"
 #include "input.h"
+#include "sound.h"
 #include "camera.h"
 #include "texture.h"
 #include "object2D.h"
@@ -442,6 +443,9 @@ void CLetterManager::UpdateFade(void)
 
 		// 便箋の取り出し状態にする
 		m_state = STATE_PAPER_TAKE;
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_PAPER);	// 便箋めくり音
 	}
 
 	// フェードの色を反映
@@ -504,6 +508,9 @@ void CLetterManager::UpdateWait(void)
 
 		// 便箋のしまい状態にする
 		m_state = STATE_PAPER_RETURN;
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_PAPER);	// 便箋めくり音
 	}
 
 	// 操作方法の点滅向きを加算
