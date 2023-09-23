@@ -165,6 +165,17 @@ void CObjectOrbit::Draw(void)
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 	CTexture *pTexture = CManager::GetTexture();						// テクスチャへのポインタ
+
+	if (CManager::GetScene()->GetMode() == CScene::MODE_GAME)
+	{ // モードがゲームの場合
+
+		if (CSceneGame::GetPause()->IsPause())
+		{ // ポーズ中の場合
+
+			// 更新しない状況にする
+			bUpdate = false;
+		}
+	}
 	
 	if (m_state != STATE_NONE)
 	{ // 何もしない状態ではない場合
@@ -178,80 +189,69 @@ void CObjectOrbit::Draw(void)
 		// ポリゴンの両面を表示状態にする
 		pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
-		//----------------------------------------------------
-		//	状態ごとの設定
-		//----------------------------------------------------
-		switch (m_state)
-		{ // 状態ごとの処理
-		case STATE_NORMAL:	// 通常状態
-
-			// 親マトリックスを設定
-			mtxParent = *m_orbit.pMtxParent;
-
-			break;
-
-		case STATE_VANISH:	// 消失状態
-
-			// 親マトリックスを設定
-			mtxParent = m_orbit.mtxVanish;
-
-			// カウンターを加算
-			if (m_nCounterState < (m_nNumVtx / MAX_OFFSET) + 1)
-			{ // カウンターが軌跡が伸び切る時間より小さい場合
-
-				// カウンターを加算
-				m_nCounterState++;
-			}
-			else
-			{ // カウンターが軌跡が伸び切る時間以上の場合
-
-				// カウンターを補正
-				m_nCounterState = 0;
-
-				// 状態を設定
-				m_state = STATE_NONE;	// 何もしない状態
-			}
-
-			break;
-
-		default:	// 例外状態
-			assert(false);
-			break;
-		}
-
-		//----------------------------------------------------
-		//	オフセットの初期化
-		//----------------------------------------------------
-		for (int nCntOff = 0; nCntOff < MAX_OFFSET; nCntOff++)
-		{ // オフセットの数分繰り返す
-
-			// ワールドマトリックスの初期化
-			D3DXMatrixIdentity(&m_orbit.aMtxWorldPoint[nCntOff]);
-
-			// 位置を反映
-			D3DXMatrixTranslation(&m_orbit.aMtxWorldPoint[nCntOff], m_orbit.aOffset[nCntOff].x, m_orbit.aOffset[nCntOff].y, m_orbit.aOffset[nCntOff].z);
-
-			// 親のマトリックスと掛け合わせる
-			D3DXMatrixMultiply(&m_orbit.aMtxWorldPoint[nCntOff], &m_orbit.aMtxWorldPoint[nCntOff], &mtxParent);
-		}
-
-		if (CManager::GetScene()->GetMode() == CScene::MODE_GAME)
-		{ // モードがゲームの場合
-
-			if (CSceneGame::GetPause()->IsPause())
-			{ // ポーズ中の場合
-
-				// 更新しない状況にする
-				bUpdate = false;
-			}
-		}
-
 		if (bUpdate)
 		{ // 更新する状況の場合
 
-			//--------------------------------------------
+			//------------------------------------------------
+			//	状態ごとの設定
+			//------------------------------------------------
+			switch (m_state)
+			{ // 状態ごとの処理
+			case STATE_NORMAL:	// 通常状態
+
+				// 親マトリックスを設定
+				mtxParent = *m_orbit.pMtxParent;
+
+				break;
+
+			case STATE_VANISH:	// 消失状態
+
+				// 親マトリックスを設定
+				mtxParent = m_orbit.mtxVanish;
+
+				// カウンターを加算
+				if (m_nCounterState < (m_nNumVtx / MAX_OFFSET) + 1)
+				{ // カウンターが軌跡が伸び切る時間より小さい場合
+
+					// カウンターを加算
+					m_nCounterState++;
+				}
+				else
+				{ // カウンターが軌跡が伸び切る時間以上の場合
+
+					// カウンターを補正
+					m_nCounterState = 0;
+
+					// 状態を設定
+					m_state = STATE_NONE;	// 何もしない状態
+				}
+
+				break;
+
+			default:	// 例外状態
+				assert(false);
+				break;
+			}
+
+			//------------------------------------------------
+			//	オフセットの初期化
+			//------------------------------------------------
+			for (int nCntOff = 0; nCntOff < MAX_OFFSET; nCntOff++)
+			{ // オフセットの数分繰り返す
+
+				// ワールドマトリックスの初期化
+				D3DXMatrixIdentity(&m_orbit.aMtxWorldPoint[nCntOff]);
+
+				// 位置を反映
+				D3DXMatrixTranslation(&m_orbit.aMtxWorldPoint[nCntOff], m_orbit.aOffset[nCntOff].x, m_orbit.aOffset[nCntOff].y, m_orbit.aOffset[nCntOff].z);
+
+				// 親のマトリックスと掛け合わせる
+				D3DXMatrixMultiply(&m_orbit.aMtxWorldPoint[nCntOff], &m_orbit.aMtxWorldPoint[nCntOff], &mtxParent);
+			}
+
+			//------------------------------------------------
 			//	頂点座標と頂点カラーの情報をずらす
-			//--------------------------------------------
+			//------------------------------------------------
 			for (int nCntVtx = m_nNumVtx - 1; nCntVtx >= MAX_OFFSET; nCntVtx--)
 			{ // 維持する頂点の最大数分繰り返す (オフセット分は含まない)
 
@@ -260,9 +260,9 @@ void CObjectOrbit::Draw(void)
 				m_orbit.pColPoint[nCntVtx] = m_orbit.pColPoint[nCntVtx - MAX_OFFSET];
 			}
 
-			//--------------------------------------------
+			//------------------------------------------------
 			//	最新の頂点座標と頂点カラーの情報を設定
-			//--------------------------------------------
+			//------------------------------------------------
 			for (int nCntOff = 0; nCntOff < MAX_OFFSET; nCntOff++)
 			{ // オフセットの数分繰り返す
 

@@ -355,8 +355,8 @@ CMagicManager::Shot CMagicManager::ShotMagic(void)
 	if (bShot.bControl)
 	{ // 魔法の発射操作していた場合
 
-		if (m_nCounterMagic <= 0)
-		{ // クールタイムが終了した場合
+		if (m_nCounterMagic <= 0 && CScene::GetTarget()->GetState() != CTarget::STATE_DESTROY)
+		{ // クールタイムが終了している且つ、ターゲットが破壊されていない場合
 
 			// ポインタを宣言
 			CPlayer *pPlayer = CScene::GetPlayer();	// プレイヤー

@@ -264,8 +264,8 @@ void CPlayerTutorial::HitVortex
 		CScene::GetStage()->GetStageBarrier().fRadius	// 判定目標半径
 	);
 
-	if (GetState() == STATE_NORMAL || GetState() == STATE_DAMAGE || GetState() == STATE_INVULN)
-	{ // 通常・ダメージ・無敵状態のどれかの場合
+	if (GetState() == STATE_NORMAL)
+	{ // 通常状態の場合
 
 		// 渦巻きこまれの設定処理
 		SetVortex(rPlayerPos, rHitPos);
