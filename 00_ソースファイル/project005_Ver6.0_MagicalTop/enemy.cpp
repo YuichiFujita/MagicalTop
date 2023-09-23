@@ -512,6 +512,9 @@ void CEnemy::RandomSpawn
 			// 敵オブジェクトの生成
 			CEnemy::Create(type, pos, rot);
 		}
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_WARNING);	// 警告音
 	}
 }
 

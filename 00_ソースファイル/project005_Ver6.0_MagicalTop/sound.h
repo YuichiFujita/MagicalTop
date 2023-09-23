@@ -47,9 +47,12 @@ public:
 		LABEL_SE_ENEMY_SHOT001,	// 敵射撃音 (大砲)
 		LABEL_SE_STICK,			// 泡着弾音
 		LABEL_SE_HIT,			// 弾着弾音
+		LABEL_SE_BREAK,			// 破壊音
 		LABEL_SE_HURRICANE,		// ハリケーン巻き込まれ音
 		LABEL_SE_FLY,			// 浮遊音
 		LABEL_SE_STOMP,			// 植物踏みつけ音
+		LABEL_SE_WARNING,		// 警告音
+		LABEL_SE_LEVELUP,		// レベルアップ音
 		LABEL_MAX,				// この列挙型の総数
 	}LABEL;
 

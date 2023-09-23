@@ -8,6 +8,8 @@
 //	インクルードファイル
 //************************************************************
 #include "expManager.h"
+#include "manager.h"
+#include "sound.h"
 #include "objectGauge2D.h"
 #include "multiValue.h"
 
@@ -146,6 +148,9 @@ void CExpManager::AddExp(const int nAdd)
 
 		// 経験値のあまりを設定
 		m_pExp->SetNum((nCurrentExp + nAdd) - MAX_EXP);
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_LEVELUP);	// レベルアップ音
 	}
 	else
 	{ // 経験値がオーバーしない場合

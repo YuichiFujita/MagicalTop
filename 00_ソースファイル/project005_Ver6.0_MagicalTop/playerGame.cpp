@@ -160,7 +160,8 @@ void CPlayerGame::Update(void)
 
 	case STATE_DEATH:		// 死亡状態
 
-		// 無し
+		// 現在のモーションに死亡モーションを設定
+		nCurrentMotion = CPlayer::MOTION_DEATH;
 
 		break;
 

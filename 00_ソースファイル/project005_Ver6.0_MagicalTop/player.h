@@ -82,6 +82,7 @@ public:
 		MOTION_ACTION_FAR,		// 奥アクションモーション
 		MOTION_ACTION_NEAR,		// 手前アクションモーション
 		MOTION_BLOW_AWAY,		// 吹っ飛びモーション
+		MOTION_DEATH,			// 死亡モーション
 		MOTION_MAX				// この列挙型の総数
 	}MOTION;
 

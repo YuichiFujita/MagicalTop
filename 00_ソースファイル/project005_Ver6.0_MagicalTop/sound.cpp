@@ -30,9 +30,12 @@ const CSound::SOUNDINFO CSound::mc_aSoundInfo[LABEL_MAX] =	// ƒTƒEƒ“ƒhî•ñ
 	{ "data\\SE\\enemyShot001.wav",  0 },	// “GËŒ‚‰¹ (‘å–C)
 	{ "data\\SE\\stick000.wav",  0 },		// –A’…’e‰¹
 	{ "data\\SE\\hit000.wav",  0 },			// ’e’…’e‰¹
+	{ "data\\SE\\break000.wav",  0 },		// ”j‰ó‰¹
 	{ "data\\SE\\hurricane000.wav",  0 },	// ƒnƒŠƒP[ƒ“Šª‚«‚Ü‚ê‰¹
 	{ "data\\SE\\fly000.wav",  0 },			// •‚—V‰¹
 	{ "data\\SE\\stomp000.wav",  0 },		// A•¨“¥‚İ‚Â‚¯‰¹
+	{ "data\\SE\\warning000.wav",  0 },		// Œx‰¹
+	{ "data\\SE\\levelup000.wav",  0 },		// ƒŒƒxƒ‹ƒAƒbƒv‰¹
 };
 
 //************************************************************

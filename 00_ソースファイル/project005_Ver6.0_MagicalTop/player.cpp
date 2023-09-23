@@ -405,15 +405,17 @@ void CPlayer::Hit(const int nDmg)
 				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
 				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
-				// 更新と描画を停止
-				SetEnableUpdate(false);
-				SetEnableDraw(false);
-
 				// カウンターを初期化
 				m_nCounterState = 0;
 
 				// 状態を変更
 				m_state = STATE_DEATH;	// 死亡状態
+
+				// モーションの設定
+				SetMotion(MOTION_DEATH);	// 死亡モーション
+
+				// サウンドの再生
+				CManager::GetSound()->Play(CSound::LABEL_SE_BREAK);	// 破壊音
 			}
 		}
 	}

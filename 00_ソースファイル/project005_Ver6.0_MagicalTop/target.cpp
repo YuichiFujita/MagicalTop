@@ -10,6 +10,7 @@
 #include "target.h"
 #include "manager.h"
 #include "renderer.h"
+#include "sound.h"
 #include "model.h"
 #include "stage.h"
 #include "field.h"
@@ -36,7 +37,7 @@
 #define ADD_SIN_ROT	(D3DXToRadian(1))	// 浮遊向きの加算量
 #define ADD_CUBEROT	(D3DXVECTOR3(0.01f, 0.001f, 0.01f))	// キューブの回転量
 
-#define TARG_LIFE		(3000)		// ターゲットの体力
+#define TARG_LIFE		(000)		// ターゲットの体力
 #define GAUGE_PLUS_Y	(160.0f)	// ターゲットのY位置の加算量
 #define GAUGE_GAUGESIZE	(D3DXVECTOR3(100.0f, 20.0f, 0.0f))	// ゲージサイズ
 #define GAUGE_FRAMESIZE	(D3DXVECTOR3(102.5f, 22.5f, 0.0f))	// ゲージフレームサイズ
@@ -284,6 +285,12 @@ void CTarget::Update(void)
 
 			break;
 
+		case STATE_DESTROY:	// 破壊状態
+
+			// 無し
+
+			break;
+
 		default:	// 例外処理
 			assert(false);
 			break;
@@ -359,15 +366,17 @@ void CTarget::Hit(const int nDmg)
 				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
 				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
-				// 更新と描画を停止
-				SetEnableUpdate(false);
-				SetEnableDraw(false);
+				// 描画を停止
+				m_pMeshCube->SetEnableDraw(false);
 
 				// カウンターを初期化
 				m_nCounterState = 0;
 
 				// 状態を変更
 				m_state = STATE_DESTROY;	// 破壊状態
+
+				// サウンドの再生
+				CManager::GetSound()->Play(CSound::LABEL_SE_BREAK);	// 破壊音
 			}
 		}
 	}
