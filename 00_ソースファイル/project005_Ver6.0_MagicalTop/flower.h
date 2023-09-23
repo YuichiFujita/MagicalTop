@@ -42,9 +42,9 @@ public:
 	// 状態列挙
 	typedef enum
 	{
-		STATE_NORMAL,	// 通常状態
-		STATE_DAMAGE,	// ダメージ状態
-		STATE_MAX		// この列挙型の総数
+		STATE_NORMAL = 0,	// 通常状態
+		STATE_DAMAGE,		// ダメージ状態
+		STATE_MAX			// この列挙型の総数
 	}STATE;
 
 	// コンストラクタ

@@ -57,7 +57,7 @@ int CFlower::m_nNumAll = 0;	// マナフラワーの総数
 //============================================================
 //	コンストラクタ
 //============================================================
-CFlower::CFlower(void) : CObject3D(CObject::LABEL_FLOWER, FLOWER_PRIO)
+CFlower::CFlower() : CObject3D(CObject::LABEL_FLOWER, FLOWER_PRIO)
 {
 	// メンバ変数をクリア
 	m_pShadow = NULL;		// 影の情報

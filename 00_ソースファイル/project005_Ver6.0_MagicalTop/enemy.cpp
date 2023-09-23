@@ -17,6 +17,7 @@
 #include "multiModel.h"
 #include "shadow.h"
 #include "objectBillboard.h"
+#include "enemyWay.h"
 #include "bubble.h"
 #include "collision.h"
 #include "player.h"
@@ -118,6 +119,7 @@ CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_type(typ
 	// メンバ変数をクリア
 	m_pShadow	= NULL;			// 影の情報
 	m_pWarning	= NULL;			// 警告の情報
+	m_pWay		= NULL;			// 方向の情報
 	m_pBubble	= NULL;			// バブルの情報
 	m_oldPos	= VEC3_ZERO;	// 過去位置
 	m_movePos	= VEC3_ZERO;	// 位置移動量
@@ -153,6 +155,7 @@ HRESULT CEnemy::Init(void)
 	// メンバ変数を初期化
 	m_pShadow	= NULL;			// 影の情報
 	m_pWarning	= NULL;			// 警告の情報
+	m_pWay		= NULL;			// 方向の情報
 	m_pBubble	= NULL;			// バブルの情報
 	m_oldPos	= VEC3_ZERO;	// 過去位置
 	m_movePos	= VEC3_ZERO;	// 位置移動量
@@ -168,6 +171,9 @@ HRESULT CEnemy::Init(void)
 	m_deathMoveRot.y += (rand() % 31 - 15) * 0.001f;
 	m_deathMoveRot.z += (rand() % 31 - 15) * 0.001f;
 
+	//--------------------------------------------------------
+	//	影の生成
+	//--------------------------------------------------------
 	// 影の生成
 	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, D3DXVECTOR3(m_status.fShadowRadius, 0.0f, m_status.fShadowRadius), this);
 	if (UNUSED(m_pShadow))
@@ -178,7 +184,10 @@ HRESULT CEnemy::Init(void)
 		return E_FAIL;
 	}
 
-	// オブジェクトビルボードの生成
+	//--------------------------------------------------------
+	//	警告表示の生成・設定
+	//--------------------------------------------------------
+	// 警告表示の生成
 	m_pWarning = CObjectBillboard::Create(VEC3_ZERO, SIZE_WARNING);
 	if (UNUSED(m_pWarning))
 	{ // 非使用中の場合
@@ -189,11 +198,27 @@ HRESULT CEnemy::Init(void)
 	}
 
 	// テクスチャを登録・割当
-	m_pWarning->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_NORMAL]));
+	m_pWarning->BindTexture(pTexture->Regist(mc_apTextureFile[TEXTURE_WARNING]));
 
 	// 優先順位を設定
 	m_pWarning->SetPriority(WARNING_PRIO);
 
+	//--------------------------------------------------------
+	//	方向表示の生成
+	//--------------------------------------------------------
+	// 方向表示の生成
+	m_pWay = CEnemyWay::Create(this, LIMIT_RADIUS - m_aStatusInfo[m_type].fRadius);
+	if (UNUSED(m_pWay))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	//--------------------------------------------------------
+	//	バブルの生成
+	//--------------------------------------------------------
 	// バブルを生成
 	m_pBubble = CBubble::Create(this, m_status.nLife, m_status.bubbleSize, VEC3_ZERO, m_status.fHeight * 0.5f);
 	if (UNUSED(m_pBubble))
@@ -236,10 +261,13 @@ HRESULT CEnemy::Init(void)
 //============================================================
 void CEnemy::Uninit(void)
 {
+	// 方向表示を削除
+	m_pWay->Delete();
+
 	// 影の終了
 	m_pShadow->Uninit();
 
-	// 警告の終了
+	// 警告表示の終了
 	m_pWarning->Uninit();
 
 	// バブルの終了
@@ -257,7 +285,7 @@ void CEnemy::Update(void)
 	// 影の更新
 	m_pShadow->Update();
 
-	// 警告の更新
+	// 警告表示の更新
 	m_pWarning->Update();
 
 	// バブルの更新
@@ -308,6 +336,9 @@ void CEnemy::Hit(const int nDmg)
 
 			// モーションを更新しない状態にする
 			SetEnableMotionUpdate(false);
+
+			// 方向表示を削除
+			m_pWay->Delete();
 
 			// パーティクル3Dオブジェクトを生成
 			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
@@ -361,6 +392,9 @@ void CEnemy::HitKnockBack(const int nDmg, const D3DXVECTOR3& vec)
 
 			// モーションを更新しない状態にする
 			SetEnableMotionUpdate(false);
+
+			// 方向表示を削除
+			m_pWay->Delete();
 
 			// パーティクル3Dオブジェクトを生成
 			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));

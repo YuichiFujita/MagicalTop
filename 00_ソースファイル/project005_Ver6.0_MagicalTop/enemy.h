@@ -21,6 +21,7 @@
 //************************************************************
 class CShadow;			// 影クラス
 class CObjectBillboard;	// オブジェクトビルボードクラス
+class CEnemyWay;		// 敵方向表示クラス
 class CBubble;			// バブルクラス
 
 //************************************************************
@@ -33,8 +34,8 @@ public:
 	// テクスチャ列挙
 	typedef enum
 	{
-		TEXTURE_NORMAL = 0,	// 警告表示
-		TEXTURE_MAX			// この列挙型の総数
+		TEXTURE_WARNING = 0,	// 警告表示
+		TEXTURE_MAX				// この列挙型の総数
 	}TEXTURE;
 
 	// 種類列挙
@@ -186,6 +187,7 @@ private:
 	// メンバ変数
 	CShadow *m_pShadow;				// 影の情報
 	CObjectBillboard *m_pWarning;	// 警告の情報
+	CEnemyWay *m_pWay;				// 方向の情報
 	CBubble *m_pBubble;				// バブルの情報
 	D3DXVECTOR3	m_oldPos;			// 過去位置
 	D3DXVECTOR3	m_movePos;			// 位置移動量
