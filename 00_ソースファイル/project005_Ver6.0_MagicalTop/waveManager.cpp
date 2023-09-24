@@ -160,6 +160,9 @@ HRESULT CWaveManager::Init(void)
 		// ƒ‚ƒfƒ‹‚ð“o˜^EŠ„“–
 		m_apModelUI[nCntWave]->BindModel(pModel->GetModel(pModel->Regist(mc_apModelFile[0])));
 
+		// —Dæ‡ˆÊ‚ðÝ’è
+		m_apModelUI[nCntWave]->SetPriority(WAVE_PRIO);
+
 		// •`‰æ‚ð‚µ‚È‚¢Ý’è‚É‚·‚é
 		m_apModelUI[nCntWave]->SetEnableDraw(false);
 	}

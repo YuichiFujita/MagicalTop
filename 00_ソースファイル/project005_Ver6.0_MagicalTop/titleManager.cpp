@@ -12,6 +12,7 @@
 #include "input.h"
 #include "sound.h"
 #include "camera.h"
+#include "fade.h"
 #include "texture.h"
 #include "model.h"
 #include "object2D.h"
@@ -483,29 +484,33 @@ void CTitleManager::UpdateStart(void)
 		else
 		{ // 遷移待機状態の場合
 
-			switch (m_nSelect)
-			{ // 選択ごとの処理
-			case SELECT_GAME:
+			if (CManager::GetFade()->GetState() == CFade::FADE_NONE)
+			{ // フェード中ではない場合
 
-				// シーンの設定
-				CManager::SetScene(CScene::MODE_GAME);	// ゲーム画面
+				switch (m_nSelect)
+				{ // 選択ごとの処理
+				case SELECT_GAME:
 
-				break;
+					// シーンの設定
+					CManager::SetScene(CScene::MODE_GAME);	// ゲーム画面
 
-			case SELECT_TUTORIAL:
+					break;
 
-				// シーンの設定
-				CManager::SetScene(CScene::MODE_TUTORIAL);	// チュートリアル画面
+				case SELECT_TUTORIAL:
 
-				break;
+					// シーンの設定
+					CManager::SetScene(CScene::MODE_TUTORIAL);	// チュートリアル画面
 
-			default:
-				assert(false);
-				break;
+					break;
+
+				default:
+					assert(false);
+					break;
+				}
+
+				// サウンドの再生
+				CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_000);	// 決定音00
 			}
-
-			// サウンドの再生
-			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_000);	// 決定音00
 		}
 	}
 }
@@ -519,37 +524,41 @@ void CTitleManager::ActSelect(void)
 	CInputKeyboard	*pKeyboard	= CManager::GetKeyboard();	// キーボード
 	CInputPad		*pPad		= CManager::GetPad();		// パッド
 
-	if (pKeyboard->GetTrigger(DIK_A)
-	||  pKeyboard->GetTrigger(DIK_LEFT)
-	||  pPad->GetTrigger(CInputPad::KEY_LEFT))
-	{ // 左移動の操作が行われた場合
+	if (CManager::GetFade()->GetState() == CFade::FADE_NONE)
+	{ // フェード中ではない場合
 
-		// 左に選択をずらす
-		m_nSelect = (m_nSelect + (SELECT_MAX - 1)) % SELECT_MAX;
+		if (pKeyboard->GetTrigger(DIK_A)
+		||  pKeyboard->GetTrigger(DIK_LEFT)
+		||  pPad->GetTrigger(CInputPad::KEY_LEFT))
+		{ // 左移動の操作が行われた場合
 
-		// サウンドの再生
-		CManager::GetSound()->Play(CSound::LABEL_SE_SELECT_000);	// 選択操作音00
+			// 左に選択をずらす
+			m_nSelect = (m_nSelect + (SELECT_MAX - 1)) % SELECT_MAX;
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_SELECT_000);	// 選択操作音00
+		}
+		if (pKeyboard->GetTrigger(DIK_D)
+		||  pKeyboard->GetTrigger(DIK_RIGHT)
+		||  pPad->GetTrigger(CInputPad::KEY_RIGHT))
+		{ // 右移動の操作が行われた場合
+
+			// 右に選択をずらす
+			m_nSelect = (m_nSelect + 1) % SELECT_MAX;
+
+			// サウンドの再生
+			CManager::GetSound()->Play(CSound::LABEL_SE_SELECT_000);	// 選択操作音00
+		}
+
+		// 前回の選択要素の色を黒に設定
+		m_apSelect[m_nOldSelect]->SetColor(DEFAULT_COL);
+
+		// 現在の選択要素の色を白に設定
+		m_apSelect[m_nSelect]->SetColor(CHOICE_COL);
+
+		// 現在の選択要素を代入
+		m_nOldSelect = m_nSelect;
 	}
-	if (pKeyboard->GetTrigger(DIK_D)
-	||  pKeyboard->GetTrigger(DIK_RIGHT)
-	||  pPad->GetTrigger(CInputPad::KEY_RIGHT))
-	{ // 右移動の操作が行われた場合
-
-		// 右に選択をずらす
-		m_nSelect = (m_nSelect + 1) % SELECT_MAX;
-
-		// サウンドの再生
-		CManager::GetSound()->Play(CSound::LABEL_SE_SELECT_000);	// 選択操作音00
-	}
-
-	// 前回の選択要素の色を黒に設定
-	m_apSelect[m_nOldSelect]->SetColor(DEFAULT_COL);
-
-	// 現在の選択要素の色を白に設定
-	m_apSelect[m_nSelect]->SetColor(CHOICE_COL);
-
-	// 現在の選択要素を代入
-	m_nOldSelect = m_nSelect;
 }
 
 //============================================================

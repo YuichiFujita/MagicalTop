@@ -72,16 +72,6 @@ CSceneGame::~CSceneGame()
 //============================================================
 HRESULT CSceneGame::Init(void)
 {
-	// ウェーブマネージャーの生成
-	m_pWaveManager = CWaveManager::Create();
-	if (UNUSED(m_pWaveManager))
-	{ // 非使用中の場合
-
-		// 失敗を返す
-		assert(false);
-		return E_FAIL;
-	}
-
 	// タイマーマネージャーの生成
 	m_pTimerManager = CTimerManager::Create
 	( // 引数
@@ -114,6 +104,19 @@ HRESULT CSceneGame::Init(void)
 		return E_FAIL;
 	}
 
+	// シーンの初期化
+	CScene::Init();		// ステージ・地面・ターゲット・プレイヤーの生成
+
+	// ウェーブマネージャーの生成
+	m_pWaveManager = CWaveManager::Create();
+	if (UNUSED(m_pWaveManager))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
 	// ポーズの生成
 	m_pPause = CPause::Create();
 	if (UNUSED(m_pPause))
@@ -123,9 +126,6 @@ HRESULT CSceneGame::Init(void)
 		assert(false);
 		return E_FAIL;
 	}
-
-	// シーンの初期化
-	CScene::Init();		// ステージ・地面・ターゲット・プレイヤーの生成
 
 	// 海オブジェクトの生成
 	CSea::Create();

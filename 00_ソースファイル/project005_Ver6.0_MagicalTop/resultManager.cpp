@@ -12,6 +12,7 @@
 #include "input.h"
 #include "sound.h"
 #include "camera.h"
+#include "fade.h"
 #include "texture.h"
 #include "model.h"
 #include "object2D.h"
@@ -679,11 +680,15 @@ void CResultManager::UpdateBack(void)
 		else
 		{ // 遷移待機状態の場合
 
-			// シーンの設定
-			CManager::SetScene(CScene::MODE_TITLE);	// タイトル画面
+			if (CManager::GetFade()->GetState() == CFade::FADE_NONE)
+			{ // フェード中ではない場合
 
-			// サウンドの再生
-			CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_000);	// 決定音00
+				// シーンの設定
+				CManager::SetScene(CScene::MODE_TITLE);	// タイトル画面
+
+				// サウンドの再生
+				CManager::GetSound()->Play(CSound::LABEL_SE_DECISION_000);	// 決定音00
+			}
 		}
 	}
 }

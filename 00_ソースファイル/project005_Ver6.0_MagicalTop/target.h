@@ -23,6 +23,7 @@
 class CObjectMeshCube;	// オブジェクトメッシュキューブクラス
 class CObjectGauge3D;	// オブジェクトゲージ3Dクラス
 class CShadow;			// 影クラス
+class CWarningAttack;	// 攻撃警告表示クラス
 
 //************************************************************
 //	クラス定義
@@ -42,7 +43,6 @@ public:
 	typedef enum
 	{
 		STATE_NORMAL = 0,	// 通常状態
-		STATE_DAMAGE,		// ダメージ状態
 		STATE_HEAL,			// 回復状態
 		STATE_DESTROY,		// 破壊状態
 		STATE_MAX			// この列挙型の総数
@@ -88,8 +88,9 @@ private:
 	// メンバ変数
 	CObjectMeshCube *m_pMeshCube;	// メッシュキューブの情報
 	CObjectGauge3D *m_pLife;		// 体力の情報
+	CShadow *m_pShadow;				// 影の情報
+	CWarningAttack *m_pWarning;		// 攻撃警告表示の情報
 
-	CShadow *m_pShadow;		// 影の情報
 	STATE m_state;			// 状態
 	float m_fSinRot;		// 浮遊向き
 	int m_nCounterState;	// 状態管理カウンター

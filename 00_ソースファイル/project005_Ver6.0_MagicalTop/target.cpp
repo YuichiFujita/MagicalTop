@@ -20,6 +20,7 @@
 #include "objectMeshCube.h"
 #include "objectGauge3D.h"
 #include "shadow.h"
+#include "warningAttack.h"
 #include "flower.h"
 #include "particle3D.h"
 
@@ -68,6 +69,7 @@ CTarget::CTarget() : CObjectModel(CObject::LABEL_TARGET)
 	m_pMeshCube		= NULL;			// メッシュキューブの情報
 	m_pLife			= NULL;			// 体力の情報
 	m_pShadow		= NULL;			// 影の情報
+	m_pWarning		= NULL;			// 攻撃警告表示の情報
 	m_state			= STATE_NORMAL;	// 状態
 	m_fSinRot		= 0.0f;			// 浮遊向き
 	m_nCounterState	= 0;			// 状態管理カウンター
@@ -91,6 +93,7 @@ HRESULT CTarget::Init(void)
 	m_pMeshCube		= NULL;			// メッシュキューブの情報
 	m_pLife			= NULL;			// 体力の情報
 	m_pShadow		= NULL;			// 影の情報
+	m_pWarning		= NULL;			// 攻撃警告表示の情報
 	m_state			= STATE_NORMAL;	// 状態
 	m_fSinRot		= 0.0f;			// 浮遊向き
 	m_nCounterState	= 0;			// 状態管理カウンター
@@ -157,6 +160,16 @@ HRESULT CTarget::Init(void)
 	// 影の生成
 	m_pShadow = CShadow::Create(CShadow::TEXTURE_NORMAL, TARG_SHADOW_SIZE, this);
 	if (UNUSED(m_pShadow))
+	{ // 生成に失敗した場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 攻撃警告表示の生成
+	m_pWarning = CWarningAttack::Create(D3DXVECTOR3(1030.0f, 610.0f, 0.0f), D3DXVECTOR3(400.0f, 200.0f, 0.0f));
+	if (UNUSED(m_pWarning))
 	{ // 生成に失敗した場合
 
 		// 失敗を返す
@@ -231,26 +244,6 @@ void CTarget::Update(void)
 					// 状態を変更
 					m_state = STATE_HEAL;	// 回復状態
 				}
-			}
-
-			break;
-
-		case STATE_DAMAGE:	// ダメージ状態
-
-			if (m_nCounterState < NORMAL_CNT)
-			{ // カウンターが一定値より小さい場合
-
-				// カウンターを加算
-				m_nCounterState++;
-			}
-			else
-			{ // カウンターが一定値以上の場合
-
-				// カウンターを初期化
-				m_nCounterState = 0;
-
-				// 状態を変更
-				m_state = STATE_NORMAL;	// 通常状態
 			}
 
 			break;
@@ -356,8 +349,8 @@ void CTarget::Hit(const int nDmg)
 				// カウンターを初期化
 				m_nCounterState = 0;
 
-				// 状態を変更
-				m_state = STATE_DAMAGE;		// ダメージ状態
+				// 攻撃警告を表示させる
+				m_pWarning->SetDisp();
 			}
 			else
 			{ // 死んでいる場合
