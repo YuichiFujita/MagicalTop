@@ -23,6 +23,7 @@ class CWaveManager;		// ウェーブマネージャークラス
 class CTimerManager;	// タイマーマネージャークラス
 class CPause;			// ポーズクラス
 class CScore;			// スコアクラス
+class CWarningSpawn;	// 出現警告表示クラス
 
 //************************************************************
 //	クラス定義
@@ -48,6 +49,7 @@ public:
 	static CTimerManager	*GetTimerManager(void);	// タイマーマネージャー取得
 	static CPause			*GetPause(void);		// ポーズ取得
 	static CScore			*GetScore(void);		// スコア取得
+	static CWarningSpawn	*GetWarningSpawn(void);	// 出現警告表示取得
 
 private:
 	// 静的メンバ変数
@@ -55,6 +57,7 @@ private:
 	static CTimerManager	*m_pTimerManager;	// タイマーマネージャー
 	static CPause			*m_pPause;			// ポーズ
 	static CScore			*m_pScore;			// スコアオブジェクト
+	static CWarningSpawn	*m_pWarningSpawn;	// 出現警告表示オブジェクト
 };
 
 #endif	// _SCENE_GAME_H_

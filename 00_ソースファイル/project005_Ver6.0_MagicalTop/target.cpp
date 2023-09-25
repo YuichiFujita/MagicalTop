@@ -45,6 +45,9 @@
 #define GAUGE_FRONTCOL	(D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f))	// 表ゲージ色
 #define GAUGE_BACKCOL	(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f))	// 裏ゲージ色
 
+#define WARNING_POS		(D3DXVECTOR3(250.0f, 610.0f, 0.0f))	// 警告表示の位置
+#define WARNING_SIZE	(D3DXVECTOR3(400.0f, 200.0f, 0.0f))	// 警告表示の大きさ
+
 #define STATE_HEAL_CNT	(480)	// 回復状態に移行するまでのカウンター
 #define NORMAL_CNT		(60)	// 通常状態に移行するまでのカウンター
 #define WAIT_HEAL_CNT	(180)	// 回復までのカウンター
@@ -168,7 +171,7 @@ HRESULT CTarget::Init(void)
 	}
 
 	// 攻撃警告表示の生成
-	m_pWarning = CWarningAttack::Create(D3DXVECTOR3(1030.0f, 610.0f, 0.0f), D3DXVECTOR3(400.0f, 200.0f, 0.0f));
+	m_pWarning = CWarningAttack::Create(WARNING_POS, WARNING_SIZE);
 	if (UNUSED(m_pWarning))
 	{ // 生成に失敗した場合
 

@@ -25,6 +25,7 @@
 #include "weed.h"
 #include "score.h"
 #include "timerManager.h"
+#include "warningSpawn.h"
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -744,11 +745,17 @@ void CWaveManager::UpdateProgression(void)
 			CEnemy::RandomSpawn(m_aWaveInfo[m_nSeason].pWave[m_nWave].pPoint[m_nPoint].aNumSpawn[nCntType], (CEnemy::TYPE)nCntType);
 		}
 
+		// 出現警告を表示
+		CSceneGame::GetWarningSpawn()->SetDisp();
+
 		// 余韻管理カウンターを設定
 		m_nCounterFrame = m_aWaveInfo[m_nSeason].pWave[m_nWave].pPoint[m_nPoint].nFrame;
 
 		// 出現管理カウンターを加算
 		m_nPoint++;
+
+		// サウンドの再生
+		CManager::GetSound()->Play(CSound::LABEL_SE_WARNING);	// 警告音
 	}
 	else
 	{ // カウンターが 0以下且つ、全出現が終了した場合

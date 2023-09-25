@@ -17,6 +17,7 @@
 #include "stage.h"
 #include "pause.h"
 #include "score.h"
+#include "warningSpawn.h"
 
 #include "enemy.h"
 #include "magic.h"
@@ -40,11 +41,14 @@
 #define SCO_SIZE	(D3DXVECTOR3(60.0f, 80.0f, 0.0f))		// スコア大きさ
 #define SCO_SPACE	(D3DXVECTOR3(SCO_SIZE.x, 0.0f, 0.0f))	// スコア空白
 
+#define WARNING_SIZE	(D3DXVECTOR3(1000.0f, 500.0f, 0.0f))	// 警告大きさ
+
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
 CWaveManager	*CSceneGame::m_pWaveManager  = NULL;	// ウェーブマネージャー
 CTimerManager	*CSceneGame::m_pTimerManager = NULL;	// タイマーマネージャー
+CWarningSpawn	*CSceneGame::m_pWarningSpawn = NULL;	// 出現警告表示オブジェクト
 CPause	*CSceneGame::m_pPause	= NULL;					// ポーズ
 CScore	*CSceneGame::m_pScore	= NULL;					// スコアオブジェクト
 
@@ -97,6 +101,20 @@ HRESULT CSceneGame::Init(void)
 		SCO_SPACE	// 空白
 	);
 	if (UNUSED(m_pScore))
+	{ // 非使用中の場合
+
+		// 失敗を返す
+		assert(false);
+		return E_FAIL;
+	}
+
+	// 出現警告表示オブジェクトの生成
+	m_pWarningSpawn = CWarningSpawn::Create
+	( // 引数
+		SCREEN_CENT,	// 位置
+		WARNING_SIZE	// 大きさ
+	);
+	if (UNUSED(m_pWarningSpawn))
 	{ // 非使用中の場合
 
 		// 失敗を返す
@@ -304,4 +322,13 @@ CScore *CSceneGame::GetScore(void)
 {
 	// スコアのポインタを返す
 	return m_pScore;
+}
+
+//============================================================
+//	出現警告表示取得処理
+//============================================================
+CWarningSpawn *CSceneGame::GetWarningSpawn(void)
+{
+	// 出現警告表示のポインタを返す
+	return m_pWarningSpawn;
 }
