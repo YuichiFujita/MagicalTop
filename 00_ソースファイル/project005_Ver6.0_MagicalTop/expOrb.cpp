@@ -16,6 +16,7 @@
 
 #include "collision.h"
 #include "player.h"
+#include "target.h"
 #include "field.h"
 #include "stage.h"
 
@@ -28,6 +29,7 @@
 #define EXP_RADIUS		(80.0f)	// 経験値の半径
 
 #define EXP_SPAWN_RADIUS	(250)	// 経験値出現時のランダム範囲
+#define LIMIT_RADIUS	(3000.0f)	// 経験値のステージ移動半径
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -111,13 +113,17 @@ void CExpOrb::Update(void)
 {
 	// 変数を宣言
 	D3DXVECTOR3 posPlayer = CScene::GetPlayer()->GetPosition();	// プレイヤー位置
-	D3DXVECTOR3 posExp = CObjectBillboard::GetPosition();	// 経験値位置
-	D3DXVECTOR3 rotExp = CObjectBillboard::GetRotation();	// 経験値向き
+	D3DXVECTOR3 posTarget = CScene::GetTarget()->GetPosition();	// ターゲット位置
+	D3DXVECTOR3 posExp = CObjectBillboard::GetPosition();		// 経験値位置
+	D3DXVECTOR3 rotExp = CObjectBillboard::GetRotation();		// 経験値向き
 	float fDestRot = 0.0f;	// 目標向き
 	float fDiffRot = 0.0f;	// 向き
 
-	if (CScene::GetPlayer()->GetState() != CPlayer::STATE_DEATH)
-	{ // プレイヤーが死亡していない場合
+	// ポインタを宣言
+	CTarget *pTarget = CScene::GetTarget();	// ターゲット情報
+
+	if (CScene::GetPlayer()->GetState() != CPlayer::STATE_DEATH && USED(CScene::GetTarget()))
+	{ // プレイヤーが死亡していない且つ、ターゲットが使用されている場合
 
 		// プレイヤーの方向を代入
 		fDestRot = atan2f(posExp.x - posPlayer.x, posExp.z - posPlayer.z);	// 目標向き
@@ -139,8 +145,8 @@ void CExpOrb::Update(void)
 		posExp.y = CScene::GetField()->GetPositionHeight(posExp);
 		posExp.y += EXP_PLUS_POSY;
 
-		// ステージ範囲外の補正
-		CScene::GetStage()->LimitPosition(posExp, EXP_RADIUS);
+		// 円柱の内側制限
+		collision::InCirclePillar(posExp, posTarget, EXP_RADIUS, LIMIT_RADIUS);
 
 		// 位置を設定
 		CObjectBillboard::SetPosition(posExp);
@@ -234,19 +240,26 @@ void CExpOrb::RandomSpawn(const int nNum, const D3DXVECTOR3& rPos)
 	// 変数を宣言
 	D3DXVECTOR3 pos;	// 位置設定用
 
-	for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
-	{ // 生成数分繰り返す
+	// ポインタを宣言
+	CTarget *pTarget = CScene::GetTarget();	// ターゲット情報
 
-		// 生成位置を設定
-		pos.x = rPos.x + (float)(rand() % (EXP_SPAWN_RADIUS * 2) - EXP_SPAWN_RADIUS + 1);
-		pos.y = rPos.y + 0.0f;
-		pos.z = rPos.z + (float)(rand() % (EXP_SPAWN_RADIUS * 2) - EXP_SPAWN_RADIUS + 1);
+	if (USED(CScene::GetTarget()))
+	{ // ターゲットが使用されている場合
 
-		// 生成位置を補正
-		CScene::GetStage()->LimitPosition(pos, EXP_RADIUS);
+		for (int nCntGrow = 0; nCntGrow < nNum; nCntGrow++)
+		{ // 生成数分繰り返す
 
-		// 経験値オブジェクトの生成
-		CExpOrb::Create(pos);
+			// 生成位置を設定
+			pos.x = rPos.x + (float)(rand() % (EXP_SPAWN_RADIUS * 2) - EXP_SPAWN_RADIUS + 1);
+			pos.y = rPos.y + 0.0f;
+			pos.z = rPos.z + (float)(rand() % (EXP_SPAWN_RADIUS * 2) - EXP_SPAWN_RADIUS + 1);
+
+			// 円柱の内側制限
+			collision::InCirclePillar(pos, pTarget->GetPosition(), EXP_RADIUS, LIMIT_RADIUS);
+
+			// 経験値オブジェクトの生成
+			CExpOrb::Create(pos);
+		}
 	}
 }
 
