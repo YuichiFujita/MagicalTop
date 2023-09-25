@@ -977,9 +977,6 @@ void CEnemy::Attack(const D3DXVECTOR3& rLookPos, const D3DXVECTOR3& rThisPos, co
 				m_status.nBullDamage			// 攻撃力
 			);
 
-			// パーティクル3Dオブジェクトの生成
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, posBull);
-
 			// カウンターを初期化
 			m_nCounterAtk = 0;
 
@@ -987,12 +984,18 @@ void CEnemy::Attack(const D3DXVECTOR3& rLookPos, const D3DXVECTOR3& rThisPos, co
 			{ // 種類ごとの処理
 			case TYPE_HUMAN:	// 歩兵
 
+				// パーティクル3Dオブジェクトの生成
+				CParticle3D::Create(CParticle3D::TYPE_MUZZLE_FLASH, posBull);
+
 				// サウンドの再生
 				CManager::GetSound()->Play(CSound::LABEL_SE_ENEMY_SHOT000);	// 敵射撃音 (銃)
 
 				break;
 
 			case TYPE_CAR:		// 戦車
+
+				// パーティクル3Dオブジェクトの生成
+				CParticle3D::Create(CParticle3D::TYPE_TANK_FIRE, posBull);
 
 				// サウンドの再生
 				CManager::GetSound()->Play(CSound::LABEL_SE_ENEMY_SHOT001);	// 敵射撃音 (大砲)

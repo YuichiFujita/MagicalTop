@@ -18,7 +18,20 @@
 #define DMG_EFF_LIFE	(120)		// ダメージの寿命
 #define DMG_SIZE		(80.0f)		// ダメージの大きさ
 #define DMG_SUB_SIZE	(2.4f)		// ダメージの半径の減算量
-#define DMG_SUB_ALPHA	(0.005f)	// ダメージの透明度の減算量
+
+#define MUZZLEFLASH_COL			(D3DXCOLOR(1.0f, 0.38f, 0.23f, 1.0f))	// マズルフラッシュの色
+#define MUZZLEFLASH_MOVE		(0.64f)		// マズルフラッシュの移動量
+#define MUZZLEFLASH_SPAWN		(48)		// マズルフラッシュの生成数
+#define MUZZLEFLASH_EFF_LIFE	(8)			// マズルフラッシュの寿命
+#define MUZZLEFLASH_SIZE		(0.57f)		// マズルフラッシュの大きさ
+#define MUZZLEFLASH_SUB_SIZE	(-1.42f)	// マズルフラッシュの半径の減算量
+
+#define TANKFIRE_COL		(D3DXCOLOR(1.0f, 0.38f, 0.23f, 1.0f))	// タンクファイアの色
+#define TANKFIRE_MOVE		(2.64f)		// タンクファイアの移動量
+#define TANKFIRE_SPAWN		(58)		// タンクファイアの生成数
+#define TANKFIRE_EFF_LIFE	(22)		// タンクファイアの寿命
+#define TANKFIRE_SIZE		(2.57f)		// タンクファイアの大きさ
+#define TANKFIRE_SUB_SIZE	(-3.42f)	// タンクファイアの半径の減算量
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -27,6 +40,8 @@ const int CParticle3D::mc_aLife[CParticle3D::TYPE_MAX] =	// 寿命定数
 {
 	0,	// なし
 	24,	// ダメージ
+	1,	// マズルフラッシュ
+	1,	// タンクファイア
 };
 
 //************************************************************
@@ -38,8 +53,8 @@ const int CParticle3D::mc_aLife[CParticle3D::TYPE_MAX] =	// 寿命定数
 CParticle3D::CParticle3D() : CObject(CObject::LABEL_PARTICLE3D)
 {
 	// メンバ変数をクリア
-	m_pos	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
-	m_col	= D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
+	m_pos	= VEC3_ZERO;	// 位置
+	m_col	= XCOL_WHITE;	// 色
 	m_type	= TYPE_NONE;	// 種類
 	m_nLife	= 0;			// 寿命
 }
@@ -58,8 +73,8 @@ CParticle3D::~CParticle3D()
 HRESULT CParticle3D::Init(void)
 {
 	// メンバ変数を初期化
-	m_pos	= D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 位置
-	m_col	= D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);	// 色
+	m_pos	= VEC3_ZERO;	// 位置
+	m_col	= XCOL_WHITE;	// 色
 	m_type	= TYPE_NONE;	// 種類
 	m_nLife	= 0;			// 寿命
 
@@ -116,8 +131,22 @@ void CParticle3D::Update(void)
 	{ // 種類ごとの処理
 	case TYPE_DAMAGE:
 
-		// ダメージパーティクル3D
+		// ダメージ
 		Damage(m_pos, m_col);
+
+		break;
+
+	case TYPE_MUZZLE_FLASH:
+
+		// マズルフラッシュ
+		MuzzleFlash(m_pos);
+
+		break;
+
+	case TYPE_TANK_FIRE:
+
+		// タンクファイア
+		TankFire(m_pos);
 
 		break;
 
@@ -136,13 +165,13 @@ void CParticle3D::Draw(void)
 }
 
 //============================================================
-//	ダメージパーティクル3D処理
+//	ダメージ
 //============================================================
 void CParticle3D::Damage(const D3DXVECTOR3& rPos, const D3DXCOLOR& rCol)
 {
 	// 変数を宣言
-	D3DXVECTOR3 move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 移動量の代入用
-	D3DXVECTOR3 rot  = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 向きの代入用
+	D3DXVECTOR3 move = VEC3_ZERO;	// 移動量の代入用
+	D3DXVECTOR3 rot  = VEC3_ZERO;	// 向きの代入用
 
 	if ((m_nLife + 1) % 12 == 0)
 	{ // 寿命が12の倍数の場合
@@ -164,7 +193,7 @@ void CParticle3D::Damage(const D3DXVECTOR3& rPos, const D3DXCOLOR& rCol)
 			move.z *= DMG_MOVE;
 
 			// 向きを設定
-			rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+			rot = VEC3_ZERO;
 
 			// エフェクト3Dオブジェクトの生成
 			CEffect3D::Create
@@ -177,10 +206,105 @@ void CParticle3D::Damage(const D3DXVECTOR3& rPos, const D3DXCOLOR& rCol)
 				DMG_EFF_LIFE,		// 寿命
 				DMG_SIZE,			// 半径
 				DMG_SUB_SIZE,		// 半径の減算量
-				DMG_SUB_ALPHA,		// 透明度の減算量
 				LABEL_PARTICLE3D	// オブジェクトラベル
 			);
 		}
+	}
+}
+
+//============================================================
+//	マズルフラッシュ
+//============================================================
+void CParticle3D::MuzzleFlash(const D3DXVECTOR3& rPos)
+{
+	// 変数を宣言
+	D3DXVECTOR3 move = VEC3_ZERO;	// 移動量の代入用
+	D3DXVECTOR3 rot  = VEC3_ZERO;	// 向きの代入用
+	int nLife = 0;	// 寿命の代入用
+
+	for (int nCntPart = 0; nCntPart < MUZZLEFLASH_SPAWN; nCntPart++)
+	{ // 生成されるエフェクト数分繰り返す
+
+		// ベクトルをランダムに設定
+		move.x = sinf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		move.y = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		move.z = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+
+		// ベクトルを正規化
+		D3DXVec3Normalize(&move, &move);
+
+		// 移動量を設定
+		move.x *= MUZZLEFLASH_MOVE;
+		move.y *= MUZZLEFLASH_MOVE;
+		move.z *= MUZZLEFLASH_MOVE;
+
+		// 向きを設定
+		rot = VEC3_ZERO;
+
+		// 寿命を設定
+		nLife = (rand() % 6) + MUZZLEFLASH_EFF_LIFE;
+
+		// エフェクト3Dオブジェクトの生成
+		CEffect3D::Create
+		( // 引数
+			CEffect3D::TYPE_NORMAL,	// テクスチャ
+			rPos,					// 位置
+			move,					// 移動量
+			rot,					// 向き
+			MUZZLEFLASH_COL,		// 色
+			nLife,					// 寿命
+			MUZZLEFLASH_SIZE,		// 半径
+			MUZZLEFLASH_SUB_SIZE,	// 半径の減算量
+			LABEL_PARTICLE3D		// オブジェクトラベル
+		);
+	}
+}
+
+//============================================================
+//	タンクファイア
+//============================================================
+void CParticle3D::TankFire(const D3DXVECTOR3& rPos)
+{
+	// 変数を宣言
+	D3DXVECTOR3 move = VEC3_ZERO;	// 移動量の代入用
+	D3DXVECTOR3 rot  = VEC3_ZERO;	// 向きの代入用
+	int nLife = 0;	// 寿命の代入用
+
+	for (int nCntPart = 0; nCntPart < TANKFIRE_SPAWN; nCntPart++)
+	{ // 生成されるエフェクト数分繰り返す
+
+		// ベクトルをランダムに設定
+		move.x = sinf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		move.y = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		move.z = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+
+		// ベクトルを正規化
+		D3DXVec3Normalize(&move, &move);
+
+		// 移動量を設定
+		move.x *= TANKFIRE_MOVE;
+		move.y *= TANKFIRE_MOVE;
+		move.z *= TANKFIRE_MOVE;
+
+		// 向きを設定
+		rot = VEC3_ZERO;
+
+		// 寿命を設定
+		nLife = (rand() % 6) + TANKFIRE_EFF_LIFE;
+
+		// エフェクト3Dオブジェクトの生成
+		CEffect3D::Create
+		( // 引数
+			CEffect3D::TYPE_NORMAL,	// テクスチャ
+			rPos,					// 位置
+			move,					// 移動量
+			rot,					// 向き
+			TANKFIRE_COL,			// 色
+			nLife,					// 寿命
+			TANKFIRE_SIZE,			// 半径
+			TANKFIRE_SUB_SIZE,		// 半径の減算量
+			LABEL_PARTICLE3D		// オブジェクトラベル
+		);
 	}
 }
 

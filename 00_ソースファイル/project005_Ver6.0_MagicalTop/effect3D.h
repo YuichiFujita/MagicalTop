@@ -54,7 +54,6 @@ public:
 		const int nLife,					// 寿命
 		const float fRadius,				// 半径
 		const float fSubSize,				// 半径の減算量
-		const float fSubAlpha,				// 透明度の減算量
 		const LABEL label = LABEL_EFFECT3D	// オブジェクトラベル
 	);
 

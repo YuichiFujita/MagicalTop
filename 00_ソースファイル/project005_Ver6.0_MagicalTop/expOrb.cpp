@@ -251,7 +251,7 @@ void CExpOrb::RandomSpawn(const int nNum, const D3DXVECTOR3& rPos)
 
 			// ê∂ê¨à íuÇê›íË
 			pos.x = rPos.x + (float)(rand() % (EXP_SPAWN_RADIUS * 2) - EXP_SPAWN_RADIUS + 1);
-			pos.y = rPos.y + 0.0f;
+			pos.y = rPos.y;
 			pos.z = rPos.z + (float)(rand() % (EXP_SPAWN_RADIUS * 2) - EXP_SPAWN_RADIUS + 1);
 
 			// â~íåÇÃì‡ë§êßå¿

@@ -32,9 +32,11 @@ public:
 	// パーティクル3D種類列挙
 	typedef enum
 	{
-		TYPE_NONE = 0,	// なし
-		TYPE_DAMAGE,	// ダメージ
-		TYPE_MAX		// この列挙型の総数
+		TYPE_NONE = 0,		// なし
+		TYPE_DAMAGE,		// ダメージ
+		TYPE_MUZZLE_FLASH,	// マズルフラッシュ
+		TYPE_TANK_FIRE,		// タンクファイア
+		TYPE_MAX			// この列挙型の総数
 	}TYPE;
 
 	// オーバーライド関数
@@ -62,6 +64,8 @@ public:
 private:
 	// メンバ関数
 	void Damage(const D3DXVECTOR3& rPos, const D3DXCOLOR& rCol);	// ダメージ
+	void MuzzleFlash(const D3DXVECTOR3& rPos);	// マズルフラッシュ
+	void TankFire(const D3DXVECTOR3& rPos);		// タンクファイア
 
 	// 静的メンバ変数
 	static const int mc_aLife[TYPE_MAX];	// 寿命定数

@@ -171,7 +171,6 @@ void CObjectTornado::Draw(void)
 	// αテストを有効にする
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);		// αテストの有効 / 無効の設定
 	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);	// αテストの設定
-	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);					// αテストの参照値設定
 
 	//--------------------------------------------------------
 	//	発生源のマトリックスを求める
@@ -237,7 +236,6 @@ void CObjectTornado::Draw(void)
 	// αテストを無効にする
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);		// αテストの有効 / 無効の設定
 	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);	// αテストの設定
-	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);					// αテストの参照値設定
 }
 
 //============================================================
