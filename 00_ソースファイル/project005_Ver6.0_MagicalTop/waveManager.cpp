@@ -77,6 +77,8 @@ CWaveManager::Season CWaveManager::m_aWaveInfo[CWaveManager::SEASON_MAX] = {};	/
 #define SEASON_SUB_ROT	(0.005f)	// シーズン表示のY向き加算量
 #define SEASON_MUL_SIZE	(1.05f)		// シーズン表示の拡大率乗算量
 
+#define PLUS_FLOWER	(10)	// 季節進行時のマナフラワーの生成数
+#define PLUS_WEED	(10)	// 季節進行時の草の生成数
 #define WAIT_FRAME	(240)	// リザルト遷移時の余韻フレーム
 
 //************************************************************
@@ -146,9 +148,9 @@ HRESULT CWaveManager::Init(void)
 		// シーズン表示用のモデルUIの生成
 		m_apModelUI[nCntWave] = CModelUI::Create
 		( // 引数
-			aPos[nCntWave],			// 位置
-			VEC3_ZERO,				// 向き
-			SIZE_SEASON				// 拡大率
+			aPos[nCntWave],	// 位置
+			VEC3_ZERO,		// 向き
+			SIZE_SEASON		// 拡大率
 		);
 		if (UNUSED(m_apModelUI[nCntWave]))
 		{ // 生成に失敗した場合
@@ -176,9 +178,9 @@ HRESULT CWaveManager::Init(void)
 	( // 引数
 		D3DXVECTOR3	// 位置
 		( // 引数
-			0.0f + SPACE_EDGE + (SIZE_WAVE.x * 0.5f),
-			SCREEN_HEIGHT * 0.5f,
-			0.0
+			0.0f + SPACE_EDGE + (SIZE_WAVE.x * 0.5f),	// x
+			SCREEN_HEIGHT * 0.5f,						// y
+			0.0											// z
 		),
 		SIZE_WAVE	// 大きさ
 	);
@@ -208,9 +210,9 @@ HRESULT CWaveManager::Init(void)
 		CValue::TEXTURE_NORMAL,	// テクスチャ
 		D3DXVECTOR3				// 位置
 		( // 引数
-			(float)SCREEN_WIDTH - SPACE_EDGE - (SIZE_NUM.x * 0.5f),
-			SCREEN_HEIGHT * 0.5f,
-			0.0f
+			(float)SCREEN_WIDTH - SPACE_EDGE - (SIZE_NUM.x * 0.5f),	// x
+			SCREEN_HEIGHT * 0.5f,									// y
+			0.0f													// z
 		),
 		SIZE_NUM	// 大きさ
 	);
@@ -700,6 +702,12 @@ void CWaveManager::UpdateWaveStart(void)
 
 			// 季節の設定
 			SetSeason((SEASON)m_nSeason);
+
+			// マナフラワーランダム生成
+			CFlower::RandomSpawn(PLUS_FLOWER, (CFlower::TYPE)m_nSeason);
+
+			// 草ランダム生成
+			CWeed::RandomSpawn(PLUS_WEED, (CWeed::TYPE)m_nSeason);
 
 			// カメラ状態を設定
 			CManager::GetCamera()->SetState(CCamera::STATE_BARGAINING);	// 寄り引き状態
