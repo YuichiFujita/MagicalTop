@@ -29,6 +29,8 @@ public:
 		TYPE_NORMAL = 0,	// 通常テクスチャ
 		TYPE_BUBBLE,		// バブルテクスチャ
 		TYPE_SMOKE,			// 煙テクスチャ
+		TYPE_HEAL,			// 回復テクスチャ
+		TYPE_LEAF,			// 葉っぱテクスチャ
 		TYPE_MAX			// この列挙型の総数
 	}TYPE;
 

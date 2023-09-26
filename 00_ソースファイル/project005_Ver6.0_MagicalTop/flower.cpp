@@ -21,6 +21,7 @@
 #include "shadow.h"
 #include "field.h"
 #include "stage.h"
+#include "particle3D.h"
 
 //************************************************************
 //	マクロ定義
@@ -443,6 +444,9 @@ bool CFlower::CollisionPlayer(const D3DXVECTOR3& rPos)
 			if (collision::Circle2D(rPos, posPlayer, sizeFlower.x * 0.5f, pPlayer->GetRadius()))
 			{ // プレイヤーに当たっていた場合
 
+				// 変数を宣言
+				float fCol = 0.0f;	// マナフラワー色
+
 				if (pPlayer->GetMotionType() != CPlayer::MOTION_ACCELE)
 				{ // プレイヤーが加速中ではない場合
 
@@ -456,11 +460,11 @@ bool CFlower::CollisionPlayer(const D3DXVECTOR3& rPos)
 					m_nLife = 0;
 				}
 
+				// マナフラワーの色を設定
+				fCol = (MIN_COL / (float)m_aStatusInfo[m_type].nLife) * m_nLife + fabsf(MIN_COL - 1.0f);
+
 				if (m_nLife > 0)
 				{ // 体力が残っていた場合
-
-					// 変数を宣言
-					float fCol = (MIN_COL / (float)m_aStatusInfo[m_type].nLife) * m_nLife + fabsf(MIN_COL - 1.0f);	// マナフラワー色
 
 					// マナフラワーの色を設定
 					SetColor(D3DXCOLOR(fCol, fCol, fCol, 1.0f));
@@ -474,6 +478,9 @@ bool CFlower::CollisionPlayer(const D3DXVECTOR3& rPos)
 					// 死亡状態にする
 					bDeath = true;
 				}
+
+				// パーティクル3Dオブジェクトを生成
+				CParticle3D::Create(CParticle3D::TYPE_STOMP_PLANT, GetPosition(), D3DXCOLOR(fCol, fCol, fCol, 1.0f));
 
 				// サウンドの再生
 				CManager::GetSound()->Play(CSound::LABEL_SE_STOMP);	// 植物踏みつけ音

@@ -31,6 +31,7 @@
 //************************************************************
 #define TARG_SHADOW_SIZE	(D3DXVECTOR3(200.0f, 0.0f, 200.0f))	// 影の大きさ
 
+#define CUBE_COL	(D3DXCOLOR(0.0f, 1.0f, 1.0f, 0.5f))	// キューブの色
 #define CUBE_SIZE	(D3DXVECTOR3(25.0f, 25.0f, 25.0f))	// キューブの大きさ
 #define CUBE_BORD	(2.5f)		// キューブの縁取りの太さ
 #define TARG_RADIUS	(100.0f)	// ターゲット半径
@@ -53,6 +54,7 @@
 #define STATE_HEAL_CNT	(480)	// 回復状態に移行するまでのカウンター
 #define NORMAL_CNT		(60)	// 通常状態に移行するまでのカウンター
 #define WAIT_HEAL_CNT	(180)	// 回復までのカウンター
+#define HEAL_EFF_COL	(D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f))	// 回復時のエフェクト色
 
 //************************************************************
 //	静的メンバ変数宣言
@@ -119,7 +121,7 @@ HRESULT CTarget::Init(void)
 		VEC3_ZERO,	// 位置
 		VEC3_ZERO,	// 向き
 		CUBE_SIZE,	// 大きさ
-		XCOL_WHITE,	// キューブ色
+		CUBE_COL,	// キューブ色
 		XCOL_BLACK,	// 縁取り色
 		CObjectMeshCube::BORDERSTATE_ON,	// 縁取り状態
 		CUBE_BORD,							// 縁取り太さ
@@ -272,6 +274,9 @@ void CTarget::Update(void)
 
 					// 体力を回復
 					m_pLife->AddNum(nNumFlower * 2);	// マナフラワー量に応じて回復量増加
+
+					// パーティクル3Dオブジェクトを生成
+					CParticle3D::Create(CParticle3D::TYPE_HEAL, pos, HEAL_EFF_COL);
 				}
 			}
 			else
@@ -317,21 +322,6 @@ void CTarget::Update(void)
 
 	// オブジェクトモデルの更新
 	CObjectModel::Update();
-
-
-
-
-
-
-
-
-
-	if (CManager::GetKeyboard()->GetTrigger(DIK_0))
-	{ // TODO：デバッグ処理
-
-		// パーティクル3Dオブジェクトを生成
-		CParticle3D::Create(CParticle3D::TYPE_EXPLOSION, pos);
-	}
 }
 
 //============================================================
@@ -363,6 +353,9 @@ void CTarget::Hit(const int nDmg)
 			if (m_pLife->GetNum() > 0)
 			{ // 生きている場合
 
+				// パーティクル3Dオブジェクトを生成
+				CParticle3D::Create(CParticle3D::TYPE_SMALL_EXPLOSION, pos);
+
 				// カウンターを初期化
 				m_nCounterState = 0;
 
@@ -371,6 +364,9 @@ void CTarget::Hit(const int nDmg)
 			}
 			else
 			{ // 死んでいる場合
+
+				// パーティクル3Dオブジェクトを生成
+				CParticle3D::Create(CParticle3D::TYPE_BIG_EXPLOSION, pos);
 
 				// 描画を停止
 				m_pMeshCube->SetEnableDraw(false);
@@ -384,9 +380,6 @@ void CTarget::Hit(const int nDmg)
 				// サウンドの再生
 				CManager::GetSound()->Play(CSound::LABEL_SE_BREAK);	// 破壊音
 			}
-
-			// パーティクル3Dオブジェクトを生成
-			CParticle3D::Create(CParticle3D::TYPE_EXPLOSION, pos);
 		}
 	}
 }

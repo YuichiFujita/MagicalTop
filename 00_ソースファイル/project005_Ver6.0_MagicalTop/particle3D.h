@@ -34,7 +34,10 @@ public:
 	{
 		TYPE_NONE = 0,			// なし
 		TYPE_DAMAGE,			// ダメージ
-		TYPE_EXPLOSION,			// 爆発
+		TYPE_HEAL,				// 回復
+		TYPE_STOMP_PLANT,		// 植物踏みつぶし
+		TYPE_SMALL_EXPLOSION,	// 小爆発
+		TYPE_BIG_EXPLOSION,		// 大爆発
 		TYPE_MUZZLE_FLASH,		// マズルフラッシュ
 		TYPE_TANK_FIRE,			// タンクファイア
 		TYPE_BUBBLE_EXPLOSION,	// バブル爆発
@@ -65,11 +68,15 @@ public:
 
 private:
 	// メンバ関数
-	void Damage(const D3DXVECTOR3& rPos, const D3DXCOLOR& rCol);	// ダメージ
-	void Explosion(const D3DXVECTOR3& rPos);						// 爆発
-	void MuzzleFlash(const D3DXVECTOR3& rPos);						// マズルフラッシュ
-	void TankFire(const D3DXVECTOR3& rPos);							// タンクファイア
-	void BubbleExplosion(const D3DXVECTOR3& rPos);					// バブル爆発
+	void Damage(const D3DXVECTOR3& rPos, const D3DXCOLOR& rCol);		// ダメージ
+	void Heal(const D3DXVECTOR3& rPos, const D3DXCOLOR& rCol);			// 回復
+	void StompPlant(const D3DXVECTOR3& rPos, const D3DXCOLOR& rCol);	// 植物踏みつぶし
+
+	void SmallExplosion(const D3DXVECTOR3& rPos);	// 小爆発
+	void BigExplosion(const D3DXVECTOR3& rPos);		// 大爆発
+	void MuzzleFlash(const D3DXVECTOR3& rPos);		// マズルフラッシュ
+	void TankFire(const D3DXVECTOR3& rPos);			// タンクファイア
+	void BubbleExplosion(const D3DXVECTOR3& rPos);	// バブル爆発
 
 	// 静的メンバ変数
 	static const int mc_aLife[TYPE_MAX];	// 寿命定数

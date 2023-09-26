@@ -16,7 +16,6 @@
 #include "texture.h"
 #include "collision.h"
 #include "effect3D.h"
-#include "particle3D.h"
 #include "target.h"
 #include "enemy.h"
 #include "field.h"
@@ -282,9 +281,6 @@ void CMagic::Update(void)
 
 	if (CollisionEnemy())
 	{ // 敵に当たっていた場合
-
-		// パーティクル3Dオブジェクトを生成
-		CParticle3D::Create(CParticle3D::TYPE_BUBBLE_EXPLOSION, m_pos);
 
 		// オブジェクトの終了
 		Uninit();

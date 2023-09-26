@@ -355,6 +355,9 @@ void CEnemy::Hit(const int nDmg)
 			// サウンドの再生
 			CManager::GetSound()->Play(CSound::LABEL_SE_FLY);	// 浮遊音
 		}
+
+		// パーティクル3Dオブジェクトを生成
+		CParticle3D::Create(CParticle3D::TYPE_BUBBLE_EXPLOSION, pos);
 	}
 }
 
@@ -404,6 +407,9 @@ void CEnemy::HitKnockBack(const int nDmg, const D3DXVECTOR3& vec)
 			// サウンドの再生
 			CManager::GetSound()->Play(CSound::LABEL_SE_FLY);	// 浮遊音
 		}
+
+		// パーティクル3Dオブジェクトを生成
+		CParticle3D::Create(CParticle3D::TYPE_BUBBLE_EXPLOSION, pos);
 	}
 }
 

@@ -22,6 +22,7 @@
 #include "enemy.h"
 #include "stage.h"
 #include "collision.h"
+#include "particle3D.h"
 
 //************************************************************
 //	マクロ定義
@@ -39,6 +40,9 @@
 #define HEALCNT_AREAMUL	(10)	// セーフエリア外での回復カウンター設定用係数
 #define NUM_DEADZONE	(100)	// デッドゾーンの値
 
+#define HEAL_EFF_CNT	(15)	// 回復時のエフェクト生成フレーム
+#define HEAL_EFF_COL	(D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f))	// 回復時のエフェクト色
+
 //************************************************************
 //	親クラス [CMagicManager] のメンバ関数
 //************************************************************
@@ -50,6 +54,7 @@ CMagicManager::CMagicManager()
 	// メンバ変数をクリア
 	m_pMana = NULL;			// マナの情報
 	m_state = STATE_NORMAL;	// 状態
+	m_nCounterEffect = 0;	// エフェクト管理カウンター
 	m_nCounterMagic = 0;	// 魔法管理カウンター
 	m_nCounterState = 0;	// 状態管理カウンター
 	m_nCounterHeal = 0;		// 回復管理カウンター
@@ -72,6 +77,7 @@ HRESULT CMagicManager::Init(void)
 	// メンバ変数を初期化
 	m_pMana = NULL;			// マナの情報
 	m_state = STATE_NORMAL;	// 状態
+	m_nCounterEffect = 0;	// エフェクト管理カウンター
 	m_nCounterMagic = 0;	// 魔法管理カウンター
 	m_nCounterState = 0;	// 状態管理カウンター
 	m_nCounterHeal = 0;		// 回復管理カウンター
@@ -152,8 +158,11 @@ void CMagicManager::Update(void)
 			else
 			{ // カウンターが一定値以上の場合
 
-				// カウンターを初期化
+				// 状態管理カウンターを初期化
 				m_nCounterState = 0;
+
+				// エフェクト管理カウンターを設定
+				m_nCounterEffect = HEAL_EFF_CNT;
 
 				// 状態を変更
 				m_state = STATE_HEAL;	// 回復状態
@@ -194,6 +203,22 @@ void CMagicManager::Update(void)
 
 						// マナを回復
 						m_pMana->AddNum(1);
+
+						if (m_nCounterEffect < HEAL_EFF_CNT)
+						{ // カウンターが一定値より小さい場合
+
+							// カウンターを加算
+							m_nCounterEffect++;
+						}
+						else
+						{ // カウンターが一定値以上の場合
+
+							// カウンターを初期化
+							m_nCounterEffect = 0;
+
+							// パーティクル3Dオブジェクトを生成
+							CParticle3D::Create(CParticle3D::TYPE_HEAL, CScene::GetPlayer()->GetPosition(), HEAL_EFF_COL);
+						}
 					}
 				}
 			}

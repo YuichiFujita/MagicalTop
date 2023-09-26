@@ -72,6 +72,7 @@ private:
 	// メンバ変数
 	CObjectGauge3D *m_pMana;	// マナの情報
 	STATE m_state;				// 状態
+	int m_nCounterEffect;		// エフェクト管理カウンター
 	int m_nCounterMagic;		// 魔法管理カウンター
 	int m_nCounterState;		// 状態管理カウンター
 	int m_nCounterHeal;			// 回復管理カウンター
