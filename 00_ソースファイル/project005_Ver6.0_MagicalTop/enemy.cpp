@@ -26,6 +26,7 @@
 #include "bullet.h"
 #include "stage.h"
 #include "score.h"
+#include "effect3D.h"
 #include "particle3D.h"
 #include "field.h"
 
@@ -50,6 +51,15 @@
 #define DAMAGE_CNT		(10)		// ダメージ状態維持カウント
 #define BUBBLE_SUB_CNT	(420)		// バブル消失カウント
 #define LIMIT_RADIUS	(2400.0f)	// 敵のステージ移動半径
+
+#define MAGIC_EFF_CNT			(2)		// エフェクトの生成フレーム
+#define MAGIC_EFF_MUL_POS		(2.0f)	// エフェクトの生成位置の乗算量
+#define MAGIC_EFF_MUL_MOVE		(1.0f)	// エフェクトの移動量の乗算量
+#define MAGIC_EFF_ALPHA			(0.6f)	// エフェクトの透明度
+#define MAGIC_EFF_LIFE			(45)	// エフェクトの寿命
+#define MAGIC_EFF_MUL_RADIUS	(1.5f)	// エフェクトの半径の乗算量
+#define MAGIC_EFF_SUB_RADIUS	(0.2f)	// エフェクトの半径の減算量
+#define MAGIC_EFF_PRIORITY		(3)		// エフェクトの優先順位
 
 // 歩兵マクロ
 #define HUMAN_FALL	(5.5f)	// 歩兵生成時の落下速度
@@ -127,6 +137,7 @@ CEnemy::CEnemy(const TYPE type) : CObjectChara(CObject::LABEL_ENEMY), m_type(typ
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
 	m_deathMoveRot		= VEC3_ZERO;	// 死亡時の向き変更量
 	m_state				= STATE_SPAWN;	// 状態
+	m_nCounterEffect	= 0;			// エフェクト管理カウンター
 	m_nCounterBubble	= 0;			// バブル管理カウンター
 	m_nCounterState		= 0;			// 状態管理カウンター
 	m_nCounterAtk		= 0;			// 攻撃管理カウンター
@@ -162,6 +173,7 @@ HRESULT CEnemy::Init(void)
 	m_moveKnock	= VEC3_ZERO;	// ノックバック移動量
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
 	m_state		= STATE_SPAWN;	// 状態
+	m_nCounterEffect	= 0;	// エフェクト管理カウンター
 	m_nCounterBubble	= 0;	// バブル管理カウンター
 	m_nCounterState		= 0;	// 状態管理カウンター
 	m_nCounterAtk		= 0;	// 攻撃管理カウンター
@@ -321,9 +333,6 @@ void CEnemy::Hit(const int nDmg)
 		if (m_pBubble->GetLevel() < m_status.nLife)
 		{ // 生きている場合
 
-			// パーティクル3Dオブジェクトを生成
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
-
 			// カウンターを初期化
 			m_nCounterState = 0;
 			m_nCounterBubble = 0;
@@ -339,10 +348,6 @@ void CEnemy::Hit(const int nDmg)
 
 			// 方向表示を削除
 			m_pWay->Delete();
-
-			// パーティクル3Dオブジェクトを生成
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
 			// 状態を設定
 			m_state = STATE_DEATH;	// 死亡状態
@@ -371,9 +376,6 @@ void CEnemy::HitKnockBack(const int nDmg, const D3DXVECTOR3& vec)
 		if (m_pBubble->GetLevel() < m_status.nLife)
 		{ // 生きている場合
 
-			// パーティクル3Dオブジェクトを生成
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
-
 			// ノックバック移動量を設定
 			vecKnock.y = 0.0f;									// 縦ベクトルを初期化
 			D3DXVec3Normalize(&vecKnock, &vecKnock);			// ベクトルを正規化
@@ -395,10 +397,6 @@ void CEnemy::HitKnockBack(const int nDmg, const D3DXVECTOR3& vec)
 
 			// 方向表示を削除
 			m_pWay->Delete();
-
-			// パーティクル3Dオブジェクトを生成
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
-			CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
 			// 状態を設定
 			m_state = STATE_DEATH;	// 死亡状態
@@ -850,6 +848,46 @@ bool CEnemy::Death(void)
 
 	// 位置を反映
 	SetPosition(posEnemy);
+
+	if (m_nCounterEffect < MAGIC_EFF_CNT)
+	{ // カウンターが一定値より小さい場合
+
+		// カウンターを加算
+		m_nCounterEffect++;
+	}
+	else
+	{ // カウンターが一定値以上の場合
+
+		// 変数を宣言
+		D3DXVECTOR3 vecRandom;	// ランダムベクトル
+
+		// ポインタを宣言
+		CEffect3D *pEffect3D;	// エフェクト情報
+
+		// ランダムベクトルを設定
+		vecRandom.x = sinf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vecRandom.y = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vecRandom.z = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+
+		// エフェクト3Dを生成
+		pEffect3D = CEffect3D::Create
+		( // 引数
+			CEffect3D::TYPE_BUBBLE,							// テクスチャ
+			posEnemy + (vecRandom * MAGIC_EFF_MUL_POS),		// 位置
+			vecRandom * MAGIC_EFF_MUL_MOVE,					// 移動量
+			VEC3_ZERO,										// 向き
+			D3DXCOLOR(1.0f, 1.0f, 1.0f, MAGIC_EFF_ALPHA),	// 色
+			MAGIC_EFF_LIFE,									// 寿命
+			m_pBubble->GetRadius() * MAGIC_EFF_MUL_RADIUS,	// 半径
+			MAGIC_EFF_SUB_RADIUS							// 半径の減算量
+		);
+
+		// 優先順位を設定
+		pEffect3D->SetPriority(MAGIC_EFF_PRIORITY);
+
+		// カウンターを初期化
+		m_nCounterEffect = 0;
+	}
 
 	if (posEnemy.y > ENE_DEATH_POSY)
 	{ // 座標が上に行き切った場合

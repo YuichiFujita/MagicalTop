@@ -24,6 +24,8 @@
 const char *CEffect3D::mc_apTextureFile[] =	// テクスチャ定数
 {
 	"data\\TEXTURE\\effect000.jpg",	// 通常テクスチャ
+	"data\\TEXTURE\\effect001.png",	// バブルテクスチャ
+	"data\\TEXTURE\\effect002.tga",	// 煙テクスチャ
 };
 
 //************************************************************
@@ -35,10 +37,11 @@ const char *CEffect3D::mc_apTextureFile[] =	// テクスチャ定数
 CEffect3D::CEffect3D() : CObjectBillboard(CObject::LABEL_EFFECT3D), m_type(TYPE_NORMAL)
 {
 	// メンバ変数をクリア
-	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 移動量
-	m_nLife		= 0;	// 寿命
-	m_fSubSize	= 0.0f;	// 大きさの減算量
-	m_fSubAlpha	= 0.0f;	// 透明度の減算量
+	m_move = VEC3_ZERO;		// 移動量
+	m_nLife		= 0;		// 寿命
+	m_fSubSize	= 0.0f;		// 大きさの減算量
+	m_fSubAlpha	= 0.0f;		// 透明度の減算量
+	m_bAdd		= false;	// 加算合成状況
 }
 
 //============================================================
@@ -47,10 +50,11 @@ CEffect3D::CEffect3D() : CObjectBillboard(CObject::LABEL_EFFECT3D), m_type(TYPE_
 CEffect3D::CEffect3D(const TYPE type, const LABEL label) : CObjectBillboard(CObject::LABEL_EFFECT3D, (label == LABEL_EFFECT3D) ? EFF_PRIO : PART_PRIO), m_type(type)
 {
 	// メンバ変数をクリア
-	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 移動量
-	m_nLife		= 0;	// 寿命
-	m_fSubSize	= 0.0f;	// 大きさの減算量
-	m_fSubAlpha	= 0.0f;	// 透明度の減算量
+	m_move = VEC3_ZERO;		// 移動量
+	m_nLife		= 0;		// 寿命
+	m_fSubSize	= 0.0f;		// 大きさの減算量
+	m_fSubAlpha	= 0.0f;		// 透明度の減算量
+	m_bAdd		= false;	// 加算合成状況
 }
 
 //============================================================
@@ -67,10 +71,11 @@ CEffect3D::~CEffect3D()
 HRESULT CEffect3D::Init(void)
 {
 	// メンバ変数を初期化
-	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 移動量
+	m_move = VEC3_ZERO;	// 移動量
 	m_nLife		= 0;	// 寿命
 	m_fSubSize	= 0.0f;	// 大きさの減算量
 	m_fSubAlpha	= 0.0f;	// 透明度の減算量
+	m_bAdd		= true;	// 加算合成状況
 
 	// オブジェクトビルボードの初期化
 	if (FAILED(CObjectBillboard::Init()))
@@ -166,10 +171,14 @@ void CEffect3D::Draw(void)
 	// ポインタを宣言
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();	// デバイスのポインタ
 
-	// αブレンディングを加算合成に設定
-	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+	if (m_bAdd)
+	{ // 加算合成がONの場合
+
+		// αブレンディングを加算合成に設定
+		pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+		pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+	}
 
 	// オブジェクトビルボードの描画
 	CObjectBillboard::Draw();
@@ -193,6 +202,7 @@ CEffect3D *CEffect3D::Create
 	const int nLife,			// 寿命
 	const float fRadius,		// 半径
 	const float fSubSize,		// 半径の減算量
+	const bool bAdd,			// 加算合成状況
 	const LABEL label			// オブジェクトラベル
 )
 {
@@ -249,6 +259,7 @@ CEffect3D *CEffect3D::Create
 		pEffect3D->m_nLife		= nLife;		// 寿命
 		pEffect3D->m_fSubSize	= fSubSize;		// 大きさの減算量
 		pEffect3D->m_fSubAlpha	= 1.0f / nLife;	// 透明度の減算量
+		pEffect3D->m_bAdd		= bAdd;			// 加算合成状況
 
 		// 確保したアドレスを返す
 		return pEffect3D;

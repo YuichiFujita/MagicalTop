@@ -195,6 +195,7 @@ private:
 	D3DXVECTOR3	m_moveRot;			// 向き変更量
 	D3DXVECTOR3 m_deathMoveRot;		// 死亡時の向き変更量
 	STATE m_state;					// 状態
+	int m_nCounterEffect;			// エフェクト管理カウンター
 	int m_nCounterBubble;			// バブル管理カウンター
 	int m_nCounterState;			// 状態管理カウンター
 	int m_nCounterAtk;				// 攻撃管理カウンター

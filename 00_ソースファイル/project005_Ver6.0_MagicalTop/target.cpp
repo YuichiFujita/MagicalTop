@@ -24,6 +24,8 @@
 #include "flower.h"
 #include "particle3D.h"
 
+#include "input.h"
+
 //************************************************************
 //	マクロ定義
 //************************************************************
@@ -315,6 +317,21 @@ void CTarget::Update(void)
 
 	// オブジェクトモデルの更新
 	CObjectModel::Update();
+
+
+
+
+
+
+
+
+
+	if (CManager::GetKeyboard()->GetTrigger(DIK_0))
+	{ // TODO：デバッグ処理
+
+		// パーティクル3Dオブジェクトを生成
+		CParticle3D::Create(CParticle3D::TYPE_EXPLOSION, pos);
+	}
 }
 
 //============================================================
@@ -346,9 +363,6 @@ void CTarget::Hit(const int nDmg)
 			if (m_pLife->GetNum() > 0)
 			{ // 生きている場合
 
-				// パーティクル3Dオブジェクトを生成
-				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos);
-
 				// カウンターを初期化
 				m_nCounterState = 0;
 
@@ -357,10 +371,6 @@ void CTarget::Hit(const int nDmg)
 			}
 			else
 			{ // 死んでいる場合
-
-				// パーティクル3Dオブジェクトを生成
-				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.4f, 0.0f, 1.0f));
-				CParticle3D::Create(CParticle3D::TYPE_DAMAGE, pos, D3DXCOLOR(1.0f, 0.1f, 0.0f, 1.0f));
 
 				// 描画を停止
 				m_pMeshCube->SetEnableDraw(false);
@@ -374,6 +384,9 @@ void CTarget::Hit(const int nDmg)
 				// サウンドの再生
 				CManager::GetSound()->Play(CSound::LABEL_SE_BREAK);	// 破壊音
 			}
+
+			// パーティクル3Dオブジェクトを生成
+			CParticle3D::Create(CParticle3D::TYPE_EXPLOSION, pos);
 		}
 	}
 }

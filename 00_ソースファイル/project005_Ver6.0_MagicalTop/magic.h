@@ -131,6 +131,7 @@ private:
 	D3DXVECTOR3	m_rot;		// 向き
 	D3DXVECTOR3	m_moveRot;	// 向き変更量
 	STATE m_state;			// 状態
+	int m_nCounterEffect;	// エフェクト管理カウンター
 };
 
 #endif	// _MAGIC_H_

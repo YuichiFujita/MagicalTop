@@ -19,6 +19,24 @@
 #define DMG_SIZE		(80.0f)		// ダメージの大きさ
 #define DMG_SUB_SIZE	(2.4f)		// ダメージの半径の減算量
 
+#define EXP_FIRE_COL		(D3DXCOLOR(1.0f, 0.38f, 0.23f, 1.0f))	// 爆発の炎の色
+#define EXP_FIRE_POSGAP		(5.0f)	// 爆発の炎の位置ずれ量
+#define EXP_FIRE_MOVE		(3.24f)	// 爆発の炎の移動量
+#define EXP_FIRE_SPAWN		(52)	// 爆発の炎の生成数
+#define EXP_FIRE_EFF_LIFE	(26)	// 爆発の炎の寿命
+#define EXP_FIRE_RAND_LIFE	(8)		// 爆発の炎のランダム寿命加算量の最大値
+#define EXP_FIRE_SIZE		(3.57f)	// 爆発の炎の大きさ
+#define EXP_FIRE_SUB_SIZE	(-8.0f)	// 爆発の炎の半径の減算量
+
+#define EXP_SMOKE_COL		(D3DXCOLOR(0.25f, 0.25f, 0.25f, 1.0f))	// 爆発の煙の色
+#define EXP_SMOKE_POSGAP	(3.0f)	// 爆発の煙の位置ずれ量
+#define EXP_SMOKE_MOVE		(1.2f)	// 爆発の煙の移動量
+#define EXP_SMOKE_SPAWN		(66)	// 爆発の煙の生成数
+#define EXP_SMOKE_EFF_LIFE	(56)	// 爆発の煙の寿命
+#define EXP_SMOKE_RAND_LIFE	(12)	// 爆発の煙のランダム寿命加算量の最大値
+#define EXP_SMOKE_SIZE		(70.0f)	// 爆発の煙の大きさ
+#define EXP_SMOKE_SUB_SIZE	(-1.0f)	// 爆発の煙の半径の減算量
+
 #define MUZZLEFLASH_COL			(D3DXCOLOR(1.0f, 0.38f, 0.23f, 1.0f))	// マズルフラッシュの色
 #define MUZZLEFLASH_MOVE		(0.64f)		// マズルフラッシュの移動量
 #define MUZZLEFLASH_SPAWN		(48)		// マズルフラッシュの生成数
@@ -40,8 +58,10 @@ const int CParticle3D::mc_aLife[CParticle3D::TYPE_MAX] =	// 寿命定数
 {
 	0,	// なし
 	24,	// ダメージ
+	1,	// 爆発
 	1,	// マズルフラッシュ
 	1,	// タンクファイア
+	24,	// バブル爆発
 };
 
 //************************************************************
@@ -136,6 +156,13 @@ void CParticle3D::Update(void)
 
 		break;
 
+	case TYPE_EXPLOSION:
+
+		// 爆発
+		Explosion(m_pos);
+
+		break;
+
 	case TYPE_MUZZLE_FLASH:
 
 		// マズルフラッシュ
@@ -147,6 +174,13 @@ void CParticle3D::Update(void)
 
 		// タンクファイア
 		TankFire(m_pos);
+
+		break;
+
+	case TYPE_BUBBLE_EXPLOSION:
+
+		// バブル爆発
+		BubbleExplosion(m_pos);
 
 		break;
 
@@ -206,9 +240,103 @@ void CParticle3D::Damage(const D3DXVECTOR3& rPos, const D3DXCOLOR& rCol)
 				DMG_EFF_LIFE,		// 寿命
 				DMG_SIZE,			// 半径
 				DMG_SUB_SIZE,		// 半径の減算量
+				true,				// 加算合成状況
 				LABEL_PARTICLE3D	// オブジェクトラベル
 			);
 		}
+	}
+}
+
+//============================================================
+//	爆発
+//============================================================
+void CParticle3D::Explosion(const D3DXVECTOR3& rPos)
+{
+	// 変数を宣言
+	D3DXVECTOR3 vec  = VEC3_ZERO;	// ベクトルの設定用
+	D3DXVECTOR3 pos  = VEC3_ZERO;	// 位置の代入用
+	D3DXVECTOR3 move = VEC3_ZERO;	// 移動量の代入用
+	D3DXVECTOR3 rot  = VEC3_ZERO;	// 向きの代入用
+	int nLife = 0;	// 寿命の代入用
+
+	for (int nCntPart = 0; nCntPart < EXP_SMOKE_SPAWN; nCntPart++)
+	{ // 生成されるエフェクト数分繰り返す
+
+		// ベクトルをランダムに設定
+		vec.x = sinf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vec.y = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vec.z = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+
+		// ベクトルを正規化
+		D3DXVec3Normalize(&vec, &vec);
+
+		// 位置を設定
+		pos = rPos + vec * EXP_SMOKE_POSGAP;
+
+		// 移動量を設定
+		move = vec * EXP_SMOKE_MOVE;
+
+		// 向きを設定
+		rot.x = 0.0f;
+		rot.y = 0.0f;
+		rot.z = (float)(rand() % 629 - 314) / 100.0f;
+
+		// 寿命を設定
+		nLife = (rand() % EXP_SMOKE_RAND_LIFE) + EXP_SMOKE_EFF_LIFE;
+
+		// エフェクト3Dオブジェクトの生成
+		CEffect3D::Create
+		( // 引数
+			CEffect3D::TYPE_SMOKE,	// テクスチャ
+			pos,					// 位置
+			move,					// 移動量
+			rot,					// 向き
+			EXP_SMOKE_COL,			// 色
+			nLife,					// 寿命
+			EXP_SMOKE_SIZE,			// 半径
+			EXP_SMOKE_SUB_SIZE,		// 半径の減算量
+			false,					// 加算合成状況
+			LABEL_PARTICLE3D		// オブジェクトラベル
+		);
+	}
+
+	for (int nCntPart = 0; nCntPart < EXP_FIRE_SPAWN; nCntPart++)
+	{ // 生成されるエフェクト数分繰り返す
+
+		// ベクトルをランダムに設定
+		vec.x = sinf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vec.y = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vec.z = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+
+		// ベクトルを正規化
+		D3DXVec3Normalize(&vec, &vec);
+
+		// 位置を設定
+		pos = rPos + vec * EXP_FIRE_POSGAP;
+
+		// 移動量を設定
+		move = vec * EXP_FIRE_MOVE;
+
+		// 向きを設定
+		rot = VEC3_ZERO;
+
+		// 寿命を設定
+		nLife = (rand() % EXP_FIRE_RAND_LIFE) + EXP_FIRE_EFF_LIFE;
+
+		// エフェクト3Dオブジェクトの生成
+		CEffect3D::Create
+		( // 引数
+			CEffect3D::TYPE_NORMAL,	// テクスチャ
+			pos,					// 位置
+			move,					// 移動量
+			rot,					// 向き
+			EXP_FIRE_COL,			// 色
+			nLife,					// 寿命
+			EXP_FIRE_SIZE,			// 半径
+			EXP_FIRE_SUB_SIZE,		// 半径の減算量
+			true,					// 加算合成状況
+			LABEL_PARTICLE3D		// オブジェクトラベル
+		);
 	}
 }
 
@@ -255,6 +383,7 @@ void CParticle3D::MuzzleFlash(const D3DXVECTOR3& rPos)
 			nLife,					// 寿命
 			MUZZLEFLASH_SIZE,		// 半径
 			MUZZLEFLASH_SUB_SIZE,	// 半径の減算量
+			true,					// 加算合成状況
 			LABEL_PARTICLE3D		// オブジェクトラベル
 		);
 	}
@@ -303,8 +432,58 @@ void CParticle3D::TankFire(const D3DXVECTOR3& rPos)
 			nLife,					// 寿命
 			TANKFIRE_SIZE,			// 半径
 			TANKFIRE_SUB_SIZE,		// 半径の減算量
+			true,					// 加算合成状況
 			LABEL_PARTICLE3D		// オブジェクトラベル
 		);
+	}
+}
+
+//============================================================
+//	バブル爆発
+//============================================================
+void CParticle3D::BubbleExplosion(const D3DXVECTOR3& rPos)
+{
+	// 変数を宣言
+	D3DXVECTOR3 move = VEC3_ZERO;	// 移動量の代入用
+	D3DXVECTOR3 rot  = VEC3_ZERO;	// 向きの代入用
+
+	if ((m_nLife + 1) % 12 == 0)
+	{ // 寿命が12の倍数の場合
+
+		for (int nCntPart = 0; nCntPart < DMG_SPAWN; nCntPart++)
+		{ // 生成されるエフェクト数分繰り返す
+
+			// ベクトルをランダムに設定
+			move.x = sinf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+			move.y = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+			move.z = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+
+			// ベクトルを正規化
+			D3DXVec3Normalize(&move, &move);
+
+			// 移動量を設定
+			move.x *= DMG_MOVE;
+			move.y *= DMG_MOVE;
+			move.z *= DMG_MOVE;
+
+			// 向きを設定
+			rot = VEC3_ZERO;
+
+			// エフェクト3Dオブジェクトの生成
+			CEffect3D::Create
+			( // 引数
+				CEffect3D::TYPE_BUBBLE,	// テクスチャ
+				rPos,				// 位置
+				move,				// 移動量
+				rot,				// 向き
+				XCOL_WHITE,			// 色
+				DMG_EFF_LIFE,		// 寿命
+				DMG_SIZE,			// 半径
+				DMG_SUB_SIZE,		// 半径の減算量
+				true,				// 加算合成状況
+				LABEL_PARTICLE3D	// オブジェクトラベル
+			);
+		}
 	}
 }
 

@@ -16,6 +16,7 @@
 #include "texture.h"
 #include "collision.h"
 #include "effect3D.h"
+#include "particle3D.h"
 #include "target.h"
 #include "enemy.h"
 #include "field.h"
@@ -42,6 +43,15 @@
 #define MOVE_INHALE_LEFT	(14.5f)	// 吸い込まれ時の魔法の左側への移動量
 #define MOVE_DELETE			(3.0f)	// 消失時の魔法の移動量
 
+#define MAGIC_EFF_CNT			(2)		// エフェクトの生成フレーム
+#define MAGIC_EFF_MUL_POS		(2.0f)	// エフェクトの生成位置の乗算量
+#define MAGIC_EFF_MUL_MOVE		(1.0f)	// エフェクトの移動量の乗算量
+#define MAGIC_EFF_ALPHA			(0.6f)	// エフェクトの透明度
+#define MAGIC_EFF_LIFE			(45)	// エフェクトの寿命
+#define MAGIC_EFF_MUL_RADIUS	(1.5f)	// エフェクトの半径の乗算量
+#define MAGIC_EFF_SUB_RADIUS	(0.2f)	// エフェクトの半径の減算量
+#define MAGIC_EFF_PRIORITY		(3)		// エフェクトの優先順位
+
 //************************************************************
 //	静的メンバ変数宣言
 //************************************************************
@@ -65,6 +75,7 @@ CMagic::CMagic() : CObject(CObject::LABEL_MAGIC)
 	m_rot		= VEC3_ZERO;	// 向き
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
 	m_state		= STATE_NORMAL;	// 状態
+	m_nCounterEffect = 0;		// エフェクト管理カウンター
 }
 
 //============================================================
@@ -89,6 +100,7 @@ HRESULT CMagic::Init(void)
 	m_rot		= VEC3_ZERO;	// 向き
 	m_moveRot	= VEC3_ZERO;	// 向き変更量
 	m_state		= STATE_NORMAL;	// 状態
+	m_nCounterEffect = 0;		// エフェクト管理カウンター
 
 	// バブル情報の生成
 	m_pBubble = CBubble::Create(this, m_statusInfo.nLife + BUBBLE_INIT_LEVEL, VEC3_ALL(m_statusInfo.fBubbleRadius), VEC3_ZERO, 0.0f);
@@ -219,6 +231,46 @@ void CMagic::Update(void)
 		m_pos.y += m_pBubble->GetRadius() + BUBBLE_POSY_UP;
 	}
 
+	if (m_nCounterEffect < MAGIC_EFF_CNT)
+	{ // カウンターが一定値より小さい場合
+
+		// カウンターを加算
+		m_nCounterEffect++;
+	}
+	else
+	{ // カウンターが一定値以上の場合
+
+		// 変数を宣言
+		D3DXVECTOR3 vecRandom;	// ランダムベクトル
+
+		// ポインタを宣言
+		CEffect3D *pEffect3D;	// エフェクト情報
+
+		// ランダムベクトルを設定
+		vecRandom.x = sinf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vecRandom.y = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vecRandom.z = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+
+		// エフェクト3Dを生成
+		pEffect3D = CEffect3D::Create
+		( // 引数
+			CEffect3D::TYPE_BUBBLE,							// テクスチャ
+			m_pos + (vecRandom * MAGIC_EFF_MUL_POS),		// 位置
+			vecRandom * MAGIC_EFF_MUL_MOVE,					// 移動量
+			VEC3_ZERO,										// 向き
+			D3DXCOLOR(1.0f, 1.0f, 1.0f, MAGIC_EFF_ALPHA),	// 色
+			MAGIC_EFF_LIFE,									// 寿命
+			m_pBubble->GetRadius() * MAGIC_EFF_MUL_RADIUS,	// 半径
+			MAGIC_EFF_SUB_RADIUS							// 半径の減算量
+		);
+
+		// 優先順位を設定
+		pEffect3D->SetPriority(MAGIC_EFF_PRIORITY);
+
+		// カウンターを初期化
+		m_nCounterEffect = 0;
+	}
+
 	// バブルの更新
 	m_pBubble->Update();
 
@@ -230,6 +282,9 @@ void CMagic::Update(void)
 
 	if (CollisionEnemy())
 	{ // 敵に当たっていた場合
+
+		// パーティクル3Dオブジェクトを生成
+		CParticle3D::Create(CParticle3D::TYPE_BUBBLE_EXPLOSION, m_pos);
 
 		// オブジェクトの終了
 		Uninit();
