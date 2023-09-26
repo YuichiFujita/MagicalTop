@@ -73,6 +73,20 @@
 #define BIG_EXP_SMOKE_SIZE		(70.0f)	// 爆発の煙の大きさ
 #define BIG_EXP_SMOKE_SUB_SIZE	(-2.5f)	// 爆発の煙の半径の減算量
 
+// プレイヤーダメージ
+#define PLAY_DMG_POSGAP		(12.0f)		// 爆発の煙の位置ずれ量
+#define PLAY_DMG_MOVE_S		(6.6f)		// 爆発の煙の移動量 (小)
+#define PLAY_DMG_MOVE_M		(5.4f)		// 爆発の煙の移動量 (中)
+#define PLAY_DMG_MOVE_L		(4.2f)		// 爆発の煙の移動量 (大)
+#define PLAY_DMG_EFF_SPAWN	(4)			// 爆発の煙の生成数
+#define PLAY_DMG_RAND_SPAWN	(6)			// 爆発の煙のランダム生成数加算量の最大値
+#define PLAY_DMG_EFF_LIFE	(28)		// 爆発の煙の寿命
+#define PLAY_DMG_RAND_LIFE	(12)		// 爆発の煙のランダム寿命加算量の最大値
+#define PLAY_DMG_SIZE_S		(32.0f)		// 爆発の煙の大きさ (小)
+#define PLAY_DMG_SIZE_M		(42.0f)		// 爆発の煙の大きさ (中)
+#define PLAY_DMG_SIZE_L		(52.0f)		// 爆発の煙の大きさ (大)
+#define PLAY_DMG_SUB_SIZE	(0.25f)		// 爆発の煙の半径の減算量
+
 // マズルフラッシュ
 #define MUZZLEFLASH_COL			(D3DXCOLOR(1.0f, 0.38f, 0.23f, 1.0f))	// マズルフラッシュの色
 #define MUZZLEFLASH_MOVE		(0.64f)		// マズルフラッシュの移動量
@@ -100,6 +114,7 @@ const int CParticle3D::mc_aLife[CParticle3D::TYPE_MAX] =	// 寿命定数
 	1,	// 植物踏みつぶし
 	1,	// 小爆発
 	1,	// 大爆発
+	1,	// プレイヤーダメージ
 	1,	// マズルフラッシュ
 	1,	// タンクファイア
 	24,	// バブル爆発
@@ -222,6 +237,13 @@ void CParticle3D::Update(void)
 
 		// 大爆発
 		BigExplosion(m_pos);
+
+		break;
+
+	case TYPE_PLAYER_DAMAGE:
+
+		// プレイヤーダメージ
+		PlayerDamage(m_pos);
 
 		break;
 
@@ -586,6 +608,171 @@ void CParticle3D::BigExplosion(const D3DXVECTOR3& rPos)
 			BIG_EXP_FIRE_SUB_SIZE,	// 半径の減算量
 			true,					// 加算合成状況
 			LABEL_PARTICLE3D		// オブジェクトラベル
+		);
+	}
+}
+
+//============================================================
+//	プレイヤーダメージ
+//============================================================
+void CParticle3D::PlayerDamage(const D3DXVECTOR3& rPos)
+{
+	// 変数を宣言
+	D3DXVECTOR3 vec  = VEC3_ZERO;	// ベクトルの設定用
+	D3DXVECTOR3 pos  = VEC3_ZERO;	// 位置の代入用
+	D3DXVECTOR3 move = VEC3_ZERO;	// 移動量の代入用
+	D3DXVECTOR3 rot  = VEC3_ZERO;	// 向きの代入用
+	D3DXCOLOR   col  = XCOL_WHITE;	// 色の代入用
+	int nSpawn = 0;	// 生成数の代入用
+	int nLife = 0;	// 寿命の代入用
+
+	// 生成数を設定
+	nSpawn = (rand() % PLAY_DMG_EFF_SPAWN) + PLAY_DMG_RAND_SPAWN;
+
+	for (int nCntPart = 0; nCntPart < nSpawn; nCntPart++)
+	{ // 生成されるエフェクト数分繰り返す
+
+		// ベクトルをランダムに設定
+		vec.x = sinf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vec.y = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vec.z = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+
+		// ベクトルを正規化
+		D3DXVec3Normalize(&vec, &vec);
+
+		// 位置を設定
+		pos = rPos + vec * PLAY_DMG_POSGAP;
+
+		// 移動量を設定
+		move = vec * PLAY_DMG_MOVE_S;
+
+		// 向きを設定
+		rot.x = 0.0f;
+		rot.y = 0.0f;
+		rot.z = (float)(rand() % 629 - 314) / 100.0f;
+
+		// 色を設定
+		col.r = (float)(rand() % 80 + 20) / 100.0f;
+		col.g = (float)(rand() % 20 + 80) / 100.0f;
+		col.b = (float)(rand() % 80 + 20) / 100.0f;
+		col.a = 1.0f;
+
+		// 寿命を設定
+		nLife = (rand() % PLAY_DMG_RAND_LIFE) + PLAY_DMG_EFF_LIFE;
+
+		// エフェクト3Dオブジェクトの生成
+		CEffect3D::Create
+		( // 引数
+			CEffect3D::TYPE_PIECE_S,	// テクスチャ
+			pos,						// 位置
+			move,						// 移動量
+			rot,						// 向き
+			col,						// 色
+			nLife,						// 寿命
+			PLAY_DMG_SIZE_S,			// 半径
+			PLAY_DMG_SUB_SIZE,			// 半径の減算量
+			true,						// 加算合成状況
+			LABEL_PARTICLE3D			// オブジェクトラベル
+		);
+	}
+
+	// 生成数を設定
+	nSpawn = (rand() % PLAY_DMG_EFF_SPAWN) + PLAY_DMG_RAND_SPAWN;
+
+	for (int nCntPart = 0; nCntPart < nSpawn; nCntPart++)
+	{ // 生成されるエフェクト数分繰り返す
+
+		// ベクトルをランダムに設定
+		vec.x = sinf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vec.y = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vec.z = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+
+		// ベクトルを正規化
+		D3DXVec3Normalize(&vec, &vec);
+
+		// 位置を設定
+		pos = rPos + vec * PLAY_DMG_POSGAP;
+
+		// 移動量を設定
+		move = vec * PLAY_DMG_MOVE_M;
+
+		// 向きを設定
+		rot.x = 0.0f;
+		rot.y = 0.0f;
+		rot.z = (float)(rand() % 629 - 314) / 100.0f;
+
+		// 色を設定
+		col.r = (float)(rand() % 20 + 80) / 100.0f;
+		col.g = (float)(rand() % 80 + 20) / 100.0f;
+		col.b = (float)(rand() % 80 + 20) / 100.0f;
+		col.a = 1.0f;
+
+		// 寿命を設定
+		nLife = (rand() % PLAY_DMG_RAND_LIFE) + PLAY_DMG_EFF_LIFE;
+
+		// エフェクト3Dオブジェクトの生成
+		CEffect3D::Create
+		( // 引数
+			CEffect3D::TYPE_PIECE_M,	// テクスチャ
+			pos,						// 位置
+			move,						// 移動量
+			rot,						// 向き
+			col,						// 色
+			nLife,						// 寿命
+			PLAY_DMG_SIZE_M,			// 半径
+			PLAY_DMG_SUB_SIZE,			// 半径の減算量
+			true,						// 加算合成状況
+			LABEL_PARTICLE3D			// オブジェクトラベル
+		);
+	}
+
+	// 生成数を設定
+	nSpawn = (rand() % PLAY_DMG_EFF_SPAWN) + PLAY_DMG_RAND_SPAWN;
+
+	for (int nCntPart = 0; nCntPart < nSpawn; nCntPart++)
+	{ // 生成されるエフェクト数分繰り返す
+
+		// ベクトルをランダムに設定
+		vec.x = sinf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vec.y = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+		vec.z = cosf((float)(rand() % 629 - 314) / 100.0f) * 1.0f;
+
+		// ベクトルを正規化
+		D3DXVec3Normalize(&vec, &vec);
+
+		// 位置を設定
+		pos = rPos + vec * PLAY_DMG_POSGAP;
+
+		// 移動量を設定
+		move = vec * PLAY_DMG_MOVE_L;
+
+		// 向きを設定
+		rot.x = 0.0f;
+		rot.y = 0.0f;
+		rot.z = (float)(rand() % 629 - 314) / 100.0f;
+
+		// 色を設定
+		col.r = (float)(rand() % 80 + 20) / 100.0f;
+		col.g = (float)(rand() % 80 + 20) / 100.0f;
+		col.b = (float)(rand() % 20 + 80) / 100.0f;
+		col.a = 1.0f;
+
+		// 寿命を設定
+		nLife = (rand() % PLAY_DMG_RAND_LIFE) + PLAY_DMG_EFF_LIFE;
+
+		// エフェクト3Dオブジェクトの生成
+		CEffect3D::Create
+		( // 引数
+			CEffect3D::TYPE_PIECE_L,	// テクスチャ
+			pos,						// 位置
+			move,						// 移動量
+			rot,						// 向き
+			col,						// 色
+			nLife,						// 寿命
+			PLAY_DMG_SIZE_L,			// 半径
+			PLAY_DMG_SUB_SIZE,			// 半径の減算量
+			true,						// 加算合成状況
+			LABEL_PARTICLE3D			// オブジェクトラベル
 		);
 	}
 }

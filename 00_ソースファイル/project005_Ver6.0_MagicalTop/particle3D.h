@@ -38,6 +38,7 @@ public:
 		TYPE_STOMP_PLANT,		// 植物踏みつぶし
 		TYPE_SMALL_EXPLOSION,	// 小爆発
 		TYPE_BIG_EXPLOSION,		// 大爆発
+		TYPE_PLAYER_DAMAGE,		// プレイヤーダメージ
 		TYPE_MUZZLE_FLASH,		// マズルフラッシュ
 		TYPE_TANK_FIRE,			// タンクファイア
 		TYPE_BUBBLE_EXPLOSION,	// バブル爆発
@@ -74,6 +75,7 @@ private:
 
 	void SmallExplosion(const D3DXVECTOR3& rPos);	// 小爆発
 	void BigExplosion(const D3DXVECTOR3& rPos);		// 大爆発
+	void PlayerDamage(const D3DXVECTOR3& rPos);		// プレイヤーダメージ
 	void MuzzleFlash(const D3DXVECTOR3& rPos);		// マズルフラッシュ
 	void TankFire(const D3DXVECTOR3& rPos);			// タンクファイア
 	void BubbleExplosion(const D3DXVECTOR3& rPos);	// バブル爆発

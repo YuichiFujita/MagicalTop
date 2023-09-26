@@ -28,6 +28,9 @@ const char *CEffect3D::mc_apTextureFile[] =	// テクスチャ定数
 	"data\\TEXTURE\\effect002.tga",	// 煙テクスチャ
 	"data\\TEXTURE\\effect003.jpg",	// 回復テクスチャ
 	"data\\TEXTURE\\effect004.png",	// 葉っぱテクスチャ
+	"data\\TEXTURE\\effect005.jpg",	// かけらテクスチャ (小)
+	"data\\TEXTURE\\effect006.jpg",	// かけらテクスチャ (中)
+	"data\\TEXTURE\\effect007.jpg",	// かけらテクスチャ (大)
 };
 
 //************************************************************

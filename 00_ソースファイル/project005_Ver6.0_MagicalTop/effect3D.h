@@ -31,6 +31,9 @@ public:
 		TYPE_SMOKE,			// 煙テクスチャ
 		TYPE_HEAL,			// 回復テクスチャ
 		TYPE_LEAF,			// 葉っぱテクスチャ
+		TYPE_PIECE_S,		// かけらテクスチャ (小)
+		TYPE_PIECE_M,		// かけらテクスチャ (中)
+		TYPE_PIECE_L,		// かけらテクスチャ (大)
 		TYPE_MAX			// この列挙型の総数
 	}TYPE;
 
