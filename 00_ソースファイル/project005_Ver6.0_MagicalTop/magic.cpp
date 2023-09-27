@@ -578,8 +578,12 @@ bool CMagic::CollisionEnemy(void)
 						else
 						{ // バブルサイズが半分以上成長している場合
 
-							// スコアを加算
-							CSceneGame::GetScore()->Add(BONUS_LONG_SCORE);
+							if (CManager::GetScene()->GetMode() == CScene::MODE_GAME)
+							{ // モードがゲームの場合
+
+								// スコアを加算
+								CSceneGame::GetScore()->Add(BONUS_LONG_SCORE);
+							}
 
 							// 敵のヒット処理
 							pObjCheck->HitKnockBack(MAGIC_LONG_DMG, m_movePos);
@@ -588,8 +592,12 @@ bool CMagic::CollisionEnemy(void)
 					else
 					{ // 状態が通常ではない場合
 
-						// スコアを加算
-						CSceneGame::GetScore()->Add(BONUS_TRICK_SCORE);
+						if (CManager::GetScene()->GetMode() == CScene::MODE_GAME)
+						{ // モードがゲームの場合
+
+							// スコアを加算
+							CSceneGame::GetScore()->Add(BONUS_TRICK_SCORE);
+						}
 
 						// 敵のヒット処理
 						pObjCheck->HitKnockBack(MAGIC_TRICK_DMG, m_movePos);

@@ -212,7 +212,7 @@ CRenderer *CRenderer::Create(HWND hWnd)
 	{ // 確保に成功している場合
 
 		// レンダラーの初期化
-		if (FAILED(pRenderer->Init(hWnd, TRUE)))
+		if (FAILED(pRenderer->Init(hWnd, FALSE)))
 		{ // 初期化に失敗した場合
 
 			// メモリ開放
