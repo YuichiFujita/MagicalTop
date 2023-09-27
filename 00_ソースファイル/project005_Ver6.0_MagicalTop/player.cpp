@@ -668,6 +668,12 @@ void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 	// 表示する設定にする
 	SetDisp(true);
 
+	// マテリアルを再設定
+	ResetMaterial();
+
+	// 透明度を不透明に再設定
+	SetAlpha(1.0f);
+
 	// カメラ更新をONにする
 	CManager::GetCamera()->SetEnableUpdate(true);
 
