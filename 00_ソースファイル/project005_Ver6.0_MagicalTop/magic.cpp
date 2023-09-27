@@ -22,6 +22,7 @@
 #include "stage.h"
 #include "bubble.h"
 #include "shadow.h"
+#include "score.h"
 
 //************************************************************
 //	マクロ定義
@@ -34,8 +35,14 @@
 #define BUBBLE_POSY_UP	(20.0f)		// バブルの縦位置上昇量
 #define BUBBLE_INIT_LEVEL	(10)	// レベルの初期値
 
-#define MAGIC_PRIO		(3)	// 魔法の優先順位
-#define MAGIC_TRICK_DMG	(3)	// トリックショット時の攻撃力
+#define MAGIC_PRIO	(3)	// 魔法の優先順位
+
+#define MAGIC_NORMAL_DMG	(1)	// 通常ショット時の攻撃力
+#define MAGIC_LONG_DMG		(2)	// ロングショット時の攻撃力
+#define MAGIC_TRICK_DMG		(3)	// トリックショット時の攻撃力
+
+#define BONUS_LONG_SCORE	(4000)	// ロングショット時のスコア加算量
+#define BONUS_TRICK_SCORE	(9000)	// トリックショット時のスコア加算量
 
 #define MOVE_NORMAL			(0.05f)	// 通常時の魔法の移動量
 #define MOVE_INHALE_INSIDE	(8.0f)	// 吸い込まれ時の魔法の内側への移動量
@@ -562,11 +569,27 @@ bool CMagic::CollisionEnemy(void)
 					if (m_state == STATE_NORMAL)
 					{ // 状態が通常の場合
 
-						// 敵のヒット処理
-						pObjCheck->HitKnockBack((m_pBubble->GetLevel() / (m_pBubble->GetMaxLevel() / 2)) + 1, m_movePos);
+						if (m_pBubble->GetLevel() / (m_pBubble->GetMaxLevel() / 2) < 1)
+						{ // バブルサイズが半分以上成長していない場合
+
+							// 敵のヒット処理
+							pObjCheck->HitKnockBack(MAGIC_NORMAL_DMG, m_movePos);
+						}
+						else
+						{ // バブルサイズが半分以上成長している場合
+
+							// スコアを加算
+							CSceneGame::GetScore()->Add(BONUS_LONG_SCORE);
+
+							// 敵のヒット処理
+							pObjCheck->HitKnockBack(MAGIC_LONG_DMG, m_movePos);
+						}
 					}
 					else
 					{ // 状態が通常ではない場合
+
+						// スコアを加算
+						CSceneGame::GetScore()->Add(BONUS_TRICK_SCORE);
 
 						// 敵のヒット処理
 						pObjCheck->HitKnockBack(MAGIC_TRICK_DMG, m_movePos);

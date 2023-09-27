@@ -57,8 +57,17 @@ void CDebugProc::Init(void)
 	//デバッグ表示用フォントの生成
 	D3DXCreateFont(pDevice, 18, 0, 0, 0, FALSE, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, "Terminal", &m_pFont);
 
+#ifdef _DEBUG
+
 	//初期表示設定
 	m_bDisp = true;
+
+#else
+
+	//初期表示設定
+	m_bDisp = false;
+
+#endif
 }
 
 //==========================================================
@@ -81,10 +90,14 @@ void CDebugProc::Update(void)
 {
 	CInputKeyboard *pInputKeyboard = CManager::GetKeyboard();	// キーボードのポインタ
 
+#ifdef _DEBUG
+
 	if(pInputKeyboard->GetTrigger(DIK_F1) == true)
 	{//F1キーが押されたとき
 		m_bDisp = m_bDisp ? false : true;
 	}
+
+#endif
 }
 
 //==========================================================

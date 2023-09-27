@@ -74,18 +74,18 @@
 #define BIG_EXP_SMOKE_SUB_SIZE	(-2.5f)	// 爆発の煙の半径の減算量
 
 // プレイヤーダメージ
-#define PLAY_DMG_POSGAP		(12.0f)		// 爆発の煙の位置ずれ量
-#define PLAY_DMG_MOVE_S		(6.6f)		// 爆発の煙の移動量 (小)
-#define PLAY_DMG_MOVE_M		(5.4f)		// 爆発の煙の移動量 (中)
-#define PLAY_DMG_MOVE_L		(4.2f)		// 爆発の煙の移動量 (大)
-#define PLAY_DMG_EFF_SPAWN	(4)			// 爆発の煙の生成数
-#define PLAY_DMG_RAND_SPAWN	(6)			// 爆発の煙のランダム生成数加算量の最大値
-#define PLAY_DMG_EFF_LIFE	(28)		// 爆発の煙の寿命
-#define PLAY_DMG_RAND_LIFE	(12)		// 爆発の煙のランダム寿命加算量の最大値
-#define PLAY_DMG_SIZE_S		(32.0f)		// 爆発の煙の大きさ (小)
-#define PLAY_DMG_SIZE_M		(42.0f)		// 爆発の煙の大きさ (中)
-#define PLAY_DMG_SIZE_L		(52.0f)		// 爆発の煙の大きさ (大)
-#define PLAY_DMG_SUB_SIZE	(0.25f)		// 爆発の煙の半径の減算量
+#define PLAY_DMG_POSGAP		(12.0f)	// プレイヤーダメージの位置ずれ量
+#define PLAY_DMG_MOVE_S		(6.6f)	// プレイヤーダメージの移動量 (小)
+#define PLAY_DMG_MOVE_M		(5.4f)	// プレイヤーダメージの移動量 (中)
+#define PLAY_DMG_MOVE_L		(4.2f)	// プレイヤーダメージの移動量 (大)
+#define PLAY_DMG_EFF_SPAWN	(4)		// プレイヤーダメージの生成数
+#define PLAY_DMG_RAND_SPAWN	(6)		// プレイヤーダメージのランダム生成数加算量の最大値
+#define PLAY_DMG_EFF_LIFE	(28)	// プレイヤーダメージの寿命
+#define PLAY_DMG_RAND_LIFE	(12)	// プレイヤーダメージのランダム寿命加算量の最大値
+#define PLAY_DMG_SIZE_S		(32.0f)	// プレイヤーダメージの大きさ (小)
+#define PLAY_DMG_SIZE_M		(42.0f)	// プレイヤーダメージの大きさ (中)
+#define PLAY_DMG_SIZE_L		(52.0f)	// プレイヤーダメージの大きさ (大)
+#define PLAY_DMG_SUB_SIZE	(0.25f)	// プレイヤーダメージの半径の減算量
 
 // マズルフラッシュ
 #define MUZZLEFLASH_COL			(D3DXCOLOR(1.0f, 0.38f, 0.23f, 1.0f))	// マズルフラッシュの色

@@ -75,14 +75,17 @@ public:
 	void SetRotate(const ROTATE rotate);		// 回転設定
 	void SetFunc(const D3DCMPFUNC func);		// Zテスト設定
 	void SetZEnable(const bool bEnable);		// Zバッファの使用状況設定
-	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
-	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
-	D3DXVECTOR3 GetScaling(void) const;			// 大きさ取得
-	D3DXCOLOR GetColor(void) const;				// 色取得
-	ORIGIN GetOrigin(void) const;				// 原点取得
-	ROTATE GetRotate(void) const;				// 回転取得
-	D3DCMPFUNC GetFunc(void) const;				// Zテスト取得
-	bool GetZEnable(void) const;				// Zバッファの使用状況取得
+
+	D3DXMATRIX *GetPtrMtxWorld(void);		// マトリックスポインタ取得
+	D3DXMATRIX GetMtxWorld(void) const;		// マトリックス取得
+	D3DXVECTOR3 GetPosition(void) const;	// 位置取得
+	D3DXVECTOR3 GetRotation(void) const;	// 向き取得
+	D3DXVECTOR3 GetScaling(void) const;		// 大きさ取得
+	D3DXCOLOR GetColor(void) const;			// 色取得
+	ORIGIN GetOrigin(void) const;			// 原点取得
+	ROTATE GetRotate(void) const;			// 回転取得
+	D3DCMPFUNC GetFunc(void) const;			// Zテスト取得
+	bool GetZEnable(void) const;			// Zバッファの使用状況取得
 
 protected:
 	// メンバ関数

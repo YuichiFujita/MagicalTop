@@ -38,7 +38,8 @@
 //************************************************************
 #define PLAYER_SETUP_TXT	"data\\TXT\\player.txt"				// セットアップテキスト相対パス
 #define PLAY_SHADOW_SIZE	(D3DXVECTOR3(80.0f, 0.0f, 80.0f))	// 影の大きさ
-#define PLAY_ORBIT_COL		(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f))	// 軌跡の色
+#define PLAY_ORBIT_COL		(D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.7f))	// 軌跡の色
+#define PLAY_ORBIT_PART		(12)	// 軌跡の分割数
 #define PLAY_ORBIT_PRIO		(4)		// 軌跡の優先順位
 
 #define RESPAWN_ROT	(D3DXVECTOR3(0.0f, -HALF_PI, 0.0f))	// 再出現時の向き
@@ -278,7 +279,7 @@ HRESULT CPlayer::Init(void)
 	}
 
 	// 軌跡の生成
-	m_pOrbit = CObjectOrbit::Create(GetMultiModel(MODEL_ROD)->GetPtrMtxWorld(), PLAY_ORBIT_COL, CObjectOrbit::OFFSET_ROD);
+	m_pOrbit = CObjectOrbit::Create(GetMultiModel(MODEL_ROD)->GetPtrMtxWorld(), PLAY_ORBIT_COL, CObjectOrbit::OFFSET_ROD, PLAY_ORBIT_PART);
 	if (UNUSED(m_pOrbit))
 	{ // 非使用中の場合
 
