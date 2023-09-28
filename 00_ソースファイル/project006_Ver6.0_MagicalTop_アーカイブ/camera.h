@@ -34,6 +34,7 @@ public:
 	enum STATE
 	{
 		STATE_NONE = 0,		// なにもしない状態
+		STATE_CONTROL,		// 操作状態
 		STATE_ROTATE,		// 回転状態
 		STATE_BARGAINING,	// 寄り引き状態
 		STATE_UP,			// 上向き状態
@@ -70,6 +71,7 @@ public:
 	void SetCamera(const TYPE type);	// カメラ設定
 	Camera GetCamera(const TYPE type);	// カメラ取得
 	void SetState(const STATE state);	// カメラ状態設定
+	STATE GetState(void) const;			// カメラ状態取得
 	void SetDestRotate(void);			// カメラ目標位置設定 (回転)
 	void SetDestBargaining(void);		// カメラ目標位置設定 (寄り引き)
 

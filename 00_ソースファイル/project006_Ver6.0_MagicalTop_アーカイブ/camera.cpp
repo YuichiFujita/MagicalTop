@@ -168,8 +168,6 @@ void CCamera::Update(void)
 	if (m_bUpdate)
 	{ // 更新する状況の場合
 
-#if 1
-
 		switch (m_state)
 		{ // 状態ごとの処理
 		case STATE_NONE:	// なにもしない状態
@@ -178,9 +176,16 @@ void CCamera::Update(void)
 
 			break;
 
+		case STATE_CONTROL:	// 操作状態
+
+			// カメラの更新 (操作)
+			Control();
+
+			break;
+
 		case STATE_ROTATE:	// 回転状態
 
-			// カメラの更新処 (回転)
+			// カメラの更新 (回転)
 			Rotate();
 
 			break;
@@ -214,14 +219,6 @@ void CCamera::Update(void)
 			assert(false);
 			break;
 		}
-
-#else
-
-		// カメラの更新 (操作)
-		Control();
-
-#endif
-
 	}
 
 	// デバッグ表示
@@ -279,6 +276,13 @@ void CCamera::SetCamera(const TYPE type)
 //============================================================
 void CCamera::SetDestRotate(void)
 {
+	if (m_state != STATE_ROTATE)
+	{ // カメラの回転状態ではない場合
+
+		// 処理を抜ける
+		return;
+	}
+
 	//----------------------------------------------------
 	//	向きの更新
 	//----------------------------------------------------
@@ -309,6 +313,13 @@ void CCamera::SetDestRotate(void)
 //============================================================
 void CCamera::SetDestBargaining(void)
 {
+	if (m_state != STATE_BARGAINING)
+	{ // カメラの寄り引き状態ではない場合
+
+		// 処理を抜ける
+		return;
+	}
+
 	if (USED(CScene::GetPlayer()) && USED(CScene::GetTarget()))
 	{ // プレイヤー・ターゲットが使用されている場合
 
@@ -423,6 +434,15 @@ void CCamera::SetState(const STATE state)
 {
 	// 状態を設定
 	m_state = state;
+}
+
+//============================================================
+//	カメラ状態取得処理
+//============================================================
+CCamera::STATE CCamera::GetState(void) const
+{
+	// 状態を返す
+	return m_state;
 }
 
 //============================================================

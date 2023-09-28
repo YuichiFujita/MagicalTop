@@ -11,7 +11,6 @@
 #include "manager.h"
 #include "sound.h"
 #include "input.h"
-#include "camera.h"
 
 #include "waveManager.h"
 #include "timerManager.h"
@@ -54,8 +53,9 @@ CWarningSpawn	*CSceneGame::m_pWarningSpawn = NULL;	// 出現警告表示オブジェクト
 CPause	*CSceneGame::m_pPause	= NULL;					// ポーズ
 CScore	*CSceneGame::m_pScore	= NULL;					// スコアオブジェクト
 
-bool CSceneGame::m_bDrawUI = true;		// UIの描画状況
-bool CSceneGame::m_bDrawPause = true;	// ポーズの描画状況
+bool CSceneGame::m_bControlCamera = false;	// カメラの操作状況
+bool CSceneGame::m_bDrawUI = true;			// UIの描画状況
+bool CSceneGame::m_bDrawPause = true;		// ポーズの描画状況
 
 //************************************************************
 //	子クラス [CSceneGame] のメンバ関数
@@ -264,6 +264,10 @@ void CSceneGame::Update(void)
 	{
 		SetEnableDrawPause((!m_bDrawPause) ? true : false);
 	}
+	else if (CManager::GetKeyboard()->GetTrigger(DIK_F4))
+	{
+		SetEnableControlCamera((!m_bControlCamera) ? true : false);
+	}
 
 	if (USED(m_pTimerManager))
 	{ // 使用中の場合
@@ -294,6 +298,16 @@ void CSceneGame::Update(void)
 
 		// シーンの更新
 		CScene::Update();
+	}
+	else
+	{ // ポーズ中の場合
+
+		if (CManager::GetCamera()->GetState() == CCamera::STATE_CONTROL)
+		{ // カメラが操作状態の場合
+
+			// カメラの更新
+			CManager::GetCamera()->Update();
+		}
 	}
 
 	// TODO：遷移のタイミングで壊れる問題シーンにも死亡フラグ追加で回避
@@ -351,6 +365,29 @@ CWarningSpawn *CSceneGame::GetWarningSpawn(void)
 {
 	// 出現警告表示のポインタを返す
 	return m_pWarningSpawn;
+}
+
+//============================================================
+//	カメラの操作状況の設定処理
+//============================================================
+void CSceneGame::SetEnableControlCamera(const bool bControl)
+{
+	// 引数のカメラ操作状況を設定
+	m_bControlCamera = bControl;
+
+	// カメラの操作状況を設定
+	if (bControl)
+	{ // 操作する状況の場合
+
+		// 操作状態に変更
+		CManager::GetCamera()->SetState(CCamera::STATE_CONTROL);
+	}
+	else
+	{ // 操作しない状況の場合
+
+		// 寄り引き状態に変更
+		CManager::GetCamera()->SetState(CCamera::STATE_BARGAINING);
+	}
 }
 
 //============================================================

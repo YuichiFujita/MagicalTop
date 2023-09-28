@@ -15,6 +15,7 @@
 //************************************************************
 #include "main.h"
 #include "scene.h"
+#include "camera.h"
 
 //************************************************************
 //	前方宣言
@@ -51,10 +52,11 @@ public:
 	static CScore			*GetScore(void);			// スコア取得
 	static CWarningSpawn	*GetWarningSpawn(void);		// 出現警告表示取得
 
-	static void SetEnableDrawUI(const bool bDraw);		// UIの描画状況設定
-	static void SetEnableDrawPause(const bool bDraw);	// ポーズの描画状況設定
-	static bool IsDrawUI(void);							// UIの描画状況取得
-	static bool IsDrawPause(void);						// ポーズの描画状況取得
+	static void SetEnableControlCamera(const bool bControl);	// カメラの操作状況設定
+	static void SetEnableDrawUI(const bool bDraw);				// UIの描画状況設定
+	static void SetEnableDrawPause(const bool bDraw);			// ポーズの描画状況設定
+	static bool IsDrawUI(void);									// UIの描画状況取得
+	static bool IsDrawPause(void);								// ポーズの描画状況取得
 
 private:
 	// 静的メンバ変数
@@ -63,8 +65,10 @@ private:
 	static CPause			*m_pPause;			// ポーズ
 	static CScore			*m_pScore;			// スコアオブジェクト
 	static CWarningSpawn	*m_pWarningSpawn;	// 出現警告表示オブジェクト
-	static bool				m_bDrawUI;			// UIの描画状況
-	static bool				m_bDrawPause;		// ポーズの描画状況
+
+	static bool m_bControlCamera;	// カメラの操作状況
+	static bool m_bDrawUI;			// UIの描画状況
+	static bool m_bDrawPause;		// ポーズの描画状況
 };
 
 #endif	// _SCENE_GAME_H_

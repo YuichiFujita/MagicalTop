@@ -640,45 +640,49 @@ void CPlayer::AddLife(const int nAdd)
 //============================================================
 void CPlayer::SetRespawn(D3DXVECTOR3& rPos)
 {
-	// 情報を初期化
-	SetMotion(CPlayer::MOTION_MOVE);	// 浮遊モーションを設定
-	m_state = STATE_NORMAL;	// 通常状態を設定
-	m_nCounterState = 0;	// カウンターを初期化
+	if (m_state != STATE_DEATH)
+	{ // 死亡していない場合
 
-	// 位置を補正・設定
-	CScene::GetStage()->LimitPosition(rPos, PLAY_RADIUS);	// ステージ範囲外の補正
-	UpdateLanding(rPos);	// 着地判定
-	SetPosition(rPos);		// 位置を設定
+		// 情報を初期化
+		SetMotion(CPlayer::MOTION_MOVE);	// 浮遊モーションを設定
+		m_state = STATE_NORMAL;	// 通常状態を設定
+		m_nCounterState = 0;	// カウンターを初期化
 
-	// 向きを設定
-	SetRotation(RESPAWN_ROT);
+		// 位置を補正・設定
+		CScene::GetStage()->LimitPosition(rPos, PLAY_RADIUS);	// ステージ範囲外の補正
+		UpdateLanding(rPos);	// 着地判定
+		SetPosition(rPos);		// 位置を設定
 
-	// ターゲットとの距離を設定
-	UpdateDisTarget();
+		// 向きを設定
+		SetRotation(RESPAWN_ROT);
 
-	// マナゲージを全回復させる
-	m_pMagic->SetMana(m_pMagic->GetMaxMana());
+		// ターゲットとの距離を設定
+		UpdateDisTarget();
 
-	// ダッシュゲージを全回復させる
-	m_pDash->HealNumGauge();
+		// マナゲージを全回復させる
+		m_pMagic->SetMana(m_pMagic->GetMaxMana());
 
-	// 軌跡の初期化を行う状態にする
-	m_pOrbit->SetEnableInit(false);
+		// ダッシュゲージを全回復させる
+		m_pDash->HealNumGauge();
 
-	// 表示する設定にする
-	SetDisp(true);
+		// 軌跡の初期化を行う状態にする
+		m_pOrbit->SetEnableInit(false);
 
-	// マテリアルを再設定
-	ResetMaterial();
+		// 表示する設定にする
+		SetDisp(true);
 
-	// 透明度を不透明に再設定
-	SetAlpha(1.0f);
+		// マテリアルを再設定
+		ResetMaterial();
 
-	// カメラ更新をONにする
-	CManager::GetCamera()->SetEnableUpdate(true);
+		// 透明度を不透明に再設定
+		SetAlpha(1.0f);
 
-	// カメラ目標位置設定
-	CManager::GetCamera()->SetDestBargaining();
+		// カメラ更新をONにする
+		CManager::GetCamera()->SetEnableUpdate(true);
+
+		// カメラ目標位置設定
+		CManager::GetCamera()->SetDestBargaining();
+	}
 }
 
 //============================================================
